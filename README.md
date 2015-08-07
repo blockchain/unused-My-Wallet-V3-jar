@@ -9,6 +9,7 @@ Install Maven.
 Build:
 
 mvn clean
+
 mvn package
 
 Two .jar files will be created in the directory target/ :
