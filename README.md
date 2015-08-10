@@ -4,25 +4,25 @@ BIP44 extension of Bitcoinj. Includes full support for BIP39 including non-Engli
 
 ## Build Process
 
-Install Maven.
+Install Maven 3.2 or higher.
 
-Build:
+### Build:
 
 mvn clean
 
 mvn package
 
-Two .jar files will be created in the directory target/ :
+Two .jar files will be created in the directory ./target :
 
 BitcoinjBIP44-jar-with-dependencies.jar : includes all dependencies and can be run from the command line using the Main.java harness.
 
-BitcoinjBIP44.jar : Can be included in any Java project as is but requires inclusion of dependencies.
+BitcoinjBIP44.jar : Can be included in any Java project 'as is' but requires inclusion of dependencies.
 
-Run using Main.java harness:
+### Run using Main.java harness:
 
 java -jar target/BitcoinjBIP44-jar-with-dependencies.jar
 
-Command line switches:
+#### Command line switches:
 
 -a create/restore with this number of accounts (default = 2 accounts)
 
@@ -30,7 +30,7 @@ Command line switches:
 
 -f restore wallet from JSON using this password
 
--l use this Locale for BIP 39 nword list
+-l use this Locale for BIP 39 nword list, defaults to en\_US if Locale empty or incorrect (accepted Locales: en\_US, es\_ES, fr\_FR, jp\_JP, zh\_CN, zh\_TW)
 
 -p use this passphrase (BIP 39)
 
@@ -38,5 +38,4 @@ Command line switches:
 
 -t save wallet to JSON using this password
 
--w create wallet using this number of words for mnemonic
-        
+-w create wallet using this number of words for mnemonic (defaults to 12 words if supplied number is illegal)
