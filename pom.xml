@@ -59,11 +59,9 @@
 			<artifactId>maven-jar-plugin</artifactId>
 			<version>2.6</version>
 			<configuration>
-			   <archive>
-			     <manifest>
-				   <mainClass>org.bitcoinj.core.bip44.Main</mainClass>
-			     </manifest>
-			   </archive>
+	            <excludes>
+	              <exclude>**/Main*</exclude>
+	            </excludes>
 			</configuration>
 		  </plugin>
 
@@ -75,7 +73,9 @@
 						  <mainClass>org.bitcoinj.core.bip44.Main</mainClass>
 					  </manifest>
 				  </archive>
-		  			<descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef> </descriptorRefs>
+		  			<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
 				</configuration>
 				<executions>
 					<execution>
