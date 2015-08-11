@@ -126,8 +126,14 @@ public class WalletFactory {
                 seed = Hex.decodeHex(data.toCharArray());
                 hdw = new Wallet(mc, params, seed, passphrase, nbAccounts);
             }
-            else {
+            else if(locale.toString().equals("en_US")) {
                 data = data.replaceAll("[^a-z]+", " ");             // only use for BIP39 English
+                words = Arrays.asList(data.trim().split("\\s+"));
+                seed = mc.toEntropy(words);
+                hdw = new Wallet(mc, params, seed, passphrase, nbAccounts);
+            }
+            else {
+//                data = data.replaceAll("[^a-z]+", " ");
                 words = Arrays.asList(data.trim().split("\\s+"));
                 seed = mc.toEntropy(words);
                 hdw = new Wallet(mc, params, seed, passphrase, nbAccounts);
