@@ -123,9 +123,22 @@ public class PrivateKeyFactory	{
 		else if(format.equals(MINI)) {
 
 			try {
+				String check = data + "?";
+				Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(check.getBytes("UTF-8")));
+				if(!hash.toString().substring(0, 2).equals("00"))	{
+					return null;
+				}
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+
+			try {
 				Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
 				return decodeHexPK(hash.toString(), false);	// assume uncompressed
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
