@@ -157,7 +157,7 @@ public class PrivateKeyFactory	{
 		byte[] privBytes = Hex.decode(hex);
 		// Prepend a zero byte to make the biginteger unsigned
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-		ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, false);
+		ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
 		return ecKey;
 	}
 
@@ -361,7 +361,7 @@ public class PrivateKeyFactory	{
 		*/
 		address = kp.toAddress(MainNetParams.get()).toString();
 
-		byte[] acs = hash(address.getBytes("US-ASCII"));
+		byte[] acs = hash(address.getBytes ("US-ASCII"));
 		byte[] check = new byte[4];
 		System.arraycopy(acs, 0, check, 0, 4);
 		if(!Arrays.equals(check, addressHash))	{
