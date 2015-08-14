@@ -112,7 +112,7 @@ public class PrivateKeyFactory	{
 			return decodeBase64PK(data);
 		}
 		else if(format.equals(HEX_UNCOMPRESSED)) {
-			return decodeHexPK(data);
+			return decodeHexPK(data, false);
 		}
         else if(format.equals(HEX_COMPRESSED)) {
             return decodeHexPK(data, true);
@@ -124,7 +124,7 @@ public class PrivateKeyFactory	{
 
 			try {
 				Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
-				return decodeHexPK(hash.toString());
+				return decodeHexPK(hash.toString(), false);	// assume uncompressed
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -146,15 +146,6 @@ public class PrivateKeyFactory	{
 
 	private ECKey decodeBase64PK(String base64Priv) throws Exception {
 		byte[] privBytes = Base64.decodeBase64(base64Priv);
-		// Prepend a zero byte to make the biginteger unsigned
-		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-		ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
-		return ecKey;
-	}
-
-	// assumes uncompressed private key
-	private ECKey decodeHexPK(String hex) throws Exception {
-		byte[] privBytes = Hex.decode(hex);
 		// Prepend a zero byte to make the biginteger unsigned
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
 		ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
