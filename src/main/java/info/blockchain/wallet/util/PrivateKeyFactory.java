@@ -83,8 +83,7 @@ public class PrivateKeyFactory	{
 				return null;
 			}
 
-//			if(testBytes[0] == 0x00 || testBytes[0] == 0x01) {
-			if(testBytes[0] == 0x00) {
+			if(testBytes[0] == 0x00 && testBytes[1] == 0x00) {
 				return MINI;
 			}
 			else {
@@ -121,18 +120,6 @@ public class PrivateKeyFactory	{
 			return parseBIP38(data, password);
 		}
 		else if(format.equals(MINI)) {
-
-			try {
-				String check = data + "?";
-				Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(check.getBytes("UTF-8")));
-				if(!hash.toString().substring(0, 2).equals("00"))	{
-					return null;
-				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
 
 			try {
 				Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
@@ -215,6 +202,7 @@ public class PrivateKeyFactory	{
 		if((store[1] & 0xff) == 0x42)	{
 			if((store[2] & 0xff) == 0xc0)	{
 				// non-EC-multiplied keys without compression (prefix 6PR)
+				compressed = false;
 			}
 			else if((store[2] & 0xff) == 0xe0)	{
 				// non-EC-multiplied keys with compression (prefix 6PY)
@@ -273,18 +261,19 @@ public class PrivateKeyFactory	{
 
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], decrypted);
 
-//		ECKey kp = new ECKey (new BigInteger(appendZeroByte));
-		ECKey kp = new ECKey(new BigInteger(appendZeroByte), null, compressed);
+		/*
+		ECKey kp = new ECKey (new BigInteger(appendZeroByte));
 
 		String address = null;
-		/*
 		if(compressed) {
 			address = kp.toAddressCompressed(MainNetParams.get()).toString();
 		} else {
 			address = kp.toAddressUnCompressed(MainNetParams.get()).toString();
 		}
 		*/
-		address = kp.toAddress(MainNetParams.get()).toString();
+		
+		ECKey kp = new ECKey (new BigInteger(appendZeroByte), null, false);
+		String address = kp.toAddress(MainNetParams.get()).toString();
 
 		byte[] acs = hash(address.toString().getBytes ("US-ASCII"));
 		byte[] check = new byte[4];
@@ -320,11 +309,11 @@ public class PrivateKeyFactory	{
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], passfactor);
 
 //		ECKey kp = new ECKey(new BigInteger(appendZeroByte));
-		ECKey kp = new ECKey(new BigInteger(appendZeroByte), null, true);
+		ECKey kp = new ECKey(new BigInteger(appendZeroByte), null, false);
 
 		byte[] salt = new byte[12];
 		System.arraycopy(store, 3, salt, 0, 12);
-//		byte[] derived = SCrypt.generate(kp.getPubKey(Compressed()), salt, 1024, 1, 1, 64);
+//		byte[] derived = SCrypt.generate(kp.getPubKeyCompressed(), salt, 1024, 1, 1, 64);
 		byte[] derived = SCrypt.generate(kp.getPubKey(), salt, 1024, 1, 1, 64);
 		byte[] aeskey = new byte[32];
 		System.arraycopy(derived, 32, aeskey, 0, 32);
@@ -352,18 +341,19 @@ public class PrivateKeyFactory	{
 		System.arraycopy(decrypted2, 8, seed, 16, 8);
 		BigInteger priv = new BigInteger(1, passfactor).multiply(new BigInteger(1, hash (seed))).remainder(SECNamedCurves.getByName("secp256k1").getN());
 
-//		kp = new ECKey(priv);
-		kp = new ECKey(priv, null, true);
+		/*
+		kp = new ECKey(priv);
 
 		String address = null;
-		/*
 		if(compressed) {
 			address = kp.toAddressCompressed(MainNetParams.get()).toString();
 		} else {
 			address = kp.toAddressUnCompressed(MainNetParams.get()).toString();
 		}
 		*/
-		address = kp.toAddress(MainNetParams.get()).toString();
+			
+		kp = new ECKey(priv, null, false);
+		String address = kp.toAddress(MainNetParams.get()).toString();
 
 		byte[] acs = hash(address.getBytes ("US-ASCII"));
 		byte[] check = new byte[4];
