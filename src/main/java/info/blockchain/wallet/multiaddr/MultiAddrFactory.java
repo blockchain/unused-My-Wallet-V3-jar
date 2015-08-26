@@ -1,25 +1,31 @@
 package info.blockchain.wallet.multiaddr;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import info.blockchain.wallet.payload.PayloadFactory;
 import info.blockchain.wallet.payload.Tx;
 import info.blockchain.wallet.payload.TxMostRecentDateComparator;
 import info.blockchain.wallet.util.WebUtil;
 
+//import android.util.Log;
+
 public class MultiAddrFactory	{
 
+    private static long legacy_balance = 0L;
     private static long xpub_balance = 0L;
     private static HashMap<String, Long> xpub_amounts = null;
+    private static HashMap<String, Long> legacy_amounts = null;
     private static HashMap<String,List<Tx>> xpub_txs = null;
+    private static List<Tx> legacy_txs = null;
+    private static HashMap<String,List<Tx>> address_legacy_txs = null;
     private static HashMap<String,List<String>> haveUnspentOuts = null;
     private static List<String> own_hd_addresses = null;
     private static HashMap<String,String> address_2_xpub = null;
@@ -41,10 +47,14 @@ public class MultiAddrFactory	{
 
         if(instance == null) {
             xpub_amounts = new HashMap<String, Long>();
+            legacy_amounts = new HashMap<String, Long>();
             xpub_txs = new HashMap<String,List<Tx>>();
+            legacy_txs = new ArrayList<Tx>();
+            address_legacy_txs = new HashMap<String,List<Tx>>();
             haveUnspentOuts = new HashMap<String,List<String>>();
             highestTxReceiveIdx = new HashMap<String,Integer>();
             highestTxChangeIdx = new HashMap<String,Integer>();
+            legacy_balance = 0L;
             xpub_balance = 0L;
             own_hd_addresses = new ArrayList<String>();
             address_2_xpub = new HashMap<String,String>();
@@ -74,6 +84,32 @@ public class MultiAddrFactory	{
                 je.printStackTrace();
                 jsonObject = null;
             }
+        }
+        catch(Exception e) {
+            jsonObject = null;
+            e.printStackTrace();
+        }
+
+        return jsonObject;
+    }
+
+    public JSONObject getLegacy(String[] addresses, boolean simple) {
+
+        JSONObject jsonObject  = null;
+
+        StringBuilder url = new StringBuilder(WebUtil.MULTIADDR_URL);
+        url.append(StringUtils.join(addresses, "|"));
+        if(simple) {
+            url.append("&simple=true&format=json");
+        }
+        else {
+            url.append("&symbol_btc="+ "BTC" + "&symbol_local=" + "USD");
+        }
+
+        try {
+            String response = WebUtil.getInstance().getURL(url.toString());
+            jsonObject = new JSONObject(response);
+            parseLegacy(jsonObject);
         }
         catch(Exception e) {
             jsonObject = null;
@@ -298,6 +334,163 @@ public class MultiAddrFactory	{
 
     }
 
+    private void parseLegacy(JSONObject jsonObject) throws JSONException  {
+
+        if(jsonObject != null)  {
+
+            legacy_balance = 0L;
+
+            if(jsonObject.has("wallet"))  {
+                JSONObject walletObj = (JSONObject)jsonObject.get("wallet");
+                if(walletObj.has("final_balance"))  {
+                    legacy_balance = walletObj.getLong("final_balance");
+                }
+            }
+
+            long latest_block = 0L;
+
+            if(jsonObject.has("info"))  {
+                JSONObject infoObj = (JSONObject)jsonObject.get("info");
+                if(infoObj.has("latest_block"))  {
+                    JSONObject blockObj = (JSONObject)infoObj.get("latest_block");
+                    if(blockObj.has("height"))  {
+                        latest_block = blockObj.getLong("height");
+                    }
+                }
+            }
+
+            if(jsonObject.has("addresses"))  {
+                JSONArray addressArray = (JSONArray)jsonObject.get("addresses");
+                JSONObject addrObj = null;
+                for(int i = 0; i < addressArray.length(); i++)  {
+                    addrObj = (JSONObject)addressArray.get(i);
+                    long amount = 0L;
+                    String addr = null;
+                    if(addrObj.has("address"))  {
+                        addr = (String)addrObj.get("address");
+                    }
+                    if(addrObj.has("final_balance"))  {
+                        amount = addrObj.getLong("final_balance");
+                    }
+                    if(addr != null)  {
+                        legacy_amounts.put(addr, amount);
+                    }
+                }
+            }
+
+            if(jsonObject.has("txs"))  {
+
+                legacy_txs = new ArrayList<Tx>();
+
+                JSONArray txArray = (JSONArray)jsonObject.get("txs");
+                JSONObject txObj = null;
+                for(int i = 0; i < txArray.length(); i++)  {
+
+                    txObj = (JSONObject)txArray.get(i);
+                    long height = 0L;
+                    long amount = 0L;
+                    long ts = 0L;
+                    String hash = null;
+                    String addr = null;
+                    boolean isMove = false;
+                    boolean isOwnInput = false;
+
+                    if(txObj.has("block_height"))  {
+                        height = txObj.getLong("block_height");
+                    }
+                    else  {
+                        height = -1L;  // 0 confirmations
+                    }
+
+                    if(txObj.has("hash"))  {
+                        hash = (String)txObj.get("hash");
+                    }
+                    if(txObj.has("result"))  {
+                        amount = txObj.getLong("result");
+                    }
+                    if(txObj.has("time"))  {
+                        ts = txObj.getLong("time");
+                    }
+
+                    List<String> ownLegacyAddresses = PayloadFactory.getInstance().get().getLegacyAddressStrings();
+
+                    if(txObj.has("inputs"))  {
+                        JSONArray inputArray = (JSONArray)txObj.get("inputs");
+                        JSONObject inputObj = null;
+                        for(int j = 0; j < inputArray.length(); j++)  {
+                            inputObj = (JSONObject)inputArray.get(j);
+                            if(inputObj.has("prev_out"))  {
+                                JSONObject prevOutObj = (JSONObject)inputObj.get("prev_out");
+                                addr = (String)prevOutObj.get("addr");
+                                if(ownLegacyAddresses.contains(addr))  {
+                                    isOwnInput = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if(txObj.has("out"))  {
+                        JSONArray outArray = (JSONArray)txObj.get("out");
+                        JSONObject outObj = null;
+                        for(int j = 0; j < outArray.length(); j++)  {
+                            outObj = (JSONObject)outArray.get(j);
+                            addr = (String)outObj.get("addr");
+                            if(ownLegacyAddresses.contains(addr) && isOwnInput)  {
+                                isMove = true;
+                            }
+                        }
+                    }
+
+                    if(addr != null)  {
+                        Tx tx = null;
+                        if(isMove)  {
+                            tx = new Tx(hash, "", MOVED, amount, ts, new HashMap<Integer,String>());
+                            tx.setIsMove(true);
+                        }
+                        else  {
+                            tx = new Tx(hash, "", amount > 0L ? RECEIVED : SENT, amount, ts, new HashMap<Integer,String>());
+                        }
+                        tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
+                        legacy_txs.add(tx);
+
+                        List<Tx> containedLegacyTx = address_legacy_txs.get(addr);
+                        if(containedLegacyTx!=null) {
+                            containedLegacyTx.add(tx);
+                            address_legacy_txs.put(addr, containedLegacyTx);
+                        }else{
+                            containedLegacyTx = new ArrayList<Tx>();
+                            containedLegacyTx.add(tx);
+                            address_legacy_txs.put(addr, containedLegacyTx);
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    public long getLegacyBalance(String addr)  {
+        if(legacy_amounts.containsKey(addr))  {
+            return legacy_amounts.get(addr);
+        }
+        else  {
+            return 0L;
+        }
+    }
+
+    public void setLegacyBalance(String addr, long value)  {
+        legacy_amounts.put(addr, value);
+    }
+
+    public long getLegacyBalance()  {
+        return legacy_balance;
+    }
+
+    public void setLegacyBalance(long value)  {
+        legacy_balance = value;
+    }
+
     public long getXpubBalance()  {
         return xpub_balance;
     }
@@ -307,8 +500,7 @@ public class MultiAddrFactory	{
     }
 
     public long getTotalBalance()  {
-//        return xpub_balance + legacy_balance;
-        return xpub_balance;
+        return xpub_balance + legacy_balance;
     }
 
     public boolean isOwnHDAddress(String addr)  {
@@ -356,6 +548,14 @@ public class MultiAddrFactory	{
         Collections.sort(ret, new TxMostRecentDateComparator());
 
         return ret;
+    }
+
+    public List<Tx> getLegacyTxs()  {
+        return legacy_txs;
+    }
+
+    public List<Tx> getAddressLegacyTxs(String addr)  {
+        return address_legacy_txs.get(addr);
     }
 
     public HashMap<String,List<String>> getUnspentOuts()  {
