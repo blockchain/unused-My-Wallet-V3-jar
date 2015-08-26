@@ -15,8 +15,6 @@ import info.blockchain.wallet.payload.Tx;
 import info.blockchain.wallet.payload.TxMostRecentDateComparator;
 import info.blockchain.wallet.util.WebUtil;
 
-//import android.util.Log;
-
 public class MultiAddrFactory	{
 
     private static long legacy_balance = 0L;
