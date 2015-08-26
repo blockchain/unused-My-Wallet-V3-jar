@@ -10,7 +10,7 @@
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-	  
+
   <build>
 		<finalName>MyWalletHD</finalName>
 
@@ -26,7 +26,7 @@
 				<downloadJavadocs>false</downloadJavadocs>
 			</configuration>
 		  </plugin>
-			
+
 		  <!-- Set a compiler level -->
 		  <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
@@ -119,6 +119,18 @@
 	  <artifactId>json</artifactId>
 	  <version>20131018</version>
     </dependency>
+<!--
+	<dependency>
+		<groupId>com.madgag.spongycastle</groupId>
+		<artifactId>prov</artifactId>
+		<version>1.51.0.0</version>
+	</dependency>
+	<dependency>
+		<groupId>com.madgag.spongycastle</groupId>
+		<artifactId>core</artifactId>
+		<version>1.51.0.0</version>
+	</dependency>
+-->
     <dependency>
 	  <groupId>org.slf4j</groupId>
 	  <artifactId>slf4j-api</artifactId>
@@ -129,6 +141,13 @@
 	  <artifactId>slf4j-jdk14</artifactId>
 	  <version>1.7.5</version>
     </dependency>
-   </dependencies>
+    <dependency>
+        <groupId>org.bitcoinj.core.bip44</groupId>
+        <artifactId>BitcoinjBIP44</artifactId>
+        <version>0.13.2</version>
+        <scope>system</scope>
+        <systemPath>${basedir}/libs/BitcoinjBIP44.jar</systemPath>
+    </dependency>
+     </dependencies>
 
 </project>
