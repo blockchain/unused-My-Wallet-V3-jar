@@ -53,7 +53,7 @@ public class PayloadFactory	{
     /**
      * Return instance for a payload factory.
      *
-     * @return HD_WalletFactory
+     * @return PayloadFactory
      *
      */
     public static PayloadFactory getInstance() {
@@ -66,29 +66,6 @@ public class PayloadFactory	{
 
         return instance;
     }
-
-    /**
-     * Return instance for a payload factory. Provide Android context if needed.
-     *
-     * @param  Context ctx app context
-     *
-     * @return HD_WalletFactory
-     *
-     */
-     /*
-    public static PayloadFactory getInstance(Context ctx) {
-
-        context = ctx;
-
-        if (instance == null) {
-            instance = new PayloadFactory();
-            payload = new Payload();
-            cached_payload = "";
-        }
-
-        return instance;
-    }
-    */
 
     /**
      * Return instance for a payload factory. Payload initialized using provided JSON string.
@@ -327,7 +304,7 @@ public class PayloadFactory	{
      * @return boolean
      *
      */
-    private boolean put() {
+    public boolean put() {
 
         String strOldCheckSum = strCheckSum;
         String payloadCleartext = null;
@@ -439,99 +416,6 @@ public class PayloadFactory	{
             je.printStackTrace();
         }
     }
-
-    /**
-     * Create a Blockchain wallet and include the HD_Wallet passed as an argument and write it to this instance's payload.
-     *
-     * @param HD_Wallet hdw HD wallet to include in the payload
-     *
-     * @return boolean
-     *
-     */
-     /*
-    public boolean createBlockchainWallet(org.bitcoinj.core.bip44.Wallet hdw)	{
-
-        String guid = UUID.randomUUID().toString();
-        String sharedKey = UUID.randomUUID().toString();
-
-        payload = new Payload();
-        payload.setGuid(guid);
-        payload.setSharedKey(sharedKey);
-
-        PrefsUtil.getInstance(context).setValue(PrefsUtil.KEY_GUID, guid);
-        AppUtil.getInstance(context).setSharedKey(sharedKey);
-
-        HDWallet payloadHDWallet = new HDWallet();
-        payloadHDWallet.setSeedHex(hdw.getSeedHex());
-
-        List<org.bitcoinj.core.bip44.Account> hdAccounts = hdw.getAccounts();
-        List<info.blockchain.wallet.payload.Account> payloadAccounts = new ArrayList<info.blockchain.wallet.payload.Account>();
-        for(int i = 0; i < hdAccounts.size(); i++)	{
-            info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account();
-            try  {
-                String xpub = WalletFactory.getInstance().get().getAccounts().get(i).xpubstr();
-                account.setXpub(xpub);
-                String xpriv = WalletFactory.getInstance().get().getAccounts().get(i).xprvstr();
-                account.setXpriv(xpriv);
-            }
-            catch(IOException | MnemonicException.MnemonicLengthException e)  {
-                e.printStackTrace();
-            }
-
-            payloadAccounts.add(account);
-        }
-        payloadHDWallet.setAccounts(payloadAccounts);
-
-        payload.setHdWallets(payloadHDWallet);
-
-        isNew = true;
-
-        return true;
-    }
-    */
-
-    /**
-     * Thread for remote save of payload to server.
-     *
-     */
-     /*
-    public void remoteSaveThread() {
-
-        final Handler handler = new Handler();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
-
-                if(PayloadFactory.getInstance(context).get() != null)	{
-
-                    if(PayloadFactory.getInstance(context).put())	{
-//                        ToastCustom.makeText(context, "Remote save OK", ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_OK);
-                        ;
-                    }
-                    else	{
-                        ToastCustom.makeText(context, context.getString(R.string.remote_save_ko), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                    }
-
-                }
-                else	{
-                    ToastCustom.makeText(context, context.getString(R.string.payload_corrupted), ToastCustom.LENGTH_SHORT, ToastCustom.TYPE_ERROR);
-                }
-
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ;
-                    }
-                });
-
-                Looper.loop();
-
-            }
-        }).start();
-    }
-    */
 
     public String getEmail() {
         return email;

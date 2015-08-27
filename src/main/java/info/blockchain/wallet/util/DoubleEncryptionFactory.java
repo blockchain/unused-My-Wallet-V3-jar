@@ -1,7 +1,5 @@
 package info.blockchain.wallet.util;
 
-//import android.util.Log;
-
 import java.security.MessageDigest;
 
 import org.spongycastle.util.encoders.Hex;
