@@ -1,6 +1,6 @@
 # My-Wallet-HD-jar
 
-Encapsulation of basic Blockchain HD Wallet utilities. A work in progress.
+Encapsulation of basic Blockchain HD Wallet utilities.
 
 ## Build Process
 
@@ -12,8 +12,16 @@ mvn clean
 
 mvn package
 
-Two .jar files will be created in the directory ./target :
+The build process will create MyWalletHD.jar in ./target : Can be included in any Java project 'as is' but requires inclusion of dependencies.
 
-MyWalletHD.jar : Can be included in any Java project 'as is' but requires inclusion of dependencies. Main.java harness not included.
+## Classes
 
-MyWalletHD-jar-with-dependencies.jar : includes all dependencies and can be run from the command line using the Main.java harness (see command line switches below).
+### crypto : standard AES support
+
+### multiaddr : multiaddr API support
+
+### payload : JSON payload classes
+
+### send : creating, signing, and pushing transactions to network
+
+### util : support classes
