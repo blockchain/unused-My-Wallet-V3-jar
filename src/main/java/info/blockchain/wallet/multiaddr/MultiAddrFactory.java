@@ -164,6 +164,7 @@ public class MultiAddrFactory	{
                 xpub_txs = new HashMap<String,List<Tx>>();
                 own_hd_addresses = new ArrayList<String>();
                 address_2_xpub = new HashMap<String,String>();
+                haveUnspentOuts = new HashMap<String,List<String>>();
 
                 JSONArray txArray = (JSONArray)jsonObject.get("txs");
                 JSONObject txObj = null;
@@ -379,6 +380,7 @@ public class MultiAddrFactory	{
             if(jsonObject.has("txs"))  {
 
                 legacy_txs = new ArrayList<Tx>();
+                address_legacy_txs = new HashMap<String,List<Tx>>();
 
                 JSONArray txArray = (JSONArray)jsonObject.get("txs");
                 JSONObject txObj = null;
