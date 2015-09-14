@@ -394,6 +394,7 @@ public class MultiAddrFactory	{
                     String addr = null;
                     boolean isMove = false;
                     boolean isOwnInput = false;
+                    String ownInput = null;
 
                     if(txObj.has("block_height"))  {
                         height = txObj.getLong("block_height");
@@ -424,6 +425,7 @@ public class MultiAddrFactory	{
                                 addr = (String)prevOutObj.get("addr");
                                 if(ownLegacyAddresses.contains(addr))  {
                                     isOwnInput = true;
+                                    ownInput = addr;
                                 }
                             }
                         }
@@ -456,11 +458,11 @@ public class MultiAddrFactory	{
                         List<Tx> containedLegacyTx = address_legacy_txs.get(addr);
                         if(containedLegacyTx!=null) {
                             containedLegacyTx.add(tx);
-                            address_legacy_txs.put(addr, containedLegacyTx);
+                            address_legacy_txs.put(ownInput != null ? ownInput : addr, containedLegacyTx);
                         }else{
                             containedLegacyTx = new ArrayList<Tx>();
                             containedLegacyTx.add(tx);
-                            address_legacy_txs.put(addr, containedLegacyTx);
+                            address_legacy_txs.put(ownInput != null ? ownInput : addr, containedLegacyTx);
                         }
                     }
                 }
