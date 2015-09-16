@@ -194,7 +194,6 @@ public class PayloadFactory	{
         try {
             String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL,"method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json");
             JSONObject jsonObject = new JSONObject(response);
-//            Log.i("PayloadFactory", jsonObject.toString());
             int iterations = AESUtil.PasswordPBKDF2Iterations;
             double version = 2.0;
             if(jsonObject.has("payload")) {
@@ -205,7 +204,6 @@ public class PayloadFactory	{
                 }
                 catch(Exception e) {
                     _jsonObject = null;
-//                    Log.i("PayloadFactory", "_jsonObject is null");
                 }
                 if(_jsonObject != null && _jsonObject.has("payload")) {
                     if(_jsonObject.has("pbkdf2_iterations")) {
@@ -229,7 +227,6 @@ public class PayloadFactory	{
                 String decrypted = null;
                 try {
                     decrypted = AESUtil.decrypt(encrypted_payload, password, iterations);
-//                    Log.i("PayloadFactory", decrypted);
                 }
                 catch(Exception e) {
                     payload = null;

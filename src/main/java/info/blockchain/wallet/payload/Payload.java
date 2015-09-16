@@ -1,7 +1,5 @@
 package info.blockchain.wallet.payload;
 
-//import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,8 +13,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import info.blockchain.wallet.crypto.AESUtil;
-
-//import android.util.Log;
 
 /**
  *
@@ -244,12 +240,11 @@ public class Payload {
                 }
             }
             catch(JSONException je)  {
-//            	Log.i("Payload", "JSONEXCEPTION");
                 je.printStackTrace();
             }
         }
         else  {
-//        	Log.i("Payload", "jsonObject is null !!!!");
+          ;
         }
 
     }
@@ -500,6 +495,7 @@ public class Payload {
                     for(int i = 0; i < keys.length(); i++)  {
                         key = (JSONObject)keys.get(i);
                         if(key.has("tag") && (key.getLong("tag") >= PayloadFactory.NORMAL_ADDRESS && key.getLong("tag") <= PayloadFactory.ARCHIVED_ADDRESS))  {
+
                             a = (String)key.get("addr");
                             if(a != null && !seenAddrs.contains(a))  {
                                 seenAddrs.add(a);
