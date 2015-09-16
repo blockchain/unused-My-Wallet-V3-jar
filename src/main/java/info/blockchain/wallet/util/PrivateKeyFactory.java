@@ -32,7 +32,7 @@ public class PrivateKeyFactory	{
 	public final static String MINI = "mini";
 	public final static String WIF_COMPRESSED = "wif_c";
 	public final static String WIF_UNCOMPRESSED = "wif_u";
-	
+
     private static PrivateKeyFactory instance = null;
 
     private PrivateKeyFactory()	 { ; }
@@ -95,11 +95,11 @@ public class PrivateKeyFactory	{
 		}
 	}
 
-	public ECKey getKey(String format, String data) throws Exception { 
-		return getKey(format, data, null); 
+	public ECKey getKey(String format, String data) throws Exception {
+		return getKey(format, data, null);
 	}
 
-	public ECKey getKey(String format, String data, CharSequenceX password) throws Exception { 
+	public ECKey getKey(String format, String data, CharSequenceX password) throws Exception {
 		if(format.equals(WIF_UNCOMPRESSED) || format.equals(WIF_COMPRESSED)) {
 			DumpedPrivateKey pk = new DumpedPrivateKey(MainNetParams.get(), data);
 			return pk.getKey();
@@ -145,7 +145,7 @@ public class PrivateKeyFactory	{
 	}
 
 	private ECKey decodeBase64PK(String base64Priv) throws Exception {
-		byte[] privBytes = Base64.decodeBase64(base64Priv);
+		byte[] privBytes = Base64.decodeBase64(base64Priv.getBytes());
 		// Prepend a zero byte to make the biginteger unsigned
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
 		ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
@@ -271,7 +271,7 @@ public class PrivateKeyFactory	{
 			address = kp.toAddressUnCompressed(MainNetParams.get()).toString();
 		}
 		*/
-		
+
 		ECKey kp = new ECKey (new BigInteger(appendZeroByte), null, false);
 		String address = kp.toAddress(MainNetParams.get()).toString();
 
@@ -351,7 +351,7 @@ public class PrivateKeyFactory	{
 			address = kp.toAddressUnCompressed(MainNetParams.get()).toString();
 		}
 		*/
-			
+
 		kp = new ECKey(priv, null, false);
 		String address = kp.toAddress(MainNetParams.get()).toString();
 
