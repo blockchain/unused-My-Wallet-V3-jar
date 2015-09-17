@@ -393,8 +393,8 @@ public class MultiAddrFactory	{
                     String hash = null;
                     String addr = null;
                     boolean isMove = false;
-                    boolean isOwnInput = false;
                     String ownInput = null;
+                    String ownOutput = null;
 
                     if(txObj.has("block_height"))  {
                         height = txObj.getLong("block_height");
@@ -424,7 +424,6 @@ public class MultiAddrFactory	{
                                 JSONObject prevOutObj = (JSONObject)inputObj.get("prev_out");
                                 addr = (String)prevOutObj.get("addr");
                                 if(ownLegacyAddresses.contains(addr))  {
-                                    isOwnInput = true;
                                     ownInput = addr;
                                 }
                             }
@@ -437,13 +436,21 @@ public class MultiAddrFactory	{
                         for(int j = 0; j < outArray.length(); j++)  {
                             outObj = (JSONObject)outArray.get(j);
                             addr = (String)outObj.get("addr");
-                            if(ownLegacyAddresses.contains(addr) && isOwnInput)  {
+                            if(ownLegacyAddresses.contains(addr) && ownInput != null && !ownInput.equals(addr))  {
                                 isMove = true;
+                                ownOutput = addr;
+                            }
+                            else if(ownLegacyAddresses.contains(addr)) {
+                              ownOutput = addr;
+                            }
+                            else  {
+                              ;
                             }
                         }
                     }
 
-                    if(addr != null)  {
+                    if(ownInput != null || ownOutput != null)  {
+
                         Tx tx = null;
                         if(isMove)  {
                             tx = new Tx(hash, "", MOVED, amount, ts, new HashMap<Integer,String>());
@@ -455,14 +462,27 @@ public class MultiAddrFactory	{
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
                         legacy_txs.add(tx);
 
-                        List<Tx> containedLegacyTx = address_legacy_txs.get(addr);
-                        if(containedLegacyTx!=null) {
-                            containedLegacyTx.add(tx);
-                            address_legacy_txs.put(ownInput != null ? ownInput : addr, containedLegacyTx);
-                        }else{
-                            containedLegacyTx = new ArrayList<Tx>();
-                            containedLegacyTx.add(tx);
-                            address_legacy_txs.put(ownInput != null ? ownInput : addr, containedLegacyTx);
+                        List<Tx> containedLegacyTx = null;
+                        if(ownInput != null)  {
+                          containedLegacyTx = address_legacy_txs.get(ownInput);
+                        }
+                        else if (ownOutput != null)  {
+                          containedLegacyTx = address_legacy_txs.get(ownOutput);
+                        }
+                        else  {
+                          ;
+                        }
+
+                        if(containedLegacyTx == null) {
+                          containedLegacyTx = new ArrayList<Tx>();
+                        }
+                        containedLegacyTx.add(tx);
+
+                        if(ownInput != null)  {
+                          address_legacy_txs.put(ownInput != null ? ownInput : addr, containedLegacyTx);
+                        }
+                        if(ownOutput != null)  {
+                          address_legacy_txs.put(ownOutput != null ? ownOutput : addr, containedLegacyTx);
                         }
                     }
                 }
