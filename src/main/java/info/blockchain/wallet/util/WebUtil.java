@@ -20,6 +20,7 @@ public class WebUtil	{
     public static final String SPEND_URL = PROTOCOL + SERVER_ADDRESS + "pushtx";
     public static final String PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + "wallet";
     public static final String PAIRING_URL = PAYLOAD_URL;
+    public static final String SID_URL = PAYLOAD_URL;
     public static final String MULTIADDR_URL = PROTOCOL + SERVER_ADDRESS + "multiaddr?active=";
     public static final String EXCHANGE_URL = PROTOCOL + SERVER_ADDRESS + "ticker";
     public static final String ACCESS_URL = PROTOCOL + SERVER_ADDRESS + "pin-store";
