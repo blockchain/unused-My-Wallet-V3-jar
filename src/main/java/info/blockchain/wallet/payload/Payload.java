@@ -49,6 +49,7 @@ public class Payload {
     private Map<Integer,String> account2Xpub = null;
     private int iterations = AESUtil.PasswordPBKDF2Iterations;
     private boolean isUpgraded = false;
+    private double version = 2.00;
 
     public Payload() {
         legacyAddresses = new ArrayList<LegacyAddress>();
@@ -656,6 +657,14 @@ public class Payload {
         obj.put("paidTo", paidToObj);
 
         return obj;
+    }
+
+    public double getVersion()  {
+      return version;
+    }
+
+    public void setVersion(double version)  {
+      this.version = version;
     }
 
 }
