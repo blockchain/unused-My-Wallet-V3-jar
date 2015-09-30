@@ -66,7 +66,8 @@ public class DoubleEncryptionFactory	{
 	}
 
 	public boolean isActivated() {
-		return (PayloadFactory.getInstance().getTempDoubleEncryptPassword() != null && PayloadFactory.getInstance().getTempDoubleEncryptPassword().length() > 1);
+//    return (PayloadFactory.getInstance().getTempDoubleEncryptPassword() != null && PayloadFactory.getInstance().getTempDoubleEncryptPassword().length() > 1);
+    return false;
 	}
 
 }

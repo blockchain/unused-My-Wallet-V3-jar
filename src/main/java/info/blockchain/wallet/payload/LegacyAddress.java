@@ -9,6 +9,7 @@ import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.util.CharSequenceX;
 
 import java.math.BigInteger;
 
@@ -125,6 +126,7 @@ public class LegacyAddress {
     		String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey, PayloadFactory.getInstance().get().getSharedKey(), PayloadFactory.getInstance().getTempDoubleEncryptPassword().toString(), PayloadFactory.getInstance().get().getIterations());
 //    		Log.i("LegacyAddress double encrypted", encryptedKey);
         	privBytes = Base58.decode(encryptedKey);
+          PayloadFactory.getInstance().setTempDoubleEncryptPassword(new CharSequenceX(""));
     	}
 
     	ECKey ecKey = null;
