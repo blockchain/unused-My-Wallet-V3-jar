@@ -48,6 +48,8 @@ public class PayloadFactory	{
     private static boolean syncPubKeys = true;
     private static String email = null;
 
+    private static double version = 2.0;
+
     private PayloadFactory()	{ ; }
 
     /**
@@ -195,7 +197,6 @@ public class PayloadFactory	{
             String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL,"method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json");
             JSONObject jsonObject = new JSONObject(response);
             int iterations = AESUtil.PasswordPBKDF2Iterations;
-            double version = 2.0;
             if(jsonObject.has("payload")) {
                 String encrypted_payload = null;
                 JSONObject _jsonObject = null;
@@ -420,5 +421,9 @@ public class PayloadFactory	{
 
     public void setEmail(String email) {
         PayloadFactory.email = email;
+    }
+
+    public double getVersion()  {
+      return version;
     }
 }
