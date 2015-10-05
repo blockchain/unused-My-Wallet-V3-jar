@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -393,8 +394,11 @@ public class MultiAddrFactory	{
                     String hash = null;
                     String addr = null;
                     boolean isMove = false;
-                    String ownInput = null;
-                    String ownOutput = null;
+                    ArrayList<String> ownInput = new ArrayList<String>();
+                    ArrayList<String> ownOutput = new ArrayList<String>();
+
+                    ArrayList<Long> amountListOut = new ArrayList<Long>();
+                    ArrayList<Long> amountListIn = new ArrayList<Long>();
 
                     if(txObj.has("block_height"))  {
                         height = txObj.getLong("block_height");
@@ -424,7 +428,16 @@ public class MultiAddrFactory	{
                                 JSONObject prevOutObj = (JSONObject)inputObj.get("prev_out");
                                 addr = (String)prevOutObj.get("addr");
                                 if(ownLegacyAddresses.contains(addr))  {
-                                    ownInput = addr;
+                                    isMove = true;
+
+                                    long amountInput = prevOutObj.getLong("value");
+                                    if(ownInput.contains(addr)) {
+                                        int index=ownInput.indexOf(addr);
+                                        amountListIn.set(index, amountListIn.get(index)+amountInput);
+                                    } else {
+                                        ownInput.add(addr);
+                                        amountListIn.add(amountInput);
+                                    }
                                 }
                             }
                         }
@@ -436,54 +449,90 @@ public class MultiAddrFactory	{
                         for(int j = 0; j < outArray.length(); j++)  {
                             outObj = (JSONObject)outArray.get(j);
                             addr = (String)outObj.get("addr");
-                            if(ownLegacyAddresses.contains(addr) && ownInput != null && !ownInput.equals(addr))  {
-                                isMove = true;
-                                ownOutput = addr;
-                            }
-                            else if(ownLegacyAddresses.contains(addr)) {
-                              ownOutput = addr;
-                            }
-                            else  {
-                              ;
+                            if(ownLegacyAddresses.contains(addr)) {
+
+                                long amountOutput = outObj.getLong("value");
+                                if(ownOutput.contains(addr)) {
+                                    int index=ownOutput.indexOf(addr);
+                                    amountListOut.set(index, amountListOut.get(index)+amountOutput);
+                                } else {
+                                    ownOutput.add(addr);
+                                    amountListOut.add(amountOutput);
+                                }
+                            } else {
+                                isMove = false; //one foreign address is enough to not call it move anymore
                             }
                         }
                     }
 
-                    if(ownInput != null || ownOutput != null)  {
+                    //Check back all the transactions where one of our addresses is listed as output
+                    //If that address is also listed as an input, we get the output back as change
+                    Tx tx = null;
+                    for(String address : ownOutput) {
 
-                        Tx tx = null;
-                        if(isMove)  {
-                            tx = new Tx(hash, "", MOVED, amount, ts, new HashMap<Integer,String>());
-                            tx.setIsMove(true);
+                        int index = ownOutput.indexOf(address);
+                        long outputAmount = amountListOut.get(index);
+                        String mode = RECEIVED;
+
+                        //Check if this is just the change we get back
+                        if(ownInput.contains(address)) {
+
+                            long inputAmount = amountListIn.get(ownInput.indexOf(address));
+                            if(inputAmount < outputAmount) {
+                                mode = RECEIVED;
+                                outputAmount = Math.abs(inputAmount-outputAmount);
+                            } else {
+                                mode = SENT;
+                                outputAmount = (-1)*(amountListIn.get(ownInput.indexOf(address))-outputAmount);
+                            }
                         }
-                        else  {
-                            tx = new Tx(hash, "", amount > 0L ? RECEIVED : SENT, amount, ts, new HashMap<Integer,String>());
+
+                        tx = new Tx(hash, "", mode, outputAmount, ts, new HashMap<Integer,String>());
+                        tx.setIsMove(false);
+                        tx.setDirection(mode);
+
+                        tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
+
+                        List<Tx> containedLegacyTx = address_legacy_txs.get(address);
+
+                        if(containedLegacyTx == null) {
+                            containedLegacyTx = new ArrayList<Tx>();
+                        }
+                        containedLegacyTx.add(tx);
+                        address_legacy_txs.put(address, containedLegacyTx);
+                    }
+
+                    //Check all cases where a address is listed as an input
+                    //Exclude cases  where it is in the output array, as these were covered above
+                    for(String address : ownInput) {
+
+                        if(ownOutput.contains(address))
+                            continue;
+
+                        int index = ownInput.indexOf(address);
+                        long inputAmount = (-1)*Math.abs(amountListIn.get(index));
+
+                        tx = new Tx(hash, "", SENT, inputAmount, ts, new HashMap<Integer,String>());
+                        tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
+
+                        List<Tx> containedLegacyTx = address_legacy_txs.get(address);
+                        if(containedLegacyTx == null) {
+                            containedLegacyTx = new ArrayList<Tx>();
+                        }
+                        containedLegacyTx.add(tx);
+                        address_legacy_txs.put(address, containedLegacyTx);
+                    }
+
+                    //Also make sure to state the wallet impact of this transaction in the general view
+                    if(ownInput.size() > 0 || ownOutput.size() > 0) {
+                        if (isMove) {
+                            tx = new Tx(hash, "", MOVED, amount, ts, new HashMap<Integer, String>());
+                            tx.setIsMove(true);
+                        } else {
+                            tx = new Tx(hash, "", amount > 0L ? RECEIVED : SENT, amount, ts, new HashMap<Integer, String>());
                         }
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
                         legacy_txs.add(tx);
-
-                        List<Tx> containedLegacyTx = null;
-                        if(ownInput != null)  {
-                          containedLegacyTx = address_legacy_txs.get(ownInput);
-                        }
-                        else if (ownOutput != null)  {
-                          containedLegacyTx = address_legacy_txs.get(ownOutput);
-                        }
-                        else  {
-                          ;
-                        }
-
-                        if(containedLegacyTx == null) {
-                          containedLegacyTx = new ArrayList<Tx>();
-                        }
-                        containedLegacyTx.add(tx);
-
-                        if(ownInput != null)  {
-                          address_legacy_txs.put(ownInput != null ? ownInput : addr, containedLegacyTx);
-                        }
-                        if(ownOutput != null)  {
-                          address_legacy_txs.put(ownOutput != null ? ownOutput : addr, containedLegacyTx);
-                        }
                     }
                 }
             }
