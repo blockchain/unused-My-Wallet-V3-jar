@@ -16,7 +16,6 @@
 
 		<plugins>
 
-		  <!-- download source code in Eclipse, best practice -->
 		  <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-eclipse-plugin</artifactId>
@@ -27,7 +26,6 @@
 			</configuration>
 		  </plugin>
 
-		  <!-- Set a compiler level -->
 		  <plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
@@ -66,13 +64,6 @@
 	  <artifactId>bitcoinj-core</artifactId>
 	  <version>0.13.1</version>
     </dependency>
-<!--
-	<dependency>
-		<groupId>org.apache.httpcomponents</groupId>
-		<artifactId>httpclient</artifactId>
-		<version>4.5</version>
-	</dependency>
--->
 	<dependency>
 		<groupId>commons-io</groupId>
 		<artifactId>commons-io</artifactId>
@@ -98,18 +89,6 @@
 	  <artifactId>json</artifactId>
 	  <version>20131018</version>
     </dependency>
-<!--
-	<dependency>
-		<groupId>com.madgag.spongycastle</groupId>
-		<artifactId>prov</artifactId>
-		<version>1.51.0.0</version>
-	</dependency>
-	<dependency>
-		<groupId>com.madgag.spongycastle</groupId>
-		<artifactId>core</artifactId>
-		<version>1.51.0.0</version>
-	</dependency>
--->
     <dependency>
 	  <groupId>org.slf4j</groupId>
 	  <artifactId>slf4j-api</artifactId>
