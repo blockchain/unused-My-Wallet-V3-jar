@@ -275,29 +275,23 @@ public class MultiAddrFactory	{
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
 
                         if(isMove)  {
-                            if(xpub_txs.containsKey(mf_addr))  {
-                                xpub_txs.get(mf_addr).add(tx);
+                            if(!xpub_txs.containsKey(mf_addr))  {
+                              xpub_txs.put(mf_addr, new ArrayList<Tx>());
                             }
-                            else  {
-                                xpub_txs.put(mf_addr, new ArrayList<Tx>());
-                                xpub_txs.get(mf_addr).add(tx);
+                            xpub_txs.get(mf_addr).add(tx);
+
+                            if(!xpub_txs.containsKey(mt_addr))  {
+                              xpub_txs.put(mt_addr, new ArrayList<Tx>());
                             }
-                            if(xpub_txs.containsKey(mt_addr))  {
-                                xpub_txs.get(mt_addr).add(tx);
-                            }
-                            else  {
-                                xpub_txs.put(mt_addr, new ArrayList<Tx>());
-                                xpub_txs.get(mt_addr).add(tx);
-                            }
+                            xpub_txs.get(mt_addr).add(tx);
+
                         }
                         else  {
-                            if(xpub_txs.containsKey(addr))  {
-                                xpub_txs.get(addr).add(tx);
+                            if(!xpub_txs.containsKey(addr))  {
+                              xpub_txs.put(addr, new ArrayList<Tx>());
                             }
-                            else  {
-                                xpub_txs.put(addr, new ArrayList<Tx>());
-                                xpub_txs.get(addr).add(tx);
-                            }
+                            xpub_txs.get(addr).add(tx);
+
                         }
                     }
                 }
