@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import info.blockchain.wallet.payload.PayloadFactory;
+import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.Tx;
 import info.blockchain.wallet.payload.TxMostRecentDateComparator;
 import info.blockchain.wallet.util.WebUtil;
@@ -556,6 +557,25 @@ public class MultiAddrFactory	{
 
     public long getLegacyBalance()  {
         return legacy_balance;
+    }
+
+    public long getLegacyBalance(long address_type)  {
+
+      if(PayloadFactory.getInstance().get() != null)  {
+        List<String> addrs = PayloadFactory.getInstance().get().getLegacyAddressStrings(address_type);
+        long value = 0L;
+
+        for(String addr : addrs) {
+          if(legacy_amounts.containsKey(addr))  {
+            value += legacy_amounts.get(addr);
+          }
+        }
+
+        return value;
+      }
+      else {
+        return 0L;
+      }
     }
 
     public void setLegacyBalance(long value)  {
