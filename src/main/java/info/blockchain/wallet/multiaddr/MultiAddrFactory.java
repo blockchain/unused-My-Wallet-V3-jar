@@ -481,9 +481,11 @@ public class MultiAddrFactory	{
                                 outputAmount = (-1)*(amountListIn.get(ownInput.indexOf(address))-outputAmount);
                             }
                         }
+                        if(isMove)
+                            mode = MOVED;
 
                         tx = new Tx(hash, "", mode, outputAmount, ts, new HashMap<Integer,String>());
-                        tx.setIsMove(false);
+                        tx.setIsMove(isMove);
                         tx.setDirection(mode);
 
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
@@ -507,7 +509,13 @@ public class MultiAddrFactory	{
                         int index = ownInput.indexOf(address);
                         long inputAmount = (-1)*Math.abs(amountListIn.get(index));
 
-                        tx = new Tx(hash, "", SENT, inputAmount, ts, new HashMap<Integer,String>());
+                        String mode = SENT;
+                        if(isMove)
+                            mode = MOVED;
+
+                        tx = new Tx(hash, "", mode, inputAmount, ts, new HashMap<Integer,String>());
+                        tx.setIsMove(isMove);
+
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
 
                         List<Tx> containedLegacyTx = address_legacy_txs.get(address);
