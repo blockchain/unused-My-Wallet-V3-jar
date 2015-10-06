@@ -175,18 +175,6 @@ public class PrivateKeyFactory	{
 		return decodeBase58PK(decryptPK(base58Priv));
 	}
 
-	/*
-	// Decrypt a double encrypted private key
-	public static String decryptPK(String key, String sharedKey, String password, final int PBKDF2Iterations) throws Exception {
-		return decrypt(key, sharedKey + password, PBKDF2Iterations);
-	}
-
-	// Encrypt a double encrypted private key
-	public static String encryptPK(String key, String sharedKey, String password, final int PBKDF2Iterations) throws Exception {
-		return encrypt(key, sharedKey + password, PBKDF2Iterations);
-	}
-	*/
-
 	private byte[] hash(byte[] data, int offset, int len)	{
 		try	{
 			MessageDigest a = MessageDigest.getInstance("SHA-256");
