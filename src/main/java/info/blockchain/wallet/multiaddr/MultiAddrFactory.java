@@ -418,7 +418,7 @@ public class MultiAddrFactory	{
                         ts = txObj.getLong("time");
                     }
 
-                    List<String> ownLegacyAddresses = PayloadFactory.getInstance().get().getLegacyAddressStrings();
+                    List<String> ownLegacyAddresses = PayloadFactory.getInstance().get().getLegacyAddressStrings(PayloadFactory.NORMAL_ADDRESS);
 
                     if(txObj.has("inputs"))  {
                         JSONArray inputArray = (JSONArray)txObj.get("inputs");
