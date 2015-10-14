@@ -15,6 +15,7 @@ public class WebUtil	{
 
     public static final String PROTOCOL = "https://";
     public static final String SERVER_ADDRESS = "blockchain.info/";
+    public static final String API_SUBDOMAIN = "api.";
 
     public static final String VALIDATE_SSL_URL = PROTOCOL + SERVER_ADDRESS;
     public static final String SPEND_URL = PROTOCOL + SERVER_ADDRESS + "pushtx";
@@ -26,7 +27,8 @@ public class WebUtil	{
     public static final String ACCESS_URL = PROTOCOL + SERVER_ADDRESS + "pin-store";
     public static final String UNSPENT_OUTPUTS_URL = PROTOCOL + SERVER_ADDRESS + "unspent?active=";
     public static final String ADDRESS_INFO_URL = PROTOCOL + SERVER_ADDRESS + "address/";
-	public static final String TRANSACTION = PROTOCOL + SERVER_ADDRESS+ "tx/";
+    public static final String TRANSACTION = PROTOCOL + SERVER_ADDRESS+ "tx/";
+    public static final String EXTERNAL_ENTROPY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "v2/randombytes?bytes=32&format=hex";
 
     public static final String BTCX_FEE = "http://bitcoinexchangerate.org/fees";
 
