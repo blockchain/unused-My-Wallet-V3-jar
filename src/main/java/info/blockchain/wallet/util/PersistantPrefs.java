@@ -21,6 +21,7 @@ public interface PersistantPrefs {
     public static final String KEY_ASK_LATER = "ask_later";
     public static final String KEY_EMAIL_VERIFY_ASK_LATER = "email_verify_ask_later";
     public static final String KEY_BALANCE_DISPLAY_STATE = "balance_display_state";
+    public static final String KEY_SCHEME_URL = "scheme_url";
 
     public abstract String getValue(String name, String value);
     public boolean setValue(String name, String value);
