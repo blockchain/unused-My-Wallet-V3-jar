@@ -50,11 +50,19 @@ public class WebUtil	{
         return instance;
     }
 
+    public String postURL(String request, String urlParameters, int requestRetry) throws Exception {
+        return postURLCall(request, urlParameters, requestRetry);
+    }
+
     public String postURL(String request, String urlParameters) throws Exception {
+        return postURLCall(request, urlParameters, DefaultRequestRetry);
+    }
+
+    private  String postURLCall(String request, String urlParameters, int requestRetry) throws Exception {
 
         String error = null;
 
-        for (int ii = 0; ii < DefaultRequestRetry; ++ii) {
+        for (int ii = 0; ii < requestRetry; ++ii) {
             URL url = new URL(request);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             try {
