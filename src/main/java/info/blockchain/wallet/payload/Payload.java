@@ -513,7 +513,7 @@ public class Payload {
                             String priv = key.getString("priv");
                             if(priv != null && !priv.equalsIgnoreCase("null")) {
                                 addr = new LegacyAddress(
-                                        key.has("priv") ? (key.get("priv") != null ? (String) key.get("priv") : "") : null,
+                                        key.has("priv") && key.get("priv") != null && !key.get("priv").equals("null") ? (String) key.get("priv") : "",
                                         key.has("created_time") ? key.getLong("created_time") : 0L,
                                         key.has("addr") ? (String) key.get("addr") : null,
                                         key.has("label") ? (String) key.get("label") : "",
