@@ -21,9 +21,6 @@ public class FeeUtil {
     private static final int ESTIMATED_INPUT_LEN = 148; // compressed key
     private static final int ESTIMATED_OUTPUT_LEN = 34;
 
-    public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.00000546").longValue());
-    public static final BigInteger bFee = BigInteger.valueOf(Coin.parseCoin("0.0001").longValue());
-
     private static BigInteger bAvgFee = null;
     private static BigInteger bHighestFee = null;
     private static BigInteger bPriorityFee = null;  // recommended priority fee
@@ -129,9 +126,9 @@ public class FeeUtil {
         int thousands = size / 1000;
         int remainder = size % 1000;
 
-        long fee = bFee.longValue() * thousands;
+        long fee = SendCoins.bFee.longValue() * thousands;
         if(remainder > 0L)   {
-            fee += bFee.longValue();
+            fee += SendCoins.bFee.longValue();
         }
 
         return BigInteger.valueOf(fee);
