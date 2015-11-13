@@ -516,16 +516,16 @@ public class Payload {
                             String created_device_name = null;
                             String created_device_version = null;
 
-                            if(key.has("priv") && key.getString("priv") != null && !key.getString("priv").equals("null"))  {
-                                try {
-                                  priv = key.getString("priv");
-                                }
-                                catch(Exception e) {
-                                  priv = "";
-                                }
-                            }
-                            else{
+                            try {
+                              if(key.has("priv"))  {
+                                priv = key.getString("priv");
+                              }
+                              if(priv == null || priv.equals("null"))  {
                                 priv = "";
+                              }
+                            }
+                            catch(Exception e) {
+                              priv = "";
                             }
 
                             if(key.has("created_time"))  {
@@ -540,16 +540,16 @@ public class Payload {
                                 created_time = 0L;
                             }
 
-                            if(key.has("label") && key.getString("label") != null && !key.getString("label").equals("null"))  {
-                              try {
+                            try {
+                              if(key.has("label"))  {
                                 label = key.getString("label");
                               }
-                              catch(Exception e) {
+                              if(label == null || label.equals("null"))  {
                                 label = "";
                               }
                             }
-                            else{
-                                label = "";
+                            catch(Exception e) {
+                              label = "";
                             }
 
                             if(key.has("tag"))  {
@@ -571,28 +571,28 @@ public class Payload {
                               throw new Exception("Missing private key");
                             }
 
-                            if(key.has("created_device_name") && key.getString("created_device_name") != null && !key.getString("created_device_name").equals("null"))  {
-                              try {
+                            try {
+                              if(key.has("created_device_name"))  {
                                 created_device_name = key.getString("created_device_name");
                               }
-                              catch(Exception e) {
+                              if(created_device_name == null || created_device_name.equals("null"))  {
                                 created_device_name = "";
                               }
                             }
-                            else{
-                                created_device_name = "";
+                            catch(Exception e) {
+                              created_device_name = "";
                             }
 
-                            if(key.has("created_device_version") && key.getString("created_device_version") != null && !key.getString("created_device_version").equals("null"))  {
-                              try {
+                            try {
+                              if(key.has("created_device_version"))  {
                                 created_device_version = key.getString("created_device_version");
                               }
-                              catch(Exception e) {
+                              if(created_device_version == null || created_device_version.equals("null"))  {
                                 created_device_version = "";
                               }
                             }
-                            else{
-                                created_device_version = "";
+                            catch(Exception e) {
+                              created_device_version = "";
                             }
 
                             legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version);
