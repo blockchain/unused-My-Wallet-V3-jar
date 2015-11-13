@@ -237,7 +237,7 @@ public class Payload {
         this.strDoublePWHash = hash2;
     }
 
-    public void parseJSON() throws JSONException  {
+    public void parseJSON() throws JSONException, Exception  {
 
         if(jsonObject != null)  {
             //
@@ -270,7 +270,7 @@ public class Payload {
      * @param JSONObject jsonObject JSON object to be parsed
      *
      */
-    public void parsePayload(JSONObject jsonObject) throws JSONException  {
+    public void parsePayload(JSONObject jsonObject) throws JSONException, Exception  {
 
         if(jsonObject != null)  {
             strGuid = (String)jsonObject.get("guid");
@@ -501,28 +501,104 @@ public class Payload {
                 JSONArray keys = (JSONArray)jsonObject.get("keys");
                 if(keys != null && keys.length() > 0)  {
                     List<String> seenAddrs = new ArrayList<String>();
-                    String a = null;
+                    String addr = null;
                     JSONObject key = null;
-                    LegacyAddress addr = null;
+                    LegacyAddress legacyAddress = null;
                     for(int i = 0; i < keys.length(); i++)  {
                         key = (JSONObject)keys.get(i);
-                        a = (String)key.get("addr");
-                        if(a != null && !seenAddrs.contains(a))  {
-                            seenAddrs.add(a);
+                        addr = (String)key.get("addr");
+                        if(addr != null && !addr.equals("null") && !seenAddrs.contains(addr))  {
 
-                            String priv = key.getString("priv");
-                            if(priv != null && !priv.equalsIgnoreCase("null")) {
-                                addr = new LegacyAddress(
-                                        key.has("priv") && key.get("priv") != null && !key.get("priv").equals("null") ? (String) key.get("priv") : "",
-                                        key.has("created_time") ? key.getLong("created_time") : 0L,
-                                        key.has("addr") ? (String) key.get("addr") : null,
-                                        key.has("label") ? (String) key.get("label") : "",
-                                        key.has("tag") ? key.getLong("tag") : 0L,
-                                        key.has("created_device_name") ? (String) key.get("created_device_name") : "",
-                                        key.has("created_device_version") ? (String) key.get("created_device_version") : ""
-                                );
-                                legacyAddresses.add(addr);
+                            String priv = null;
+                            long created_time = 0L;
+                            String label = null;
+                            long tag = 0L;
+                            String created_device_name = null;
+                            String created_device_version = null;
+
+                            if(key.has("priv") && key.getString("priv") != null && !key.getString("priv").equals("null"))  {
+                                try {
+                                  priv = key.getString("priv");
+                                }
+                                catch(Exception e) {
+                                  priv = "";
+                                }
                             }
+                            else{
+                                priv = "";
+                            }
+
+                            if(key.has("created_time"))  {
+                                try {
+                                  created_time = key.getLong("created_time");
+                                }
+                                catch(Exception e) {
+                                  created_time = 0L;
+                                }
+                            }
+                            else  {
+                                created_time = 0L;
+                            }
+
+                            if(key.has("label") && key.getString("label") != null && !key.getString("label").equals("null"))  {
+                              try {
+                                label = key.getString("label");
+                              }
+                              catch(Exception e) {
+                                label = "";
+                              }
+                            }
+                            else{
+                                label = "";
+                            }
+
+                            if(key.has("tag"))  {
+                              try {
+                                tag = key.getLong("tag");
+                              }
+                              catch(Exception e) {
+                                tag = (priv.length() == 0) ? 1L : 0L;
+                              }
+                            }
+                            else if(priv.length() == 0)  {
+                                tag = 1L; // assume watch only
+                            }
+                            else  {
+                                tag = 0L;
+                            }
+
+                            if(priv.length() == 0 && (tag == 0L || tag == 2L))  {
+                              throw new Exception("Missing private key");
+                            }
+
+                            if(key.has("created_device_name") && key.getString("created_device_name") != null && !key.getString("created_device_name").equals("null"))  {
+                              try {
+                                created_device_name = key.getString("created_device_name");
+                              }
+                              catch(Exception e) {
+                                created_device_name = "";
+                              }
+                            }
+                            else{
+                                created_device_name = "";
+                            }
+
+                            if(key.has("created_device_version") && key.getString("created_device_version") != null && !key.getString("created_device_version").equals("null"))  {
+                              try {
+                                created_device_version = key.getString("created_device_version");
+                              }
+                              catch(Exception e) {
+                                created_device_version = "";
+                              }
+                            }
+                            else{
+                                created_device_version = "";
+                            }
+
+                            legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version);
+                            legacyAddresses.add(legacyAddress);
+                            seenAddrs.add(addr);
+
                         }
                     }
                 }
