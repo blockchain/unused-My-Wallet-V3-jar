@@ -58,7 +58,7 @@ public class SendCoins	{
 
     private boolean sentChange = false;
 
-    public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.00000546").longValue());
+    public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.00005460").longValue());
     public static final BigInteger bFee = BigInteger.valueOf(Coin.parseCoin("0.0001").longValue());
 
     public static SendCoins getInstance() {
