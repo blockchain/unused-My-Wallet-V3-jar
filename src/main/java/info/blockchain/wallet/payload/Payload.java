@@ -126,6 +126,18 @@ public class Payload {
         return legacyAddresses;
     }
 
+    public List<LegacyAddress> getLegacyAddresses(long tag) {
+
+      List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
+      for(LegacyAddress legacyAddress : legacyAddresses) {
+          if(legacyAddress.getTag() == tag)  {
+            addrs.add(legacyAddress);
+          }
+      }
+
+        return addrs;
+    }
+
     public List<String> getLegacyAddressStrings() {
 
         List<String> addrs = new ArrayList<String>();
