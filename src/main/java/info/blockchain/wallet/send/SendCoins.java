@@ -147,7 +147,6 @@ public class SendCoins	{
                 continue;
             }
 
-//            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint);
             MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
             inputs.add(input);
             valueSelected = valueSelected.add(outPoint.getValue());
@@ -198,7 +197,6 @@ public class SendCoins	{
         //
         Collections.sort(inputs, new InputComparator());
         for(MyTransactionInput ti : inputs) {
-          System.out.println("input tx hash:" + ti.getTxHash());
           tx.addInput(ti);
         }
 
