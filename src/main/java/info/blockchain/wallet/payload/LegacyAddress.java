@@ -22,6 +22,7 @@ public class LegacyAddress {
     private String strCreatedDeviceName = null;
     private String strCreatedDeviceVersion = null;
     private long tag = 0L;
+    private boolean watchOnly = false;
 
     public LegacyAddress() { ; }
 
@@ -33,6 +34,17 @@ public class LegacyAddress {
         this.tag = tag;
         this.strCreatedDeviceName = device_name;
         this.strCreatedDeviceVersion = device_version;
+    }
+
+    public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version, boolean watchOnly) {
+        this.strEncryptedKey = encryptedKey;
+        this.created = created;
+        this.strAddress = address;
+        this.strLabel = label;
+        this.tag = tag;
+        this.strCreatedDeviceName = device_name;
+        this.strCreatedDeviceVersion = device_version;
+        this.watchOnly = watchOnly;
     }
 
     public LegacyAddress(String encryptedKey, String address) {
@@ -85,6 +97,14 @@ public class LegacyAddress {
 
     public void setTag(long tag) {
         this.tag = tag;
+    }
+
+    public boolean isWatchOnly() {
+        return watchOnly;
+    }
+
+    public void setWatchOnly(boolean watchOnly) {
+        this.watchOnly = watchOnly;
     }
 
     public String getCreatedDeviceName() { return strCreatedDeviceName; }

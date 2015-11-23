@@ -527,6 +527,7 @@ public class Payload {
                             long tag = 0L;
                             String created_device_name = null;
                             String created_device_version = null;
+                            boolean watchOnly = false;
 
                             try {
                               if(key.has("priv"))  {
@@ -538,6 +539,10 @@ public class Payload {
                             }
                             catch(Exception e) {
                               priv = "";
+                            }
+
+                            if(priv.length() == 0)  {
+                                watchOnly = true;
                             }
 
                             if(key.has("created_time"))  {
@@ -569,18 +574,11 @@ public class Payload {
                                 tag = key.getLong("tag");
                               }
                               catch(Exception e) {
-                                tag = (priv.length() == 0) ? 1L : 0L;
+                                tag = 0L;
                               }
-                            }
-                            else if(priv.length() == 0)  {
-                                tag = 1L; // assume watch only
                             }
                             else  {
                                 tag = 0L;
-                            }
-
-                            if(priv.length() == 0 && (tag == 0L || tag == 2L))  {
-                              throw new Exception("Missing private key");
                             }
 
                             try {
@@ -607,10 +605,9 @@ public class Payload {
                               created_device_version = "";
                             }
 
-                            legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version);
+                            legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
                             legacyAddresses.add(legacyAddress);
                             seenAddrs.add(addr);
-
                         }
                     }
                 }
