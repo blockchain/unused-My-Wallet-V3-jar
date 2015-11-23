@@ -12,35 +12,62 @@ import org.bitcoinj.core.TransactionOutPoint;
 
 public class MyTransactionInput extends TransactionInput {
 
-	private static final long serialVersionUID = 1L;
-	
-	public String address;
-	public BigInteger value;
-	public NetworkParameters params;
-	
-	public MyTransactionInput(NetworkParameters params, Transaction parentTransaction, byte[] scriptBytes, TransactionOutPoint outpoint) {
-		super(params, parentTransaction, scriptBytes, outpoint);
-		this.params = params;
-	}
- 
-	@Override
-	public Address getFromAddress() {
+    private static final long serialVersionUID = 1L;
 
-		try {
-			return new Address(params, address);
-		} catch (AddressFormatException e) {
-			e.printStackTrace();
-		}
+    public String address;
+    public BigInteger value;
+    public NetworkParameters params;
 
-		return null;
-	}
-	
-	public Coin getValue() {
-		return Coin.valueOf(value.longValue());
-	}
+    public String txHash;
+    public int txPos;
 
-	public void setValue(BigInteger value) {
-		this.value = value;
-	}
+    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction, byte[] scriptBytes, TransactionOutPoint outpoint, String txHash, int txPos) {
+        super(params, parentTransaction, scriptBytes, outpoint);
+        this.params = params;
+        this.txHash = txHash;
+        this.txPos = txPos;
+    }
 
+    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction, byte[] scriptBytes, TransactionOutPoint outpoint) {
+        super(params, parentTransaction, scriptBytes, outpoint);
+        this.params = params;
+        this.txHash = "";
+        this.txPos = -1;
+    }
+
+    @Override
+    public Address getFromAddress() {
+
+        try {
+            return new Address(params, address);
+        } catch (AddressFormatException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public Coin getValue() {
+        return Coin.valueOf(value.longValue());
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String sortKey) {
+        this.txHash = txHash;
+    }
+
+    public int getTxPos() {
+        return txPos;
+    }
+
+    public void setTxPos(int txPos) {
+        this.txPos = txPos;
+    }
 }

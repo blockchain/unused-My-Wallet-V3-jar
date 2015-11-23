@@ -10,15 +10,17 @@ import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.params.MainNetParams;
 
+import info.blockchain.wallet.util.Hash;
+
 public class MyTransactionOutPoint extends TransactionOutPoint {
 
 	private static final long serialVersionUID = 1L;
-	private byte[] scriptBytes;	
+	private byte[] scriptBytes;
 	private int txOutputN;
 	private Sha256Hash txHash;
 	private BigInteger value;
 	private int confirmations;
-	
+
 	public MyTransactionOutPoint(Sha256Hash txHash, int txOutputN, BigInteger value, byte[] scriptBytes) throws ProtocolException {
 		super(MainNetParams.get(), txOutputN, new Sha256Hash(txHash.getBytes()));
 		this.scriptBytes = scriptBytes;
@@ -52,7 +54,7 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
 	}
 
 	@Override
-	public TransactionOutput getConnectedOutput() {		       
+	public TransactionOutput getConnectedOutput() {
 		return new TransactionOutput(params, null, Coin.valueOf(value.longValue()), scriptBytes);
 	}
 

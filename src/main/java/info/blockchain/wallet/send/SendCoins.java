@@ -98,9 +98,10 @@ public class SendCoins	{
             fee = BigInteger.ZERO;
         }
 
-        List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
         // Construct a new transaction
         Transaction tx = new Transaction(MainNetParams.get());
+        List<MyTransactionInput> inputs = new ArrayList<MyTransactionInput>();
+        List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
         BigInteger outputValueSum = BigInteger.ZERO;
 
         for(Iterator<Entry<String, BigInteger>> iterator = receivingAddresses.entrySet().iterator(); iterator.hasNext();)   {
@@ -146,8 +147,9 @@ public class SendCoins	{
                 continue;
             }
 
-            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint);
-            tx.addInput(input);
+//            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint);
+            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
+            inputs.add(input);
             valueSelected = valueSelected.add(outPoint.getValue());
             priority += outPoint.getValue().longValue() * outPoint.getConfirmations();
 
@@ -191,9 +193,18 @@ public class SendCoins	{
             sentChange = false;
         }
 
-        Collections.shuffle(outputs, new SecureRandom());
+        //
+        // deterministically sort inputs and outputs, see OBPP BIP69
+        //
+        Collections.sort(inputs, new InputComparator());
+        for(MyTransactionInput ti : inputs) {
+          System.out.println("input tx hash:" + ti.getTxHash());
+          tx.addInput(ti);
+        }
+
+        Collections.sort(outputs, new OutputComparator());
         for(TransactionOutput to : outputs) {
-            tx.addOutput(to);
+          tx.addOutput(to);
         }
 
         long estimatedSize = tx.bitcoinSerialize().length + (114 * tx.getInputs().size());
@@ -275,6 +286,99 @@ public class SendCoins	{
       catch(Exception e) {
         return "Exception calling pushTx";
       }
+
+    }
+
+    private class InputComparator implements Comparator<MyTransactionInput> {
+
+        public int compare(MyTransactionInput i1, MyTransactionInput i2) {
+
+            final int BEFORE = -1;
+            final int EQUAL = 0;
+            final int AFTER = 1;
+
+            Hash hash1 = new Hash(Hex.decode(i1.getTxHash()));
+            Hash hash2 = new Hash(Hex.decode(i2.getTxHash()));
+            byte[] h1 = hash1.getBytes();
+            byte[] h2 = hash2.getBytes();
+
+            int pos = 0;
+            while(pos < h1.length && pos < h2.length)    {
+
+                byte b1 = h1[pos];
+                byte b2 = h2[pos];
+
+                if((b1 & 0xff) < (b2 & 0xff))    {
+                    return BEFORE;
+                }
+                else if((b1 & 0xff) > (b2 & 0xff))    {
+                    return AFTER;
+                }
+                else    {
+                    pos++;
+                }
+
+            }
+
+            if(i1.getTxPos() < i2.getTxPos())    {
+                return BEFORE;
+            }
+            else if(i1.getTxPos() > i2.getTxPos())    {
+                return AFTER;
+            }
+            else    {
+                return EQUAL;
+            }
+
+        }
+
+    }
+
+    private class OutputComparator implements Comparator<TransactionOutput> {
+
+        public int compare(TransactionOutput o1, TransactionOutput o2) {
+
+            final int BEFORE = -1;
+            final int EQUAL = 0;
+            final int AFTER = 1;
+
+            if(o1.getValue().compareTo(o2.getValue()) > 0) {
+                return AFTER;
+            }
+            else if(o1.getValue().compareTo(o2.getValue()) < 0) {
+                return BEFORE;
+            }
+            else    {
+
+                byte[] b1 = o1.getScriptBytes();
+                byte[] b2 = o2.getScriptBytes();
+
+                int pos = 0;
+                while(pos < b1.length && pos < b2.length)    {
+
+                    if((b1[pos] & 0xff) < (b2[pos] & 0xff))    {
+                        return BEFORE;
+                    }
+                    else if((b1[pos] & 0xff) > (b2[pos] & 0xff))    {
+                        return AFTER;
+                    }
+
+                    pos++;
+                }
+
+                if(b1.length < b2.length)    {
+                    return BEFORE;
+                }
+                else if(b1.length > b2.length)    {
+                    return AFTER;
+                }
+                else    {
+                    return EQUAL;
+                }
+
+            }
+
+        }
 
     }
 
