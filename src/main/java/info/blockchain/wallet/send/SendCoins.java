@@ -56,8 +56,6 @@ public class SendCoins	{
     private String[] from = null;
     private HashMap<String,String> froms = null;
 
-    private boolean sentChange = false;
-
     public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.00005460").longValue());
     public static final BigInteger bFee = BigInteger.valueOf(Coin.parseCoin("0.0001").longValue());
 
@@ -180,16 +178,12 @@ public class SendCoins	{
             BitcoinScript change_script;
             if (changeAddress != null) {
                 change_script = BitcoinScript.createSimpleOutBitcoinScript(new BitcoinAddress(changeAddress));
-                sentChange = true;
             }
             else {
                 throw new Exception("Change address null");
             }
             TransactionOutput change_output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(change.longValue()), change_script.getProgram());
             outputs.add(change_output);
-        }
-        else {
-            sentChange = false;
         }
 
         //
