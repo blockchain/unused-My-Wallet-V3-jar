@@ -138,6 +138,19 @@ public class Payload {
         return addrs;
     }
 
+    public List<LegacyAddress> getActiveLegacyAddresses() {
+        List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
+
+        for(LegacyAddress legacyAddress : legacyAddresses) {
+            if(legacyAddress.getTag() == PayloadFactory.NORMAL_ADDRESS &&
+               !legacyAddress.isWatchOnly()) {
+                addrs.add(legacyAddress);
+            }
+        }
+
+        return addrs;
+    }
+
     public List<String> getLegacyAddressStrings() {
 
         List<String> addrs = new ArrayList<String>();
@@ -153,6 +166,19 @@ public class Payload {
         List<String> addrs = new ArrayList<String>();
         for(LegacyAddress legacyAddress : legacyAddresses) {
             if(legacyAddress.getTag() == tag)  {
+              addrs.add(legacyAddress.getAddress());
+            }
+        }
+
+        return addrs;
+    }
+
+    public List<String> getActiveLegacyAddressStrings() {
+        List<String> addrs = new ArrayList<String>();
+
+        for(LegacyAddress legacyAddress : legacyAddresses) {
+            if(legacyAddress.getTag() == PayloadFactory.NORMAL_ADDRESS &&
+               !legacyAddress.isWatchOnly()) {
               addrs.add(legacyAddress.getAddress());
             }
         }
