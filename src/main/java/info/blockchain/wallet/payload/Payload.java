@@ -706,14 +706,7 @@ public class Payload {
 
         JSONArray keys = new JSONArray();
         for(LegacyAddress addr : legacyAddresses) {
-            JSONObject key = new JSONObject();
-            key.put("priv", addr.getEncryptedKey());
-            key.put("addr", addr.getAddress());
-            key.put("label", addr.getLabel());
-            key.put("tag", addr.getTag());
-            key.put("created_time", addr.getCreated());
-            key.put("created_device_name", addr.getCreatedDeviceName() == null ? "" : addr.getCreatedDeviceName());
-            key.put("created_device_version", addr.getCreatedDeviceVersion() == null ? "" : addr.getCreatedDeviceVersion());
+            JSONObject key = addr.dumpJSON();
             keys.put(key);
         }
         obj.put("keys", keys);

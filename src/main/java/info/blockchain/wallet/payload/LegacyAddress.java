@@ -181,13 +181,34 @@ public class LegacyAddress {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("priv", strEncryptedKey);
-        obj.put("created_time", created);
-        obj.put("addr", strAddress == null ? "" : strAddress);
-        obj.put("label", strLabel == null ? "" : strLabel);
+        if (strAddress == null || "".equals(strAddress)) {
+            // TODO should probably throw an error here and not sync
+            return obj;
+        }
+
+        obj.put("addr", strAddress);
+
+        if (!"".equals(strEncryptedKey)) {
+            obj.put("priv", strEncryptedKey);
+        }
+
         obj.put("tag", tag);
-        obj.put("created_device_version", strCreatedDeviceVersion);
-        obj.put("created_device_name", strCreatedDeviceName);
+
+        if (strLabel != null && !"".equals(strLabel)) {
+            obj.put("label", strLabel);
+        }
+
+        if (created > 0L) {
+            obj.put("created_time", created);
+        }
+
+        if (!"".equals(strCreatedDeviceName)) {
+            obj.put("created_device_name", strCreatedDeviceName);
+        }
+
+        if (!"".equals(strCreatedDeviceVersion)) {
+            obj.put("created_device_version", strCreatedDeviceVersion);
+        }
 
         return obj;
     }
