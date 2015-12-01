@@ -47,7 +47,7 @@ public class Payload {
     private Map<String,PaidTo> paidTo = null;
     private Map<String,Integer> xpub2Account = null;
     private Map<Integer,String> account2Xpub = null;
-    private int iterations = AESUtil.PasswordPBKDF2Iterations;
+
     private boolean isUpgraded = false;
 
     public Payload() {
@@ -251,12 +251,12 @@ public class Payload {
         this.paidTo = paidTo;
     }
 
-    public int getIterations() {
-        return iterations;
+    public int getDoubleEncryptionPbkdf2Iterations() {
+        return options.getIterations();
     }
 
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
+    public void setDoubleEncryptionPbkdf2Iterations(int doubleEncryptionPbkdf2Iterations) {
+        options.setIterations(doubleEncryptionPbkdf2Iterations);
     }
 
     public boolean isDoubleEncrypted() {
@@ -689,7 +689,7 @@ public class Payload {
 
         obj.put("guid", getGuid());
         obj.put("sharedKey", getSharedKey());
-        obj.put("pbkdf2_iterations", iterations);
+        obj.put("pbkdf2_iterations", this.getDoubleEncryptionPbkdf2Iterations());
 
         if(doubleEncryption) {
             obj.put("double_encryption", true);

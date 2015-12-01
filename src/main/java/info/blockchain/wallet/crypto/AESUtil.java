@@ -24,10 +24,9 @@ public class AESUtil	{
 
 //    private static Logger mLogger = LoggerFactory.getLogger(AESUtil.class);
 
-    public static final int DefaultPBKDF2Iterations = 10;
-    public static final int QRCodePBKDF2Iterations = 10;
-    public static final int DoubleEncryptionPBKDF2Iterations = 10;
-    public static final int PasswordPBKDF2Iterations = 5000;
+    // TODO this is set to 1 on iOS
+    public static final int PinPbkdf2Iterations = 5000;
+    public static final int QrCodePbkdf2Iterations = 10;
 
     private static byte[] copyOfRange(byte[] source, int from, int to) {
         byte[] range = new byte[to - from];

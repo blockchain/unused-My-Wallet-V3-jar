@@ -40,6 +40,9 @@ public class PayloadFactory	{
     // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
     private static String cached_payload = null;
 
+    private static final int WalletDefaultPbkdf2Iterations = 5000;
+    public static int WalletPbkdf2Iterations = WalletDefaultPbkdf2Iterations;
+
     private static CharSequenceX strTempPassword =  null;
     private static CharSequenceX strTempDoubleEncryptPassword =  null;
     private static String strCheckSum = null;
@@ -195,7 +198,7 @@ public class PayloadFactory	{
         try {
             String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL,"method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json");
             JSONObject jsonObject = new JSONObject(response);
-            int iterations = AESUtil.PasswordPBKDF2Iterations;
+
             if(jsonObject.has("payload")) {
                 String encrypted_payload = null;
                 JSONObject _jsonObject = null;
@@ -207,7 +210,7 @@ public class PayloadFactory	{
                 }
                 if(_jsonObject != null && _jsonObject.has("payload")) {
                     if(_jsonObject.has("pbkdf2_iterations")) {
-                        iterations = Integer.valueOf(_jsonObject.get("pbkdf2_iterations").toString());
+                        WalletPbkdf2Iterations = Integer.valueOf(_jsonObject.get("pbkdf2_iterations").toString());
                     }
                     if(_jsonObject.has("version")) {
                         version = Double.valueOf(_jsonObject.get("version").toString());
@@ -216,7 +219,7 @@ public class PayloadFactory	{
                 }
                 else {
                     if(jsonObject.has("pbkdf2_iterations")) {
-                        iterations = Integer.valueOf(jsonObject.get("pbkdf2_iterations").toString());
+                        WalletPbkdf2Iterations = Integer.valueOf(jsonObject.get("pbkdf2_iterations").toString());
                     }
                     if(jsonObject.has("version")) {
                         version = Double.valueOf(jsonObject.get("version").toString());
@@ -226,7 +229,7 @@ public class PayloadFactory	{
 
                 String decrypted = null;
                 try {
-                    decrypted = AESUtil.decrypt(encrypted_payload, password, iterations);
+                    decrypted = AESUtil.decrypt(encrypted_payload, password, WalletPbkdf2Iterations);
                 }
                 catch(Exception e) {
                     payload = null;
@@ -243,6 +246,9 @@ public class PayloadFactory	{
                     return null;
                 }
 
+                // Default to wallet pbkdf2 iterations in case the double encryption pbkdf2 iterations is not set in wallet.json > options
+                payload.setDoubleEncryptionPbkdf2Iterations(WalletPbkdf2Iterations);
+
                 try {
                     payload.parseJSON();
                 }
@@ -251,21 +257,17 @@ public class PayloadFactory	{
                     je.printStackTrace();
                     return null;
                 }
-
-                payload.setIterations(iterations);
             }
             else {
 //                Log.i("PayloadFactory", "jsonObject has no payload");
                 return null;
             }
         }
-        catch(JSONException je) {
-            payload = null;
-            je.printStackTrace();
+        catch(JSONException e) {
+            e.printStackTrace();
             return null;
         }
         catch(Exception e) {
-            payload = null;
             e.printStackTrace();
             return null;
         }
@@ -314,10 +316,10 @@ public class PayloadFactory	{
             }
 
             payloadCleartext = payload.dumpJSON().toString();
-            String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), AESUtil.PasswordPBKDF2Iterations);
+            String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), WalletPbkdf2Iterations);
             JSONObject rootObj = new JSONObject();
             rootObj.put("version", 2.0);
-            rootObj.put("pbkdf2_iterations", AESUtil.PasswordPBKDF2Iterations);
+            rootObj.put("pbkdf2_iterations", WalletPbkdf2Iterations);
             rootObj.put("payload", payloadEncrypted);
 
             strCheckSum  = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));

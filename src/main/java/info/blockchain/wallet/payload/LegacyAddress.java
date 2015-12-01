@@ -143,7 +143,7 @@ public class LegacyAddress {
     		Log.i("LegacyAddress double encrypted", PayloadFactory.getInstance().get().getDoublePasswordHash());
     		Log.i("LegacyAddress double encrypted", "" + PayloadFactory.getInstance().get().getIterations());
     		*/
-    		String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey, PayloadFactory.getInstance().get().getSharedKey(), PayloadFactory.getInstance().getTempDoubleEncryptPassword().toString(), PayloadFactory.getInstance().get().getIterations());
+    		String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey, PayloadFactory.getInstance().get().getSharedKey(), PayloadFactory.getInstance().getTempDoubleEncryptPassword().toString(), PayloadFactory.getInstance().get().getDoubleEncryptionPbkdf2Iterations());
 //    		Log.i("LegacyAddress double encrypted", encryptedKey);
         	privBytes = Base58.decode(encryptedKey);
     	}
