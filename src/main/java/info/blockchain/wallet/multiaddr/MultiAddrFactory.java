@@ -580,6 +580,25 @@ public class MultiAddrFactory	{
       }
     }
 
+    public long getLegacyActiveBalance()  {
+
+      if(PayloadFactory.getInstance().get() != null)  {
+        List<String> addrs = PayloadFactory.getInstance().get().getActiveLegacyAddressStrings();
+        long value = 0L;
+
+        for(String addr : addrs) {
+          if(legacy_amounts.containsKey(addr))  {
+            value += legacy_amounts.get(addr);
+          }
+        }
+
+        return value;
+      }
+      else {
+        return 0L;
+      }
+    }
+
     public void setLegacyBalance(long value)  {
         legacy_balance = value;
     }
