@@ -8,7 +8,6 @@ public interface PersistantPrefs {
     public static final String KEY_ENCRYPTED_PASSWORD   = "encrypted_password";
     public static final String KEY_GUID                 = "guid";
     public static final String KEY_SHARED_KEY           = "sharedKey";
-    public static final String KEY_SHARED_KEY_X           = "sharedKeyX";   // encrypted sharedKey
     public static final String KEY_PIN_FAILS            = "pin_fails";
     // public static final String KEY_LOGGED_IN              = "logged_in";
     public static final String KEY_BTC_UNITS            = "btcUnits";
