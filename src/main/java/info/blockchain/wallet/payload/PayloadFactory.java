@@ -318,7 +318,7 @@ public class PayloadFactory	{
             payloadCleartext = payload.dumpJSON().toString();
             String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), WalletPbkdf2Iterations);
             JSONObject rootObj = new JSONObject();
-            rootObj.put("version", 2.0);
+            rootObj.put("version", payload.isUpgraded() ? 3.0 : 2.0);
             rootObj.put("pbkdf2_iterations", WalletPbkdf2Iterations);
             rootObj.put("payload", payloadEncrypted);
 
