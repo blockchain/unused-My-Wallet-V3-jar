@@ -195,9 +195,15 @@ public class PayloadFactory	{
      */
     public Payload get(String guid, String sharedKey, CharSequenceX password) {
 
+        String checksum = null;
+
         try {
             String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL,"method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json");
             JSONObject jsonObject = new JSONObject(response);
+
+            if(jsonObject.has("payload_checksum")) {
+                checksum = jsonObject.get("payload_checksum").toString();
+            }
 
             if(jsonObject.has("payload")) {
                 String encrypted_payload = null;
@@ -272,6 +278,9 @@ public class PayloadFactory	{
             return null;
         }
 
+        if (StringUtils.isNotEmpty(checksum)) {
+            strCheckSum = checksum;
+        }
         return payload;
     }
 
