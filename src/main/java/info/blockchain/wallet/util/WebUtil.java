@@ -51,14 +51,18 @@ public class WebUtil	{
     }
 
     public String postURL(String request, String urlParameters, int requestRetry) throws Exception {
-        return postURLCall(request, urlParameters, requestRetry);
+        return postURLCall(request, urlParameters, requestRetry, "application/x-www-form-urlencoded");
     }
 
     public String postURL(String request, String urlParameters) throws Exception {
-        return postURLCall(request, urlParameters, DefaultRequestRetry);
+        return postURLCall(request, urlParameters, DefaultRequestRetry, "application/x-www-form-urlencoded");
     }
 
-    private  String postURLCall(String request, String urlParameters, int requestRetry) throws Exception {
+    public String postURLJson(String request, String urlParameters) throws Exception {
+        return this.postURLCall(request, urlParameters, 2, "application/json");
+    }
+
+    private  String postURLCall(String request, String urlParameters, int requestRetry, String contentType) throws Exception {
 
         String error = null;
 
@@ -70,7 +74,7 @@ public class WebUtil	{
                 connection.setDoInput(true);
                 connection.setInstanceFollowRedirects(false);
                 connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("Content-Type", contentType);
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("Accept", "application/json");
                 connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
