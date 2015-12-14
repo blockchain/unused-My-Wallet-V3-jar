@@ -1,12 +1,14 @@
 package info.blockchain.wallet.util;
 
 import java.util.regex.Pattern;
+import java.nio.ByteBuffer;
 
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.Base58;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.core.WrongNetworkException;
 
@@ -16,7 +18,7 @@ public class FormatsUtil {
 	private Pattern phonePattern = Pattern.compile("(\\+[1-9]{1}[0-9]{1,2}+|00[1-9]{1}[0-9]{1,2}+)[\\(\\)\\.\\-\\s\\d]{6,16}");
 
 	private static FormatsUtil instance = null;
-	
+
 	private FormatsUtil() { ; }
 
 	public static FormatsUtil getInstance() {
@@ -29,7 +31,7 @@ public class FormatsUtil {
 	}
 
 	public String validateBitcoinAddress(final String address) {
-		
+
 		if(isValidBitcoinAddress(address)) {
 			return address;
 		}
@@ -48,7 +50,7 @@ public class FormatsUtil {
 
 		boolean ret = false;
 		BitcoinURI uri = null;
-		
+
 		try {
 			uri = new BitcoinURI(s);
 			ret = true;
@@ -56,7 +58,7 @@ public class FormatsUtil {
 		catch(BitcoinURIParseException bupe) {
 			ret = false;
 		}
-		
+
 		return ret;
 	}
 
@@ -64,7 +66,7 @@ public class FormatsUtil {
 
 		String ret = null;
 		BitcoinURI uri = null;
-		
+
 		try {
 			uri = new BitcoinURI(s);
 			ret = uri.toString();
@@ -72,7 +74,7 @@ public class FormatsUtil {
 		catch(BitcoinURIParseException bupe) {
 			ret = null;
 		}
-		
+
 		return ret;
 	}
 
@@ -80,7 +82,7 @@ public class FormatsUtil {
 
 		String ret = null;
 		BitcoinURI uri = null;
-		
+
 		try {
 			uri = new BitcoinURI(s);
 			ret = uri.getAddress().toString();
@@ -96,7 +98,7 @@ public class FormatsUtil {
 
 		String ret = null;
 		BitcoinURI uri = null;
-		
+
 		try {
 			uri = new BitcoinURI(s);
 			if(uri.getAmount() != null) {
@@ -117,7 +119,7 @@ public class FormatsUtil {
 
 		boolean ret = false;
 		Address addr = null;
-		
+
 		try {
 			addr = new Address(MainNetParams.get(), address);
 			if(addr != null) {
@@ -153,10 +155,10 @@ public class FormatsUtil {
 	}
 
 	private String uri2BitcoinAddress(final String address) {
-		
+
 		String ret = null;
 		BitcoinURI uri = null;
-		
+
 		try {
 			uri = new BitcoinURI(address);
 			ret = uri.getAddress().toString();
@@ -164,8 +166,44 @@ public class FormatsUtil {
 		catch(BitcoinURIParseException bupe) {
 			ret = null;
 		}
-		
+
 		return ret;
+	}
+
+	public boolean isValidXpub(String xpub){
+
+			try {
+					byte[] xpubBytes = Base58.decodeChecked(xpub);
+
+					ByteBuffer byteBuffer = ByteBuffer.wrap(xpubBytes);
+					if(byteBuffer.getInt() != 0x0488B21E)   {
+							throw new AddressFormatException("invalid version: " + xpub);
+					}
+					else	{
+
+							byte[] chain = new byte[32];
+							byte[] pub = new byte[33];
+							// depth:
+							byteBuffer.get();
+							// parent fingerprint:
+							byteBuffer.getInt();
+							// child no.
+							byteBuffer.getInt();
+							byteBuffer.get(chain);
+							byteBuffer.get(pub);
+
+							ByteBuffer pubBytes = ByteBuffer.wrap(pub);
+							int firstByte = pubBytes.get();
+							if(firstByte == 0x02 || firstByte == 0x03){
+									return true;
+							}else{
+									throw new AddressFormatException("invalid format: " + xpub);
+							}
+					}
+			}
+			catch(Exception e)	{
+					return false;
+			}
 	}
 
 }
