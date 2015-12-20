@@ -51,6 +51,7 @@ public class Payload {
     private boolean isUpgraded = false;
 
     public int stepNumber = 0;
+    public String lastErrorMessage;
 
     public Payload() {
         legacyAddresses = new ArrayList<LegacyAddress>();

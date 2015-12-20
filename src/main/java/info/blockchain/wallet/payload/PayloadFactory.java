@@ -238,17 +238,17 @@ public class PayloadFactory	{
                     decrypted = AESUtil.decrypt(encrypted_payload, password, WalletPbkdf2Iterations);
                 }
                 catch(Exception e) {
-                    payload = null;
+                    payload.lastErrorMessage = e.getMessage();
                     e.printStackTrace();
                     return null;
                 }
                 if(decrypted == null) {
-                    payload = null;
+                    payload.lastErrorMessage = "Empty after decrypt";
                     return null;
                 }
                 payload = new Payload(decrypted);
                 if(payload.getJSON() == null) {
-                    payload = null;
+                    payload.lastErrorMessage = "Can't parse JSON";
                     return null;
                 }
 
@@ -259,6 +259,7 @@ public class PayloadFactory	{
                     payload.parseJSON();
                 }
                 catch(JSONException je) {
+                    payload.lastErrorMessage = je.getMessage();
                     je.printStackTrace();
                     return null;
                 }
@@ -269,10 +270,12 @@ public class PayloadFactory	{
             }
         }
         catch(JSONException e) {
+            payload.lastErrorMessage = e.getMessage();
             e.printStackTrace();
             return null;
         }
         catch(Exception e) {
+            payload.lastErrorMessage = e.getMessage();
             e.printStackTrace();
             return null;
         }
