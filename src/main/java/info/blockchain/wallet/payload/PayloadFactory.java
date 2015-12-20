@@ -259,7 +259,6 @@ public class PayloadFactory	{
                     payload.parseJSON();
                 }
                 catch(JSONException je) {
-                    payload = null;
                     je.printStackTrace();
                     return null;
                 }

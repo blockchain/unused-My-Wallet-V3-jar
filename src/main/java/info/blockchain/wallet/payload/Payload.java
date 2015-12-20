@@ -50,6 +50,8 @@ public class Payload {
 
     private boolean isUpgraded = false;
 
+    public int stepNumber = 0;
+
     public Payload() {
         legacyAddresses = new ArrayList<LegacyAddress>();
         addressBookEntries = new ArrayList<AddressBookEntry>();
@@ -317,6 +319,8 @@ public class Payload {
             doubleEncryption = jsonObject.has("double_encryption") ? (Boolean)jsonObject.get("double_encryption") : false;
             strDoublePWHash = jsonObject.has("dpasswordhash") ? (String)jsonObject.get("dpasswordhash") : "";
 
+            stepNumber = 1;
+
             //
             // "options" or "wallet_options" ?
             //
@@ -347,6 +351,8 @@ public class Payload {
                 }
             }
 
+            stepNumber = 2;
+
             if(jsonObject.has("tx_notes"))  {
                 JSONObject tx_notes = (JSONObject)jsonObject.get("tx_notes");
                 Map<String,String> notes = new HashMap<String,String>();
@@ -357,6 +363,8 @@ public class Payload {
                 }
                 setNotes(notes);
             }
+
+            stepNumber = 3;
 
             if(jsonObject.has("tx_tags"))  {
                 JSONObject tx_tags = (JSONObject)jsonObject.get("tx_tags");
@@ -374,6 +382,8 @@ public class Payload {
                 setTags(_tags);
             }
 
+            stepNumber = 4;
+
             if(jsonObject.has("tag_names"))  {
                 JSONArray tnames = (JSONArray)jsonObject.get("tag_names");
                 Map<Integer,String> _tnames = new HashMap<Integer,String>();
@@ -382,6 +392,8 @@ public class Payload {
                 }
                 setTagNames(_tnames);
             }
+
+            stepNumber = 5;
 
             if(jsonObject.has("paidTo"))  {
                 JSONObject paid2 = (JSONObject)jsonObject.get("paidTo");
@@ -398,6 +410,8 @@ public class Payload {
                 }
                 setPaidTo(pto);
             }
+
+            stepNumber = 6;
 
             if(jsonObject.has("hd_wallets"))  {
                 isUpgraded = true;
@@ -535,6 +549,8 @@ public class Payload {
                 isUpgraded = false;
             }
 
+            stepNumber = 7;
+
             if(jsonObject.has("keys"))  {
                 JSONArray keys = (JSONArray)jsonObject.get("keys");
                 if(keys != null && keys.length() > 0)  {
@@ -544,7 +560,13 @@ public class Payload {
                     LegacyAddress legacyAddress = null;
                     for(int i = 0; i < keys.length(); i++)  {
                         key = (JSONObject)keys.get(i);
+
+                        stepNumber = 101;
+
                         addr = (String)key.get("addr");
+
+                        stepNumber = 102;
+
                         if(addr != null && !addr.equals("null") && !seenAddrs.contains(addr))  {
 
                             String priv = null;
@@ -567,9 +589,13 @@ public class Payload {
                               priv = "";
                             }
 
+                            stepNumber = 103;
+
                             if(priv.length() == 0)  {
                                 watchOnly = true;
                             }
+
+                            stepNumber = 104;
 
                             if(key.has("created_time"))  {
                                 try {
@@ -583,6 +609,8 @@ public class Payload {
                                 created_time = 0L;
                             }
 
+                            stepNumber = 105;
+
                             try {
                               if(key.has("label"))  {
                                 label = key.getString("label");
@@ -594,6 +622,8 @@ public class Payload {
                             catch(Exception e) {
                               label = "";
                             }
+
+                            stepNumber = 106;
 
                             if(key.has("tag"))  {
                               try {
@@ -607,6 +637,8 @@ public class Payload {
                                 tag = 0L;
                             }
 
+                            stepNumber = 107;
+
                             try {
                               if(key.has("created_device_name"))  {
                                 created_device_name = key.getString("created_device_name");
@@ -618,6 +650,8 @@ public class Payload {
                             catch(Exception e) {
                               created_device_name = "";
                             }
+
+                            stepNumber = 108;
 
                             try {
                               if(key.has("created_device_version"))  {
@@ -631,29 +665,49 @@ public class Payload {
                               created_device_version = "";
                             }
 
+                            stepNumber = 109;
+
                             legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
                             legacyAddresses.add(legacyAddress);
                             seenAddrs.add(addr);
+
+                            stepNumber = 110;
                         }
                     }
                 }
             }
 
+            stepNumber = 8;
+
             if(jsonObject.has("address_book"))  {
+
+                stepNumber = 201;
+
                 JSONArray address_book = (JSONArray)jsonObject.get("address_book");
+
+                stepNumber = 202;
+
                 if(address_book != null && address_book.length() > 0)  {
                     JSONObject addr = null;
                     AddressBookEntry addr_entry = null;
                     for(int i = 0; i < address_book.length(); i++)  {
                         addr = (JSONObject)address_book.get(i);
+
+                        stepNumber = 202;
+
                         addr_entry = new AddressBookEntry(
                                 addr.has("addr") ? (String)addr.get("addr") : null,
                                 addr.has("label") ? (String)addr.get("label") : null
                         );
+
+                        stepNumber = 203;
+
                         addressBookEntries.add(addr_entry);
                     }
                 }
             }
+
+            stepNumber = 9;
 
         }
 
