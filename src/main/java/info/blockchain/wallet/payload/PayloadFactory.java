@@ -243,8 +243,19 @@ public class PayloadFactory	{
                     return null;
                 }
                 if(decrypted == null) {
-                    payload.lastErrorMessage = "Empty after decrypt";
-                    return null;
+                    try {
+                        // v1 wallet fixed PBKDF2 iterations at 10
+                        decrypted = AESUtil.decrypt(encrypted_payload, password, 10);
+                    }
+                    catch(Exception e) {
+                        payload.lastErrorMessage = e.getMessage();
+                        e.printStackTrace();
+                        return null;
+                    }
+                    if(decrypted == null) {
+                        payload.lastErrorMessage = "Empty after decrypt";
+                        return null;
+                    }
                 }
                 payload = new Payload(decrypted);
                 if(payload.getJSON() == null) {
