@@ -11,12 +11,12 @@ public class PaidTo {
 
     private String strEmail = null;
     private String strMobile = null;
-    private String strRedeemedAt = null;
+    private Integer strRedeemedAt = null;
     private String strAddress = null;
 
     public PaidTo() { ; }
 
-    public PaidTo(String email, String mobile, String redeemed, String address) {
+    public PaidTo(String email, String mobile, Integer redeemed, String address) {
         this.strEmail = email;
         this.strMobile = mobile;
         this.strRedeemedAt = redeemed;
@@ -39,11 +39,11 @@ public class PaidTo {
         this.strMobile = strMobile;
     }
 
-    public String getRedeemedAt() {
+    public Integer getRedeemedAt() {
         return strRedeemedAt;
     }
 
-    public void setRedeemedAt(String strRedeemedAt) {
+    public void setRedeemedAt(Integer strRedeemedAt) {
         this.strRedeemedAt = strRedeemedAt;
     }
 

@@ -403,10 +403,10 @@ public class Payload {
                     String key = keys.next();
                     PaidTo p = new PaidTo();
                     JSONObject t = (JSONObject)paid2.get(key);
-                    p.setEmail((String)t.get("email"));
-                    p.setMobile((String)t.get("mobile"));
-                    p.setRedeemedAt((String)t.get("redeemedAt"));
-                    p.setAddress((String)t.get("address"));
+                    p.setEmail(t.isNull("email") ? null : t.optString("email", null));
+                    p.setMobile(t.isNull("mobile") ? null : t.optString("mobile", null));
+                    p.setRedeemedAt(t.isNull("redeemedAt") ? null : (Integer)t.get("redeemedAt"));
+                    p.setAddress(t.isNull("address") ? null : t.optString("address", null));
                     pto.put(key, p);
                 }
                 setPaidTo(pto);
