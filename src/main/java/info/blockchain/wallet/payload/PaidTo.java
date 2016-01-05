@@ -59,11 +59,26 @@ public class PaidTo {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("email", strEmail);
-        obj.put("mobile", strMobile);
-        obj.put("redeemedAt", strRedeemedAt);
-        obj.put("address", strAddress);
-
+        if ((strEmail != null) && !"".equals(strEmail)) {
+            obj.put("email", strEmail);
+        }else{
+            obj.put("email", JSONObject.NULL);
+        }
+        if ((strMobile != null) && !"".equals(strMobile)) {
+            obj.put("mobile", strMobile);
+        }else{
+            obj.put("mobile", JSONObject.NULL);
+        }
+        if ((strRedeemedAt != null) && !"".equals(strRedeemedAt)) {
+            obj.put("redeemedAt", strRedeemedAt);
+        }else{
+            obj.put("redeemedAt", JSONObject.NULL);
+        }
+        if ((strAddress != null) && !"".equals(strAddress)) {
+            obj.put("address", strAddress);
+        }else{
+            obj.put("address", JSONObject.NULL);
+        }
         return obj;
     }
 

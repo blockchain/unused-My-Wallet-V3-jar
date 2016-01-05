@@ -342,6 +342,14 @@ public class Payload {
                     long val = optionsObj.getLong("fee_per_kb");
                     options.setFeePerKB(val);
                 }
+                if(optionsObj.has("logout_time"))  {
+                    long val = optionsObj.getLong("logout_time");
+                    options.setLogoutTime(val);
+                }
+                if(optionsObj.has("html5_notifications"))  {
+                    boolean val = optionsObj.getBoolean("html5_notifications");
+                    options.setHtml5Notifications(val);
+                }
                 if(optionsObj.has("additional_seeds"))  {
                     JSONArray seeds = (JSONArray)optionsObj.get("additional_seeds");
                     List<String> additionalSeeds = new ArrayList<String>();

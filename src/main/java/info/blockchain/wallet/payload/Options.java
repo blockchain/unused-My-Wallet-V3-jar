@@ -16,6 +16,7 @@ public class Options {
     private long logout_time = 600000L;
     private List<String> additionalSeeds = null;
     private boolean enable_multiple_accounts = true;
+    private boolean html5_notifications = false;
 
     public Options() { additionalSeeds = new ArrayList<String>(); }
 
@@ -58,6 +59,13 @@ public class Options {
     public void setEnablMultipleAccounts(boolean enable) {
         this.enable_multiple_accounts = enable;
     }
+    public boolean isHtml5Notifications() {
+        return html5_notifications;
+    }
+
+    public void setHtml5Notifications(boolean enable) {
+        this.html5_notifications = enable;
+    }
 
     public JSONObject dumpJSON() throws JSONException	 {
 
@@ -67,6 +75,7 @@ public class Options {
         obj.put("fee_per_kb", fee_per_kb);
         obj.put("logout_time", logout_time);
         obj.put("enable_multiple_accounts", enable_multiple_accounts);
+        obj.put("html5_notifications", html5_notifications);
 
         JSONArray seeds = new JSONArray();
         for(String seed : additionalSeeds) {

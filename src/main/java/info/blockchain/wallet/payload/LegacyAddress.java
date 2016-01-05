@@ -190,6 +190,8 @@ public class LegacyAddress {
 
         if (!"".equals(strEncryptedKey)) {
             obj.put("priv", strEncryptedKey);
+        }else{
+            obj.put("priv", JSONObject.NULL);
         }
 
         obj.put("tag", tag);
@@ -198,16 +200,22 @@ public class LegacyAddress {
             obj.put("label", strLabel);
         }
 
-        if (created > 0L) {
-            obj.put("created_time", created);
+        if (created >= 0L) {
+          obj.put("created_time", created);
+        }else{
+          obj.put("created_time", 0L);
         }
 
         if (!"".equals(strCreatedDeviceName)) {
             obj.put("created_device_name", strCreatedDeviceName);
+        }else{
+            obj.put("created_device_name", JSONObject.NULL);
         }
 
         if (!"".equals(strCreatedDeviceVersion)) {
             obj.put("created_device_version", strCreatedDeviceVersion);
+        }else{
+            obj.put("created_device_version", JSONObject.NULL);
         }
 
         return obj;
