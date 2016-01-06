@@ -27,19 +27,19 @@ public class PasswordUtil {
 		if(instance == null) {
 
 			patternsWeight = new HashMap<Pattern,Double>();
-			patternsWeight.put(Pattern.compile("^\\d+$"), WEIGHT_COMMON_PATTERN);							// all digits
-			patternsWeight.put(Pattern.compile("^[a-z]+\\d$"), WEIGHT_COMMON_PATTERN);						// all lower then 1 digit
-			patternsWeight.put(Pattern.compile("^[A-Z]+\\d$"), WEIGHT_COMMON_PATTERN);						// all upper then 1 digit
-			patternsWeight.put(Pattern.compile("^[a-zA-Z]+\\d$"), WEIGHT_BAD_PATTERN);						// all alpha then 1 digit
-			patternsWeight.put(Pattern.compile("^[a-z]+\\d+$"), WEIGHT_BAD_PATTERN);						// all lower then digits
-			patternsWeight.put(Pattern.compile("^[a-z]+$"), WEIGHT_COMMON_PATTERN);							// all lower
-			patternsWeight.put(Pattern.compile("^[A-Z]+$"), WEIGHT_COMMON_PATTERN);							// all upper
-			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+$"), WEIGHT_COMMON_PATTERN);					// only one upper at start
+			patternsWeight.put(Pattern.compile("^\\d+$"), WEIGHT_BAD_PATTERN);							// all digits
+			patternsWeight.put(Pattern.compile("^[a-z]+\\d$"), WEIGHT_BAD_PATTERN);						// all lower then 1 digit
+			patternsWeight.put(Pattern.compile("^[A-Z]+\\d$"), WEIGHT_BAD_PATTERN);						// all upper then 1 digit
+			patternsWeight.put(Pattern.compile("^[a-zA-Z]+\\d$"), WEIGHT_COMMON_PATTERN);						// all alpha then 1 digit
+			patternsWeight.put(Pattern.compile("^[a-z]+\\d+$"), WEIGHT_COMMON_PATTERN);						// all lower then digits
+			patternsWeight.put(Pattern.compile("^[a-z]+$"), WEIGHT_BAD_PATTERN);							// all lower
+			patternsWeight.put(Pattern.compile("^[A-Z]+$"), WEIGHT_BAD_PATTERN);							// all upper
+			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+$"), WEIGHT_BAD_PATTERN);					// only one upper at start
 			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+\\d$"), WEIGHT_BAD_PATTERN);					// only one upper at start followed by 1 digit
 			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+\\d+$"), WEIGHT_COMMON_PATTERN);				// only one upper at start followed by digits
-			patternsWeight.put(Pattern.compile("^[a-z]+[._!\\- @*#]$"), WEIGHT_COMMON_PATTERN);				// all lower followed by 1 special character
-			patternsWeight.put(Pattern.compile("^[A-Z]+[._!\\- @*#]$"), WEIGHT_COMMON_PATTERN);				// all upper followed by 1 special character
-			patternsWeight.put(Pattern.compile("^[a-zA-Z]+[._!\\- @*#]$"), WEIGHT_BAD_PATTERN);				// all alpha followed by 1 special character
+			patternsWeight.put(Pattern.compile("^[a-z]+[._!\\- @*#]$"), WEIGHT_BAD_PATTERN);				// all lower followed by 1 special character
+			patternsWeight.put(Pattern.compile("^[A-Z]+[._!\\- @*#]$"), WEIGHT_BAD_PATTERN);				// all upper followed by 1 special character
+			patternsWeight.put(Pattern.compile("^[a-zA-Z]+[._!\\- @*#]$"), WEIGHT_COMMON_PATTERN);				// all alpha followed by 1 special character
 			patternsWeight.put(Pattern.compile(
 								"[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
 								"\\@" +
@@ -48,7 +48,7 @@ public class PasswordUtil {
 								"\\." +
 								"[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
 								")+"
-								), WEIGHT_COMMON_PATTERN);													// email address
+								), WEIGHT_BAD_PATTERN);													// email address
 			patternsWeight.put(Pattern.compile("_^(?:(?:https?|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?!10(?:\\.\\d{1,3}){3})(?!127(?:\\.\\d{1,3}){3})(?!169\\.254(?:\\.\\d{1,3}){2})(?!192\\.168(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,})))(?::\\d{2,5})?(?:/[^\\s]*)?$_iuS"), WEIGHT_COMMON_PATTERN);									// web url
 
 			patternsQuality = new HashMap<Pattern, Double>();
