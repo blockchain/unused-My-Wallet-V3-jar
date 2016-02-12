@@ -172,18 +172,19 @@ public class SendCoins	{
         BigInteger change = valueSelected.subtract(outputValueSum).subtract(fee);
         // Now add the change if there is any
         if (change.compareTo(BigInteger.ZERO) > 0) {
-            if(change.compareTo(bDust) <= 0)    {
-                throw new Exception("Dust change amount");
+
+            // Consume the change if it would create a very small none standard output
+            if(change.compareTo(bDust) >= 0)    {
+                BitcoinScript change_script;
+                if (changeAddress != null) {
+                    change_script = BitcoinScript.createSimpleOutBitcoinScript(new BitcoinAddress(changeAddress));
+                }
+                else {
+                    throw new Exception("Change address null");
+                }
+                TransactionOutput change_output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(change.longValue()), change_script.getProgram());
+                outputs.add(change_output);
             }
-            BitcoinScript change_script;
-            if (changeAddress != null) {
-                change_script = BitcoinScript.createSimpleOutBitcoinScript(new BitcoinAddress(changeAddress));
-            }
-            else {
-                throw new Exception("Change address null");
-            }
-            TransactionOutput change_output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(change.longValue()), change_script.getProgram());
-            outputs.add(change_output);
         }
 
         //
