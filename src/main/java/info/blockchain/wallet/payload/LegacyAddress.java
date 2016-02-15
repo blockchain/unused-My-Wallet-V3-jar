@@ -1,15 +1,12 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
-//import libsrc.org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
-
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import java.math.BigInteger;
 
@@ -130,6 +127,9 @@ public class LegacyAddress {
     public ECKey getECKey() throws AddressFormatException {
 
     	byte[] privBytes = null;
+
+        if(this.strEncryptedKey == null || this.strEncryptedKey.isEmpty())
+            return null;
 
     	if(!PayloadFactory.getInstance().get().isDoubleEncrypted()) {
         	privBytes = Base58.decode(this.strEncryptedKey);
