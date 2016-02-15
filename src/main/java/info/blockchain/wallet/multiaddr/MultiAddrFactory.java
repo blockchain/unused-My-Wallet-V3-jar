@@ -1,21 +1,18 @@
 package info.blockchain.wallet.multiaddr;
 
+import info.blockchain.wallet.payload.PayloadFactory;
+import info.blockchain.wallet.payload.Tx;
+import info.blockchain.wallet.payload.TxMostRecentDateComparator;
+import info.blockchain.wallet.util.WebUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import info.blockchain.wallet.payload.PayloadFactory;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Tx;
-import info.blockchain.wallet.payload.TxMostRecentDateComparator;
-import info.blockchain.wallet.util.WebUtil;
 
 public class MultiAddrFactory	{
 
@@ -389,6 +386,7 @@ public class MultiAddrFactory	{
                     String hash = null;
                     String addr = null;
                     boolean isMove = false;
+                    boolean isWatchOnly = false;
                     ArrayList<String> ownInput = new ArrayList<String>();
                     ArrayList<String> ownOutput = new ArrayList<String>();
 
@@ -413,6 +411,7 @@ public class MultiAddrFactory	{
                     }
 
                     List<String> ownLegacyAddresses = PayloadFactory.getInstance().get().getLegacyAddressStrings(PayloadFactory.NORMAL_ADDRESS);
+                    List<String> watchOnlyLegacyAddresses = PayloadFactory.getInstance().get().getWatchOnlyAddressStrings();
 
                     if(txObj.has("inputs"))  {
                         JSONArray inputArray = (JSONArray)txObj.get("inputs");
@@ -433,6 +432,10 @@ public class MultiAddrFactory	{
                                         ownInput.add(addr);
                                         amountListIn.add(amountInput);
                                     }
+                                }
+
+                                if(watchOnlyLegacyAddresses.contains(addr)){
+                                    isWatchOnly = true;
                                 }
                             }
                         }
@@ -456,6 +459,10 @@ public class MultiAddrFactory	{
                                 }
                             } else {
                                 isMove = false; //one foreign address is enough to not call it move anymore
+                            }
+
+                            if(watchOnlyLegacyAddresses.contains(addr)){
+                                isWatchOnly = true;
                             }
                         }
                     }
@@ -495,6 +502,11 @@ public class MultiAddrFactory	{
                         if(containedLegacyTx == null) {
                             containedLegacyTx = new ArrayList<Tx>();
                         }
+
+                        if(isWatchOnly) {
+                            tx.setIsWatchOnly(true);
+                        }
+
                         containedLegacyTx.add(tx);
                         address_legacy_txs.put(address, containedLegacyTx);
                     }
@@ -534,6 +546,11 @@ public class MultiAddrFactory	{
                         } else {
                             tx = new Tx(hash, "", amount > 0L ? RECEIVED : SENT, amount, ts, new HashMap<Integer, String>());
                         }
+
+                        if(isWatchOnly) {
+                            tx.setIsWatchOnly(true);
+                        }
+
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
                         legacy_txs.add(tx);
                     }

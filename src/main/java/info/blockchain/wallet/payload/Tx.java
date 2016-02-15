@@ -12,6 +12,7 @@ public class Tx {
     private Map<Integer,String> tags = null;
     private boolean isMove = false;
     private long confirmations = 0L;
+    private boolean isWatchOnly = false;
 
     public Tx(String hash, String note, String direction, double amount, long date, Map<Integer,String> tags) {
         strHash = hash;
@@ -94,4 +95,11 @@ public class Tx {
         this.confirmations = confirmations;
     }
 
+    public void setIsWatchOnly(boolean isWatchOnly) {
+        this.isWatchOnly = isWatchOnly;
+    }
+
+    public boolean isWatchOnly() {
+        return isWatchOnly;
+    }
 }

@@ -1,5 +1,6 @@
 package info.blockchain.wallet.payload;
 
+import org.bitcoinj.core.AddressFormatException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -159,6 +160,22 @@ public class Payload {
         List<String> addrs = new ArrayList<String>();
         for(LegacyAddress legacyAddress : legacyAddresses) {
             addrs.add(legacyAddress.getAddress());
+        }
+
+        return addrs;
+    }
+
+    public List<String> getWatchOnlyAddressStrings() {
+
+        List<String> addrs = new ArrayList<String>();
+        for(LegacyAddress legacyAddress : legacyAddresses) {
+            try {
+                if(legacyAddress.getPrivateKey() == null || legacyAddress.getPrivateKey().isEmpty()) {
+                    addrs.add(legacyAddress.getAddress());
+                }
+            } catch (AddressFormatException e) {
+                e.printStackTrace();
+            }
         }
 
         return addrs;
