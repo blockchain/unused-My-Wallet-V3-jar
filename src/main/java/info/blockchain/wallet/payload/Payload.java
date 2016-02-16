@@ -169,12 +169,8 @@ public class Payload {
 
         List<String> addrs = new ArrayList<String>();
         for(LegacyAddress legacyAddress : legacyAddresses) {
-            try {
-                if(legacyAddress.getPrivateKey() == null || legacyAddress.getPrivateKey().isEmpty()) {
-                    addrs.add(legacyAddress.getAddress());
-                }
-            } catch (AddressFormatException e) {
-                e.printStackTrace();
+            if (legacyAddress.isWatchOnly()) {
+                addrs.add(legacyAddress.getAddress());
             }
         }
 
