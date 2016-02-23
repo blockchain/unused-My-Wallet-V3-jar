@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class MultiAddrFactory	{
+public class MultiAddrFactory   {
 
     private static long legacy_balance = 0L;
     private static long xpub_balance = 0L;
@@ -34,7 +34,7 @@ public class MultiAddrFactory	{
 
 //    private static Logger mLogger = LoggerFactory.getLogger(MultiAddrFactory.class);
 
-    private MultiAddrFactory()	{ ; }
+    private MultiAddrFactory()  { ; }
 
     public static final String RECEIVED = "RECEIVED";
     public static final String SENT = "SENT";
@@ -158,6 +158,8 @@ public class MultiAddrFactory	{
                 }
             }
 
+            List<String> ownLegacyAddresses = PayloadFactory.getInstance().get().getLegacyAddressStrings(PayloadFactory.NORMAL_ADDRESS);
+
             if(jsonObject.has("txs"))  {
 
                 xpub_txs = new HashMap<String,List<Tx>>();
@@ -211,6 +213,12 @@ public class MultiAddrFactory	{
                         else  {
                             o_addr = (String)prevOutObj.get("addr");
                         }
+
+                        if(ownLegacyAddresses.contains((String) prevOutObj.get("addr"))){
+                            isMove = true;
+                            move_amount = amount;
+                        }
+
                         inputs_amount += prevOutObj.getLong("value");
                     }
 
@@ -252,7 +260,17 @@ public class MultiAddrFactory	{
                         else  {
                             o_addr = (String)outObj.get("addr");
                         }
+
+                        //If move from hd to legacy
+                        if(ownLegacyAddresses.contains((String) outObj.get("addr"))){
+                            isMove = true;
+                        }
+
                         outputs_amount += outObj.getLong("value");
+                    }
+
+                    if(isMove){
+                        move_amount = outputs_amount;
                     }
 
                     if(Math.abs(inputs_amount - outputs_amount) == Math.abs(amount))  {
@@ -273,19 +291,19 @@ public class MultiAddrFactory	{
 
                         if(isMove)  {
                             if(!xpub_txs.containsKey(mf_addr))  {
-                              xpub_txs.put(mf_addr, new ArrayList<Tx>());
+                                xpub_txs.put(mf_addr, new ArrayList<Tx>());
                             }
                             xpub_txs.get(mf_addr).add(tx);
 
                             if(!xpub_txs.containsKey(mt_addr))  {
-                              xpub_txs.put(mt_addr, new ArrayList<Tx>());
+                                xpub_txs.put(mt_addr, new ArrayList<Tx>());
                             }
                             xpub_txs.get(mt_addr).add(tx);
 
                         }
                         else  {
                             if(!xpub_txs.containsKey(addr))  {
-                              xpub_txs.put(addr, new ArrayList<Tx>());
+                                xpub_txs.put(addr, new ArrayList<Tx>());
                             }
                             xpub_txs.get(addr).add(tx);
 
@@ -382,6 +400,7 @@ public class MultiAddrFactory	{
                     txObj = (JSONObject)txArray.get(i);
                     long height = 0L;
                     long amount = 0L;
+                    long move_amount = 0l;
                     long ts = 0L;
                     String hash = null;
                     String addr = null;
@@ -421,7 +440,9 @@ public class MultiAddrFactory	{
                             if(inputObj.has("prev_out"))  {
                                 JSONObject prevOutObj = (JSONObject)inputObj.get("prev_out");
                                 addr = (String)prevOutObj.get("addr");
-                                if(ownLegacyAddresses.contains(addr))  {
+
+                                //If input is own legacy or hd address = move
+                                if(ownLegacyAddresses.contains(addr) || own_hd_addresses.contains(addr))  {
                                     isMove = true;
 
                                     long amountInput = prevOutObj.getLong("value");
@@ -447,9 +468,12 @@ public class MultiAddrFactory	{
                         for(int j = 0; j < outArray.length(); j++)  {
                             outObj = (JSONObject)outArray.get(j);
                             addr = (String)outObj.get("addr");
-                            if(ownLegacyAddresses.contains(addr)) {
+
+                            //If output is own legacy or hd address = move
+                            if(ownLegacyAddresses.contains(addr) || own_hd_addresses.contains(addr)) {
 
                                 long amountOutput = outObj.getLong("value");
+                                move_amount += amountOutput;
                                 if(ownOutput.contains(addr)) {
                                     int index=ownOutput.indexOf(addr);
                                     amountListOut.set(index, amountListOut.get(index)+amountOutput);
@@ -534,6 +558,11 @@ public class MultiAddrFactory	{
                         if(containedLegacyTx == null) {
                             containedLegacyTx = new ArrayList<Tx>();
                         }
+
+                        if(watchOnlyLegacyAddresses.contains(address)){
+                            tx.setIsWatchOnly(true);
+                        }
+
                         containedLegacyTx.add(tx);
                         address_legacy_txs.put(address, containedLegacyTx);
                     }
@@ -541,7 +570,7 @@ public class MultiAddrFactory	{
                     //Also make sure to state the wallet impact of this transaction in the general view
                     if(ownInput.size() > 0 || ownOutput.size() > 0) {
                         if (isMove) {
-                            tx = new Tx(hash, "", MOVED, amount, ts, new HashMap<Integer, String>());
+                            tx = new Tx(hash, "", MOVED, move_amount, ts, new HashMap<Integer, String>());
                             tx.setIsMove(true);
                         } else {
                             tx = new Tx(hash, "", amount > 0L ? RECEIVED : SENT, amount, ts, new HashMap<Integer, String>());
@@ -580,40 +609,40 @@ public class MultiAddrFactory	{
 
     public long getLegacyBalance(long address_type)  {
 
-      if(PayloadFactory.getInstance().get() != null)  {
-        List<String> addrs = PayloadFactory.getInstance().get().getLegacyAddressStrings(address_type);
-        long value = 0L;
+        if(PayloadFactory.getInstance().get() != null)  {
+            List<String> addrs = PayloadFactory.getInstance().get().getLegacyAddressStrings(address_type);
+            long value = 0L;
 
-        for(String addr : addrs) {
-          if(legacy_amounts.containsKey(addr))  {
-            value += legacy_amounts.get(addr);
-          }
+            for(String addr : addrs) {
+                if(legacy_amounts.containsKey(addr))  {
+                    value += legacy_amounts.get(addr);
+                }
+            }
+
+            return value;
         }
-
-        return value;
-      }
-      else {
-        return 0L;
-      }
+        else {
+            return 0L;
+        }
     }
 
     public long getLegacyActiveBalance()  {
 
-      if(PayloadFactory.getInstance().get() != null)  {
-        List<String> addrs = PayloadFactory.getInstance().get().getActiveLegacyAddressStrings();
-        long value = 0L;
+        if(PayloadFactory.getInstance().get() != null)  {
+            List<String> addrs = PayloadFactory.getInstance().get().getActiveLegacyAddressStrings();
+            long value = 0L;
 
-        for(String addr : addrs) {
-          if(legacy_amounts.containsKey(addr))  {
-            value += legacy_amounts.get(addr);
-          }
+            for(String addr : addrs) {
+                if(legacy_amounts.containsKey(addr))  {
+                    value += legacy_amounts.get(addr);
+                }
+            }
+
+            return value;
         }
-
-        return value;
-      }
-      else {
-        return 0L;
-      }
+        else {
+            return 0L;
+        }
     }
 
     public void setLegacyBalance(long value)  {
