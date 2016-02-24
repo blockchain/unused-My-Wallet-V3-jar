@@ -205,18 +205,22 @@ public class MultiAddrFactory   {
                             JSONObject xpubObj = (JSONObject)prevOutObj.get("xpub");
                             addr = (String)xpubObj.get("m");
                             mf_addr = addr;
-                            if(prevOutObj.has("addr") && !own_hd_addresses.contains(prevOutObj.has("addr")))  {
+                            if(prevOutObj.has("addr") && !own_hd_addresses.contains(prevOutObj.get("addr")))  {
                                 own_hd_addresses.add((String)prevOutObj.get("addr"));
                                 address_2_xpub.put((String)prevOutObj.get("addr"), addr);
                             }
                         }
                         else  {
                             o_addr = (String)prevOutObj.get("addr");
-                        }
 
-                        if(ownLegacyAddresses.contains((String) prevOutObj.get("addr"))){
-                            isMove = true;
-                            move_amount = amount;
+                            //(Legacy to HD transfer check)
+                            //If contained in our own legacy addresses - it is a move
+                            //We still need to calculate the move amount below
+                            if(ownLegacyAddresses.contains(o_addr)){
+                                mf_addr = o_addr;
+                                isMove = true;
+                                move_amount = amount;
+                            }
                         }
 
                         inputs_amount += prevOutObj.getLong("value");
@@ -235,7 +239,7 @@ public class MultiAddrFactory   {
                                 move_amount = outObj.getLong("value");
                                 mt_addr = addr;
                             }
-                            if(outObj.has("addr") && !own_hd_addresses.contains(outObj.has("addr")))  {
+                            if(outObj.has("addr") && !own_hd_addresses.contains(outObj.get("addr")))  {
                                 own_hd_addresses.add((String)outObj.get("addr"));
                                 address_2_xpub.put((String)outObj.get("addr"), addr);
                             }
@@ -259,18 +263,17 @@ public class MultiAddrFactory   {
                         }
                         else  {
                             o_addr = (String)outObj.get("addr");
-                        }
-
-                        //If move from hd to legacy
-                        if(ownLegacyAddresses.contains((String) outObj.get("addr"))){
-                            isMove = true;
+                            //(HD to Legacy transfer check)
+                            //if !outObj.has("xpub") - this means we are not receiving to own HD
+                            //If contained in our own legacy addresses (Sent from HD to Legacy)
+                            if(ownLegacyAddresses.contains(o_addr)){
+                                isMove = true;
+                                mt_addr = o_addr;
+                                move_amount += outObj.getLong("value");
+                            }
                         }
 
                         outputs_amount += outObj.getLong("value");
-                    }
-
-                    if(isMove){
-                        move_amount = outputs_amount;
                     }
 
                     if(Math.abs(inputs_amount - outputs_amount) == Math.abs(amount))  {
@@ -403,7 +406,8 @@ public class MultiAddrFactory   {
                     long move_amount = 0l;
                     long ts = 0L;
                     String hash = null;
-                    String addr = null;
+                    String inputAddr = null;
+                    String outputAddr = null;
                     boolean isMove = false;
                     boolean isWatchOnly = false;
                     ArrayList<String> ownInput = new ArrayList<String>();
@@ -439,23 +443,23 @@ public class MultiAddrFactory   {
                             inputObj = (JSONObject)inputArray.get(j);
                             if(inputObj.has("prev_out"))  {
                                 JSONObject prevOutObj = (JSONObject)inputObj.get("prev_out");
-                                addr = (String)prevOutObj.get("addr");
+                                inputAddr = (String)prevOutObj.get("addr");
 
                                 //If input is own legacy or hd address = move
-                                if(ownLegacyAddresses.contains(addr) || own_hd_addresses.contains(addr))  {
+                                if(ownLegacyAddresses.contains(inputAddr) || own_hd_addresses.contains(inputAddr))  {
                                     isMove = true;
 
                                     long amountInput = prevOutObj.getLong("value");
-                                    if(ownInput.contains(addr)) {
-                                        int index=ownInput.indexOf(addr);
+                                    if(ownInput.contains(inputAddr)) {
+                                        int index=ownInput.indexOf(inputAddr);
                                         amountListIn.set(index, amountListIn.get(index)+amountInput);
                                     } else {
-                                        ownInput.add(addr);
+                                        ownInput.add(inputAddr);
                                         amountListIn.add(amountInput);
                                     }
                                 }
 
-                                if(watchOnlyLegacyAddresses.contains(addr)){
+                                if(watchOnlyLegacyAddresses.contains(inputAddr)){
                                     isWatchOnly = true;
                                 }
                             }
@@ -467,25 +471,30 @@ public class MultiAddrFactory   {
                         JSONObject outObj = null;
                         for(int j = 0; j < outArray.length(); j++)  {
                             outObj = (JSONObject)outArray.get(j);
-                            addr = (String)outObj.get("addr");
+                            outputAddr = (String)outObj.get("addr");
 
                             //If output is own legacy or hd address = move
-                            if(ownLegacyAddresses.contains(addr) || own_hd_addresses.contains(addr)) {
+                            if(ownLegacyAddresses.contains(outputAddr) || own_hd_addresses.contains(outputAddr)) {
 
                                 long amountOutput = outObj.getLong("value");
-                                move_amount += amountOutput;
-                                if(ownOutput.contains(addr)) {
-                                    int index=ownOutput.indexOf(addr);
-                                    amountListOut.set(index, amountListOut.get(index)+amountOutput);
+
+                                //Don't add change coming back
+                                if(!inputAddr.equals(outputAddr))
+                                    move_amount += amountOutput;
+
+                                if (ownOutput.contains(outputAddr)) {
+                                    int index = ownOutput.indexOf(outputAddr);
+                                    amountListOut.set(index, amountListOut.get(index) + amountOutput);
                                 } else {
-                                    ownOutput.add(addr);
+                                    ownOutput.add(outputAddr);
                                     amountListOut.add(amountOutput);
                                 }
+
                             } else {
                                 isMove = false; //one foreign address is enough to not call it move anymore
                             }
 
-                            if(watchOnlyLegacyAddresses.contains(addr)){
+                            if(watchOnlyLegacyAddresses.contains(outputAddr)){
                                 isWatchOnly = true;
                             }
                         }
