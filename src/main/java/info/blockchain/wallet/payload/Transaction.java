@@ -228,7 +228,11 @@ public class Transaction    {
 		} else {
 			HashMap<String, String> xpub = MultiAddrFactory.getInstance().getAddress2Xpub();
 			Map<String, Integer> xpubAcc = PayloadFactory.getInstance().get().getXpub2Account();
-			List<Account> accountList = PayloadFactory.getInstance().get().getHdWallet().getAccounts();
+			HDWallet hdWallet = PayloadFactory.getInstance().get().getHdWallet();
+			List<Account> accountList = null;
+
+			if(hdWallet != null)
+				accountList = hdWallet.getAccounts();
 
 			for (Transaction.xPut ip : getInputs()) {
 				if (MultiAddrFactory.getInstance().isOwnHDAddress(ip.addr)) {
@@ -266,7 +270,11 @@ public class Transaction    {
 		toLabelValuePair = new HashMap<String,Long>();
 		HashMap<String, String> xpub = MultiAddrFactory.getInstance().getAddress2Xpub();
 		Map<String, Integer> xpubAcc = PayloadFactory.getInstance().get().getXpub2Account();
-		List<Account> accountList = PayloadFactory.getInstance().get().getHdWallet().getAccounts();
+		HDWallet hdWallet = PayloadFactory.getInstance().get().getHdWallet();
+		List<Account> accountList = null;
+
+		if(hdWallet != null)
+			accountList = hdWallet.getAccounts();
 
 		for (Transaction.xPut ip : getOutputs()) {
 			if (MultiAddrFactory.getInstance().isOwnHDAddress(ip.addr)) {
