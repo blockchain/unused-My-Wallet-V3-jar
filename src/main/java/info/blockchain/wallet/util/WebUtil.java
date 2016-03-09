@@ -33,6 +33,7 @@ public class WebUtil	{
     public static final String MERCHANT_DIRECTORY_URL = PROTOCOL + MERCHANT_DIRECTORY_SUBDOMAIN + SERVER_ADDRESS + "cgi-bin/btcd.pl?";
 
     public static final String BTCX_FEE = "http://bitcoinexchangerate.org/fees";
+    public static final String DYNAMIC_FEE = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "fees";
 
     private static final int DefaultRequestRetry = 2;
     private static final int DefaultRequestTimeout = 60000;

@@ -1,20 +1,13 @@
-package info.blockchain.wallet.send;
+package info.blockchain.wallet.util;
 
-import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import info.blockchain.wallet.send.MyTransactionOutPoint;
+import info.blockchain.wallet.send.SendCoins;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.Coin;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
-import info.blockchain.wallet.util.WebUtil;
+import java.math.BigInteger;
+import java.util.List;
 
 public class FeeUtil {
 
@@ -146,4 +139,35 @@ public class FeeUtil {
         return bAvgFee;
     }
 
+    public JSONObject getDynamicFee(){
+
+        try {
+            String result =  WebUtil.getInstance().getURL(WebUtil.DYNAMIC_FEE);
+
+            if(result != null) {
+                JSONObject resultJson = new JSONObject(result);
+                JSONObject defaultJson = resultJson.getJSONObject("default");
+
+                //At the time production didn't have 'ok' key, so we'll just return json
+                if(!defaultJson.has("ok")){
+                    return defaultJson;
+                }
+
+                //determine if the estimate is safe or a failure.
+                if(defaultJson.getBoolean("ok")){
+                    return defaultJson;
+                }else{
+                    return null;
+                }
+
+            }else{
+                return null;
+            }
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
