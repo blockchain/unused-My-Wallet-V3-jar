@@ -148,11 +148,6 @@ public class FeeUtil {
                 JSONObject resultJson = new JSONObject(result);
                 JSONObject defaultJson = resultJson.getJSONObject("default");
 
-                //At the time production didn't have 'ok' key, so we'll just return json
-                if(!defaultJson.has("ok")){
-                    return defaultJson;
-                }
-
                 //determine if the estimate is safe or a failure.
                 if(defaultJson.getBoolean("ok")){
                     return defaultJson;
