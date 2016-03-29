@@ -20,6 +20,7 @@ public class FeeUtil {
     private static FeeUtil instance = null;
 
     public static final BigInteger AVERAGE_FEE = BigInteger.valueOf(Coin.parseCoin("0.0001").longValue());
+    public static final BigInteger AVERAGE_FEE_PER_KB = BigInteger.valueOf(Coin.parseCoin("0.0003").longValue());
 
     //
     // use unsigned tx here
