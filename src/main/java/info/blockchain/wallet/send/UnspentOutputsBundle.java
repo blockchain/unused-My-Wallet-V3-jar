@@ -6,8 +6,10 @@ import java.util.List;
 public class UnspentOutputsBundle	{
 
     private List<MyTransactionOutPoint> outputs = null;
-    private BigInteger totalAmount = BigInteger.ZERO;
+    private BigInteger totalAmount = BigInteger.ZERO;//Selected coin total
     private BigInteger recommendedFee = BigInteger.valueOf(-1L);
+    private String notice = null;
+    private BigInteger sweepAmount = BigInteger.ZERO;//Selected coin total
 
     public UnspentOutputsBundle() {
         outputs = null;
@@ -36,5 +38,21 @@ public class UnspentOutputsBundle	{
 
     public void setRecommendedFee(BigInteger recommendedFee) {
         this.recommendedFee = recommendedFee;
+    }
+
+    public String getNotice() {
+        return notice;
+    }
+
+    public void setNotice(String notice) {
+        this.notice = notice;
+    }
+
+    public BigInteger getSweepAmount() {
+        return sweepAmount;
+    }
+
+    public void setSweepAmount(BigInteger sweepAmount) {
+        this.sweepAmount = sweepAmount;
     }
 }

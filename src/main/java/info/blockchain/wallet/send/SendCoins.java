@@ -57,7 +57,6 @@ public class SendCoins	{
     private HashMap<String,String> froms = null;
 
     public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.00005460").longValue());
-    public static final BigInteger bFee = BigInteger.valueOf(Coin.parseCoin("0.0001").longValue());
 
     public static SendCoins getInstance() {
 
@@ -165,8 +164,7 @@ public class SendCoins	{
 
         // Check the amount we have selected is greater than the amount we need
         if(valueSelected.compareTo(valueNeeded) < 0) {
-//			throw new InsufficientFundsException("Insufficient Funds");
-            return null;
+			throw new Exception("Insufficient Funds");
         }
 
         BigInteger change = valueSelected.subtract(outputValueSum).subtract(fee);

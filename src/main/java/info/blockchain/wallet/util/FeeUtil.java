@@ -1,7 +1,7 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.send.MyTransactionOutPoint;
-import info.blockchain.wallet.send.SendCoins;
+import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.Transaction;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
@@ -14,36 +14,18 @@ public class FeeUtil {
     private static final int ESTIMATED_INPUT_LEN = 148; // compressed key
     private static final int ESTIMATED_OUTPUT_LEN = 34;
 
-    private static BigInteger bAvgFee = null;
-    private static BigInteger bHighestFee = null;
-    private static BigInteger bPriorityFee = null;  // recommended priority fee
-    private static double dPriorityMultiplier = 1.5;
-    private static BigInteger bMinFee750KB = null;
-    private static BigInteger bMinFee1MB = null;
-    private static int totalBytes = -1;
+//    private static BigInteger bAvgFee = null;
+//    private static double dPriorityMultiplier = 1.5;
 
     private static FeeUtil instance = null;
 
-    private FeeUtil()    { ; }
-
-    public static FeeUtil getInstance()  {
-
-        if(instance == null)    {
-
-            bAvgFee = BigInteger.valueOf(10000L);
-            bHighestFee = BigInteger.valueOf(50000L);
-            bPriorityFee = calcPriority();
-
-            instance = new FeeUtil();
-        }
-
-        return instance;
-    }
+    public static final BigInteger AVERAGE_FEE = BigInteger.valueOf(Coin.parseCoin("0.0001").longValue());
+    public static final BigInteger AVERAGE_FEE_PER_KB = BigInteger.valueOf(Coin.parseCoin("0.0003").longValue());
 
     //
     // use unsigned tx here
     //
-    public long getPriority(Transaction tx, List<MyTransactionOutPoint> outputs)   {
+    public static long getPriority(Transaction tx, List<MyTransactionOutPoint> outputs)   {
 
         long priority = 0L;
 
@@ -62,84 +44,46 @@ public class FeeUtil {
     //
     // use signed tx here
     //
-    public BigInteger calculatedFee(Transaction tx)   {
+    public static BigInteger calculatedFee(Transaction tx, BigInteger feePerKb)   {
 
         String hexString = new String(Hex.encode(tx.bitcoinSerialize()));
         int size = hexString.length();
 
-        return feeCalculation(size);
+        return feeCalculation(size, feePerKb);
     }
 
     //
     // use unsigned tx here
     //
-    public BigInteger estimatedFee(Transaction tx)   {
+    public static BigInteger estimatedFee(Transaction tx, BigInteger feePerKb)   {
 
         int size = estimatedSize(tx.getOutputs().size(), tx.getInputs().size());
 
-        return feeCalculation(size);
+        return feeCalculation(size, feePerKb);
     }
 
-    public BigInteger estimatedFee(int inputs, int outputs)   {
+    public static BigInteger estimatedFee(int inputs, int outputs, BigInteger feePerKb)   {
 
         int size = estimatedSize(inputs, outputs);
-
-        return feeCalculation(size);
+        return feeCalculation(size, feePerKb);
     }
 
-    public BigInteger getAvgFee() {
-        return bAvgFee;
-    }
+    private static BigInteger feeCalculation(int size, BigInteger feePerKb)   {
 
-    public BigInteger getHighestFee() {
-        return bHighestFee;
-    }
-
-    public BigInteger getPriorityFee() {
-        return bPriorityFee;
-    }
-
-    public BigInteger getRecommendedFee(int inputs, int outputs)    {
-
-        if(isStressed())    {
-            return stressFee();
-        }
-        else    {
-            return estimatedFee(inputs, outputs);
-        }
-
-    }
-
-    private boolean isStressed()   {
-        return (totalBytes > 15000000 && bAvgFee.compareTo(BigInteger.valueOf(30000L)) >= 0);
-    }
-
-    private BigInteger feeCalculation(int size)   {
-
-        int thousands = size / 1000;
-        int remainder = size % 1000;
-
-        long fee = SendCoins.bFee.longValue() * thousands;
-        if(remainder > 0L)   {
-            fee += SendCoins.bFee.longValue();
-        }
-
+        double txBytes = ((double)size / 1000.0);
+        long fee = (long)Math.ceil(feePerKb.doubleValue() * txBytes);
         return BigInteger.valueOf(fee);
     }
 
-    private int estimatedSize(int inputs, int outputs)   {
-        return (outputs * ESTIMATED_OUTPUT_LEN) + (inputs * ESTIMATED_INPUT_LEN) + inputs;
+    private static int estimatedSize(int inputs, int outputs)   {
+        return (outputs * ESTIMATED_OUTPUT_LEN) + (inputs * ESTIMATED_INPUT_LEN) + 10;
     }
 
-    private static BigInteger calcPriority()   {
-        return BigInteger.valueOf((long)Math.round(bAvgFee.doubleValue() * dPriorityMultiplier));
-    }
+//    private static BigInteger calcPriority()   {
+//        return BigInteger.valueOf((long)Math.round(bAvgFee.doubleValue() * dPriorityMultiplier));
+//    }
 
-    private BigInteger stressFee()   {
-        return bAvgFee;
-    }
-
-    public JSONObject getDynamicFee(){
+    public static JSONObject getDynamicFee(){
 
         try {
             String result =  WebUtil.getInstance().getURL(WebUtil.DYNAMIC_FEE);

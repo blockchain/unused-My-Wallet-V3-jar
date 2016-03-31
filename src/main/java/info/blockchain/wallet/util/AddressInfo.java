@@ -19,7 +19,7 @@ public class AddressInfo	{
         return instance;
     }
 
-    public JSONObject getAddressInfo(String address) {
+    public JSONObject getAddressInfo(String address, String parameter) {
 
         JSONObject jsonObject  = null;
 
@@ -27,6 +27,8 @@ public class AddressInfo	{
             StringBuilder url = new StringBuilder(WebUtil.ADDRESS_INFO_URL);
             url.append(address);
             url.append("?format=json");
+            if(parameter != null && !parameter.isEmpty())
+                url.append(parameter);
 
             String response = WebUtil.getInstance().getURL(url.toString());
             jsonObject = new JSONObject(response);
