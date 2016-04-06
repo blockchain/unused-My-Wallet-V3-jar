@@ -9,6 +9,10 @@ import org.spongycastle.util.encoders.Hex;
 import java.math.BigInteger;
 import java.util.List;
 
+/**
+ * @deprecated use {@link info.blockchain.util.FeeUtil} instead.
+ */
+@Deprecated
 public class FeeUtil {
 
     private static final int ESTIMATED_INPUT_LEN = 148; // compressed key

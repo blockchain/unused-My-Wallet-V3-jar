@@ -1,59 +1,39 @@
 package info.blockchain.wallet.transaction;
 
-import info.blockchain.wallet.send.UnspentOutputsBundle;
-import info.blockchain.wallet_rafactored.transaction.BaseTransaction;
-import info.blockchain.wallet_rafactored.transaction.SimpleTransaction;
+import info.blockchain.api.Unspent;
+import info.blockchain.wallet.transaction.data.UnspentOutputs;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 public class SimpleTransactionTest {
 
-    @Test
-    public void getUnspentOutputsShouldNotReturnNull() {
+    String address = "xpub6DHgYHmEhNxMrZP3rvfSnnPHVi5X2H4h4HLmBnRPHyZ2krP9SKrhEGNFUFRvDwGEAX3KTdD27TQFsTfyjAiCqBvnqWcRwUKZBe5X9MsKkZT";
+    JSONObject unspentJson = null;
 
-        SimpleTransaction transaction = new BaseTransaction();
-        UnspentOutputsBundle freshCoins = transaction.getFreshCoins("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
-        System.out.println("freshCoins: "+freshCoins);
-        assert(freshCoins != null);
 
-        //Todo - advance transaction
-//        AdvancedTransaction advTransaction = new BaseTransaction();
-//        advTransaction.someExtraMethodForAdvancedTx();
+    @Before
+    public void meh() throws Exception {
+        unspentJson = Unspent.getUnspentOutputs(address);
     }
 
     @Test
-    public void cachingUnspentOutputsShouldBeCached() {
+    public void testGetCachedCoins() throws Exception {
 
         //Cache it
         SimpleTransaction transaction = new BaseTransaction();
-        transaction.cacheUnspentOutputs("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
+        transaction.cacheUnspentOutputs(address, unspentJson);
 
         //Read cached
-        UnspentOutputsBundle cachedCoins = transaction.getCachedCoins("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
-        System.out.println("getCachedCoins: " + cachedCoins);
+        UnspentOutputs cachedCoins = transaction.getCachedCoins(address);
         assert(cachedCoins != null);
-
-        UnspentOutputsBundle freshCoins = transaction.getFreshCoins("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
-        System.out.println("freshCoins: "+freshCoins);
-        assert(freshCoins != null);
-
-        transaction.clearCachedUnspentOutputs();
-        cachedCoins = transaction.getCachedCoins("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
-        assert(cachedCoins == null);
     }
 
     @Test
-    public void clearingCachedUnspentOutputsShouldReturnEmpty() {
+    public void testGetCoins() {
 
-        //Cache it
         SimpleTransaction transaction = new BaseTransaction();
-        transaction.cacheUnspentOutputs("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
-
-        //Read cached
-        UnspentOutputsBundle cachedCoins = transaction.getCachedCoins("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
-
-        //Clear cache
-        transaction.clearCachedUnspentOutputs();
-        cachedCoins = transaction.getCachedCoins("1rW486AbUx2LapYca7kddpULJVqMGMhTH");
-        assert(cachedCoins == null);
+        UnspentOutputs coins = transaction.getCoins(address, unspentJson);
+        assert(coins != null);
     }
 }

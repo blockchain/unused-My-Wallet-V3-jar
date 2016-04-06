@@ -1,8 +1,9 @@
-package info.blockchain.wallet;
+package info.blockchain;
 
+import info.blockchain.api.DynamicFeeTest;
 import info.blockchain.wallet.multiaddr.MultiAddrFactoryTest;
+import info.blockchain.wallet.transaction.AdvancedTransactionTest;
 import info.blockchain.wallet.transaction.SimpleTransactionTest;
-import info.blockchain.wallet.util.AddressInfoTest;
 import info.blockchain.wallet.util.FeeUtilTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -11,8 +12,9 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         MultiAddrFactoryTest.class,
         SimpleTransactionTest.class,
+        AdvancedTransactionTest.class,
         FeeUtilTest.class,
-        AddressInfoTest.class
+        DynamicFeeTest.class
 })
 
 public class TestAll {
