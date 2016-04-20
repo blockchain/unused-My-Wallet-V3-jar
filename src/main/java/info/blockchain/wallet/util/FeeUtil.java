@@ -89,28 +89,19 @@ public class FeeUtil {
 
     public static JSONObject getDynamicFee(){
 
+        JSONObject resultJson = null;
+
         try {
             String result =  WebUtil.getInstance().getURL(WebUtil.DYNAMIC_FEE);
 
             if(result != null) {
-                JSONObject resultJson = new JSONObject(result);
-                JSONObject defaultJson = resultJson.getJSONObject("default");
-
-                //determine if the estimate is safe or a failure.
-                if(defaultJson.getBoolean("ok")){
-                    return defaultJson;
-                }else{
-                    return null;
-                }
-
-            }else{
-                return null;
+                resultJson = new JSONObject(result);
             }
         }
         catch(Exception e) {
             e.printStackTrace();
         }
 
-        return null;
+        return resultJson;
     }
 }
