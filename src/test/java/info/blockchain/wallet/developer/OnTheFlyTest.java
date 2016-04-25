@@ -20,7 +20,7 @@ public class OnTheFlyTest {
         JSONObject unspentJson = Unspent.getUnspentOutputs(address);
 
         SimpleTransaction transaction = new BaseTransaction();
-        UnspentOutputs unspentOutputs = transaction.getCoins(address, unspentJson);
+        UnspentOutputs unspentOutputs = transaction.getCoins(unspentJson);
         System.out.println("unspentOutputs: "+unspentOutputs);
 
         BigInteger fee = FeeUtil.estimatedFee(1, unspentOutputs.getOutputs().size(), FeeUtil.AVERAGE_FEE_PER_KB);

@@ -1,6 +1,10 @@
 package info.blockchain;
 
 import info.blockchain.api.DynamicFeeTest;
+import info.blockchain.wallet.CreateWalletTest;
+import info.blockchain.wallet.DoubleEncryptionFactoryTest;
+import info.blockchain.wallet.RestoreHDWalletTest;
+import info.blockchain.wallet.crypto.AESUtilTest;
 import info.blockchain.wallet.multiaddr.MultiAddrFactoryTest;
 import info.blockchain.wallet.transaction.AdvancedTransactionTest;
 import info.blockchain.wallet.transaction.SimpleTransactionTest;
@@ -14,7 +18,12 @@ import org.junit.runners.Suite;
         SimpleTransactionTest.class,
         AdvancedTransactionTest.class,
         FeeUtilTest.class,
-        DynamicFeeTest.class
+        DynamicFeeTest.class,
+        AESUtilTest.class,
+        FeeUtilTest.class,
+        CreateWalletTest.class,
+        DoubleEncryptionFactoryTest.class,
+        RestoreHDWalletTest.class
 })
 
 public class TestAll {
