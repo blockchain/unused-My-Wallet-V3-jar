@@ -1,4 +1,4 @@
-package info.blockchain.wallet.transaction.data;
+package info.blockchain.wallet.payment.data;
 
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 

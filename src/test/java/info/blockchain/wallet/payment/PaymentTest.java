@@ -1,10 +1,10 @@
-package info.blockchain.wallet.transaction;
+package info.blockchain.wallet.payment;
 
 import info.blockchain.test_data.UnspentTestData;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.send.SendCoins;
-import info.blockchain.wallet.transaction.data.SpendableUnspentOutputs;
-import info.blockchain.wallet.transaction.data.UnspentOutputs;
+import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.payment.data.UnspentOutputs;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -13,12 +13,12 @@ import java.math.BigInteger;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class SimpleTransactionTest {
+public class PaymentTest {
 
     @Test
     public void testGetCoins() {
 
-        SimpleTransaction transaction = new BaseTransaction();
+        Payment transaction = new Payment();
 
         UnspentOutputs coins = transaction.getCoins(new JSONObject(UnspentTestData.apiResponseString));
         assertThat(coins.getOutputs().size(), is(UnspentTestData.UNSPENT_OUTPUTS_COUNT));
@@ -30,7 +30,7 @@ public class SimpleTransactionTest {
     public void testGetCachedCoins() throws Exception {
 
         //Cache it
-        SimpleTransaction transaction = new BaseTransaction();
+        Payment transaction = new Payment();
         transaction.cacheUnspentOutputs(UnspentTestData.ADDRESS, new JSONObject(UnspentTestData.apiResponseString));
 
         //Read cached
@@ -43,7 +43,7 @@ public class SimpleTransactionTest {
     @Test
     public void testGetSweepFee() throws Exception {
 
-        SimpleTransaction transaction = new BaseTransaction();
+        Payment transaction = new Payment();
 
         UnspentOutputs coins = transaction.getCoins(new JSONObject(UnspentTestData.apiResponseString));
 
@@ -60,7 +60,7 @@ public class SimpleTransactionTest {
     @Test
     public void testGetSweepBalance() throws Exception {
 
-        SimpleTransaction transaction = new BaseTransaction();
+        Payment transaction = new Payment();
 
         UnspentOutputs coins = transaction.getCoins(new JSONObject(UnspentTestData.apiResponseString));
 
@@ -71,7 +71,7 @@ public class SimpleTransactionTest {
     @Test
     public void testGetSpendableCoins() {
 
-        SimpleTransaction transaction = new BaseTransaction();
+        Payment transaction = new Payment();
 
         UnspentOutputs coins = transaction.getCoins(new JSONObject(UnspentTestData.apiResponseString));
 

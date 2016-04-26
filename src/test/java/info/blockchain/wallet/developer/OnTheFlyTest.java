@@ -2,9 +2,8 @@ package info.blockchain.wallet.developer;
 
 import info.blockchain.api.Unspent;
 import info.blockchain.util.FeeUtil;
-import info.blockchain.wallet.transaction.BaseTransaction;
-import info.blockchain.wallet.transaction.SimpleTransaction;
-import info.blockchain.wallet.transaction.data.UnspentOutputs;
+import info.blockchain.wallet.payment.Payment;
+import info.blockchain.wallet.payment.data.UnspentOutputs;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -19,7 +18,7 @@ public class OnTheFlyTest {
 
         JSONObject unspentJson = Unspent.getUnspentOutputs(address);
 
-        SimpleTransaction transaction = new BaseTransaction();
+        Payment transaction = new Payment();
         UnspentOutputs unspentOutputs = transaction.getCoins(unspentJson);
         System.out.println("unspentOutputs: "+unspentOutputs);
 

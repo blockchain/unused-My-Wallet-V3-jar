@@ -1,9 +1,9 @@
-package info.blockchain.wallet.transaction;
+package info.blockchain.wallet.payment;
 
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
-import info.blockchain.wallet.transaction.data.SpendableUnspentOutputs;
-import info.blockchain.wallet.transaction.data.UnspentOutputs;
+import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.util.Hash;
 import org.bitcoinj.core.Sha256Hash;
 import org.json.JSONArray;
@@ -13,11 +13,14 @@ import org.spongycastle.util.encoders.Hex;
 import java.math.BigInteger;
 import java.util.*;
 
-public class BaseTransaction implements SimpleTransaction, AdvancedTransaction {
+/*
+This class is still in development (26/04/2016)
+ */
+public class Payment {
 
     private HashMap<String, JSONObject> cachedUnspentOutputs;
 
-    public BaseTransaction() {
+    public Payment() {
         this.cachedUnspentOutputs = new HashMap<String, JSONObject>();
     }
 
@@ -46,10 +49,6 @@ public class BaseTransaction implements SimpleTransaction, AdvancedTransaction {
      */
     public void clearCachedUnspentOutputs() {
         cachedUnspentOutputs.clear();
-    }
-
-    public void someExtraMethodForAdvancedTx() {
-
     }
 
     public UnspentOutputs getCachedCoins(String address) throws Exception {

@@ -6,8 +6,7 @@ import info.blockchain.wallet.DoubleEncryptionFactoryTest;
 import info.blockchain.wallet.RestoreHDWalletTest;
 import info.blockchain.wallet.crypto.AESUtilTest;
 import info.blockchain.wallet.multiaddr.MultiAddrFactoryTest;
-import info.blockchain.wallet.transaction.AdvancedTransactionTest;
-import info.blockchain.wallet.transaction.SimpleTransactionTest;
+import info.blockchain.wallet.payment.PaymentTest;
 import info.blockchain.wallet.util.FeeUtilTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -15,8 +14,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         MultiAddrFactoryTest.class,
-        SimpleTransactionTest.class,
-        AdvancedTransactionTest.class,
+        PaymentTest.class,
         FeeUtilTest.class,
         DynamicFeeTest.class,
         AESUtilTest.class,
