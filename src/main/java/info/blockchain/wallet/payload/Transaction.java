@@ -1,21 +1,16 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Transaction    {
 
 	private String strData = null;
 	private JSONObject objX = null;
-	private HashMap<String,Long> fromLabelValuePair = null;
-	private HashMap<String,Long> toLabelValuePair = null;
 
 	public class xPut {
 		public long value;
@@ -216,108 +211,5 @@ public class Transaction    {
 			je.printStackTrace();
 		}
 
-	}
-
-	public HashMap<String,Long> getFromLabelValuePair(String txDirection) {
-
-		fromLabelValuePair = new HashMap<String,Long>();
-
-		if (txDirection.equals(MultiAddrFactory.RECEIVED)) {//only 1 addr for receive
-			fromLabelValuePair.put(getInputs().get(0).addr, getInputs().get(0).value);
-
-		} else {
-			HashMap<String, String> xpub = MultiAddrFactory.getInstance().getAddress2Xpub();
-			Map<String, Integer> xpubAcc = PayloadFactory.getInstance().get().getXpub2Account();
-			HDWallet hdWallet = PayloadFactory.getInstance().get().getHdWallet();
-			List<Account> accountList = null;
-
-			if(hdWallet != null)
-				accountList = hdWallet.getAccounts();
-
-			for (Transaction.xPut ip : getInputs()) {
-				if (MultiAddrFactory.getInstance().isOwnHDAddress(ip.addr)) {
-
-					int accIndex = xpubAcc.get(xpub.get(ip.addr));
-
-					if (accountList != null) {
-
-						String accountLabel = accountList.get(accIndex).getLabel();
-
-						if (fromLabelValuePair.containsKey(accountList.get(accIndex).getLabel())) {
-							long prevAmount = fromLabelValuePair.get(accountLabel) + accountList.get(accIndex).amount;
-							fromLabelValuePair.put(accountLabel, prevAmount);
-						} else {
-							fromLabelValuePair.put(accountList.get(accIndex).getLabel(), ip.value);
-						}
-					} else
-						fromLabelValuePair.put(ip.addr, ip.value);
-				} else {
-					String label = ip.addr;
-					if (PayloadFactory.getInstance().get().getLegacyAddressStrings().contains(ip.addr)) {
-						label = PayloadFactory.getInstance().get().getLegacyAddresses().get(PayloadFactory.getInstance().get().getLegacyAddressStrings().indexOf(ip.addr)).getLabel();
-						if (label == null || label.isEmpty()) label = ip.addr;
-					}
-					fromLabelValuePair.put(label, ip.value);
-				}
-			}
-		}
-
-		return fromLabelValuePair;
-	}
-
-	public HashMap<String,Long> getToLabelValuePair(String txDirection, double amount) {
-
-		toLabelValuePair = new HashMap<String,Long>();
-		HashMap<String, String> xpub = MultiAddrFactory.getInstance().getAddress2Xpub();
-		Map<String, Integer> xpubAcc = PayloadFactory.getInstance().get().getXpub2Account();
-		HDWallet hdWallet = PayloadFactory.getInstance().get().getHdWallet();
-		List<Account> accountList = null;
-
-		if(hdWallet != null)
-			accountList = hdWallet.getAccounts();
-
-		for (Transaction.xPut ip : getOutputs()) {
-			if (MultiAddrFactory.getInstance().isOwnHDAddress(ip.addr)) {
-
-				if (txDirection.equals(MultiAddrFactory.SENT))
-					continue;//change addr
-				if (txDirection.equals(MultiAddrFactory.MOVED) && amount != (double) ip.value)
-					continue;//change addr
-
-				//If Receive
-				int accIndex = 0;
-				if(!xpubAcc.isEmpty())accIndex = xpubAcc.get(xpub.get(ip.addr));
-
-				if (accountList != null) {
-
-					String accountLabel = accountList.get(accIndex).getLabel();
-
-					if(fromLabelValuePair.containsKey(accountLabel))continue;
-
-					if (toLabelValuePair.containsKey(accountLabel)) {
-						long prevAmount = toLabelValuePair.get(accountLabel)+accountList.get(accIndex).amount;
-						toLabelValuePair.put(accountLabel, prevAmount);
-					}else{
-						toLabelValuePair.put(accountLabel, ip.value);
-					}
-				} else {
-					if(!fromLabelValuePair.containsKey(ip.addr))
-						toLabelValuePair.put(ip.addr, ip.value);
-				}
-
-			} else {
-				if(!fromLabelValuePair.containsKey(ip.addr)) {
-
-					String label = ip.addr;
-					if(PayloadFactory.getInstance().get().getLegacyAddressStrings().contains(ip.addr)){
-						label = PayloadFactory.getInstance().get().getLegacyAddresses().get(PayloadFactory.getInstance().get().getLegacyAddressStrings().indexOf(ip.addr)).getLabel();
-						if(label == null || label.isEmpty())label = ip.addr;
-					}
-					if(!fromLabelValuePair.containsKey(label))toLabelValuePair.put(label, ip.value);
-				}
-			}
-		}
-
-		return toLabelValuePair;
 	}
 }

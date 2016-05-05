@@ -55,4 +55,15 @@ public class UnspentOutputsBundle	{
     public void setSweepAmount(BigInteger sweepAmount) {
         this.sweepAmount = sweepAmount;
     }
+
+    @Override
+    public String toString() {
+        return "UnspentOutputsBundle{" +
+                "outputs=" + outputs +
+                ", totalAmount=" + totalAmount +
+                ", recommendedFee=" + recommendedFee +
+                ", notice='" + notice + '\'' +
+                ", sweepAmount=" + sweepAmount +
+                '}';
+    }
 }

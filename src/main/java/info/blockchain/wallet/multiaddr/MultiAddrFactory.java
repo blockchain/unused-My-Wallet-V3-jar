@@ -1,10 +1,9 @@
 package info.blockchain.wallet.multiaddr;
 
+import info.blockchain.api.MultiAddress;
 import info.blockchain.wallet.payload.PayloadFactory;
 import info.blockchain.wallet.payload.Tx;
 import info.blockchain.wallet.payload.TxMostRecentDateComparator;
-import info.blockchain.wallet.util.WebUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,55 +64,43 @@ public class MultiAddrFactory   {
         instance = null;
     }
 
-    public JSONObject getXPUB(String[] xpubs) {
+    public void refreshXPUBData(String[] xpubs) throws Exception {
 
-        JSONObject jsonObject  = null;
+        MultiAddress api = new MultiAddress();
 
-        try {
-            StringBuilder url = new StringBuilder(WebUtil.MULTIADDR_URL);
-            url.append(StringUtils.join(xpubs, "|"));
-            String response = WebUtil.getInstance().getURL(url.toString());
-            try {
-                jsonObject = new JSONObject(response);
-                parseXPUB(jsonObject);
-            }
-            catch(JSONException je) {
-                je.printStackTrace();
-                jsonObject = null;
-            }
+        JSONObject jsonObject  = api.getXPUB(xpubs);
+
+        if(jsonObject != null){
+            parseXPUB(jsonObject);
         }
-        catch(Exception e) {
-            jsonObject = null;
-            e.printStackTrace();
-        }
-
-        return jsonObject;
     }
 
-    public JSONObject getLegacy(String[] addresses, boolean simple) {
+    public void refreshLegacyAddressData(String[] addresses, boolean simple) throws Exception{
 
-        JSONObject jsonObject  = null;
+        MultiAddress api = new MultiAddress();
 
-        StringBuilder url = new StringBuilder(WebUtil.MULTIADDR_URL);
-        url.append(StringUtils.join(addresses, "|"));
-        if(simple) {
-            url.append("&simple=true&format=json");
-        }
-        else {
-            url.append("&symbol_btc="+ "BTC" + "&symbol_local=" + "USD");
-        }
+        JSONObject jsonObject  = api.getLegacy(addresses, simple);
 
-        try {
-            String response = WebUtil.getInstance().getURL(url.toString());
-            jsonObject = new JSONObject(response);
+        if(jsonObject != null){
             parseLegacy(jsonObject);
         }
-        catch(Exception e) {
-            jsonObject = null;
-            e.printStackTrace();
+    }
+
+    public long getXpubTransactionCount(String xpub) throws Exception  {
+
+        long ret = -1L;
+
+        MultiAddress api = new MultiAddress();
+        JSONObject jsonObject  = api.getXPUB(new String[]{xpub});
+
+        if(jsonObject != null && jsonObject.has("wallet"))  {
+            JSONObject walletObj = (JSONObject)jsonObject.get("wallet");
+            if(walletObj.has("n_tx"))  {
+                ret = walletObj.getLong("n_tx");
+            }
         }
 
-        return jsonObject;
+        return ret;
     }
 
     private void parseXPUB(JSONObject jsonObject) throws JSONException  {
@@ -316,34 +303,6 @@ public class MultiAddrFactory   {
             }
 
         }
-
-    }
-
-    public long nbTxXPUB(String xpub) throws JSONException  {
-
-        String response = null;
-        JSONObject jsonObject = null;
-        long ret = -1L;
-
-        try {
-            StringBuilder url = new StringBuilder(WebUtil.MULTIADDR_URL);
-            url.append(xpub);
-            response = WebUtil.getInstance().getURL(url.toString());
-            jsonObject = new JSONObject(response);
-        }
-        catch(Exception e) {
-            jsonObject = null;
-            e.printStackTrace();
-        }
-
-        if(jsonObject != null && jsonObject.has("wallet"))  {
-            JSONObject walletObj = (JSONObject)jsonObject.get("wallet");
-            if(walletObj.has("n_tx"))  {
-                ret = walletObj.getLong("n_tx");
-            }
-        }
-
-        return ret;
 
     }
 

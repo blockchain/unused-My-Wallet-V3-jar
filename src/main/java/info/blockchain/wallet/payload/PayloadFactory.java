@@ -31,6 +31,7 @@ import info.blockchain.wallet.util.WebUtil;
  */
 public class PayloadFactory	{
 
+    public static final double SUPPORTED_ENCRYPTION_VERSION = 3.0;
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
 
