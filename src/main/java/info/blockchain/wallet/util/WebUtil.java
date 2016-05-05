@@ -13,6 +13,8 @@ import java.util.Set;
 
 public class WebUtil	{
 
+    public static final String API_CODE = "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
+
     public static final String PROTOCOL = "https://";
     public static final String SERVER_ADDRESS = "blockchain.info/";
     public static final String API_SUBDOMAIN = "api.";
