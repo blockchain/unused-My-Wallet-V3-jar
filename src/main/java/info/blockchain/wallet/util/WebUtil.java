@@ -22,12 +22,12 @@ public class WebUtil	{
 
     public static final String VALIDATE_SSL_URL = PROTOCOL + SERVER_ADDRESS;
     public static final String SPEND_URL = PROTOCOL + SERVER_ADDRESS + "pushtx";
-    public static final String PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + "wallet";
+    public static final String PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + "wallet?";
     public static final String PAIRING_URL = PAYLOAD_URL;
     public static final String SID_URL = PAYLOAD_URL;
     public static final String MULTIADDR_URL = PROTOCOL + SERVER_ADDRESS + "multiaddr?active=";
     public static final String EXCHANGE_URL = PROTOCOL + SERVER_ADDRESS + "ticker";
-    public static final String ACCESS_URL = PROTOCOL + SERVER_ADDRESS + "pin-store";
+    public static final String ACCESS_URL = PROTOCOL + SERVER_ADDRESS + "pin-store?";
     public static final String UNSPENT_OUTPUTS_URL = PROTOCOL + SERVER_ADDRESS + "unspent?active=";
     public static final String ADDRESS_INFO_URL = PROTOCOL + SERVER_ADDRESS + "address/";
     public static final String TRANSACTION = PROTOCOL + SERVER_ADDRESS+ "tx/";
