@@ -258,28 +258,6 @@ public class SendCoins	{
       return new String(Hex.encode(tx.bitcoinSerialize()));
     }
 
-    public String pushTx(String hexString) {
-
-      try {
-        return WebUtil.getInstance().postURL(WebUtil.SPEND_URL, "tx=" + hexString);
-      }
-      catch(Exception e) {
-        return "Exception calling pushTx";
-      }
-
-    }
-
-    public String pushTx(Transaction tx) {
-
-      try {
-        return WebUtil.getInstance().postURL(WebUtil.SPEND_URL, "tx=" + encodeHex(tx));
-      }
-      catch(Exception e) {
-        return "Exception calling pushTx";
-      }
-
-    }
-
     private class InputComparator implements Comparator<MyTransactionInput> {
 
         public int compare(MyTransactionInput i1, MyTransactionInput i2) {
