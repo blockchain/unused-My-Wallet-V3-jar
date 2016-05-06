@@ -5,8 +5,9 @@ import org.json.JSONObject;
 
 public class Unspent {
 
-    public static  JSONObject getUnspentOutputs(String address) throws Exception {
+    public JSONObject getUnspentOutputs(String address) throws Exception {
 
+        address += "&api_code="+WebUtil.API_CODE;
         String response = WebUtil.getInstance().getURL(WebUtil.UNSPENT_OUTPUTS_URL + address);
 
         if(response != null) {

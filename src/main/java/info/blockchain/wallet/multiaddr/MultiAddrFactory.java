@@ -438,7 +438,7 @@ public class MultiAddrFactory   {
                                 long amountOutput = outObj.getLong("value");
 
                                 //Don't add change coming back
-                                if(!inputAddr.equals(outputAddr))
+                                if(inputAddr != null && !inputAddr.equals(outputAddr))
                                     move_amount += amountOutput;
 
                                 if (ownOutput.contains(outputAddr)) {
