@@ -199,7 +199,7 @@ public class PayloadFactory	{
         String checksum = null;
 
         try {
-            String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL,"method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json");
+            String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL,"method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json"+"&api_code=" + WebUtil.API_CODE);
             JSONObject jsonObject = new JSONObject(response);
 
             if(jsonObject.has("payload_checksum")) {
@@ -409,6 +409,8 @@ public class PayloadFactory	{
             args.append("&old_checksum=");
             args.append(strOldCheckSum);
         }
+
+        args.append("&api_code=" + WebUtil.API_CODE);
 
         try	{
             String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, args.toString());
