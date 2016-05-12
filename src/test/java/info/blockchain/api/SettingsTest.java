@@ -32,37 +32,37 @@ public class SettingsTest {
         assertThat(smsResponse, is("SMS Number Successfully Updated. Verification Message Sent."));
     }
 
-    @Test
-    public void testVerifySms() throws Exception {
-
-        /*
-        No way we'll get the real code here - So we'll just test that the sms verification reaches the server.
-         */
-        try{
-        String smsResponse = settingsApi.verifySms("2246C");
-        }catch (Exception e) {
-            assertThat(e.getMessage(), is("Invalid Response SMS Verification Code Incorrect."));
-        }
-    }
+//    @Test
+//    public void testVerifySms() throws Exception {
+//
+//        /*
+//        No way we'll get the real code here - So we'll just test that the sms verification reaches the server.
+//         */
+//        try{
+//        String smsResponse = settingsApi.verifySms("2246C");
+//        }catch (Exception e) {
+//            assertThat(e.getMessage(), is("Invalid Response SMS Verification Code Incorrect."));
+//        }
+//    }
 
     @Test
     public void testUpdateEmail() throws Exception {
-        String emailResponse = settingsApi.updateEmail("riaanjvos@gmail.com");
+        String emailResponse = settingsApi.updateEmail("a@a.com");
         assertThat(emailResponse, is("Email Updated"));
     }
 
-    @Test
-    public void testVerifyEmail() throws Exception {
-
-        /*
-        No way we'll get the real code here - So we'll just test that the email verification reaches the server.
-         */
-        try{
-            String emailResponse = settingsApi.verifyEmail("2246C");
-        }catch (Exception e) {
-            assertThat(e.getMessage(), is("Invalid Response Email Verification Code Incorrect"));
-        }
-    }
+//    @Test
+//    public void testVerifyEmail() throws Exception {
+//
+//        /*
+//        No way we'll get the real code here - So we'll just test that the email verification reaches the server.
+//         */
+//        try{
+//            String emailResponse = settingsApi.verifyEmail("2246C");
+//        }catch (Exception e) {
+//            assertThat(e.getMessage(), is("Invalid Response Email Verification Code Incorrect"));
+//        }
+//    }
 
     /*
     TODO - you would think this has been done ...
