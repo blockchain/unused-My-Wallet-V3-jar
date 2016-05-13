@@ -109,48 +109,48 @@ public class Transaction    {
 					JSONArray _inputs = tx.getJSONArray("inputs");
 					for(int j = 0; j < _inputs.length(); j++)   {
 						JSONObject _input = _inputs.getJSONObject(j);
-						JSONObject prev_out = _input.getJSONObject("prev_out");
-						boolean our_xput = false;
-						if(prev_out != null)    {
-							xPut input = new xPut();
-							if(prev_out.has("xpub"))    {
-								our_xput = true;
-							}
-							else if(prev_out.has("addr"))   {
-								input.addr = prev_out.getString("addr");
 
-								if(PayloadFactory.getInstance().get().containsLegacyAddress(input.addr))  {
+						if(_input.has("prev_out")) {
+							JSONObject prev_out = _input.getJSONObject("prev_out");
+							boolean our_xput = false;
+							if (prev_out != null) {
+								xPut input = new xPut();
+								if (prev_out.has("xpub")) {
 									our_xput = true;
+								} else if (prev_out.has("addr")) {
+									input.addr = prev_out.getString("addr");
+
+									if (PayloadFactory.getInstance().get().containsLegacyAddress(input.addr)) {
+										our_xput = true;
+									}
 								}
+
+								if (prev_out.has("addr_tag")) {
+									input.addr_tag = prev_out.getString("addr_tag");
+								}
+								if (prev_out.has("value")) {
+									input.value = prev_out.getLong("value");
+									total_input += input.value;
+
+									if (our_xput) {
+										our_xput_value -= input.value;
+									}
+
+									if (totalValues.get(input.addr) != null) {
+										totalValues.put(input.addr, totalValues.get(input.addr) - input.value);
+									} else {
+										totalValues.put(input.addr, 0L - input.value);
+									}
+
+									if (inputValues.get(input.addr) != null) {
+										inputValues.put(input.addr, inputValues.get(input.addr) - input.value);
+									} else {
+										inputValues.put(input.addr, 0L - input.value);
+									}
+
+								}
+								inputs.add(input);
 							}
-
-							if(prev_out.has("addr_tag"))    {
-								input.addr_tag = prev_out.getString("addr_tag");
-							}
-							if(prev_out.has("value"))   {
-								input.value = prev_out.getLong("value");
-								total_input += input.value;
-
-								if(our_xput)    {
-									our_xput_value -= input.value;
-								}
-
-								if(totalValues.get(input.addr) != null) {
-									totalValues.put(input.addr, totalValues.get(input.addr) - input.value);
-								}
-								else    {
-									totalValues.put(input.addr, 0L - input.value);
-								}
-
-								if(inputValues.get(input.addr) != null) {
-									inputValues.put(input.addr, inputValues.get(input.addr) - input.value);
-								}
-								else    {
-									inputValues.put(input.addr, 0L - input.value);
-								}
-
-							}
-							inputs.add(input);
 						}
 					}
 				}
