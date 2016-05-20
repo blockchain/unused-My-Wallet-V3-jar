@@ -7,13 +7,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class UnspentTest {
 
-    String xpub = "xpub6DHgYHmEhNxMuqjcoCAX2bfawU8rsufyDjHBgyq43Gz8X6iAgPVYMRByF7ETJmVFcDhkbdbUn31qMHaRzed17FrghmoQsQsdxdLv3nV2jMs";
+    private final String dormantAddress = "1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF";
 
     @Test
     public void refreshLegacyAddressData() throws Exception {
 
         Unspent unspent = new Unspent();
-        JSONObject json = unspent.getUnspentOutputs(xpub);
+        JSONObject json = unspent.getUnspentOutputs(dormantAddress);
 
         assertThat("JSON doesn't have unspent_outputs key", json.has("unspent_outputs"));
     }
