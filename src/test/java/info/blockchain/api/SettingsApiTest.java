@@ -10,63 +10,31 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
-public class SettingsTest {
+public class SettingsApiTest {
 
     String guid = "ba773137-56a6-426b-981e-40efd1ddac54";
     String password = "MyTestWallet";
-    Settings settingsApi;
+    SettingsApi settingsApi;
 
     @Before
     public void setUp() throws Exception {
 
         manualPairWallet(guid, password);
         Payload payload = PayloadFactory.getInstance().get();
-        settingsApi = new Settings(guid, payload.getSharedKey());
+        settingsApi = new SettingsApi(guid, payload.getSharedKey());
     }
 
     @Test
     public void testUpdateSms() throws Exception {
-        String smsResponse = settingsApi.updateSms("+44 75 1234 1234");
-        assertThat(smsResponse, is("SMS Number Successfully Updated. Verification Message Sent."));
+        assertThat("sms update", settingsApi.updateSms("+44 75 1234 1234"));
     }
-
-//    @Test
-//    public void testVerifySms() throws Exception {
-//
-//        /*
-//        No way we'll get the real code here - So we'll just test that the sms verification reaches the server.
-//         */
-//        try{
-//        String smsResponse = settingsApi.verifySms("2246C");
-//        }catch (Exception e) {
-//            assertThat(e.getMessage(), is("Invalid Response SMS Verification Code Incorrect."));
-//        }
-//    }
 
     @Test
     public void testUpdateEmail() throws Exception {
-        String emailResponse = settingsApi.updateEmail("a@a.com");
-        assertThat(emailResponse, is("Email Updated"));
+        assertThat("email update", settingsApi.updateEmail("nope@nope.com"));
     }
 
-//    @Test
-//    public void testVerifyEmail() throws Exception {
-//
-//        /*
-//        No way we'll get the real code here - So we'll just test that the email verification reaches the server.
-//         */
-//        try{
-//            String emailResponse = settingsApi.verifyEmail("2246C");
-//        }catch (Exception e) {
-//            assertThat(e.getMessage(), is("Invalid Response Email Verification Code Incorrect"));
-//        }
-//    }
-
-    /*
-    TODO - you would think this has been done ...
-     */
     private void manualPairWallet(final String guid, final String password) throws Exception {
         StringBuilder args = new StringBuilder();
 
