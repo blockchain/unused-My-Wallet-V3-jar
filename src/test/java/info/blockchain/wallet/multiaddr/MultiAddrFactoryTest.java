@@ -8,12 +8,12 @@ import static org.hamcrest.core.Is.is;
 public class MultiAddrFactoryTest {
 
     //Address with lost private key, so multiaddress response won't change
-    private final String dormantAddress = "1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF";
-    private final long dormantAddressBalance = 7995711508537L;
+    private final String dormantAddress = "15sAyHb9zBsZbVnaSXz2UivTZYxnjjrEkX";
+    private final long dormantAddressBalance = 10000L;
 
-    private final String dormantXpub = "xpub6CmZamQcHw2TPtbGmJNEvRgfhLwitarvzFn3fBYEEkFTqztus7W7CNbf48Kxuj1bRRBmZPzQocB6qar9ay6buVkQk73ftKE1z4tt9cPHWRn";
-    private final long dormantXpubBalance = 20000L;
-    private final long dormantXpubTxCount = 1L;
+    private final String dormantXpub = "xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt";
+    private final long dormantXpubBalance = 10000L;
+    private final long dormantXpubTxCount = 34L;
 
     @Test
     public void refreshLegacyAddressData() throws Exception {
@@ -28,7 +28,7 @@ public class MultiAddrFactoryTest {
     }
 
     @Test
-    public void refreshLegacyAddressDataa() throws Exception {
+    public void getXpubTransactionCount() throws Exception {
         assertThat(MultiAddrFactory.getInstance().getXpubTransactionCount(dormantXpub), is(dormantXpubTxCount));
     }
 }

@@ -11,28 +11,61 @@ import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class SettingsApiTest {
+public class SettingsTest {
 
     String guid = "ba773137-56a6-426b-981e-40efd1ddac54";
-    String password = "MyTestWallet";
-    SettingsApi settingsApi;
+    String password = "MyTestWallet1";
+    Settings settingsApi;
 
     @Before
     public void setUp() throws Exception {
 
         manualPairWallet(guid, password);
         Payload payload = PayloadFactory.getInstance().get();
-        settingsApi = new SettingsApi(guid, payload.getSharedKey());
+        settingsApi = new Settings(guid, payload.getSharedKey());
     }
 
     @Test
     public void testUpdateSms() throws Exception {
-        assertThat("sms update", settingsApi.updateSms("+44 75 1234 1234"));
+        assertThat("sms update", settingsApi.setSms("+44 75 1234 1234"));
     }
 
     @Test
     public void testUpdateEmail() throws Exception {
-        assertThat("email update", settingsApi.updateEmail("nope@nope.com"));
+        assertThat("email update", settingsApi.setEmail("nope@nope.com"));
+    }
+
+    @Test
+    public void testUpdatePasswordHint1() throws Exception {
+        assertThat("pw1 hint update", settingsApi.setPasswordHint1("pw1"));
+    }
+
+    @Test
+    public void testUpdatePasswordHint2() throws Exception {
+        assertThat("pw2 hint update", settingsApi.setPasswordHint2("pw2"));
+    }
+
+    @Test
+    public void testUpdateBtcCurrency() throws Exception {
+        assertThat("update btc currency", settingsApi.setBtcCurrency(Settings.UNIT_BTC));
+        assertThat("update btc currency", settingsApi.setBtcCurrency(Settings.UNIT_MBC));
+        assertThat("update btc currency", settingsApi.setBtcCurrency(Settings.UNIT_UBC));
+    }
+
+    @Test
+    public void testUpdateFiatCurrency() throws Exception {
+        for (int i = 0; i < settingsApi.UNIT_FIAT.length; i++){
+            assertThat("update fiat currency", settingsApi.setFiatCurrency(Settings.UNIT_FIAT[i]));
+        }
+    }
+
+    @Test
+    public void testSetTorBlocked() throws Exception {
+        assertThat("block tor", settingsApi.setTorBlocked(false));
+        assertThat("block tor", settingsApi.isTorBlocked() == false);
+
+        assertThat("block tor", settingsApi.setTorBlocked(true));
+        assertThat("block tor", settingsApi.isTorBlocked() == true);
     }
 
     private void manualPairWallet(final String guid, final String password) throws Exception {
