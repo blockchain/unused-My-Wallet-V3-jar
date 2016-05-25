@@ -68,6 +68,12 @@ public class Settings {
     private String guid;
     private String sharedKey;
 
+    public interface ResultListener{
+        public void onSuccess();
+        public void onFail();
+        public void onBadRequest();
+    }
+
     public Settings(String guid, String sharedKey){
 
         this.guid = guid;
@@ -169,7 +175,7 @@ public class Settings {
         return dialCode;
     }
 
-    public String getCurrency() {
+    public String getFiatCurrency() {
         return currency;
     }
 
@@ -197,70 +203,16 @@ public class Settings {
         return passwordHint1;
     }
 
+    public String getPasswordHint2() {
+        return passwordHint2;
+    }
+
     public String getGuid() {
         return guid;
     }
 
-    public String getSms() {
-        return sms;
-    }
-
-    public boolean setEmail(String email){
-        boolean success = updateValue(METHOD_UPDATE_EMAIL, email);
-        if(success){
-            this.email = email;
-            this.emailVerified = false;
-        }
-        return success;
-    }
-
-    public boolean setSms(String sms){
-        boolean success = updateValue(METHOD_UPDATE_SMS, sms);
-        if(success){
-            this.sms = sms;
-            this.smsVerified = false;
-        }
-        return success;
-    }
-
-    public boolean verifyEmail(String code){
-        boolean success = updateValue(METHOD_VERIFY_EMAIL, code);
-        if(success){
-            this.emailVerified = true;
-        }
-        return success;
-    }
-
-    public boolean verifySms(String code){
-        boolean success = updateValue(METHOD_VERIFY_SMS, code);
-        if(success){
-            this.smsVerified = true;
-        }
-        return success;
-    }
-
-    public boolean setPasswordHint1(String hint)  {
-        if(isBadPasswordHint(hint)){
-            return false;
-        }else{
-            boolean success = updateValue(METHOD_UPDATE_PASSWORD_HINT_1, hint);
-            if(success){
-                this.passwordHint1 = hint;
-            }
-            return success;
-        }
-    }
-
-    public boolean setPasswordHint2(String hint) throws Exception {
-        if(isBadPasswordHint(hint)){
-            return false;
-        }else{
-            boolean success = updateValue(METHOD_UPDATE_PASSWORD_HINT_2, hint);
-            if(success){
-                this.passwordHint2 = hint;
-            }
-            return success;
-        }
+    public boolean isTorBlocked() {
+        return blockTorIps;
     }
 
     private boolean isBadPasswordHint(String hint)  {
@@ -271,33 +223,110 @@ public class Settings {
         }
     }
 
-    public boolean setBtcCurrency(String btcCurrency){
-        boolean success = updateValue(METHOD_UPDATE_BTC_CURRENCY, btcCurrency);
-        if(success){
+    public String getSms() {
+        return sms;
+    }
+
+    public void setEmail(String email, ResultListener listener){
+
+        if(email == null || email.isEmpty()){
+            listener.onBadRequest();
+        }else if(updateValue(METHOD_UPDATE_EMAIL, email)){
+            this.email = email;
+            this.emailVerified = false;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    public void setSms(String sms, ResultListener listener){
+        if(sms == null || sms.isEmpty()){
+            listener.onBadRequest();
+        }else if(updateValue(METHOD_UPDATE_SMS, sms)){
+            this.sms = sms;
+            this.smsVerified = false;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    public void verifyEmail(String code, ResultListener listener){
+        if(code == null || code.isEmpty()){
+            listener.onBadRequest();
+        }else if(updateValue(METHOD_VERIFY_EMAIL, code)){
+            this.emailVerified = true;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    public void verifySms(String code, ResultListener listener){
+        if(code == null || code.isEmpty()){
+            listener.onBadRequest();
+        }else if(updateValue(METHOD_VERIFY_SMS, code)){
+            this.smsVerified = true;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    public void setPasswordHint1(String hint, ResultListener listener)  {
+        if (hint == null || hint.isEmpty() || isBadPasswordHint(hint)) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_PASSWORD_HINT_1, hint)) {
+            this.passwordHint1 = hint;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
+    }
+
+    public void setPasswordHint2(String hint, ResultListener listener) {
+        if (hint == null || hint.isEmpty() || isBadPasswordHint(hint)) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_PASSWORD_HINT_2, hint)) {
+            this.passwordHint2 = hint;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
+    }
+
+    public void setBtcCurrency(String btcCurrency, ResultListener listener){
+        if (btcCurrency == null || btcCurrency.isEmpty()) {
+            listener.onBadRequest();
+        } else if(updateValue(METHOD_UPDATE_BTC_CURRENCY, btcCurrency)){
             this.btcCurrency = btcCurrency;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
         }
-        return success;
     }
 
-    public boolean setFiatCurrency(String currency){
-        boolean success = updateValue(METHOD_UPDATE_CURRENCY, currency);
-        if(success){
+    public void setFiatCurrency(String currency, ResultListener listener){
+        if (currency == null || currency.isEmpty()) {
+            listener.onBadRequest();
+        } else if(updateValue(METHOD_UPDATE_CURRENCY, currency)){
             this.currency = currency;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
         }
-        return success;
     }
 
-    public boolean setTorBlocked(boolean block){
+    public void setTorBlocked(boolean block, ResultListener listener){
         int value = 0;
         if(block)value = 1;
         boolean success = updateValue(METHOD_UPDATE_BLOCK_TOR_IPS, value+"");
         if(success){
             this.blockTorIps = block;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
         }
-        return success;
-    }
-
-    public boolean isTorBlocked() {
-        return blockTorIps;
     }
 }

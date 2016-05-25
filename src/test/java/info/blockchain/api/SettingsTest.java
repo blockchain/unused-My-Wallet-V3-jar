@@ -10,11 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.fail;
 
 public class SettingsTest {
 
     String guid = "ba773137-56a6-426b-981e-40efd1ddac54";
-    String password = "MyTestWallet1";
+    String password = "MyTestWallet";
     Settings settingsApi;
 
     @Before
@@ -27,45 +29,172 @@ public class SettingsTest {
 
     @Test
     public void testUpdateSms() throws Exception {
-        assertThat("sms update", settingsApi.setSms("+44 75 1234 1234"));
+        final String value = "+44 75 1234 1234";
+        settingsApi.setSms(value, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getSms(), is(value));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
     }
 
     @Test
     public void testUpdateEmail() throws Exception {
-        assertThat("email update", settingsApi.setEmail("nope@nope.com"));
+        final String value = "nope@nope.com";
+        settingsApi.setEmail(value, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getEmail(), is(value));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
     }
 
     @Test
     public void testUpdatePasswordHint1() throws Exception {
-        assertThat("pw1 hint update", settingsApi.setPasswordHint1("pw1"));
+        final String value = "pw1";
+        settingsApi.setPasswordHint1(value, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getPasswordHint1(), is(value));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
     }
 
     @Test
     public void testUpdatePasswordHint2() throws Exception {
-        assertThat("pw2 hint update", settingsApi.setPasswordHint2("pw2"));
+        final String value = "pw2";
+        settingsApi.setPasswordHint2(value, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getPasswordHint2(), is(value));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
     }
 
     @Test
     public void testUpdateBtcCurrency() throws Exception {
-        assertThat("update btc currency", settingsApi.setBtcCurrency(Settings.UNIT_BTC));
-        assertThat("update btc currency", settingsApi.setBtcCurrency(Settings.UNIT_MBC));
-        assertThat("update btc currency", settingsApi.setBtcCurrency(Settings.UNIT_UBC));
+        settingsApi.setBtcCurrency(Settings.UNIT_BTC, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getBtcCurrency(), is(Settings.UNIT_BTC));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
+        settingsApi.setBtcCurrency(Settings.UNIT_MBC, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getBtcCurrency(), is(Settings.UNIT_MBC));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
+        settingsApi.setBtcCurrency(Settings.UNIT_UBC, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getBtcCurrency(), is(Settings.UNIT_UBC));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
     }
 
     @Test
     public void testUpdateFiatCurrency() throws Exception {
         for (int i = 0; i < settingsApi.UNIT_FIAT.length; i++){
-            assertThat("update fiat currency", settingsApi.setFiatCurrency(Settings.UNIT_FIAT[i]));
+            final int finalI = i;
+            settingsApi.setFiatCurrency(Settings.UNIT_FIAT[i], new Settings.ResultListener() {
+                public void onSuccess() {
+                    assertThat(settingsApi.getFiatCurrency(), is(Settings.UNIT_FIAT[finalI]));
+                }
+
+                public void onFail() {
+                    fail("");
+                }
+
+                public void onBadRequest() {
+                    fail("");
+                }
+            });
         }
     }
 
     @Test
     public void testSetTorBlocked() throws Exception {
-        assertThat("block tor", settingsApi.setTorBlocked(false));
-        assertThat("block tor", settingsApi.isTorBlocked() == false);
 
-        assertThat("block tor", settingsApi.setTorBlocked(true));
-        assertThat("block tor", settingsApi.isTorBlocked() == true);
+        settingsApi.setTorBlocked(false, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("block tor", !settingsApi.isTorBlocked());
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
+        settingsApi.setTorBlocked(true, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("block tor", settingsApi.isTorBlocked());
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
     }
 
     private void manualPairWallet(final String guid, final String password) throws Exception {
