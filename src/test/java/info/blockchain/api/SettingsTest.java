@@ -9,9 +9,9 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.fail;
 
 public class SettingsTest {
 
@@ -147,7 +147,7 @@ public class SettingsTest {
 
     @Test
     public void testUpdateFiatCurrency() throws Exception {
-        for (int i = 0; i < settingsApi.UNIT_FIAT.length; i++){
+        for (int i = 0; i < settingsApi.UNIT_FIAT.length; i++) {
             final int finalI = i;
             settingsApi.setFiatCurrency(Settings.UNIT_FIAT[i], new Settings.ResultListener() {
                 public void onSuccess() {
@@ -185,6 +185,70 @@ public class SettingsTest {
         settingsApi.setTorBlocked(true, new Settings.ResultListener() {
             public void onSuccess() {
                 assertThat("block tor", settingsApi.isTorBlocked());
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+    }
+
+    @Test
+    public void testEnableNotifications() throws Exception {
+
+        settingsApi.enableNotifications(false, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("notifications toggle", !settingsApi.isNotificationsOn());
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
+        settingsApi.enableNotifications(true, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("notifications toggle", settingsApi.isNotificationsOn());
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+    }
+
+    @Test
+    public void testSetNotificationsType() throws Exception {
+
+        settingsApi.setNotificationType(Settings.NOTIFICATION_TYPE_EMAIL, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("notifications types", settingsApi.getNotificationTypes().contains(Settings.NOTIFICATION_TYPE_EMAIL));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
+        settingsApi.setNotificationType(Settings.NOTIFICATION_TYPE_ALL_DISABLE, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("notifications toggle", settingsApi.getNotificationTypes().isEmpty());
             }
 
             public void onFail() {

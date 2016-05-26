@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
 public class Settings {
 
@@ -14,6 +15,7 @@ public class Settings {
     public static final String METHOD_VERIFY_EMAIL = "verify-email";
     public static final String METHOD_VERIFY_SMS = "verify-sms";
     public static final String METHOD_UPDATE_NOTIFICATION_TYPE = "update-notifications-type";
+    public static final String METHOD_UPDATE_NOTIFICATION_ON = "update-notifications-on";
     public static final String METHOD_UPDATE_SMS = "update-sms";
     public static final String METHOD_UPDATE_EMAIL = "update-email";
     public static final String METHOD_UPDATE_BTC_CURRENCY = "update-btc-currency";
@@ -39,10 +41,10 @@ public class Settings {
             "ISK", "JPY", "KRW", "NZD", "PLN", "RUB", "SEK", "SGD", "THB", "TWD", "USD"
     };
 
+    public static final int NOTIFICATION_TYPE_ALL_DISABLE = 0;
+    public static final int NOTIFICATION_TYPE_EMAIL = 1;
+
     private String btcCurrency;
-
-    private boolean notificationsOn;
-
     private String dialCode;
     private String currency;
     private String email;
@@ -53,11 +55,12 @@ public class Settings {
     private String passwordHint1;
     private String passwordHint2;
     private String sms;
+    private boolean blockTorIps;
+    private ArrayList<Integer> notificationType;
+    private boolean notificationsOn;
 
-    private String[] notificationType;
     private String language;
     private boolean ipLockOn;
-    private boolean blockTorIps;
     private int notificationsConfirmations;
     private boolean autoEmailBackup;
     private boolean neverSaveAuthType;
@@ -136,7 +139,12 @@ public class Settings {
 
         JSONObject jsonObject = new JSONObject(jsonString);
         if(jsonObject.has("btc_currency"))btcCurrency = jsonObject.getString("btc_currency");
-        JSONArray notificationTypeJsonArray = jsonObject.getJSONArray("notifications_type");//TODO
+
+        notificationType = new ArrayList<Integer>();
+        JSONArray notificationTypeJsonArray = jsonObject.getJSONArray("notifications_type");
+        for (int i = 0; i < notificationTypeJsonArray.length(); i++){
+            notificationType.add(notificationTypeJsonArray.getInt(i));
+        }
         if(jsonObject.has("language"))language = jsonObject.getString("language");
         if(jsonObject.has("notifications_on"))notificationsOn = toBoolean(jsonObject.getInt("notifications_on"));
         if(jsonObject.has("ip_lock_on"))ipLockOn = toBoolean(jsonObject.getInt("ip_lock_on"));
@@ -225,6 +233,10 @@ public class Settings {
 
     public String getSms() {
         return sms;
+    }
+
+    public ArrayList<Integer> getNotificationTypes(){
+        return notificationType;
     }
 
     public void setEmail(String email, ResultListener listener){
@@ -324,6 +336,37 @@ public class Settings {
         boolean success = updateValue(METHOD_UPDATE_BLOCK_TOR_IPS, value+"");
         if(success){
             this.blockTorIps = block;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    public void enableNotifications(boolean enable, ResultListener listener){
+        int value;
+        if(enable) {
+            value = 2;//on
+        }else{
+            value = 0;//off
+        }
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_ON, value+"");
+        if(success){
+            this.notificationsOn = enable;
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    public void setNotificationType(int type, ResultListener listener){
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, type+"");
+        if(success){
+            if(!this.notificationType.contains(type))
+                this.notificationType.add(type);
+
+            if(type == NOTIFICATION_TYPE_ALL_DISABLE)
+                this.notificationType = new ArrayList<Integer>();
+
             listener.onSuccess();
         }else{
             listener.onFail();
