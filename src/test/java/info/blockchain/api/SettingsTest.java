@@ -261,6 +261,52 @@ public class SettingsTest {
         });
     }
 
+    @Test
+    public void testAuthType() throws Exception {
+
+        settingsApi.setAuthType(Settings.AUTH_TYPE_SMS, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getAuthType(), is(Settings.AUTH_TYPE_SMS));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
+        settingsApi.setAuthType(Settings.AUTH_TYPE_EMAIL, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getAuthType(), is(Settings.AUTH_TYPE_EMAIL));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+
+        settingsApi.setAuthType(Settings.AUTH_TYPE_OFF, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat(settingsApi.getAuthType(), is(Settings.AUTH_TYPE_OFF));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+    }
+
     private void manualPairWallet(final String guid, final String password) throws Exception {
         StringBuilder args = new StringBuilder();
 
