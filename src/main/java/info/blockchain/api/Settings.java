@@ -44,6 +44,12 @@ public class Settings {
     public static final int NOTIFICATION_TYPE_ALL_DISABLE = 0;
     public static final int NOTIFICATION_TYPE_EMAIL = 1;
 
+    public static final int AUTH_TYPE_OFF = 0;
+    public static final int AUTH_TYPE_YUBI_KEY = 1;
+    public static final int AUTH_TYPE_EMAIL = 2;
+    public static final int AUTH_TYPE_GOOGLE_AUTHENTICATOR = 4;
+    public static final int AUTH_TYPE_SMS = 5;
+
     private String btcCurrency;
     private String dialCode;
     private String currency;
@@ -367,6 +373,16 @@ public class Settings {
             if(type == NOTIFICATION_TYPE_ALL_DISABLE)
                 this.notificationType = new ArrayList<Integer>();
 
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    public void setAuthType(int type, ResultListener listener){
+        boolean success = updateValue(METHOD_UPDATE_AUTH_TYPE, type+"");
+        if(success){
+            authType = type;
             listener.onSuccess();
         }else{
             listener.onFail();
