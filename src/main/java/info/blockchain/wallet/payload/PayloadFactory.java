@@ -122,6 +122,7 @@ public class PayloadFactory	{
      */
     public void setTempPassword(CharSequenceX temp_password) {
         strTempPassword = temp_password;
+        clearCachedPayload();
     }
 
     /**
@@ -451,5 +452,9 @@ public class PayloadFactory	{
 
     public double getVersion()  {
       return version;
+    }
+
+    private void clearCachedPayload(){
+        cached_payload = null;
     }
 }
