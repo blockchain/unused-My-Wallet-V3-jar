@@ -19,7 +19,7 @@ import info.blockchain.wallet.crypto.AESUtil;
  *
  * Payload.java : java class for encapsulating Blockchain HD wallet payload
  *
- * <p>The Blockchain HD wallet payload is read from/written to the server in an encrypted JSON file
+ * <p>The Blockchain HD wallet payload is read from/written to the server in an encryptedPairingCode JSON file
  *
  * <p>The Blockchain HD wallet payload format was previously fully documented on Basecamp but the latest
  * documentation there is out-of-date. This java class encapsulates the JSON format as most recently
