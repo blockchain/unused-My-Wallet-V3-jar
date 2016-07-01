@@ -36,7 +36,7 @@ public class AESUtilTest {
         String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
         String decrypted = AESUtil.decrypt(encrypted, new CharSequenceX("bogus"), iterations);
 
-        assertThat("Decryption successful with incorrect password", decrypted == null);
+        assertThat("Decryption successful with incorrect password", decrypted == null || !decrypted.equals(cleartext));
     }
 
     @Test

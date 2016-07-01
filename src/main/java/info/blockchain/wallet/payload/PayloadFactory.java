@@ -1,24 +1,17 @@
 package info.blockchain.wallet.payload;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bitcoinj.crypto.MnemonicException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
-import org.bitcoinj.core.bip44.Account;
-import org.bitcoinj.core.bip44.Wallet;
-import org.bitcoinj.core.bip44.WalletFactory;
 
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.util.CharSequenceX;
@@ -328,6 +321,8 @@ public class PayloadFactory	{
      *
      */
     public boolean put() {
+
+        if(payload == null) return false;
 
         String strOldCheckSum = strCheckSum;
         String payloadCleartext = null;
