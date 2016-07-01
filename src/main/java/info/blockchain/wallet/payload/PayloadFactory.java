@@ -2,16 +2,20 @@ package info.blockchain.wallet.payload;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.bitcoinj.core.bip44.WalletFactory;
+import org.bitcoinj.crypto.MnemonicException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.util.CharSequenceX;
@@ -451,5 +455,41 @@ public class PayloadFactory	{
 
     private void clearCachedPayload(){
         cached_payload = null;
+    }
+
+    public Payload createBlockchainWallet(String defaultAccountName) throws IOException, MnemonicException.MnemonicLengthException {
+
+        org.bitcoinj.core.bip44.Wallet hdw = WalletFactory.getInstance().get();
+
+        String guid = UUID.randomUUID().toString();
+        String sharedKey = UUID.randomUUID().toString();
+
+        Payload payload = new Payload();
+        payload.setGuid(guid);
+        payload.setSharedKey(sharedKey);
+
+        HDWallet payloadHDWallet = new HDWallet();
+        payloadHDWallet.setSeedHex(hdw.getSeedHex());
+
+        List<org.bitcoinj.core.bip44.Account> hdAccounts = hdw.getAccounts();
+        List<info.blockchain.wallet.payload.Account> payloadAccounts = new ArrayList<Account>();
+        for (int i = 0; i < hdAccounts.size(); i++) {
+            info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account(defaultAccountName);
+
+            String xpub = WalletFactory.getInstance().get().getAccounts().get(i).xpubstr();
+            account.setXpub(xpub);
+            String xpriv = WalletFactory.getInstance().get().getAccounts().get(i).xprvstr();
+            account.setXpriv(xpriv);
+
+            payloadAccounts.add(account);
+        }
+        payloadHDWallet.setAccounts(payloadAccounts);
+
+        payload.setHdWallets(payloadHDWallet);
+
+        set(payload);
+        setNew(true);
+
+        return payload;
     }
 }
