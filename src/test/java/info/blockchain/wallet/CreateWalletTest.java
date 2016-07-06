@@ -1,7 +1,7 @@
 package info.blockchain.wallet;
 
-import org.bitcoinj.core.bip44.Wallet;
-import org.bitcoinj.core.bip44.WalletFactory;
+import info.blockchain.bip44.Wallet;
+import info.blockchain.bip44.WalletFactory;
 import org.bitcoinj.crypto.MnemonicException;
 import org.junit.Test;
 

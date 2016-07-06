@@ -1,8 +1,11 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.bip44.Wallet;
+import info.blockchain.bip44.WalletFactory;
+import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.util.WebUtil;
 import org.apache.commons.lang3.StringUtils;
-
-import org.bitcoinj.core.bip44.WalletFactory;
 import org.bitcoinj.crypto.MnemonicException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,10 +19,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.WebUtil;
 
 /**
  *
@@ -72,7 +71,7 @@ public class PayloadFactory	{
     /**
      * Return instance for a payload factory. Payload initialized using provided JSON string.
      *
-     * @param  String json JSON string used to initialize this instance
+     * @param  json JSON string used to initialize this instance
      *
      * @return HD_WalletFactory
      *
@@ -114,7 +113,7 @@ public class PayloadFactory	{
     /**
      * Set temporary password for user once it has been validated. Read password from here rather than reprompting user.
      *
-     * @param CharSequenceX password Validated user password
+     * @param temp_password Validated user password
      *
      */
     public void setTempPassword(CharSequenceX temp_password) {
@@ -135,7 +134,7 @@ public class PayloadFactory	{
     /**
      * Set temporary double encrypt password for user once it has been validated. Read double encrypt password from here rather than reprompting user.
      *
-     * @param CharSequenceX password Validated user double encrypt password
+     * @param temp_password2 Validated user double encrypt password
      *
      */
     public void setTempDoubleEncryptPassword(CharSequenceX temp_password2) {
@@ -155,7 +154,7 @@ public class PayloadFactory	{
     /**
      * Set checksum for this payload.
      *
-     * @param String checksum Checksum to be set for this payload
+     * @param checksum Checksum to be set for this payload
      *
      */
     public void setCheckSum(String checksum) {
@@ -175,7 +174,7 @@ public class PayloadFactory	{
     /**
      * Set if this payload is for a new Blockchain account.
      *
-     * @param boolean isNew
+     * @param isNew
      *
      */
     public void setNew(boolean isNew) {
@@ -185,9 +184,9 @@ public class PayloadFactory	{
     /**
      * Remote get(). Get refreshed payload from server.
      *
-     * @param  String guid User's wallet 'guid'
-     * @param  String sharedKey User's sharedKey value
-     * @param  CharSequenceX password User password
+     * @param  guid User's wallet 'guid'
+     * @param  sharedKey User's sharedKey value
+     * @param  password User password
      *
      * @return Payload
      *
@@ -318,8 +317,6 @@ public class PayloadFactory	{
 
     /**
      * Remote save of current client payload to server. Will not save if no change as compared to cached payload.
-     *
-     * @param CharSequenceX password User password
      *
      * @return boolean
      *
@@ -459,7 +456,7 @@ public class PayloadFactory	{
 
     public Payload createBlockchainWallet(String defaultAccountName) throws IOException, MnemonicException.MnemonicLengthException {
 
-        org.bitcoinj.core.bip44.Wallet hdw = WalletFactory.getInstance().get();
+        Wallet hdw = WalletFactory.getInstance().get();
 
         String guid = UUID.randomUUID().toString();
         String sharedKey = UUID.randomUUID().toString();
@@ -471,7 +468,7 @@ public class PayloadFactory	{
         HDWallet payloadHDWallet = new HDWallet();
         payloadHDWallet.setSeedHex(hdw.getSeedHex());
 
-        List<org.bitcoinj.core.bip44.Account> hdAccounts = hdw.getAccounts();
+        List<info.blockchain.bip44.Account> hdAccounts = hdw.getAccounts();
         List<info.blockchain.wallet.payload.Account> payloadAccounts = new ArrayList<Account>();
         for (int i = 0; i < hdAccounts.size(); i++) {
             info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account(defaultAccountName);
