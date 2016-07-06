@@ -282,7 +282,7 @@ public class WalletFactory {
         try {
             obj = deserialize(password);
             if(obj != null) {
-                hdw = new Wallet(obj, params);
+                hdw = new Wallet(obj, params, locale);
             }
         }
         catch(IOException ioe) {

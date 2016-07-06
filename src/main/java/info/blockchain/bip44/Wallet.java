@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -71,14 +72,16 @@ public class Wallet {
         strPath = dKey.getPathAsString();
     }
 
-    public Wallet(JSONObject jsonobj, NetworkParameters params) throws DecoderException, JSONException, IOException, MnemonicException.MnemonicLengthException {
+    public Wallet(JSONObject jsonobj, NetworkParameters params, Locale locale) throws DecoderException, JSONException, IOException, MnemonicException.MnemonicLengthException {
 
         this.params = params;
         seed = Hex.decodeHex(((String)jsonobj.get("hex_seed")).toCharArray());
         strPassphrase = (String)jsonobj.getString("passphrase");
         int nbAccounts = jsonobj.getJSONArray("accounts").length();
 
-        InputStream wis = Main.class.getResourceAsStream("/wordlist/english.txt");
+        InputStream wis = this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("wordlist/" + locale.toString() + ".txt");
         MnemonicCode mc = null;
         if(wis != null) {
             mc = new MnemonicCode(wis, WalletFactory.BIP39_ENGLISH_SHA256);
