@@ -17,14 +17,13 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 /**
  *
- * WalletFactory.java : singleton class for creating/restoring/reading BIP44 HD wallet
+ * WalletFactory.java : Class for creating/restoring/reading BIP44 HD wallet
  *
  * BIP44 extension of Bitcoinj
  *
@@ -33,56 +32,14 @@ public class WalletFactory {
 
     public static final String BIP39_ENGLISH_SHA256 = "ad90bf3beb7b0eb7e5acd74727dc0da96e0a280a258354e7293fb7e211ac03db";
 
-    private static WalletFactory instance = null;
-    private static List<Wallet> wallets = null;
-    private static Wallet watch_only_wallet = null;
+    private Logger mLogger = LoggerFactory.getLogger(WalletFactory.class);
 
-    private static Logger mLogger = LoggerFactory.getLogger(WalletFactory.class);
+  	private Locale locale = null;
 
-  	private static Locale locale = null;
+    public String strJSONFilePath = null;
 
-    public static String strJSONFilePath = null;
-
-    private WalletFactory()	{ ; }
-
-    /**
-     * Return instance for a full wallet including seed and private keys.
-     *
-     * @return WalletFactory
-     *
-     */
-    public static WalletFactory getInstance() {
-
-        if (instance == null) {
-			      locale = new Locale("en", "US");
-            wallets = new ArrayList<Wallet>();
-            instance = new WalletFactory();
-        }
-
-        return instance;
-    }
-
-    /**
-     * Return instance for a watch only wallet. No seed, no private keys.
-     *
-     * @param  xpub restore these accounts only
-     *
-     * @return WalletFactory
-     *
-     */
-    public static WalletFactory getInstance(String[] xpub) throws AddressFormatException {
-
-        if(instance == null) {
-            locale = new Locale("en", "US");
-            wallets = new ArrayList<Wallet>();
-            instance = new WalletFactory();
-        }
-
-        if(watch_only_wallet == null) {
-        	watch_only_wallet = new Wallet(MainNetParams.get(), xpub);
-        }
-
-        return instance;
+    public WalletFactory()	{
+        locale = new Locale("en", "US");
     }
 
 	public void setJSONFilePath(String path)	{
@@ -144,13 +101,9 @@ public class WalletFactory {
             wis.close();
         }
         else {
-            System.out.println("cannot read BIP39 word list");
             mLogger.info("cannot read BIP39 word list");
 			return null;
         }
-
-        wallets.clear();
-        wallets.add(hdw);
 
         return hdw;
     }
@@ -211,65 +164,11 @@ public class WalletFactory {
 			return null;
         }
 
-        wallets.clear();
-        wallets.add(hdw);
-
         return hdw;
     }
 
-    /**
-     * Get wallet for this instance.
-     *
-     * @return Wallet
-     *
-     */
-    public Wallet get() throws IOException, MnemonicException.MnemonicLengthException {
-
-        if(wallets.size() < 1) {
-            wallets.clear();
-            wallets.add(newWallet(12, "", 1));
-        }
-
-        return wallets.get(0);
-    }
-
-    /**
-     * Set wallet for this instance.
-     *
-     * @param  wallet
-     *
-     */
-    public void set(Wallet wallet)	{
-
-        if(wallet != null)	{
-            wallets.clear();
-            wallets.add(wallet);
-        }
-
-    }
-
-    /**
-     * Return watch only wallet for this instance.
-     *
-     * @return Wallet
-     *
-     */
-    public Wallet getWatchOnlyWallet()   {
-    	return watch_only_wallet;
-    }
-
-    /**
-     * Set watch only wallet for this instance.
-     *
-     * @param  wallet
-     *
-     */
-    public void setWatchOnlyWallet(Wallet wallet)   {
-    	watch_only_wallet = wallet;
-    }
-
-    public void saveWalletToJSON(String password) throws MnemonicException.MnemonicLengthException, IOException, JSONException {
-        serialize(get().toJSON(), password);
+    public void saveWalletToJSON(Wallet wallet, String password) throws MnemonicException.MnemonicLengthException, IOException, JSONException {
+        serialize(wallet.toJSON(), password);
     }
 
     public Wallet restoreWalletfromJSON(String password) throws DecoderException, MnemonicException.MnemonicLengthException {
@@ -291,9 +190,6 @@ public class WalletFactory {
         catch(JSONException je) {
             je.printStackTrace();
         }
-
-        wallets.clear();
-        wallets.add(hdw);
 
         return hdw;
     }
@@ -357,10 +253,5 @@ public class WalletFactory {
         }
 
         return node;
-    }
-
-    public void wipe(){
-        watch_only_wallet = null;
-        instance = null;
     }
 }
