@@ -1,11 +1,15 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.WebUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.MnemonicException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,6 +102,7 @@ public class PayloadFactory	{
      */
     public void wipe() {
         instance = null;
+        WalletFactory.getInstance().setWatchOnlyWallet(null);
     }
 
     /**
@@ -488,5 +493,141 @@ public class PayloadFactory	{
         setNew(true);
 
         return payload;
+    }
+
+    //TODO these probably need some refactoring - moved as is from android
+    public String getChangeAddress(int accountIndex) throws Exception {
+        int changeIdx = get().getHdWallet().getAccounts().get(accountIndex).getIdxChangeAddresses();
+        if (!get().isDoubleEncrypted()) {
+            return WalletFactory.getInstance().get().getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
+        } else {
+            return WalletFactory.getInstance().getWatchOnlyWallet().getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
+        }
+    }
+
+    public ECKey getECKey(int accountIndex, String path) throws Exception{
+        String[] s = path.split("/");
+        Address hd_address = null;
+        if (!PayloadFactory.getInstance().get().isDoubleEncrypted()) {
+            hd_address = WalletFactory.getInstance().get().getAccount(accountIndex).getChain(Integer.parseInt(s[1])).getAddressAt(Integer.parseInt(s[2]));
+        } else {
+            hd_address = WalletFactory.getInstance().getWatchOnlyWallet().getAccount(accountIndex).getChain(Integer.parseInt(s[1])).getAddressAt(Integer.parseInt(s[2]));
+        }
+        return PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+    }
+
+    public interface AccountAddListener{
+        void onAccountAddSuccess(Account account);
+        void onAccountAddFail();
+        void onPayloadSaveFail();
+    }
+
+    public void addAccount(String accountLabel, AccountAddListener listener) throws Exception{
+        Account account = null;
+
+        //If double encrypted
+        //Ensure watch-only wallet (no private keys) is in sync with hd wallet before adding account
+        if (PayloadFactory.getInstance().get().isDoubleEncrypted()) {
+            CharSequenceX tempPassword = PayloadFactory.getInstance().getTempDoubleEncryptPassword();
+            String tempPasswordS = "";
+            if (tempPassword != null) tempPasswordS = tempPassword.toString();
+
+            String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                    PayloadFactory.getInstance().get().getHdWallet().getSeedHex(),
+                    PayloadFactory.getInstance().get().getSharedKey(),
+                    tempPasswordS,
+                    PayloadFactory.getInstance().get().getDoubleEncryptionPbkdf2Iterations());
+
+            Wallet hdw = WalletFactory.getInstance().restoreWallet(decrypted_hex, "", PayloadFactory.getInstance().get().getHdWallet().getAccounts().size());
+            WalletFactory.getInstance().setWatchOnlyWallet(hdw);
+        }
+
+        //Add account
+        try {
+            account = new HDPayloadBridge().addAccount(accountLabel);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //Save payload
+        if (PayloadFactory.getInstance().put()) {
+            listener.onAccountAddSuccess(account);
+        } else {
+            listener.onPayloadSaveFail();
+        }
+
+        //Reset 2nd pwd
+        PayloadFactory.getInstance().setTempDoubleEncryptPassword(new CharSequenceX(""));
+    }
+
+    public boolean setDoubleEncryptPassword(String password, boolean isHD) {
+
+        if (DoubleEncryptionFactory.getInstance().validateSecondPassword(PayloadFactory.getInstance().get().getDoublePasswordHash(),
+                PayloadFactory.getInstance().get().getSharedKey(),
+                new CharSequenceX(password),
+                PayloadFactory.getInstance().get().getDoubleEncryptionPbkdf2Iterations())) {
+
+            if(isHD) {
+                String encrypted_hex = PayloadFactory.getInstance().get().getHdWallet().getSeedHex();
+                String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                        encrypted_hex,
+                        PayloadFactory.getInstance().get().getSharedKey(),
+                        password,
+                        PayloadFactory.getInstance().get().getDoubleEncryptionPbkdf2Iterations());
+
+                Wallet hdw = null;
+                try {
+                    hdw = WalletFactory.getInstance().restoreWallet(decrypted_hex, "", PayloadFactory.getInstance().get().getHdWallet().getAccounts().size());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                WalletFactory.getInstance().setWatchOnlyWallet(hdw);
+            }else{
+                PayloadFactory.getInstance().setTempDoubleEncryptPassword(new CharSequenceX(password));
+            }
+
+            return true;
+
+        }else{
+            return false;
+        }
+    }
+
+    public String[] getMnemonicForDoubleEncryptedWallet() {
+
+        if (PayloadFactory.getInstance().getTempDoubleEncryptPassword().toString().length() == 0) {
+            return null;
+        }
+
+        // Decrypt seedHex (which is double encrypted in this case)
+        String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                PayloadFactory.getInstance().get().getHdWallet().getSeedHex(),
+                PayloadFactory.getInstance().get().getSharedKey(),
+                PayloadFactory.getInstance().getTempDoubleEncryptPassword().toString(),
+                PayloadFactory.getInstance().get().getDoubleEncryptionPbkdf2Iterations());
+
+        String mnemonic = null;
+
+        // Try to create a using the decrypted seed hex
+        try {
+            Wallet hdw = WalletFactory.getInstance().get();
+            WalletFactory.getInstance().restoreWallet(decrypted_hex, "", 1);
+
+            mnemonic = WalletFactory.getInstance().get().getMnemonic();
+
+            WalletFactory.getInstance().set(hdw);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (mnemonic != null && mnemonic.length() > 0) {
+
+                return mnemonic.split("\\s+");
+
+            } else {
+                return null;
+            }
+        }
     }
 }
