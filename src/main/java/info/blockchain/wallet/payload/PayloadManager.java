@@ -117,6 +117,20 @@ public class PayloadManager {
         if (payload.getJSON() == null && listener != null) {
             listener.onInitPairFail();
         }
+
+        //bip44 wallet need to be kept in sync
+        if (payload.getHdWallet() != null && payload.getHdWallet().getSeedHex() != null) {
+
+            if (!payload.isDoubleEncrypted()) {
+
+                wallet = bip44WalletFactory.restoreWallet(payload.getHdWallet().getSeedHex(),
+                        payload.getHdWallet().getPassphrase(),
+                        payload.getHdWallet().getAccounts().size());
+            }else{
+                watchOnlyWallet = new Wallet(MainNetParams.get(), getXPUBs(true));
+            }
+        }
+
         if(listener != null){
             listener.onInitSuccess();
         }
@@ -660,8 +674,6 @@ public class PayloadManager {
             if (!payload.isDoubleEncrypted()) {
                 addr = wallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
             } else {
-                //TODO - getXpubs?
-                watchOnlyWallet = new Wallet(MainNetParams.get(), getXPUBs(true));
                 addr = watchOnlyWallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
             }
 
@@ -677,9 +689,6 @@ public class PayloadManager {
         }
     }
 
-
-
-
     public ECKey getECKey(int accountIndex, String path) throws Exception {
 
         String[] s = path.split("/");
@@ -691,8 +700,6 @@ public class PayloadManager {
         }
         return PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
     }
-
-
 
     public String getXpubFromAccountIndex(int accountIdx) {
         return payload.getHdWallet().getAccounts().get(accountIdx).getXpub();
@@ -735,21 +742,6 @@ public class PayloadManager {
 
         ArrayList<String> xpubs = new ArrayList<String>();
 
-        if (!payload.isDoubleEncrypted()) {
-
-            //TODO - restoreWallet?
-            if (payload.getHdWallet() != null) {
-
-                bip44WalletFactory.restoreWallet(payload.getHdWallet().getSeedHex(),
-                        payload.getHdWallet().getPassphrase(),
-                        payload.getHdWallet().getAccounts().size());
-            }
-
-        }
-
-        //
-        // null test added for 'V2' mode
-        //
         if (payload.getHdWallet() != null) {
             int nb_accounts = payload.getHdWallet().getAccounts().size();
             for (int i = 0; i < nb_accounts; i++) {
@@ -767,9 +759,6 @@ public class PayloadManager {
 
         return xpubs.toArray(new String[xpubs.size()]);
     }
-
-
-
 
     public interface AccountAddListener {
         void onAccountAddSuccess(Account account);

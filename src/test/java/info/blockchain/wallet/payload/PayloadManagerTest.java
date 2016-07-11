@@ -91,10 +91,9 @@ public class PayloadManagerTest {
         for(int i = 0; i < expectedAddresses0.length; i++) {
             String receiveAddress = payloadManager.getReceiveAddress(accountIndex);
             assertThat(receiveAddress, is(expectedAddresses0[i]));
-
-            String changeAddress = payloadManager.getChangeAddress(accountIndex);
-            //TODO
         }
+//        String changeAddress = payloadManager.getChangeAddress(0);
+//        assertThat(changeAddress, is("16hgR6bjr99X6NhrsWuDR6NLpCLEacUNk"));
 
         payloadManager.addAccount("", null);//add account - index 1
         payloadManager.addAccount("", null);//add account - index 2
@@ -114,12 +113,12 @@ public class PayloadManagerTest {
                 "19WEjX2zgXdn6FCLmRAJ5Ty593GkJ77pNj"};
 
         for(int i = 0; i < expectedAddresses4.length; i++) {
-            String receiveAddress = payloadManager.getReceiveAddress(accountIndex);
+            String receiveAddress = payloadManager.getReceiveAddress(4);
             assertThat(receiveAddress, is(expectedAddresses4[i]));
-
-            String changeAddress = payloadManager.getChangeAddress(accountIndex);
-            //TODO
         }
+
+//        changeAddress = payloadManager.getChangeAddress(accountIndex);
+//        assertThat(changeAddress, is("1KCJ4RQyXGwcQCKhuuGSczbDXMzQDDtCvA"));
     }
 
 
