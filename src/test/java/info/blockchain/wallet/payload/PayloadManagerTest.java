@@ -74,136 +74,22 @@ public class PayloadManagerTest {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
 
-        String mnemonic = "all all all all all all all all all all all all";
-        Payload payload = payloadManager.restoreHDWallet(mnemonic, "", "");
+        String mnemonic = "pen news pluck gaze suit moon pride potato senior keep patient ensure";
+        payloadManager.restoreHDWallet(mnemonic, "", "");
 
-        int accountIndex = 0;
-        String[] expectedAddresses0 = {"1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL",
-                "1GWFxtwWmNVqotUPXLcKVL2mUKpshuJYo",
-                "1Eni8JFS4yA2wJkicc3yx3QzCNzopLybCM",
-                "124dT55Jqpj9AKTyJnTX6G8RkUs7ReTzun",
-                "15T9DSqc6wjkPxcr2MNVSzF9JAePdvS3n1",
-                "1GA9u9TfCG7SWmKCveBumdA1TZpfom6ZdJ",
-                "1PogPE3bXc84abzEuM2rJEZf2vCbCEZzXz",
-                "176U2WABbj4h5PCrxE963wmxzXd2Mw6bP4",
-                "1HRZDR7CmLnq59w6mtzNa7SHtVWPSxdgKA"};
+        assertThat(payloadManager.getReceiveAddress(0), is("11LjwroZHsKvWiJqbJezQpnTjY7g7oup3"));
+        assertThat(payloadManager.getChangeAddress(0), is("167WqTeExjQJH54k3ZpjCnUaf1fuGzbk5r"));
 
-        for(int i = 0; i < expectedAddresses0.length; i++) {
-            String receiveAddress = payloadManager.getReceiveAddress(accountIndex);
-            assertThat(receiveAddress, is(expectedAddresses0[i]));
-        }
-//        String changeAddress = payloadManager.getChangeAddress(0);
-//        assertThat(changeAddress, is("16hgR6bjr99X6NhrsWuDR6NLpCLEacUNk"));
+        payloadManager.addAccount("",null);
+        assertThat(payloadManager.getReceiveAddress(1), is("17b3y6mxmU7ZTNAWx33384ytQr3jH9tV2n"));
+        assertThat(payloadManager.getChangeAddress(1), is("1Kk4MiERVf9ZL2uAKbvpPN1Fa5hrSPiXy4"));
 
-        payloadManager.addAccount("", null);//add account - index 1
-        payloadManager.addAccount("", null);//add account - index 2
-        payloadManager.addAccount("", null);//add account - index 3
-        payloadManager.addAccount("", null);//add account - index 4
+        payloadManager.addAccount("",null);
+        assertThat(payloadManager.getReceiveAddress(2), is("18pEjskhpR7pZn1Rh4UrUWHMFusvfMsymX"));
+        assertThat(payloadManager.getChangeAddress(2), is("1BW6kawa8EEKpyFeN6QGiXTzxs2Mi7h137"));
 
-        //Let's test index 4
-        accountIndex = 4;
-        String[] expectedAddresses4 = {"1HdTbfFfHLBbMB7Wr2pGmZUhEz9TMK6Q96",
-                "1DqQYGbyPBCTh22EifruQ2CQdudayzXKaZ",
-                "1CpBgovtuWNzwFVPBmfJehtytXEmYD7ST7",
-                "167tYTuBweEux6EhiNA1g2fptQoqFdC5XY",
-                "1AyvLEtEZ7RBKxrqbeC3UemVzkKhWNfBLN",
-                "13TrnmcyZwM4pW2vAbzk2pzviV9NyvNN3q",
-                "12yv1bjTqcztNWMpuyZBRgpwvjyaiKSMvz",
-                "1LZEWagvzxg4vLQSVFmNksUvfQQ9N7yGqA",
-                "19WEjX2zgXdn6FCLmRAJ5Ty593GkJ77pNj"};
-
-        for(int i = 0; i < expectedAddresses4.length; i++) {
-            String receiveAddress = payloadManager.getReceiveAddress(4);
-            assertThat(receiveAddress, is(expectedAddresses4[i]));
-        }
-
-//        changeAddress = payloadManager.getChangeAddress(accountIndex);
-//        assertThat(changeAddress, is("1KCJ4RQyXGwcQCKhuuGSczbDXMzQDDtCvA"));
+        payloadManager.addAccount("",null);
+        assertThat(payloadManager.getReceiveAddress(3), is("17te2ij1Lhm8YuMJoSsVFVDkSpQYzCyRF6"));
+        assertThat(payloadManager.getChangeAddress(3), is("1Fzsc6beQYu6qXrRXbrhR3zpFruhcygsxU"));
     }
-
-
-
-
-//    @Test
-//    public void createWallet_withPassphrase_shouldPass() throws Exception {
-//
-//        String passphrase = "passphrase";
-//
-//        Wallet wallet = bciWalletFactory.createWallet(passphrase);
-//
-//        assertThat(wallet.getMnemonic().split(" ").length, is(12));//All Bci mnemonics are 12
-//        assertThat(wallet.getAccounts().size(), is(1));//Newly created wallets will contain 1 account
-//        assertThat(wallet.getPassphrase(), is(passphrase));
-//    }
-//
-//    @Test
-//    public void createWallet_withEmptyPassphrase_shouldPass() throws Exception {
-//
-//        String passphrase = "";
-//
-//        Wallet wallet = bciWalletFactory.createWallet(passphrase);
-//
-//        assertThat(wallet.getMnemonic().split(" ").length, is(12));//All Bci mnemonics are 12
-//        assertThat(wallet.getAccounts().size(), is(1));//Newly created wallets will contain 1 account
-//        assertThat(wallet.getPassphrase(), is(passphrase));
-//    }
-//
-//    @Test
-//    public void restoreWallet_withGoodMnemonic_shouldPass() throws Exception {
-//
-//        String goodMnemonic = "all all all all all all all all all all all all";
-//        String passphrase = "myPassPhrase";
-//        int accountListSize = 4;
-//
-//        Wallet wallet = bciWalletFactory.restoreWallet(goodMnemonic, passphrase, accountListSize);
-//
-//        String[] restoredMnemonic = wallet.getMnemonic().split(" ");
-//        assertThat(restoredMnemonic.length, is(12));//All Bci mnemonics are 12
-//        assertThat(wallet.getAccounts().size(), is(accountListSize));
-//        assertThat(wallet.getPassphrase(), is(passphrase));
-//        for (int i = 0; i < restoredMnemonic.length; i++){
-//            assertThat(restoredMnemonic[i], is("all"));
-//        }
-//    }
-//
-//    @Test
-//    public void restoreWallet_withBadMnemonic_shouldFail() {
-//
-//        String passphrase = "myPassPhrase";
-//        int accountListSize = 4;
-//
-//        try {
-//            String badMnemonic_Length_notMultipleOf3 = "all all all all all all all all all all all";
-//            bciWalletFactory.restoreWallet(badMnemonic_Length_notMultipleOf3, passphrase, accountListSize);
-//        } catch (MnemonicException.MnemonicLengthException e) {
-//            assertThat("Mnemonic with incorrect length should not produce wallet", true);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        try {
-//            String badMnemonic_incorrectWord = "all all all all all all all all all all all fakeWord";
-//            bciWalletFactory.restoreWallet(badMnemonic_incorrectWord, passphrase, accountListSize);
-//        } catch (Exception e) {
-//            assertThat("Mnemonic with incorrect word should not produce wallet", true);
-//        }
-//
-//        try {
-//            String badMnemonic_badChecksum = "all all all all all all all all all all all all all all all all all all all all all all all all all all all all all all all all all";
-//            bciWalletFactory.restoreWallet(badMnemonic_badChecksum, passphrase, accountListSize);
-//        } catch (Exception e) {
-//            assertThat("Mnemonic with bad checksum should not produce wallet", true);
-//        }
-//    }
-//
-//    @Test
-//    public void createWatchOnlyWallet_shouldPass() throws Exception {
-//
-//        String[] xpubs = {"xpub6BiVtCpG9fQPxnPmHXG8PhtzQdWC2Su4qWu6XW9tpWFYhxydCLJGrWBJZ5H6qTAHdPQ7pQhtpjiYZVZARo14qHiay2fvrX996oEP42u8wZy",
-//                "xpub6BiVtCpG9fQQ1EW99bMSYwySbPWvzTFRQZCFgTmV3samLSZAYU7C3f4Je9vkNh7h1GAWi5Fn93BwoGBy9EAXbWTTgTnVKAbthHpxM1fXVRL"};
-//
-//        Wallet wallet = bciWalletFactory.createWatchOnlyWallet(xpubs);
-//
-//        assertThat(wallet.getAccounts().size(), is(2));
-//    }
 }

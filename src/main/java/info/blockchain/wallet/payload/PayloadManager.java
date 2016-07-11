@@ -99,6 +99,9 @@ public class PayloadManager {
         void onInitCreateFail(String error);
     }
 
+    /*
+    Initiate payload after pairing or after PIN entered
+     */
     public void initiatePayload(String sharedKey, String guid, CharSequenceX password, InitiatePayloadListener listener) throws MnemonicException.MnemonicWordException, DecoderException, IOException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException {
 
         payload = getPayloadFromServer(guid, sharedKey, password);
@@ -678,9 +681,6 @@ public class PayloadManager {
             }
 
             ReceiveAddress receiveAddress = new ReceiveAddress(addr.getAddressString(), idx);
-
-            //TODO
-            payload.getHdWallet().getAccounts().get(accountIndex).incReceive();
             return receiveAddress.getAddress();
 
         } catch (Exception e) {
