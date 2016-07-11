@@ -101,7 +101,7 @@ public class PayloadManager {
 
     public void initiatePayload(String sharedKey, String guid, CharSequenceX password, InitiatePayloadListener listener) throws MnemonicException.MnemonicWordException, DecoderException, IOException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException {
 
-        getPayloadFromServer(guid, sharedKey, password);
+        payload = getPayloadFromServer(guid, sharedKey, password);
 
         if (payload == null || payload.stepNumber != 9) {
             String error = "";
@@ -118,10 +118,6 @@ public class PayloadManager {
             listener.onInitPairFail();
         }
         if(listener != null){
-            wallet = bip44WalletFactory.restoreWallet(payload.getHdWallet().getSeedHex(),
-                    password.toString(),
-                    payload.getHdWallet().getAccounts().size());
-
             listener.onInitSuccess();
         }
     }
@@ -209,6 +205,7 @@ public class PayloadManager {
      */
     private Payload getPayloadFromServer(String guid, String sharedKey, CharSequenceX password) {
 
+        Payload payload = null;
         String checksum = null;
 
         try {
@@ -540,7 +537,6 @@ public class PayloadManager {
         wallet = bip44WalletFactory.restoreWallet(seed, passphrase, defaultAccountSize);
 
         payload = createBlockchainWallet(defaultAccountName, wallet);
-        payload.setUpgraded(true);
         if(!savePayloadToServer()){
             //if save failed don't return payload
             payload = null;
@@ -927,6 +923,7 @@ public class PayloadManager {
 
         payload.setHdWallets(payloadHDWallet);
 
+        payload.setUpgraded(true);
         setPayload(payload);
         setNew(true);
 
