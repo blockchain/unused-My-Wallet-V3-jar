@@ -1,7 +1,5 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.wallet.crypto.AESUtil;
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -11,7 +9,7 @@ import org.json.JSONException;
 
 public class Options {
 
-    private int iterations = PayloadFactory.WalletPbkdf2Iterations;
+    private int iterations = PayloadManager.WalletPbkdf2Iterations;
     private long fee_per_kb = 10000L;
     private long logout_time = 600000L;
     private List<String> additionalSeeds = null;

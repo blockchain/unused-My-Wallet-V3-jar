@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import org.spongycastle.util.encoders.Hex;
 
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.payload.PayloadFactory;
 
 public class DoubleEncryptionFactory	{
 
@@ -66,7 +65,7 @@ public class DoubleEncryptionFactory	{
 	}
 
 	public boolean isActivated() {
-//    return (PayloadFactory.getInstance().getTempDoubleEncryptPassword() != null && PayloadFactory.getInstance().getTempDoubleEncryptPassword().length() > 1);
+//    return (PayloadManager.getInstance().getTempDoubleEncryptPassword() != null && PayloadManager.getInstance().getTempDoubleEncryptPassword().length() > 1);
     return false;
 	}
 

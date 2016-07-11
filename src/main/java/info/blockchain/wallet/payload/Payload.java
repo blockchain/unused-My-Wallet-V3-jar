@@ -1,6 +1,5 @@
 package info.blockchain.wallet.payload;
 
-import org.bitcoinj.core.AddressFormatException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import info.blockchain.wallet.crypto.AESUtil;
 
 /**
  *
@@ -146,7 +143,7 @@ public class Payload {
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
 
         for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == PayloadFactory.NORMAL_ADDRESS &&
+            if(legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS &&
                !legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress);
             }
@@ -193,7 +190,7 @@ public class Payload {
         List<String> addrs = new ArrayList<String>();
 
         for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == PayloadFactory.NORMAL_ADDRESS) {
+            if(legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS) {
               addrs.add(legacyAddress.getAddress());
             }
         }
