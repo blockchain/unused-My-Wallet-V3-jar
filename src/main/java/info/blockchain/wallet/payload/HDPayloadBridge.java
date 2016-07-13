@@ -108,7 +108,7 @@ public class HDPayloadBridge {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public boolean upgradeV2PayloadToV3(Payload payload, CharSequenceX secondPassword,boolean isNewlyCreated, String defaultAccountName) throws Exception {
+    public boolean upgradeV2PayloadToV3(Payload payload, CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName) throws Exception {
 
         //
         // create HD wallet and sync w/ payload

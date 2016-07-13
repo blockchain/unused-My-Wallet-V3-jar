@@ -604,10 +604,10 @@ public class PayloadManager {
         boolean isUpgradeSuccessful = hdPayloadBridge.upgradeV2PayloadToV3(payload, secondPassword, isNewlyCreated, defaultAccountName);
         if(isUpgradeSuccessful) {
 
-            updateBalancesAndTransactions();
-            cachePayload();
-
             if (savePayloadToServer()) {
+                wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
+                updateBalancesAndTransactions();
+                cachePayload();
                 listener.onUpgradeSuccess();
             }else{
                 listener.onUpgradeFail();//failed to save
