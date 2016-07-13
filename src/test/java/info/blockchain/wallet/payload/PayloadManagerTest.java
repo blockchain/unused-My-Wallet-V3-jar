@@ -1,14 +1,9 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.params.MainNetParams;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -29,51 +24,38 @@ public class PayloadManagerTest {
         payload.setHdWallets(new ArrayList<HDWallet>());//remove hd
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        ECKey ecKey = payloadManager.newLegacyAddress();
+        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android","6.6");
+        if(payloadManager.addLegacyAddress(legacyAddress)) {
+            final String guidOriginal = payloadManager.getPayload().getGuid();
 
-        String encryptedKey = new String(Base58.encode(ecKey.getPrivKeyBytes()));
-        if (payloadManager.getPayload().isDoubleEncrypted()) {
-            encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey, payloadManager.getPayload().getSharedKey(), payloadManager.getTempDoubleEncryptPassword().toString(), payloadManager.getPayload().getOptions().getIterations());
-        }
-        final LegacyAddress legacyAddress = new LegacyAddress();
-        legacyAddress.setEncryptedKey(encryptedKey);
-        legacyAddress.setAddress(ecKey.toAddress(MainNetParams.get()).toString());
-        legacyAddress.setCreatedDeviceName("android");
-        legacyAddress.setCreated(System.currentTimeMillis());
-
-        Payload updatedPayload = payloadManager.getPayload();
-        List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddresses();
-        updatedLegacyAddresses.add(legacyAddress);
-        updatedPayload.setLegacyAddresses(updatedLegacyAddresses);
-        payloadManager.setPayload(updatedPayload);
-        payloadManager.savePayloadToServer();
-        final String guidOriginal = payloadManager.getPayload().getGuid();
-
-        //Now we have legacy wallet (only addresses)
-        payloadManager.upgradeV2PayloadToV3(new CharSequenceX(""), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
-            public void onDoubleEncryptionPasswordError() {
-                assertThat("upgradeV2PayloadToV3 failed",false);
-            }
-
-            public void onUpgradeSuccess() {
-
-                assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
-                assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
-
-                String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
-                try {
-                    assertThat(payloadManager.getHDMnemonic().split(" ").length, is(12));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    assertThat("upgradeV2PayloadToV3 failed",false);
+            //Now we have legacy wallet (only addresses)
+            payloadManager.upgradeV2PayloadToV3(new CharSequenceX(""), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
+                public void onDoubleEncryptionPasswordError() {
+                    assertThat("upgradeV2PayloadToV3 failed", false);
                 }
-            }
 
-            public void onUpgradeFail() {
-                assertThat("upgradeV2PayloadToV3 failed",false);
-            }
-        });
+                public void onUpgradeSuccess() {
+
+                    assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
+                    assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
+
+                    String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
+                    assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
+                    try {
+                        assertThat(payloadManager.getHDMnemonic().split(" ").length, is(12));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        assertThat("upgradeV2PayloadToV3 failed", false);
+                    }
+                }
+
+                public void onUpgradeFail() {
+                    assertThat("upgradeV2PayloadToV3 failed", false);
+                }
+            });
+        }else{
+            assertThat("adding new Legacy address failed failed", false);
+        }
 
         PayloadManager.getInstance().wipe();
     }

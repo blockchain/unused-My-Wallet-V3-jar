@@ -8,8 +8,10 @@ import info.blockchain.wallet.util.*;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.MnemonicException;
+import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
@@ -808,7 +810,35 @@ public class PayloadManager {
     Generate V2 legacy address
     When called from Android - First apply PRNGFixes
      */
-    public ECKey newLegacyAddress() {
+    public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion){
+        ECKey ecKey = getRandomECKey();
+
+        String encryptedKey = new String(Base58.encode(ecKey.getPrivKeyBytes()));
+        if (payload.isDoubleEncrypted()) {
+            encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
+                    payload.getSharedKey(),
+                    getTempDoubleEncryptPassword().toString(),
+                    payload.getOptions().getIterations());
+        }
+
+        final LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setEncryptedKey(encryptedKey);
+        legacyAddress.setAddress(ecKey.toAddress(MainNetParams.get()).toString());
+        legacyAddress.setCreatedDeviceName(deviceName);
+        legacyAddress.setCreated(System.currentTimeMillis());
+        legacyAddress.setCreatedDeviceVersion(deviceVersion);
+
+        return legacyAddress;
+    }
+
+    public boolean addLegacyAddress(LegacyAddress legacyAddress){
+        List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddresses();
+        updatedLegacyAddresses.add(legacyAddress);
+        payload.setLegacyAddresses(updatedLegacyAddresses);
+        return savePayloadToServer();
+    }
+
+    private ECKey getRandomECKey() {
 
         String result = null;
         byte[] data = null;
