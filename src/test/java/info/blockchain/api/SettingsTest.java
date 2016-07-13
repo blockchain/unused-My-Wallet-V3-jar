@@ -12,14 +12,13 @@ import static org.hamcrest.core.Is.is;
 public class SettingsTest {
 
     String mnemonic = "all all all all all all all all all all all all";
-    String password = "MyTestWallet";
     Settings settingsApi;
 
     @Before
     public void setUp() throws Exception {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
-        Payload payload = payloadManager.restoreHDWallet(mnemonic, password, "");
+        Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "");
 
         settingsApi = new Settings(payload.getGuid(), payload.getSharedKey());
     }

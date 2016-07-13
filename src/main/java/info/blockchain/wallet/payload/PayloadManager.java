@@ -2,7 +2,6 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.util.*;
@@ -11,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.MnemonicException;
-import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
@@ -24,7 +22,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  *
@@ -57,9 +54,7 @@ public class PayloadManager {
 
     private static double version = 2.0;
 
-    private static WalletFactory bip44WalletFactory;
-    private static int defaultMnemonicLength = 12;//Default for bci wallets
-    private static int defaultAccountSize = 1;//Default for bci wallets
+    private static HDPayloadBridge hdPayloadBridge;
     private static Wallet wallet;
     private static Wallet watchOnlyWallet;
 
@@ -78,7 +73,7 @@ public class PayloadManager {
             instance = new PayloadManager();
             payload = new Payload();
             cached_payload = "";
-            bip44WalletFactory = new WalletFactory();
+            hdPayloadBridge = new HDPayloadBridge();
         }
 
         return instance;
@@ -102,7 +97,7 @@ public class PayloadManager {
     /*
     Initiate payload after pairing or after PIN entered
      */
-    public void initiatePayload(String sharedKey, String guid, CharSequenceX password, InitiatePayloadListener listener) throws MnemonicException.MnemonicWordException, DecoderException, IOException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException {
+    public void initiatePayload(String sharedKey, String guid, CharSequenceX password, InitiatePayloadListener listener) throws Exception {
 
         payload = getPayloadFromServer(guid, sharedKey, password);
 
@@ -121,16 +116,14 @@ public class PayloadManager {
             listener.onInitPairFail();
         }
 
-        //bip44 wallet need to be kept in sync
-        if (payload.getHdWallet() != null && payload.getHdWallet().getSeedHex() != null) {
+        //HD payload
+        if (payload.getHdWallet() != null) {
 
-            if (!payload.isDoubleEncrypted()) {
-
-                wallet = bip44WalletFactory.restoreWallet(payload.getHdWallet().getSeedHex(),
-                        payload.getHdWallet().getPassphrase(),
-                        payload.getHdWallet().getAccounts().size());
+            //bip44 wallet need to be kept in sync
+            if (payload.isDoubleEncrypted()) {
+                watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
             }else{
-                watchOnlyWallet = new Wallet(MainNetParams.get(), getXPUBs(true));
+                wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
             }
         }
 
@@ -484,7 +477,7 @@ public class PayloadManager {
                         payload.getDoubleEncryptionPbkdf2Iterations());
 
                 try {
-                    watchOnlyWallet = bip44WalletFactory.restoreWallet(decrypted_hex, "", payload.getHdWallet().getAccounts().size());
+                    watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return false;
@@ -518,7 +511,7 @@ public class PayloadManager {
 
         // Try to create a using the decrypted seed hex
         try {
-            watchOnlyWallet = bip44WalletFactory.restoreWallet(decrypted_hex, "", 1);
+            watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
             mnemonic = watchOnlyWallet.getMnemonic();
 
         } catch (Exception e) {
@@ -534,12 +527,14 @@ public class PayloadManager {
         }
     }
 
-    public Payload createHDWallet(String passphrase, String defaultAccountName) throws Exception {
+    public Payload createHDWallet(String payloadPassword, String defaultAccountName) throws Exception {
 
-        setTempPassword(new CharSequenceX(passphrase));
-        wallet = bip44WalletFactory.newWallet(defaultMnemonicLength, passphrase, defaultAccountSize);
+        setTempPassword(new CharSequenceX(payloadPassword));
+        HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet(defaultAccountName);
+        wallet = pair.wallet;
+        payload = pair.payload;
+        setNew(true);
 
-        payload = createBlockchainWallet(defaultAccountName, wallet);
         if(!savePayloadToServer()){
             //if save failed don't return payload
             payload = null;
@@ -548,12 +543,30 @@ public class PayloadManager {
         return payload;
     }
 
-    public Payload restoreHDWallet(String seed, String passphrase, String defaultAccountName) throws Exception {
+    public Payload restoreHDWallet(String payloadPassword, String seed, String defaultAccountName) throws Exception {
 
-        setTempPassword(new CharSequenceX(passphrase));
-        wallet = bip44WalletFactory.restoreWallet(seed, passphrase, defaultAccountSize);
+        setTempPassword(new CharSequenceX(payloadPassword));
+        HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.restoreHDWallet(seed, defaultAccountName);
+        wallet = pair.wallet;
+        payload = pair.payload;
+        setNew(true);
 
-        payload = createBlockchainWallet(defaultAccountName, wallet);
+        if(!savePayloadToServer()){
+            //if save failed don't return payload
+            payload = null;
+        }
+
+        return payload;
+    }
+
+    public Payload restoreHDWallet(String payloadPassword, String seed, String defaultAccountName, String passphrase) throws Exception {
+
+        setTempPassword(new CharSequenceX(payloadPassword));
+        HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.restoreHDWallet(seed, defaultAccountName, passphrase);
+        wallet = pair.wallet;
+        payload = pair.payload;
+        setNew(true);
+
         if(!savePayloadToServer()){
             //if save failed don't return payload
             payload = null;
@@ -571,9 +584,12 @@ public class PayloadManager {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public void upgradeV2PayloadToV3(CharSequenceX password, CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName, UpgradePayloadListener listener) throws Exception {
+    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
 
+        //Check if payload has 2nd password
         if (payload.isDoubleEncrypted()) {
+
+            //Validate 2nd password
             if (StringUtils.isEmpty(secondPassword) || !DoubleEncryptionFactory.getInstance().validateSecondPassword(
                     payload.getDoublePasswordHash(),
                     payload.getSharedKey(),
@@ -583,80 +599,23 @@ public class PayloadManager {
                 listener.onDoubleEncryptionPasswordError();
             }
         }
-        //
-        // create HD wallet and sync w/ payload
-        //
 
-        if (payload.getHdWallets() == null ||
-                payload.getHdWallets().size() == 0) {
+        //Upgrade
+        boolean isUpgradeSuccessful = hdPayloadBridge.upgradeV2PayloadToV3(payload, secondPassword, isNewlyCreated, defaultAccountName);
+        if(isUpgradeSuccessful) {
 
-            String xpub = null;
-            int attempts = 0;
-            boolean no_tx = false;
-
-            do {
-
-                attempts++;
-
-                wallet = bip44WalletFactory.newWallet(defaultMnemonicLength, "", defaultAccountSize);
-                HDWallet hdw = new HDWallet();
-                String seedHex = wallet.getSeedHex();
-                if (!StringUtils.isEmpty(secondPassword)) {
-                    seedHex = DoubleEncryptionFactory.getInstance().encrypt(
-                            seedHex,
-                            payload.getSharedKey(),
-                            secondPassword.toString(),
-                            payload.getDoubleEncryptionPbkdf2Iterations());
-                }
-
-                hdw.setSeedHex(seedHex);
-                List<Account> accounts = new ArrayList<Account>();
-                xpub = wallet.getAccount(0).xpubstr();
-                if (isNewlyCreated) {
-                    accounts.add(new Account());
-                    accounts.get(0).setXpub(xpub);
-                    String xpriv = wallet.getAccount(0).xprvstr();
-                    if (!StringUtils.isEmpty(secondPassword)) {
-                        xpriv = DoubleEncryptionFactory.getInstance().encrypt(
-                                xpriv,
-                                payload.getSharedKey(),
-                                secondPassword.toString(),
-                                payload.getDoubleEncryptionPbkdf2Iterations());
-                    }
-                    accounts.get(0).setXpriv(xpriv);
-                }
-                hdw.setAccounts(accounts);
-                payload.setHdWallets(hdw);
-                payload.setUpgraded(true);
-
-                payload.getHdWallet().getAccounts().get(0).setLabel(defaultAccountName);
-
-                try {
-                    no_tx = (MultiAddrFactory.getInstance().getXpubTransactionCount(xpub) == 0L);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            } while (!no_tx && attempts < 3);
-
-            if (!no_tx && isNewlyCreated) {
-                listener.onUpgradeFail();
-            } else {
-                if(!savePayloadToServer())
-                    listener.onUpgradeFail();
-            }
-        }
-
-        try {
             updateBalancesAndTransactions();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        List<Account> accounts = payload.getHdWallet().getAccounts();
-        payload.getHdWallet().setAccounts(accounts);
-        cachePayload();
+            cachePayload();
 
-        listener.onUpgradeSuccess();
+            if (savePayloadToServer()) {
+                listener.onUpgradeSuccess();
+            }else{
+                listener.onUpgradeFail();//failed to save
+            }
+        }else{
+            listener.onUpgradeFail();//failed to create
+        }
+
     }
 
     public String getChangeAddress(int accountIndex) throws Exception {
@@ -795,7 +754,7 @@ public class PayloadManager {
                     payload.getDoubleEncryptionPbkdf2Iterations());
 
             //Need to decrypt watch-only wallet before adding new xpub
-            watchOnlyWallet = bip44WalletFactory.restoreWallet(decrypted_hex, "", payload.getHdWallet().getAccounts().size());
+            watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
             watchOnlyWallet.addAccount();
 
             xpub = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xpubstr();
@@ -882,41 +841,6 @@ public class PayloadManager {
         }
 
         return ecKey;
-    }
-
-    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw) throws IOException, MnemonicException.MnemonicLengthException {
-
-        String guid = UUID.randomUUID().toString();
-        String sharedKey = UUID.randomUUID().toString();
-
-        Payload payload = new Payload();
-        payload.setGuid(guid);
-        payload.setSharedKey(sharedKey);
-
-        HDWallet payloadHDWallet = new HDWallet();
-        payloadHDWallet.setSeedHex(hdw.getSeedHex());
-
-        List<info.blockchain.bip44.Account> hdAccounts = hdw.getAccounts();
-        List<info.blockchain.wallet.payload.Account> payloadAccounts = new ArrayList<Account>();
-        for (int i = 0; i < hdAccounts.size(); i++) {
-            info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account(defaultAccountName);
-
-            String xpub = hdw.getAccounts().get(i).xpubstr();
-            account.setXpub(xpub);
-            String xpriv = hdw.getAccounts().get(i).xprvstr();
-            account.setXpriv(xpriv);
-
-            payloadAccounts.add(account);
-        }
-        payloadHDWallet.setAccounts(payloadAccounts);
-
-        payload.setHdWallets(payloadHDWallet);
-
-        payload.setUpgraded(true);
-        setPayload(payload);
-        setNew(true);
-
-        return payload;
     }
 
     public String getHDSeed() throws IOException, MnemonicException.MnemonicLengthException {

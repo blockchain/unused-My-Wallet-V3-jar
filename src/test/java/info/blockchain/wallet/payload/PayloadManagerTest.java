@@ -11,14 +11,12 @@ import static org.hamcrest.core.Is.is;
 public class PayloadManagerTest {
 
     @Test
-    public void newWallet_shouldPass() throws Exception {
+    public void createWallet_shouldPass() throws Exception {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
 
         String label = "Account 1";
-        String passphrase = "passphrase";
-
-        Payload payload = payloadManager.createHDWallet(passphrase, label);
+        Payload payload = payloadManager.createHDWallet("password",label);
 
         assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
         assertThat(payload.getHdWallet().getAccounts().get(0).getLabel(), is(label));
@@ -29,7 +27,7 @@ public class PayloadManagerTest {
     }
 
     @Test
-    public void restoreWallet_withMnemonic_shouldPass() throws Exception {
+    public void restoreWallet_withMnemonicNoPassphrase_shouldPass() throws Exception {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
 
@@ -42,7 +40,7 @@ public class PayloadManagerTest {
         String xpub4 = "xpub6BiVtCpG9fQQ77Qr7WArXSG3yWYm2bkRYpoSYtRkVEAk5nrcULBG8AeRYMMKVUXAsNeXdR7TGuL6SkUc4RF2YC7X4afLyZrT9NrrUFyotkH";
         String xpub5 = "xpub6BiVtCpG9fQQ8pVjVF7jm3kLahkNbQRkWGUvzsKQpXWYvhYD4d4UDADxZUL4xp9UwsDT5YgwNKofTWRtwJgnHkbNxuzLDho4mxfS9KLesGP";
 
-        Payload payload = payloadManager.restoreHDWallet(mnemonic, "", "");
+        Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "");
 
         assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
         assertThat(payload.getHdWallet().getSeedHex(), is(seedHex));
@@ -70,26 +68,66 @@ public class PayloadManagerTest {
     }
 
     @Test
+    public void restoreWallet_withMnemonicWithPassphrase_shouldPass() throws Exception {
+
+        PayloadManager payloadManager = PayloadManager.getInstance();
+
+        String mnemonic = "all all all all all all all all all all all all";
+        String passphrase = "myPassphrase";
+
+        String seedHex = "0660cc198330660cc198330660cc1983";//All all ...
+        String xpub1 = "xpub6D45Bi15NLqVpUqw9ku1ucJw6AKa5mgU3fbodx96sbj8rWw91TPkZ1TVbhMNUVihSLHGJk5pdCXBb56r2tiPRrvp439uxq4S3D8Emxs8WiZ";
+        String xpub2 = "xpub6D45Bi15NLqVrLDEFqomu3YrS197BMHMdk9xy4Kp21g8CzABvQ1o7DNbL5aiFoksJYvpaJGW5aEXF7qFHFHejgvSV4UXu9LXoRaNfcek7sN";
+        String xpub3 = "xpub6D45Bi15NLqVtw4aMeT9xCXmE8YX4SBeeAozaYGeCgDPK8SwVDeLwGQv9wW6x8Ex41ERUHwT9KKgKF2d9jXaYe9M4XUitPGTgk7UERTJ1dm";
+        String xpub4 = "xpub6D45Bi15NLqVwVjzUWpR6Nw1bdJZiEHqLg4k9MpFMFnLqBJTS1P5Zym4sgfdYMTP87yJFK1MkeXUxviHE3emBfd8k3NyZf2GPLoaKYfEQti";
+        String xpub5 = "xpub6D45Bi15NLqVyTd6H8nZG7KZ6LjHaw3WBeAtsGVJ4pHxkZdj7ersAWJvejFtNHCe95JGXjVJuZ8pvSMmRdf84FUbrnpPCfhJj5SoEk67Um6";
+
+        Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "", passphrase);
+
+        assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
+        assertThat(payload.getHdWallet().getSeedHex(), is(seedHex));
+
+        assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
+        assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG"));
+
+        payloadManager.addAccount("",null);
+        assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
+        assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX"));
+
+        payloadManager.addAccount("",null);
+        assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
+        assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q"));
+
+        payloadManager.addAccount("",null);
+        assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
+        assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7"));
+
+        payloadManager.addAccount("",null);
+        assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
+        assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF"));
+
+        PayloadManager.getInstance().wipe();
+    }
+
+    @Test
     public void restoreWallet_withMnemonic_shouldContainCorrectReceiveAddresses() throws Exception{
 
         PayloadManager payloadManager = PayloadManager.getInstance();
 
-        String mnemonic = "pen news pluck gaze suit moon pride potato senior keep patient ensure";
-        payloadManager.restoreHDWallet(mnemonic, "", "");
+        String mnemonic = "all all all all all all all all all all all all";
+        payloadManager.restoreHDWallet("password",mnemonic, "");
 
-        assertThat(payloadManager.getReceiveAddress(0), is("11LjwroZHsKvWiJqbJezQpnTjY7g7oup3"));
-        assertThat(payloadManager.getChangeAddress(0), is("167WqTeExjQJH54k3ZpjCnUaf1fuGzbk5r"));
-
-        payloadManager.addAccount("",null);
-        assertThat(payloadManager.getReceiveAddress(1), is("17b3y6mxmU7ZTNAWx33384ytQr3jH9tV2n"));
-        assertThat(payloadManager.getChangeAddress(1), is("1Kk4MiERVf9ZL2uAKbvpPN1Fa5hrSPiXy4"));
+        assertThat(payloadManager.getReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
 
         payloadManager.addAccount("",null);
-        assertThat(payloadManager.getReceiveAddress(2), is("18pEjskhpR7pZn1Rh4UrUWHMFusvfMsymX"));
-        assertThat(payloadManager.getChangeAddress(2), is("1BW6kawa8EEKpyFeN6QGiXTzxs2Mi7h137"));
+        assertThat(payloadManager.getReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
 
         payloadManager.addAccount("",null);
-        assertThat(payloadManager.getReceiveAddress(3), is("17te2ij1Lhm8YuMJoSsVFVDkSpQYzCyRF6"));
-        assertThat(payloadManager.getChangeAddress(3), is("1Fzsc6beQYu6qXrRXbrhR3zpFruhcygsxU"));
+        assertThat(payloadManager.getReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
+
+        payloadManager.addAccount("",null);
+        assertThat(payloadManager.getReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
+
+        PayloadManager.getInstance().wipe();
     }
 }
