@@ -120,7 +120,7 @@ public class Transaction    {
 								} else if (prev_out.has("addr")) {
 									input.addr = prev_out.getString("addr");
 
-									if (PayloadFactory.getInstance().get().containsLegacyAddress(input.addr)) {
+									if (PayloadManager.getInstance().getPayload().containsLegacyAddress(input.addr)) {
 										our_xput = true;
 									}
 								}
@@ -168,7 +168,7 @@ public class Transaction    {
 							else if(_output.has("addr"))    {
 								output.addr = _output.getString("addr");
 
-								if(PayloadFactory.getInstance().get().containsLegacyAddress(output.addr))  {
+								if(PayloadManager.getInstance().getPayload().containsLegacyAddress(output.addr))  {
 									our_xput = true;
 								}
 							}

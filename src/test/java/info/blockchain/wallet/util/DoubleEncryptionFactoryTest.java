@@ -1,8 +1,6 @@
-package info.blockchain.wallet;
+package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;

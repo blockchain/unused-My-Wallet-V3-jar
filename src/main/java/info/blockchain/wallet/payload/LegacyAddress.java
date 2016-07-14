@@ -131,20 +131,20 @@ public class LegacyAddress {
         if(this.strEncryptedKey == null || this.strEncryptedKey.isEmpty())
             return null;
 
-    	if(!PayloadFactory.getInstance().get().isDoubleEncrypted()) {
+    	if(!PayloadManager.getInstance().getPayload().isDoubleEncrypted()) {
         	privBytes = Base58.decode(this.strEncryptedKey);
     	}
     	else {
     		/*
-    		Log.i("LegacyAddress double encrypted", strEncryptedKey);
-    		Log.i("LegacyAddress double encrypted", PayloadFactory.getInstance().get().getSharedKey());
-    		Log.i("LegacyAddress double encrypted", PayloadFactory.getInstance().getTempDoubleEncryptPassword().toString());
-    		Log.i("LegacyAddress double encrypted", "hash:" + DoubleEncryptionFactory.getInstance().validateSecondPassword(PayloadFactory.getInstance().get().getDoublePasswordHash(), PayloadFactory.getInstance().get().getSharedKey(), PayloadFactory.getInstance().getTempDoubleEncryptPassword(), PayloadFactory.getInstance().get().getIterations()));
-    		Log.i("LegacyAddress double encrypted", PayloadFactory.getInstance().get().getDoublePasswordHash());
-    		Log.i("LegacyAddress double encrypted", "" + PayloadFactory.getInstance().get().getIterations());
+    		Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);
+    		Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getSharedKey());
+    		Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().getTempDoubleEncryptPassword().toString());
+    		Log.i("LegacyAddress double encryptedPairingCode", "hash:" + DoubleEncryptionFactory.getInstance().validateSecondPassword(PayloadManager.getInstance().get().getDoublePasswordHash(), PayloadManager.getInstance().get().getSharedKey(), PayloadManager.getInstance().getTempDoubleEncryptPassword(), PayloadManager.getInstance().get().getIterations()));
+    		Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getDoublePasswordHash());
+    		Log.i("LegacyAddress double encryptedPairingCode", "" + PayloadManager.getInstance().get().getIterations());
     		*/
-    		String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey, PayloadFactory.getInstance().get().getSharedKey(), PayloadFactory.getInstance().getTempDoubleEncryptPassword().toString(), PayloadFactory.getInstance().get().getDoubleEncryptionPbkdf2Iterations());
-//    		Log.i("LegacyAddress double encrypted", encryptedKey);
+    		String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey, PayloadManager.getInstance().getPayload().getSharedKey(), PayloadManager.getInstance().getTempDoubleEncryptPassword().toString(), PayloadManager.getInstance().getPayload().getDoubleEncryptionPbkdf2Iterations());
+//    		Log.i("LegacyAddress double encryptedPairingCode", encryptedKey);
         	privBytes = Base58.decode(encryptedKey);
     	}
 

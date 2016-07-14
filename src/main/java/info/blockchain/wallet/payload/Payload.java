@@ -1,6 +1,5 @@
 package info.blockchain.wallet.payload;
 
-import org.bitcoinj.core.AddressFormatException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,13 +12,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import info.blockchain.wallet.crypto.AESUtil;
-
 /**
  *
  * Payload.java : java class for encapsulating Blockchain HD wallet payload
  *
- * <p>The Blockchain HD wallet payload is read from/written to the server in an encrypted JSON file
+ * <p>The Blockchain HD wallet payload is read from/written to the server in an encryptedPairingCode JSON file
  *
  * <p>The Blockchain HD wallet payload format was previously fully documented on Basecamp but the latest
  * documentation there is out-of-date. This java class encapsulates the JSON format as most recently
@@ -146,7 +143,7 @@ public class Payload {
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
 
         for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == PayloadFactory.NORMAL_ADDRESS &&
+            if(legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS &&
                !legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress);
             }
@@ -193,7 +190,7 @@ public class Payload {
         List<String> addrs = new ArrayList<String>();
 
         for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == PayloadFactory.NORMAL_ADDRESS) {
+            if(legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS) {
               addrs.add(legacyAddress.getAddress());
             }
         }

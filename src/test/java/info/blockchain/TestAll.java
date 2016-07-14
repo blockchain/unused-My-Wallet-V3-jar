@@ -8,7 +8,7 @@ This would cause duplicate tests
 //
 //import info.blockchain.api.DynamicFeeTest;
 //import info.blockchain.wallet.CreateWalletTest;
-//import info.blockchain.wallet.DoubleEncryptionFactoryTest;
+//import info.blockchain.wallet.util.DoubleEncryptionFactoryTest;
 //import info.blockchain.wallet.RestoreHDWalletTest;
 //import info.blockchain.wallet.crypto.AESUtilTest;
 //import info.blockchain.wallet.multiaddr.MultiAddrFactoryTest;

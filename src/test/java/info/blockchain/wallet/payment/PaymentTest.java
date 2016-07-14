@@ -77,7 +77,7 @@ public class PaymentTest {
 
         SpendableUnspentOutputs spendableCoins = null;
         BigInteger spendAmount = BigInteger.ZERO;
-        BigInteger feePerKb = info.blockchain.wallet.util.FeeUtil.AVERAGE_FEE_PER_KB;
+        BigInteger feePerKb = FeeUtil.AVERAGE_FEE_PER_KB;
         BigInteger dust = SendCoins.bDust;
         int inputs = 0;
         int outputs = 0;

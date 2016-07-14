@@ -1,7 +1,7 @@
 package info.blockchain.wallet.multiaddr;
 
 import info.blockchain.api.MultiAddress;
-import info.blockchain.wallet.payload.PayloadFactory;
+import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.Tx;
 import info.blockchain.wallet.payload.TxMostRecentDateComparator;
 import org.json.JSONArray;
@@ -145,7 +145,7 @@ public class MultiAddrFactory   {
                 }
             }
 
-            List<String> ownLegacyAddresses = PayloadFactory.getInstance().get().getLegacyAddressStrings(PayloadFactory.NORMAL_ADDRESS);
+            List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(PayloadManager.NORMAL_ADDRESS);
 
             if(jsonObject.has("txs"))  {
 
@@ -392,8 +392,8 @@ public class MultiAddrFactory   {
                         ts = txObj.getLong("time");
                     }
 
-                    List<String> ownLegacyAddresses = PayloadFactory.getInstance().get().getLegacyAddressStrings(PayloadFactory.NORMAL_ADDRESS);
-                    List<String> watchOnlyLegacyAddresses = PayloadFactory.getInstance().get().getWatchOnlyAddressStrings();
+                    List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(PayloadManager.NORMAL_ADDRESS);
+                    List<String> watchOnlyLegacyAddresses = PayloadManager.getInstance().getPayload().getWatchOnlyAddressStrings();
 
                     if(txObj.has("inputs"))  {
                         JSONArray inputArray = (JSONArray)txObj.get("inputs");
@@ -577,8 +577,8 @@ public class MultiAddrFactory   {
 
     public long getLegacyBalance(long address_type)  {
 
-        if(PayloadFactory.getInstance().get() != null)  {
-            List<String> addrs = PayloadFactory.getInstance().get().getLegacyAddressStrings(address_type);
+        if(PayloadManager.getInstance().getPayload() != null)  {
+            List<String> addrs = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(address_type);
             long value = 0L;
 
             for(String addr : addrs) {
@@ -596,8 +596,8 @@ public class MultiAddrFactory   {
 
     public long getLegacyActiveBalance()  {
 
-        if(PayloadFactory.getInstance().get() != null)  {
-            List<String> addrs = PayloadFactory.getInstance().get().getActiveLegacyAddressStrings();
+        if(PayloadManager.getInstance().getPayload() != null)  {
+            List<String> addrs = PayloadManager.getInstance().getPayload().getActiveLegacyAddressStrings();
             long value = 0L;
 
             for(String addr : addrs) {
