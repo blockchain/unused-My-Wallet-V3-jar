@@ -12,8 +12,8 @@ public class PasswordUtil {
 	private static PasswordUtil instance = null;
 
 	private static HashMap<Pattern,Double> patternsWeight = null;
-	private static final double WEIGHT_BAD_PATTERN = .25;
-	private static final double WEIGHT_COMMON_PATTERN = .50;
+	private static final double WEIGHT_BAD_PATTERN = .20;
+	private static final double WEIGHT_COMMON_PATTERN = .40;
 
 	private static HashMap<Pattern,Double> patternsQuality = null;
 	private static final double QUALITY_POOR = 10;
@@ -27,19 +27,19 @@ public class PasswordUtil {
 		if(instance == null) {
 
 			patternsWeight = new HashMap<Pattern,Double>();
-			patternsWeight.put(Pattern.compile("^\\d+$"), WEIGHT_BAD_PATTERN);							// all digits
-			patternsWeight.put(Pattern.compile("^[a-z]+\\d$"), WEIGHT_BAD_PATTERN);						// all lower then 1 digit
-			patternsWeight.put(Pattern.compile("^[A-Z]+\\d$"), WEIGHT_BAD_PATTERN);						// all upper then 1 digit
-			patternsWeight.put(Pattern.compile("^[a-zA-Z]+\\d$"), WEIGHT_COMMON_PATTERN);						// all alpha then 1 digit
+			patternsWeight.put(Pattern.compile("^\\d+$"), WEIGHT_BAD_PATTERN);								// all digits
+			patternsWeight.put(Pattern.compile("^[a-z]+\\d$"), WEIGHT_BAD_PATTERN);							// all lower then 1 digit
+			patternsWeight.put(Pattern.compile("^[A-Z]+\\d$"), WEIGHT_BAD_PATTERN);							// all upper then 1 digit
+			patternsWeight.put(Pattern.compile("^[a-zA-Z]+\\d$"), WEIGHT_COMMON_PATTERN);					// all alpha then 1 digit
 			patternsWeight.put(Pattern.compile("^[a-z]+\\d+$"), WEIGHT_COMMON_PATTERN);						// all lower then digits
 			patternsWeight.put(Pattern.compile("^[a-z]+$"), WEIGHT_BAD_PATTERN);							// all lower
 			patternsWeight.put(Pattern.compile("^[A-Z]+$"), WEIGHT_BAD_PATTERN);							// all upper
-			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+$"), WEIGHT_BAD_PATTERN);					// only one upper at start
+			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+$"), WEIGHT_BAD_PATTERN);						// only one upper at start
 			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+\\d$"), WEIGHT_BAD_PATTERN);					// only one upper at start followed by 1 digit
 			patternsWeight.put(Pattern.compile("^[A-Z][a-z]+\\d+$"), WEIGHT_COMMON_PATTERN);				// only one upper at start followed by digits
 			patternsWeight.put(Pattern.compile("^[a-z]+[._!\\- @*#]$"), WEIGHT_BAD_PATTERN);				// all lower followed by 1 special character
 			patternsWeight.put(Pattern.compile("^[A-Z]+[._!\\- @*#]$"), WEIGHT_BAD_PATTERN);				// all upper followed by 1 special character
-			patternsWeight.put(Pattern.compile("^[a-zA-Z]+[._!\\- @*#]$"), WEIGHT_COMMON_PATTERN);				// all alpha followed by 1 special character
+			patternsWeight.put(Pattern.compile("^[a-zA-Z]+[._!\\- @*#]$"), WEIGHT_COMMON_PATTERN);			// all alpha followed by 1 special character
 			patternsWeight.put(Pattern.compile(
 								"[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
 								"\\@" +
