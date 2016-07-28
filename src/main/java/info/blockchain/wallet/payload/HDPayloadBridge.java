@@ -1,8 +1,8 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.api.Balance;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -157,7 +157,7 @@ public class HDPayloadBridge {
                 payload.getHdWallet().getAccounts().get(0).setLabel(defaultAccountName);
 
                 try {
-                    no_tx = (MultiAddrFactory.getInstance().getXpubTransactionCount(xpub) == 0L);
+                    no_tx = (new Balance().getXpubTransactionCount(xpub) == 0L);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

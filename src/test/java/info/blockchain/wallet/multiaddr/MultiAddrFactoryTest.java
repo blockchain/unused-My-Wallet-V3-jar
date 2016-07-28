@@ -13,7 +13,6 @@ public class MultiAddrFactoryTest {
 
     private final String dormantXpub = "xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt";
     private final long dormantXpubBalance = 10000L;
-    private final long dormantXpubTxCount = 34L;
 
     @Test
     public void refreshLegacyAddressData() throws Exception {
@@ -25,10 +24,5 @@ public class MultiAddrFactoryTest {
     public void refreshXPUBData() throws Exception {
         MultiAddrFactory.getInstance().refreshXPUBData(new String[]{dormantXpub});
         assertThat(MultiAddrFactory.getInstance().getXpubBalance(), is(dormantXpubBalance));
-    }
-
-    @Test
-    public void getXpubTransactionCount() throws Exception {
-        assertThat(MultiAddrFactory.getInstance().getXpubTransactionCount(dormantXpub), is(dormantXpubTxCount));
     }
 }
