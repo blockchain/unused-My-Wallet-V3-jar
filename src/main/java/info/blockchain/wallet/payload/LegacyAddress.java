@@ -1,5 +1,6 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
@@ -112,9 +113,9 @@ public class LegacyAddress {
 
     public void setCreatedDeviceVersion(String device_version) { this.strCreatedDeviceVersion = device_version; }
 
-    public String getPrivateKey() throws AddressFormatException {
+    public String getPrivateKey(String secondPassword) throws AddressFormatException {
 
-        ECKey ecKey = getECKey();
+        ECKey ecKey = getECKey(secondPassword);
 
         if(ecKey != null) {
             return ecKey.getPrivateKeyEncoded(MainNetParams.get()).toString();
@@ -124,30 +125,36 @@ public class LegacyAddress {
         }
     }
 
-    public ECKey getECKey() throws AddressFormatException {
+    public ECKey getECKey(CharSequenceX secondPassword)  throws AddressFormatException{
 
-    	byte[] privBytes = null;
+        /*
+        Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);
+        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getSharedKey());
+        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().getTempDoubleEncryptPassword().toString());
+        Log.i("LegacyAddress double encryptedPairingCode", "hash:" + DoubleEncryptionFactory.getInstance().validateSecondPassword(PayloadManager.getInstance().get().getDoublePasswordHash(), PayloadManager.getInstance().get().getSharedKey(), PayloadManager.getInstance().getTempDoubleEncryptPassword(), PayloadManager.getInstance().get().getIterations()));
+        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getDoublePasswordHash());
+        Log.i("LegacyAddress double encryptedPairingCode", "" + PayloadManager.getInstance().get().getIterations());
+        */
 
-        if(this.strEncryptedKey == null || this.strEncryptedKey.isEmpty())
+        String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey,
+                PayloadManager.getInstance().getPayload().getSharedKey(),
+                secondPassword.toString(),
+                PayloadManager.getInstance().getPayload().getDoubleEncryptionPbkdf2Iterations());
+//    		Log.i("LegacyAddress double encryptedPairingCode", encryptedKey);
+
+        return getECKey(encryptedKey);
+    }
+
+    public ECKey getECKey()  throws AddressFormatException{
+        return getECKey(strEncryptedKey);
+    }
+
+    private ECKey getECKey(String strEncryptedKey) throws AddressFormatException {
+
+        if(strEncryptedKey == null || strEncryptedKey.isEmpty())
             return null;
 
-    	if(!PayloadManager.getInstance().getPayload().isDoubleEncrypted()) {
-        	privBytes = Base58.decode(this.strEncryptedKey);
-    	}
-    	else {
-    		/*
-    		Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);
-    		Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getSharedKey());
-    		Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().getTempDoubleEncryptPassword().toString());
-    		Log.i("LegacyAddress double encryptedPairingCode", "hash:" + DoubleEncryptionFactory.getInstance().validateSecondPassword(PayloadManager.getInstance().get().getDoublePasswordHash(), PayloadManager.getInstance().get().getSharedKey(), PayloadManager.getInstance().getTempDoubleEncryptPassword(), PayloadManager.getInstance().get().getIterations()));
-    		Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getDoublePasswordHash());
-    		Log.i("LegacyAddress double encryptedPairingCode", "" + PayloadManager.getInstance().get().getIterations());
-    		*/
-    		String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey, PayloadManager.getInstance().getPayload().getSharedKey(), PayloadManager.getInstance().getTempDoubleEncryptPassword().toString(), PayloadManager.getInstance().getPayload().getDoubleEncryptionPbkdf2Iterations());
-//    		Log.i("LegacyAddress double encryptedPairingCode", encryptedKey);
-        	privBytes = Base58.decode(encryptedKey);
-    	}
-
+        byte[] privBytes = Base58.decode(strEncryptedKey);
     	ECKey ecKey = null;
 
     	ECKey keyCompressed = null;

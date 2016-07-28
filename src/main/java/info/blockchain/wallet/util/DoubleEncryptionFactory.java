@@ -1,10 +1,9 @@
 package info.blockchain.wallet.util;
 
-import java.security.MessageDigest;
-
+import info.blockchain.wallet.crypto.AESUtil;
 import org.spongycastle.util.encoders.Hex;
 
-import info.blockchain.wallet.crypto.AESUtil;
+import java.security.MessageDigest;
 
 public class DoubleEncryptionFactory	{
 
@@ -62,11 +61,6 @@ public class DoubleEncryptionFactory	{
 	public boolean validateSecondPassword(String dpasswordhash, String sharedKey, CharSequenceX password2, int iterations) {
 	    String dhash = getHash(sharedKey, password2.toString(), iterations);
 		return dpasswordhash.equals(dhash);
-	}
-
-	public boolean isActivated() {
-//    return (PayloadManager.getInstance().getTempDoubleEncryptPassword() != null && PayloadManager.getInstance().getTempDoubleEncryptPassword().length() > 1);
-    return false;
 	}
 
 }
