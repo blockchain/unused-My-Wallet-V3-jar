@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -48,7 +49,6 @@ public class PayloadManager {
     public static int WalletPbkdf2Iterations = WalletDefaultPbkdf2Iterations;
 
     private static CharSequenceX strTempPassword = null;
-    private static CharSequenceX strTempDoubleEncryptPassword = null;
     private static String strCheckSum = null;
     private static boolean isNew = false;
     private static boolean syncPubKeys = true;
@@ -151,24 +151,6 @@ public class PayloadManager {
     public void setTempPassword(CharSequenceX temp_password) {
         strTempPassword = temp_password;
         clearCachedPayload();
-    }
-
-    /**
-     * Get temporary double encrypt password for user. Read double encrypt password from here rather than reprompting user.
-     *
-     * @return CharSequenceX
-     */
-    public CharSequenceX getTempDoubleEncryptPassword() {
-        return strTempDoubleEncryptPassword;
-    }
-
-    /**
-     * Set temporary double encrypt password for user once it has been validated. Read double encrypt password from here rather than reprompting user.
-     *
-     * @param temp_password2 Validated user double encrypt password
-     */
-    public void setTempDoubleEncryptPassword(CharSequenceX temp_password2) {
-        strTempDoubleEncryptPassword = temp_password2;
     }
 
     /**
@@ -462,30 +444,30 @@ public class PayloadManager {
         return version;
     }
 
-
-    public boolean setDoubleEncryptPassword(String password, boolean isHD) {
-
-        if (DoubleEncryptionFactory.getInstance().validateSecondPassword(payload.getDoublePasswordHash(),
+    public boolean validateSecondPassword(String secondPassword){
+        return DoubleEncryptionFactory.getInstance().validateSecondPassword(
+                payload.getDoublePasswordHash(),
                 payload.getSharedKey(),
-                new CharSequenceX(password),
-                payload.getDoubleEncryptionPbkdf2Iterations())) {
+                new CharSequenceX(secondPassword),
+                payload.getDoubleEncryptionPbkdf2Iterations());
+    }
 
-            if (isHD) {
-                String encrypted_hex = payload.getHdWallet().getSeedHex();
-                String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                        encrypted_hex,
-                        payload.getSharedKey(),
-                        password,
-                        payload.getDoubleEncryptionPbkdf2Iterations());
+    public boolean decryptDoubleEncryptedWallet(String secondPassword) {
 
-                try {
-                    watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            } else {
-                setTempDoubleEncryptPassword(new CharSequenceX(password));
+        if (validateSecondPassword(secondPassword)) {
+
+            String encrypted_hex = payload.getHdWallet().getSeedHex();
+            String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                    encrypted_hex,
+                    payload.getSharedKey(),
+                    secondPassword,
+                    payload.getDoubleEncryptionPbkdf2Iterations());
+
+            try {
+                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
             }
 
             return true;
@@ -495,37 +477,35 @@ public class PayloadManager {
         }
     }
 
-    //TODO - inspect this
-    public String[] getMnemonicForDoubleEncryptedWallet() {
+    public String[] getMnemonicForDoubleEncryptedWallet(String secondPassword) {
 
-        if (getTempDoubleEncryptPassword().toString().length() == 0) {
-            return null;
-        }
+        if (validateSecondPassword(secondPassword)) {
+            // Decrypt seedHex (which is double encrypted in this case)
+            String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                    payload.getHdWallet().getSeedHex(),
+                    payload.getSharedKey(),
+                    secondPassword,
+                    payload.getDoubleEncryptionPbkdf2Iterations());
 
-        // Decrypt seedHex (which is double encrypted in this case)
-        String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                payload.getHdWallet().getSeedHex(),
-                payload.getSharedKey(),
-                getTempDoubleEncryptPassword().toString(),
-                payload.getDoubleEncryptionPbkdf2Iterations());
+            String mnemonic = null;
 
-        String mnemonic = null;
+            try {
+                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
+                mnemonic = watchOnlyWallet.getMnemonic();
 
-        // Try to create a using the decrypted seed hex
-        try {
-            watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-            mnemonic = watchOnlyWallet.getMnemonic();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (mnemonic != null && mnemonic.length() > 0) {
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (mnemonic != null && mnemonic.length() > 0) {
+                    return mnemonic.split("\\s+");
 
-                return mnemonic.split("\\s+");
-
-            } else {
-                return null;
+                } else {
+                    return null;
+                }
             }
+        }else{
+            return null;
         }
     }
 
@@ -592,12 +572,7 @@ public class PayloadManager {
         if (payload.isDoubleEncrypted()) {
 
             //Validate 2nd password
-            if (StringUtils.isEmpty(secondPassword) || !DoubleEncryptionFactory.getInstance().validateSecondPassword(
-                    payload.getDoublePasswordHash(),
-                    payload.getSharedKey(),
-                    new CharSequenceX(secondPassword),
-                    payload.getOptions().getIterations())) {
-
+            if (StringUtils.isEmpty(secondPassword) || !validateSecondPassword(secondPassword.toString())) {
                 listener.onDoubleEncryptionPasswordError();
             }
         }
@@ -724,12 +699,12 @@ public class PayloadManager {
     public interface AccountAddListener {
         void onAccountAddSuccess(Account account);
 
-        void onAccountAddFail();
+        void onSecondPasswordFail();
 
         void onPayloadSaveFail();
     }
 
-    public void addAccount(String accountLabel, AccountAddListener listener) throws Exception {
+    public void addAccount(String accountLabel, @Nullable String secondPassword, AccountAddListener listener) throws Exception {
 
         //Add account
         String xpub = null;
@@ -744,23 +719,29 @@ public class PayloadManager {
         }
         else {
 
-            CharSequenceX tempPassword = getTempDoubleEncryptPassword();
-            String tempPasswordS = "";
-            if (tempPassword != null)
-                tempPasswordS = tempPassword.toString();
-
-            String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                    payload.getHdWallet().getSeedHex(),
+            if(DoubleEncryptionFactory.getInstance().validateSecondPassword(
+                    payload.getDoublePasswordHash(),
                     payload.getSharedKey(),
-                    tempPasswordS,
-                    payload.getDoubleEncryptionPbkdf2Iterations());
+                    new CharSequenceX(secondPassword),
+                    payload.getOptions().getIterations())){
 
-            //Need to decrypt watch-only wallet before adding new xpub
-            watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-            watchOnlyWallet.addAccount();
+                String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                        payload.getHdWallet().getSeedHex(),
+                        payload.getSharedKey(),
+                        secondPassword,
+                        payload.getDoubleEncryptionPbkdf2Iterations());
 
-            xpub = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xpubstr();
-            xpriv = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xprvstr();
+                //Need to decrypt watch-only wallet before adding new xpub
+                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
+                watchOnlyWallet.addAccount();
+
+                xpub = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xpubstr();
+                xpriv = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xprvstr();
+
+            }else{
+                listener.onSecondPasswordFail();
+                return;
+            }
         }
 
         //Initialize newly created xpub's tx list and balance
@@ -781,7 +762,7 @@ public class PayloadManager {
             String encrypted_xpriv = DoubleEncryptionFactory.getInstance().encrypt(
                     xpriv,
                     payload.getSharedKey(),
-                    getTempDoubleEncryptPassword().toString(),
+                    secondPassword,
                     payload.getDoubleEncryptionPbkdf2Iterations());
             account.setXpriv(encrypted_xpriv);
         }
@@ -801,23 +782,25 @@ public class PayloadManager {
         } else {
             if(listener != null)listener.onPayloadSaveFail();
         }
-
-        //Reset 2nd pwd
-        setTempDoubleEncryptPassword(new CharSequenceX(""));
     }
 
     /*
     Generate V2 legacy address
     When called from Android - First apply PRNGFixes
      */
-    public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion){
+    public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion, String secondPassword){
+
+        if(payload.isDoubleEncrypted() && !validateSecondPassword(secondPassword)){
+            return null;//second password validation failed
+        }
+
         ECKey ecKey = getRandomECKey();
 
         String encryptedKey = new String(Base58.encode(ecKey.getPrivKeyBytes()));
         if (payload.isDoubleEncrypted()) {
             encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
                     payload.getSharedKey(),
-                    getTempDoubleEncryptPassword().toString(),
+                    secondPassword,
                     payload.getOptions().getIterations());
         }
 

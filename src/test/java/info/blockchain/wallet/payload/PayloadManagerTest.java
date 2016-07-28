@@ -24,7 +24,7 @@ public class PayloadManagerTest {
         payload.setHdWallets(new ArrayList<HDWallet>());//remove hd
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android","6.6");
+        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android","6.6", null);
         if(payloadManager.addLegacyAddress(legacyAddress)) {
             final String guidOriginal = payloadManager.getPayload().getGuid();
 
@@ -98,19 +98,19 @@ public class PayloadManagerTest {
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9xj9UhHNKHr6kJKJBVj82ZxFrbfhczBDUHyVj7kHGAiZqAeUenz2JhrphnMMYVKcWcVPFJESngtKsVa4FYEvFfWUTtZThCoZdwDeS9qQnqm"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9xj9UhHNKHr6nkRg3ZpSBp2i3MgSazXa3LGet5MsVY3nTeE1zvnwVrjpnsJGEtEvvcm8fwoUBVpnHcioJfFqRUaZ6ijXEuwUuv2Q5RM6dGR"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9xj9UhHNKHr6rUDptMDdQhw5ccX8mzVQBopwYejpRt1NHpFvQMSG1a8RGRJjZRE8rRJJ6N9g1GcB6yWEgkXCzGBweq934jS9LfBuViQRxRw"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9xj9UhHNKHr6tdLP1UdrAJKKRUiGd92aBbsqkW28vtdmCzXTvns1aNKwh5uM1nSbdD8Y4x9VBnTLrDDEbREnu9KYnDyvt8QRPtPWQ78UgAG"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9xj9UhHNKHr6vLRGPDajPuoc2futBwhu93ZLCUuoGBya3uD4X5kDfMuUiEHz7HPWPpkgCHiwNbLWjxa6QrqfjmPmVr146GUt8D5shiXkQpC"));
 
@@ -140,19 +140,19 @@ public class PayloadManagerTest {
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF"));
 
@@ -169,13 +169,13 @@ public class PayloadManagerTest {
 
         assertThat(payloadManager.getReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payloadManager.getReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payloadManager.getReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
 
-        payloadManager.addAccount("",null);
+        payloadManager.addAccount("",null, null);
         assertThat(payloadManager.getReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
 
         PayloadManager.getInstance().wipe();
