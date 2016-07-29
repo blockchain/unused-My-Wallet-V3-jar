@@ -118,19 +118,20 @@ public class PayloadManager {
             listener.onInitPairFail();
         }
 
-        //HD payload
-        if (payload.getHdWallet() != null) {
-
-            //bip44 wallet need to be kept in sync
-            if (payload.isDoubleEncrypted()) {
-                watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
-            }else{
-                wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
-            }
-        }
+        syncWallet();
 
         if(listener != null){
             listener.onInitSuccess();
+        }
+    }
+
+    private void syncWallet() throws Exception{
+        if (payload.getHdWallet() != null) {
+            if (payload.isDoubleEncrypted()) {
+                watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
+            } else {
+                wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
+            }
         }
     }
 
@@ -582,7 +583,8 @@ public class PayloadManager {
         if(isUpgradeSuccessful) {
 
             if (savePayloadToServer()) {
-                wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
+
+                syncWallet();
                 updateBalancesAndTransactions();
                 cachePayload();
                 listener.onUpgradeSuccess();
