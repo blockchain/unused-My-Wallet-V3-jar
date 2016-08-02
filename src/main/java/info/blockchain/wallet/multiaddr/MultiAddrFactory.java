@@ -223,7 +223,7 @@ public class MultiAddrFactory   {
                             addr = (String)xpubObj.get("m");
                             path = (String)xpubObj.get("path");
                             if(path.startsWith("M/0/"))  {
-                                move_amount = outObj.getLong("value");
+                                move_amount += outObj.getLong("value");
                                 mt_addr = addr;
                             }
                             if(outObj.has("addr") && !own_hd_addresses.contains(outObj.get("addr")))  {
