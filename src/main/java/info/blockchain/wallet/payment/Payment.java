@@ -87,17 +87,24 @@ public class Payment {
         //Filter usable coins
         ArrayList<MyTransactionOutPoint> worthyCoins = new ArrayList<MyTransactionOutPoint>();
         BigInteger sweepBalance = BigInteger.ZERO;
+        BigInteger consumedBalance = BigInteger.ZERO;
         for (MyTransactionOutPoint output : coins.getOutputs()) {
-            if(output.getValue().compareTo(feePerKb) == 1){
+//            if(output.getValue().compareTo(feePerKb) == 1){
                 worthyCoins.add(output);
                 sweepBalance = sweepBalance.add(output.getValue());
+//            }
+
+            if(output.getValue().compareTo(feePerKb) <= 1){
+                consumedBalance.add(output.getValue());
             }
         }
 
         //All inputs, 1 output = no change
-        BigInteger feeForAll = FeeUtil.estimatedFee(worthyCoins.size(), 1, feePerKb);
+        //TODO- assume change to line up with web wallet. This should be 1
+        BigInteger feeForAll = FeeUtil.estimatedFee(worthyCoins.size(), 2, feePerKb);
         sweepBundle.setSweepAmount(sweepBalance.subtract(feeForAll));
         sweepBundle.setSweepFee(feeForAll);
+        sweepBundle.setConsumedAmount(consumedBalance);
         return sweepBundle;
     }
 

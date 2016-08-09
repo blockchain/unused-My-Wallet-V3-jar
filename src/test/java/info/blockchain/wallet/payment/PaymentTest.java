@@ -37,7 +37,9 @@ public class PaymentTest {
         SweepBundle sweepBundle = transaction.getSweepBundle(coins, FeeUtil.AVERAGE_FEE_PER_KB);
 
         //Manually calculated fee
-        long size = (1 * 34) + (UnspentTestData.WORTHY_UNSPENT_OUTPUTS_COUNT * 148) + 10;//36840L
+        //TODO- assume change to line up with web wallet. This should be 1
+//        long size = (1 * 34) + (UnspentTestData.WORTHY_UNSPENT_OUTPUTS_COUNT * 148) + 10;//36840L
+        long size = (2 * 34) + (UnspentTestData.UNSPENT_OUTPUTS_COUNT * 148) + 10;//36840L
         double txBytes = ((double)size / 1000.0);
         long feeManual = (long)Math.ceil(FeeUtil.AVERAGE_FEE_PER_KB.doubleValue() * txBytes);
 
@@ -52,7 +54,8 @@ public class PaymentTest {
         UnspentOutputs coins = transaction.getCoins(new JSONObject(UnspentTestData.apiResponseString));
 
         SweepBundle sweepBundle = transaction.getSweepBundle(coins, FeeUtil.AVERAGE_FEE_PER_KB);
-        assertThat(sweepBundle.getSweepAmount().longValue(), is(276480L));
+//        assertThat(sweepBundle.getSweepAmount().longValue(), is(276480L));
+        assertThat(sweepBundle.getSweepAmount().longValue(), is(322140L));//doesn't assume change
     }
 
     @Test
