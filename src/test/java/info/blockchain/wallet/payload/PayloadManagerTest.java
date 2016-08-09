@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -30,6 +31,59 @@ public class PayloadManagerTest {
 
             //Now we have legacy wallet (only addresses)
             payloadManager.upgradeV2PayloadToV3(new CharSequenceX(""), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
+                public void onDoubleEncryptionPasswordError() {
+                    assertThat("upgradeV2PayloadToV3 failed", false);
+                }
+
+                public void onUpgradeSuccess() {
+
+                    assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
+                    assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
+
+                    String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
+                    assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
+                    try {
+                        assertThat(payloadManager.getHDMnemonic().split(" ").length, is(12));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        assertThat("upgradeV2PayloadToV3 failed", false);
+                    }
+                }
+
+                public void onUpgradeFail() {
+                    assertThat("upgradeV2PayloadToV3 failed", false);
+                }
+            });
+        }else{
+            assertThat("adding new Legacy address failed failed", false);
+        }
+
+        PayloadManager.getInstance().wipe();
+    }
+
+    @Test
+    public void upgradeV2PayloadToV3_withSecondPassword_shouldPass() throws Exception {
+
+        final String secondPassword = "password2";
+        final PayloadManager payloadManager = PayloadManager.getInstance();
+
+        //Create HD
+        String label = "Account 1";
+        Payload payload = payloadManager.createHDWallet("password",label);
+        payload.setHdWallets(new ArrayList<HDWallet>());//remove hd
+
+        //Set second password
+        String hash = DoubleEncryptionFactory.getInstance().getHash(payload.getSharedKey(), secondPassword, payload.getDoubleEncryptionPbkdf2Iterations());
+        payload.setDoublePasswordHash(hash);
+        payload.setDoubleEncrypted(true);
+
+        //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
+        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android","6.6", secondPassword);
+        if(payloadManager.addLegacyAddress(legacyAddress)) {
+            final String guidOriginal = payloadManager.getPayload().getGuid();
+
+            //Now we have legacy wallet (only addresses)
+            payloadManager.upgradeV2PayloadToV3(new CharSequenceX(secondPassword), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
                 public void onDoubleEncryptionPasswordError() {
                     assertThat("upgradeV2PayloadToV3 failed", false);
                 }
