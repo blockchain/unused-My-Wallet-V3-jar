@@ -1,12 +1,12 @@
 package info.blockchain.wallet.payload;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.TreeMap;
-
-import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 
 public class Account {
 
@@ -195,7 +195,7 @@ public class Account {
         return realIdx;
     }
 
-    public void setRealIdx(int visibleIdx) {
+    public void setRealIdx(int realIdx) {
         this.realIdx = realIdx;
     }
 

@@ -18,7 +18,7 @@ public class FeeUtil  {
         return calculateFee(size, feePerKb);
     }
 
-    private static int estimatedSize(int inputs, int outputs)   {
+    public static int estimatedSize(int inputs, int outputs)   {
         return (outputs * ESTIMATED_OUTPUT_LEN) + (inputs * ESTIMATED_INPUT_LEN) + 10;
     }
 

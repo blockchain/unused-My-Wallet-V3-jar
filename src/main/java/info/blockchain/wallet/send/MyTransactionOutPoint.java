@@ -1,16 +1,9 @@
 package info.blockchain.wallet.send;
 
-import java.math.BigInteger;
-
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.ProtocolException;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.TransactionOutPoint;
-import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.core.*;
 import org.bitcoinj.params.MainNetParams;
 
-import info.blockchain.wallet.util.Hash;
+import java.math.BigInteger;
 
 public class MyTransactionOutPoint extends TransactionOutPoint {
 
@@ -20,6 +13,7 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
 	private Sha256Hash txHash;
 	private BigInteger value;
 	private int confirmations;
+	private String path;
 
 	public MyTransactionOutPoint(Sha256Hash txHash, int txOutputN, BigInteger value, byte[] scriptBytes) throws ProtocolException {
 		super(MainNetParams.get(), txOutputN, new Sha256Hash(txHash.getBytes()));
@@ -61,5 +55,13 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
 	//@Override
 	public byte[] getConnectedPubKeyScript() {
 		return scriptBytes;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 }
