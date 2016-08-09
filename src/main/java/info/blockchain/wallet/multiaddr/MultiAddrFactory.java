@@ -31,8 +31,6 @@ public class MultiAddrFactory   {
 
     private static MultiAddrFactory instance = null;
 
-//    private static Logger mLogger = LoggerFactory.getLogger(MultiAddrFactory.class);
-
     private MultiAddrFactory()  { ; }
 
     public static final String RECEIVED = "RECEIVED";
@@ -84,23 +82,6 @@ public class MultiAddrFactory   {
         if(jsonObject != null){
             parseLegacy(jsonObject);
         }
-    }
-
-    public long getXpubTransactionCount(String xpub) throws Exception  {
-
-        long ret = -1L;
-
-        MultiAddress api = new MultiAddress();
-        JSONObject jsonObject  = api.getXPUB(new String[]{xpub});
-
-        if(jsonObject != null && jsonObject.has("wallet"))  {
-            JSONObject walletObj = (JSONObject)jsonObject.get("wallet");
-            if(walletObj.has("n_tx"))  {
-                ret = walletObj.getLong("n_tx");
-            }
-        }
-
-        return ret;
     }
 
     private void parseXPUB(JSONObject jsonObject) throws JSONException  {
