@@ -869,4 +869,15 @@ public class PayloadManager {
     public String getHDPassphrase() throws IOException, MnemonicException.MnemonicLengthException {
         return wallet.getPassphrase();
     }
+
+    public Address getAddressAt(int accountIndex, int chain, int addressIndex) {
+        Address hd_address = null;
+        if (!payload.isDoubleEncrypted()) {
+            hd_address = wallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
+        } else {
+            hd_address = watchOnlyWallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
+        }
+
+        return hd_address;
+    }
 }

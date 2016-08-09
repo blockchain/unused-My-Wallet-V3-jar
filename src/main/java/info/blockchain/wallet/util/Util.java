@@ -1,5 +1,8 @@
 package info.blockchain.wallet.util;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class Util	{
 
     private static Util instance = null;
@@ -30,4 +33,26 @@ public class Util	{
         return ret;
     }
 
+    /**
+     * Calculates the SHA-256 hash of the given byte range, and then hashes the resulting hash again. This is
+     * standard procedure in Bitcoin. The resulting hash is in big endian form.
+     */
+    public static byte[] doubleDigest(byte[] input, int offset, int length) {
+
+        MessageDigest digest = null;
+
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+
+            synchronized (digest) {
+                digest.reset();
+                digest.update(input, offset, length);
+                byte[] first = digest.digest();
+                return digest.digest(first);
+            }
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);  // Can't happen.
+        }
+    }
 }

@@ -3,6 +3,7 @@ package info.blockchain.wallet.payment;
 import info.blockchain.test_data.UnspentTestData;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.send.SendCoins;
 import org.json.JSONObject;
@@ -27,34 +28,20 @@ public class PaymentTest {
     }
 
     @Test
-    public void testGetCachedCoins() throws Exception {
-
-        //Cache it
-        Payment transaction = new Payment();
-        transaction.cacheUnspentOutputs(UnspentTestData.ADDRESS, new JSONObject(UnspentTestData.apiResponseString));
-
-        //Read cached
-        UnspentOutputs coins = transaction.getCachedCoins(UnspentTestData.ADDRESS);
-        assertThat(coins.getOutputs().size(), is(UnspentTestData.UNSPENT_OUTPUTS_COUNT));
-        assertThat(coins.getBalance().longValue(), is(UnspentTestData.BALANCE));
-        assertThat(coins.getNotice(), is(UnspentTestData.NOTICE));
-    }
-
-    @Test
     public void testGetSweepFee() throws Exception {
 
         Payment transaction = new Payment();
 
         UnspentOutputs coins = transaction.getCoins(new JSONObject(UnspentTestData.apiResponseString));
 
-        BigInteger sweepBalance = transaction.getSweepFee(coins, FeeUtil.AVERAGE_FEE_PER_KB);
+        SweepBundle sweepBundle = transaction.getSweepBundle(coins, FeeUtil.AVERAGE_FEE_PER_KB);
 
         //Manually calculated fee
         long size = (1 * 34) + (UnspentTestData.WORTHY_UNSPENT_OUTPUTS_COUNT * 148) + 10;//36840L
         double txBytes = ((double)size / 1000.0);
         long feeManual = (long)Math.ceil(FeeUtil.AVERAGE_FEE_PER_KB.doubleValue() * txBytes);
 
-        assertThat(sweepBalance.longValue(), is(feeManual));
+        assertThat(sweepBundle.getSweepFee().longValue(), is(feeManual));
     }
 
     @Test
@@ -64,8 +51,8 @@ public class PaymentTest {
 
         UnspentOutputs coins = transaction.getCoins(new JSONObject(UnspentTestData.apiResponseString));
 
-        BigInteger sweepBalance = transaction.getSweepBalance(coins, FeeUtil.AVERAGE_FEE_PER_KB);
-        assertThat(sweepBalance.longValue(), is(276480L));
+        SweepBundle sweepBundle = transaction.getSweepBundle(coins, FeeUtil.AVERAGE_FEE_PER_KB);
+        assertThat(sweepBundle.getSweepAmount().longValue(), is(276480L));
     }
 
     @Test

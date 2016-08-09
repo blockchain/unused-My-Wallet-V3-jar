@@ -17,11 +17,11 @@
 
 package info.blockchain.wallet.send;
 
+import info.blockchain.wallet.util.Hash;
+import info.blockchain.wallet.util.Util;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Utils;
-
-import info.blockchain.wallet.util.Hash;
 
 import java.io.Serializable;
 
@@ -42,7 +42,7 @@ public class BitcoinAddress implements Serializable {
 
 		this.hash160 = new Hash(bytes);
 	}
-/*
+
 	@Override
 	public String toString() {
 		if (_toStringCache == null) {
@@ -53,7 +53,7 @@ public class BitcoinAddress implements Serializable {
 			addressBytes[0] = (byte) version;
 
 			System.arraycopy(hash160.getBytes(), 0, addressBytes, 1, length);
-			byte[] check = Utils.doubleDigest(addressBytes, 0, length + 1);
+			byte[] check = Util.doubleDigest(addressBytes, 0, length + 1);
 			System.arraycopy(check, 0, addressBytes, length + 1, 4);
 
 			_toStringCache = Base58.encode(addressBytes);
@@ -61,7 +61,7 @@ public class BitcoinAddress implements Serializable {
 
 		return _toStringCache;
 	}
-*/
+
 	// from pubKey
 	public BitcoinAddress(byte[] pubKey) {
 		this.hash160 = new Hash(Utils.sha256hash160(pubKey));

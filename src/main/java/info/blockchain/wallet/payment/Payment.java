@@ -1,11 +1,23 @@
 package info.blockchain.wallet.payment;
 
+import info.blockchain.api.PushTx;
+import info.blockchain.bip44.Address;
 import info.blockchain.util.FeeUtil;
-import info.blockchain.wallet.send.MyTransactionOutPoint;
+import info.blockchain.wallet.payload.Account;
+import info.blockchain.wallet.payload.LegacyAddress;
+import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
+import info.blockchain.wallet.send.BitcoinScript;
+import info.blockchain.wallet.send.MyTransactionOutPoint;
+import info.blockchain.wallet.send.SendCoins;
+import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.Hash;
-import org.bitcoinj.core.Sha256Hash;
+import info.blockchain.wallet.util.PrivateKeyFactory;
+import org.apache.commons.lang3.tuple.Pair;
+import org.bitcoinj.core.*;
+import org.bitcoinj.params.MainNetParams;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
@@ -13,58 +25,16 @@ import org.spongycastle.util.encoders.Hex;
 import java.math.BigInteger;
 import java.util.*;
 
-/*
-This class is still in development (26/04/2016)
+/**
+ * Created by riaanvos on 26/04/2016.
  */
 public class Payment {
 
-    private HashMap<String, JSONObject> cachedUnspentOutputs;
-
-    public Payment() {
-        this.cachedUnspentOutputs = new HashMap<String, JSONObject>();
-    }
-
-    private JSONObject getCachedUnspentOutputs(String address) {
-        return cachedUnspentOutputs.get(address);
-    }
-
     /**
+     * Parses Blockchain's unspent api json and return all unspent data
      *
-     * Caches address-unspent key pair
-     * @param address or xpub (pipe separated)
-     * @param unspentOutputsJson unspent json from blockchain.info
-     *
-     */
-    public void cacheUnspentOutputs(String address, JSONObject unspentOutputsJson) {
-
-        if(!cachedUnspentOutputs.containsKey(address)) {
-            cachedUnspentOutputs.put(address, unspentOutputsJson);
-        }
-    }
-
-    /**
-     *
-     * Clears cache used for unspent api responses
-     *
-     */
-    public void clearCachedUnspentOutputs() {
-        cachedUnspentOutputs.clear();
-    }
-
-    public UnspentOutputs getCachedCoins(String address) throws Exception {
-        if(cachedUnspentOutputs.containsKey(address)) {
-            return getCoins(cachedUnspentOutputs.get(address));
-        }else{
-            throw new Exception("Address not cached.");
-        }
-    }
-
-    /**
-     *
-     * If cacheUnspentOutputs() has been called prior to this, a cached state will be returned, otherwise - calls blockchain's unspent api and caches the result in a JSONObject
      * @param unspentsOutputJson
      * @return UnspentOutputs result of api response
-     *
      */
     public UnspentOutputs getCoins(JSONObject unspentsOutputJson) {
 
@@ -74,7 +44,7 @@ public class Payment {
 
         JSONArray unspentsJsonArray = unspentsOutputJson.getJSONArray("unspent_outputs");
 
-        if(unspentsOutputJson.has("notice")) {
+        if (unspentsOutputJson.has("notice")) {
             notice = unspentsOutputJson.getString("notice");
         }
 
@@ -97,6 +67,12 @@ public class Payment {
             // Construct the output
             MyTransactionOutPoint outPoint = new MyTransactionOutPoint(txHash, txOutputN, value, scriptBytes);
             outPoint.setConfirmations(confirmations);
+
+            if(unspentJson.has("xpub")){
+                JSONObject xpubJsonObject = unspentJson.getJSONObject("xpub");
+                outPoint.setPath(xpubJsonObject.getString("path"));
+            }
+
             outputPointList.add(outPoint);
 
         }
@@ -104,26 +80,14 @@ public class Payment {
         return new UnspentOutputs(outputPointList, balance, notice);
     }
 
-    public BigInteger getSweepFee(UnspentOutputs coins, BigInteger feePerKb) {
+    public SweepBundle getSweepBundle(UnspentOutputs coins, BigInteger feePerKb) {
 
-        //Filter usable coins
-        ArrayList<MyTransactionOutPoint> worthyCoins = new ArrayList<MyTransactionOutPoint>();
-        for(MyTransactionOutPoint output : coins.getOutputs()){
-            if(output.getValue().compareTo(feePerKb) == 1){
-                worthyCoins.add(output);
-            }
-        }
-
-        //All inputs, 1 output = no change
-        return FeeUtil.estimatedFee(worthyCoins.size(), 1, feePerKb);
-    }
-
-    public BigInteger getSweepBalance(UnspentOutputs coins, BigInteger feePerKb) {
+        SweepBundle sweepBundle = new SweepBundle();
 
         //Filter usable coins
         ArrayList<MyTransactionOutPoint> worthyCoins = new ArrayList<MyTransactionOutPoint>();
         BigInteger sweepBalance = BigInteger.ZERO;
-        for(MyTransactionOutPoint output : coins.getOutputs()){
+        for (MyTransactionOutPoint output : coins.getOutputs()) {
             if(output.getValue().compareTo(feePerKb) == 1){
                 worthyCoins.add(output);
                 sweepBalance = sweepBalance.add(output.getValue());
@@ -132,21 +96,9 @@ public class Payment {
 
         //All inputs, 1 output = no change
         BigInteger feeForAll = FeeUtil.estimatedFee(worthyCoins.size(), 1, feePerKb);
-        return sweepBalance.subtract(feeForAll);
-    }
-
-    public BigInteger getRecommendedFee(UnspentOutputs coins, BigInteger spendAmount, BigInteger feePerKb) {
-
-        //Filter usable coins
-        ArrayList<MyTransactionOutPoint> worthyCoins = new ArrayList<MyTransactionOutPoint>();
-        for(MyTransactionOutPoint output : coins.getOutputs()){
-            if(output.getValue().compareTo(feePerKb) == 1){
-                worthyCoins.add(output);
-            }
-        }
-
-        //All inputs, 1 output = no change
-        return FeeUtil.estimatedFee(worthyCoins.size(), 1, feePerKb);
+        sweepBundle.setSweepAmount(sweepBalance.subtract(feeForAll));
+        sweepBundle.setSweepFee(feeForAll);
+        return sweepBundle;
     }
 
     public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs coins, BigInteger spendAmount, BigInteger feePerKb) {
@@ -207,5 +159,139 @@ public class Payment {
             return ret;
         }
 
+    }
+
+    public interface SubmitPaymentListener {
+        void onSuccess(String hash);
+        void onFail(String error);
+    }
+
+    public void submitPayment(SpendableUnspentOutputs unspentOutputBundle,
+                                      Account account,
+                                      LegacyAddress legacyAddress,
+                                      String toAddress,
+                                      String changeAddress,
+                                      String note,
+                                      BigInteger bigIntFee,
+                                      BigInteger bigIntAmount,
+                                      boolean isWatchOnly,
+                                      String secondPassword,
+                                      SubmitPaymentListener listener) throws Exception {
+
+        //TODO - PayloadManager needs to be refactored out to make this method testable
+        //TODO - This method was pretty much just coppied out from android and modified slightly to retain stability
+        PayloadManager payloadManager = PayloadManager.getInstance();
+
+        final boolean isHD = account == null ? false : true;
+
+        //Get keys
+        HashMap<String, Address> keyMap = new HashMap<String, Address>();
+        if (isHD) {
+
+            for(MyTransactionOutPoint a : unspentOutputBundle.getSpendableOutputs()){
+                String[] split = a.getPath().split("/");
+                int chain = Integer.parseInt(split[1]);
+                int addressIndex = Integer.parseInt(split[2]);
+
+                Address address = payloadManager.getAddressAt(account.getRealIdx(), chain, addressIndex);
+                keyMap.put(address.getAddressString(), address);
+            }
+        }
+
+        final HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
+        receivers.put(toAddress, bigIntAmount);
+
+        Pair<Transaction, Long> pair = null;
+        pair = SendCoins.getInstance().makeTransaction(true,
+                unspentOutputBundle.getSpendableOutputs(),
+                receivers,
+                bigIntFee,
+                changeAddress);
+
+        // Transaction cancelled
+        if (pair == null) {
+            throw new Exception("Transaction cancelled");
+        }
+        Transaction tx = pair.getLeft();
+        Long priority = pair.getRight();
+
+        Wallet wallet = new Wallet(MainNetParams.get());
+        for (TransactionInput input : tx.getInputs()) {
+            byte[] scriptBytes = input.getOutpoint().getConnectedPubKeyScript();
+            String address = new BitcoinScript(scriptBytes).getAddress().toString();
+            ECKey walletKey = null;
+            try {
+
+                if (isHD) {
+                    Address hd_address = keyMap.get(address);
+                    walletKey =  PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+
+                } else {
+                    if (!isWatchOnly && payloadManager.getPayload().isDoubleEncrypted()) {
+                        walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
+                    } else {
+                        walletKey = legacyAddress.getECKey();
+                    }
+                }
+            } catch (AddressFormatException afe) {
+                // skip add Watch Only Bitcoin Address key because already accounted for later with tempKeys
+                afe.printStackTrace();
+                continue;
+            }
+
+            if (walletKey != null) {
+                wallet.addKey(walletKey);
+            } else {
+                throw new Exception("Wallet key error");
+            }
+
+        }
+
+        if (payloadManager.isNotUpgraded()) {
+            wallet = new Wallet(MainNetParams.get());
+            List<LegacyAddress> addrs = payloadManager.getPayload().getActiveLegacyAddresses();
+            for (LegacyAddress addr : addrs) {
+                ECKey ecKey = null;
+                if (!isWatchOnly && payloadManager.getPayload().isDoubleEncrypted()) {
+                    ecKey = addr.getECKey(new CharSequenceX(secondPassword));
+                } else {
+                    ecKey = addr.getECKey();
+                }
+                if (addr != null && ecKey != null && ecKey.hasPrivKey()) {
+                    wallet.addKey(ecKey);
+                }
+            }
+        }
+
+        SendCoins.getInstance().signTx(tx, wallet);
+        String hexString = SendCoins.getInstance().encodeHex(tx);
+
+        if (hexString.length() > (100 * 1024)) {
+            //Transaction maximum length cannot exceed 100KB
+            //Try splitting transaction
+            throw new Exception("Transaction maximum length cannot exceed 100KB");
+        }
+
+        PushTx pushTxApi = new PushTx();
+
+        String response = pushTxApi.submitTransaction(tx);
+        if (response.contains("Transaction Submitted")) {
+
+            listener.onSuccess(tx.getHashAsString());
+
+            if (note != null && note.length() > 0) {
+                Map<String, String> notes = payloadManager.getPayload().getNotes();
+                notes.put(tx.getHashAsString(), note);
+                payloadManager.getPayload().setNotes(notes);
+            }
+
+            if (account != null) {
+                // increment change address counter
+                account.incChange();
+            }
+
+        } else {
+            listener.onFail(response);
+        }
     }
 }
