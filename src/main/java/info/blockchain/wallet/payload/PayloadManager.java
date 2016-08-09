@@ -132,6 +132,8 @@ public class PayloadManager {
             } else {
                 wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
             }
+        }else{
+            //V2 wallet - no need to keep in sync with bp44 wallet
         }
     }
 
