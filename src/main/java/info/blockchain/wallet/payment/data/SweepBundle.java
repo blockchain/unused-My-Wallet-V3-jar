@@ -9,7 +9,6 @@ public class SweepBundle {
 
     private BigInteger sweepAmount;
     private BigInteger sweepFee;
-    private BigInteger consumedAmount;
 
     public BigInteger getSweepAmount() {
         return sweepAmount;
@@ -27,20 +26,11 @@ public class SweepBundle {
         this.sweepFee = sweepFee;
     }
 
-    public BigInteger getConsumedAmount() {
-        return consumedAmount;
-    }
-
-    public void setConsumedAmount(BigInteger consumedAmount) {
-        this.consumedAmount = consumedAmount;
-    }
-
     @Override
     public String toString() {
         return "SweepBundle{" +
                 "sweepAmount=" + sweepAmount +
                 ", sweepFee=" + sweepFee +
-                ", consumedAmount=" + consumedAmount +
                 '}';
     }
 }

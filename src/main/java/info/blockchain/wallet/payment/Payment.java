@@ -84,24 +84,25 @@ public class Payment {
 
         SweepBundle sweepBundle = new SweepBundle();
 
-        //Filter usable coins
-        ArrayList<MyTransactionOutPoint> worthyCoins = new ArrayList<MyTransactionOutPoint>();
+        //Use all coins for sweeping. Consume non worthy coins
+        ArrayList<MyTransactionOutPoint> allCoins = new ArrayList<MyTransactionOutPoint>();
         BigInteger sweepBalance = BigInteger.ZERO;
+
         for (MyTransactionOutPoint output : coins.getOutputs()) {
-            if(output.getValue().compareTo(feePerKb) == 1){
-                worthyCoins.add(output);
-                sweepBalance = sweepBalance.add(output.getValue());
-            }
+
+            allCoins.add(output);
+            sweepBalance = sweepBalance.add(output.getValue());
+
         }
 
         //All inputs, 1 output = no change
-        BigInteger feeForAll = FeeUtil.estimatedFee(worthyCoins.size(), 1, feePerKb);
+        BigInteger feeForAll = FeeUtil.estimatedFee(allCoins.size(), 1, feePerKb);
         sweepBundle.setSweepAmount(sweepBalance.subtract(feeForAll));
         sweepBundle.setSweepFee(feeForAll);
         return sweepBundle;
     }
 
-    public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs coins, BigInteger spendAmount, BigInteger feePerKb) {
+    public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs coins, BigInteger spendAmount, BigInteger feePerKb){
 
         SpendableUnspentOutputs result = new SpendableUnspentOutputs();
 
@@ -109,14 +110,27 @@ public class Payment {
         Collections.sort(coins.getOutputs(), new UnspentOutputAmountComparator());
         List<MyTransactionOutPoint> minimumUnspentOutputsList = new ArrayList<MyTransactionOutPoint>();
         BigInteger totalValue = BigInteger.ZERO;
-        int outputCount = 2;
+        BigInteger consumedBalance = BigInteger.ZERO;
+
+        int outputCount = 2;//initially assume change
+
         for (MyTransactionOutPoint output : coins.getOutputs()) {
+
             totalValue = totalValue.add(output.getValue());
             minimumUnspentOutputsList.add(output);
 
-            //No change = 1 output
+            //No change = 1 output (Exact amount)
             BigInteger spendAmountNoChange = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
             if (spendAmountNoChange.compareTo(totalValue) == 0) {
+                outputCount = 1;
+                break;
+            }
+
+            //No change = 1 output (Don't allow dust to be sent back as change - consume it rather)
+            BigInteger spendAmountNoChangeWithDustInclusion = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
+            if (spendAmountNoChangeWithDustInclusion.compareTo(totalValue) == -1
+                    && spendAmountNoChangeWithDustInclusion.compareTo(totalValue.subtract(SendCoins.bDust)) >= 0) {
+                consumedBalance = consumedBalance.add(spendAmountNoChangeWithDustInclusion.subtract(totalValue));
                 outputCount = 1;
                 break;
             }
@@ -131,6 +145,7 @@ public class Payment {
 
         result.setSpendableOutputs(minimumUnspentOutputsList);
         result.setAbsoluteFee(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), outputCount, feePerKb));
+        result.setConsumedAmount(consumedBalance);
 
         return result;
     }

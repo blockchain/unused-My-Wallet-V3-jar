@@ -9,6 +9,7 @@ public class SpendableUnspentOutputs {
 
     private List<MyTransactionOutPoint> spendableOutputs = null;
     private BigInteger absoluteFee = BigInteger.ZERO;
+    private BigInteger consumedAmount = BigInteger.ZERO;
 
     public SpendableUnspentOutputs() {
     }
@@ -29,11 +30,20 @@ public class SpendableUnspentOutputs {
         this.absoluteFee = absoluteFee;
     }
 
+    public BigInteger getConsumedAmount() {
+        return consumedAmount;
+    }
+
+    public void setConsumedAmount(BigInteger consumedAmount) {
+        this.consumedAmount = consumedAmount;
+    }
+
     @Override
     public String toString() {
         return "SpendableUnspentOutputs{" +
-                "spendableOutputs=" + spendableOutputs.size() +
+                "spendableOutputs=" + spendableOutputs +
                 ", absoluteFee=" + absoluteFee +
+                ", consumedAmount=" + consumedAmount +
                 '}';
     }
 }
