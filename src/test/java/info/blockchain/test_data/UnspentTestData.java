@@ -1,7 +1,5 @@
 package info.blockchain.test_data;
 
-import java.util.LinkedHashMap;
-
 /**
  * Created by riaanvos on 25/04/16.
  */
@@ -10,23 +8,10 @@ public class UnspentTestData {
     public static String ADDRESS = "19Axrcn8nsdZkSJtbnyM1rCs1PGwSzzzNn";
     public static String NOTICE = "Some funds are pending confirmation and cannot be spent yet (Value 0.001 BTC)";
     public static int UNSPENT_OUTPUTS_COUNT = 8;
-    public static int WORTHY_UNSPENT_OUTPUTS_COUNT = 5;// > FeeUtil.AVERAGE_FEE_PER_KB
-    public static long BALANCE = 360000l;
-
-    private static Long[] absoluteFeeListOneOutput = {0l, 5760l, 10200l, 14640l, 19080l, 23520l, 27960l, 32401l, 36840l};
-    private static Long[] absoluteFeeListTwoOutput = {0l, 6780l, 11220l, 15660l, 20100l, 24540l, 28980l, 33420l, 37860l};
-
-    public static LinkedHashMap<Integer, Long[]> feeMap;
-
-    static {
-        feeMap = new LinkedHashMap<Integer, Long[]>();
-        feeMap.put(1, absoluteFeeListOneOutput);
-        feeMap.put(2, absoluteFeeListTwoOutput);
-    }
-
+    public static long BALANCE = 360200l;
 
     /*
-    8 available coins: [80000,70000,60000,50000,40000,30000,20000,10000]
+    8 available coins: [80200,70000,60000,50000,40000,30000,20000,10000]
      */
     public static String apiResponseString = "{\n" +
             "\t\"unspent_outputs\": [{\n" +
@@ -35,7 +20,7 @@ public class UnspentTestData {
             "\t\t\"tx_index\": 136339683,\n" +
             "\t\t\"tx_output_n\": 0,\n" +
             "\t\t\"script\": \"76a91459a3602f1dc9fd3ff771e21883dedf18e11107cf88ac\",\n" +
-            "\t\t\"value\": 80000,\n" +
+            "\t\t\"value\": 80200,\n" +
             "\t\t\"value_hex\": \"4e20\",\n" +
             "\t\t\"confirmations\": 4228\n" +
             "\t}, {\n" +
