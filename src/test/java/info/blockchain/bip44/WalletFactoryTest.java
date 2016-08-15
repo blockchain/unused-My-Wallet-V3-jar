@@ -9,15 +9,12 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-/**
- * Created by riaanvos on 07/07/16.
- */
 public class WalletFactoryTest {
 
     WalletFactory walletFactory = new WalletFactory();
 
     @Test
-    public void newWallet_shouldPass() throws IOException, MnemonicException.MnemonicLengthException {
+    public void createWallet_shouldContainCorrectInfo() throws IOException, MnemonicException.MnemonicLengthException {
 
         String passphrase = "passphrase";
         int mnemonicLength = 12;
@@ -32,7 +29,7 @@ public class WalletFactoryTest {
     }
 
     @Test
-    public void restore_withGoodMnemonic_shouldPass() {
+    public void restoreWallet_withGoodMnemonic_shouldContainCorrectInfo() {
 
         String mnemonic = "all all all all all all all all all all all all";
         String passphrase = "myPassPhrase";
@@ -53,7 +50,7 @@ public class WalletFactoryTest {
     }
 
     @Test
-    public void restore_withBadMnemonic_shouldFail() {
+    public void restoreWallet_withBadMnemonic_shouldFail() {
 
         Wallet wallet = null;
 
@@ -67,7 +64,7 @@ public class WalletFactoryTest {
     }
 
     @Test
-    public void restore_withGoodSeedHex_shouldPass() {
+    public void restoreWallet_withGoodSeedHex_shouldPass() {
 
         String hexSeed = "0660cc198330660cc198330660cc1983";
         String passphrase = "myPassPhrase";
@@ -88,14 +85,39 @@ public class WalletFactoryTest {
     }
 
     @Test
-    public void walletChains_withDifferentPassphrase_shouldBeDifferent() {
+    public void restoredWallet_addressChains_withSamePassphrase_shouldBeSame() {
+
+        Wallet restoredWallet1 = null;
+        Wallet restoredWallet2 = null;
+
+        String passphrase1 = "passphrase1";
+
+        try {
+            restoredWallet1 = walletFactory.restoreWallet("all all all all all all all all all all all all", passphrase1, 1);
+            restoredWallet2 = walletFactory.restoreWallet("all all all all all all all all all all all all", passphrase1, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        assertThat(restoredWallet1.getAccount(0).getReceive().getAddressAt(0).getAddressString(),
+                is(restoredWallet2.getAccount(0).getReceive().getAddressAt(0).getAddressString()));
+
+        assertThat(restoredWallet1.getAccount(0).getChange().getAddressAt(0).getAddressString(),
+                is(restoredWallet2.getAccount(0).getChange().getAddressAt(0).getAddressString()));
+    }
+
+    @Test
+    public void restoredWallet_addressChains_withDifferentPassphrase_shouldBeDifferent() {
 
         Wallet wallet1 = null;
         Wallet wallet2 = null;
 
+        String passphrase1 = "passphrase1";
+        String passphrase2 = "passphrase2";
+
         try {
-            wallet1 = walletFactory.restoreWallet("all all all all all all all all all all all all", "one", 1);
-            wallet2 = walletFactory.restoreWallet("all all all all all all all all all all all all", "two", 1);
+            wallet1 = walletFactory.restoreWallet("all all all all all all all all all all all all", passphrase1, 1);
+            wallet2 = walletFactory.restoreWallet("all all all all all all all all all all all all", passphrase2, 1);
         } catch (Exception e) {
             e.printStackTrace();
         }
