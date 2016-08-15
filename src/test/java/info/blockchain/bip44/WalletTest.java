@@ -19,20 +19,17 @@ import java.util.Locale;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-/**
- * Created by riaanvos on 06/07/16.
- */
 public class WalletTest {
 
     @Test
-    public void createWalletTest() throws Exception {
-        Wallet wallet = null;
+    public void createBip44Wallet_shouldPass() throws Exception {
+
+        Wallet bip44Wallet = null;
 
         Locale locale = new Locale("en", "US");
         int wordCount = 12;
         String passphrase = "myPassPhrase";
         int accountCount = 4;
-        MnemonicCode mc;
 
         NetworkParameters params = MainNetParams.get();
 
@@ -44,19 +41,22 @@ public class WalletTest {
                 .getClassLoader()
                 .getResourceAsStream("wordlist/" + locale.toString() + ".txt");
         if(wis != null) {
-            mc = new MnemonicCode(wis, null);
-            wallet = new Wallet(mc, params, seed, passphrase, accountCount);
+            MnemonicCode mc = new MnemonicCode(wis, null);
+
+            //Create bip44 wallet
+            bip44Wallet = new Wallet(mc, params, seed, passphrase, accountCount);
+
             wis.close();
         }else {
             throw new Exception("Cannot read BIP39 word list");
         }
 
-        assertThat(wallet.getAccounts().size(), is(accountCount));
-        assertThat(wallet.getPassphrase(), is(passphrase));
+        assertThat(bip44Wallet.getAccounts().size(), is(accountCount));
+        assertThat(bip44Wallet.getPassphrase(), is(passphrase));
     }
 
     @Test
-    public void createWalletFromXpubsTest() throws AddressFormatException {
+    public void createWatchOnly_Bip44Wallet_shouldPass_andContainNoPrivx() throws AddressFormatException {
 
         String xpub1 = "xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt";
         String xpub2 = "xpub6C2grzAkm4ikWsjqffKKqLPbVEyhZmBY9nKcW1QrSZexNe9ynfisSLwyoWs94yHqGnfX3VgCeCmW38x4GxHzVSoYNcT9KVq6SH9P3VpgbFs";
@@ -68,10 +68,13 @@ public class WalletTest {
 
         assertThat(wallet.getAccounts().get(0).xpubstr(), is(xpub1));
         assertThat(wallet.getAccounts().get(1).xpubstr(), is(xpub2));
+
+        assertThat("PrivX should be null", wallet.getAccounts().get(0).xprvstr() == null);
+        assertThat("PrivX should be null", wallet.getAccounts().get(1).xprvstr() == null);
     }
 
     @Test
-    public void createWalletFromJsonTest() throws MnemonicException.MnemonicLengthException, IOException, DecoderException {
+    public void createBip44Wallet_FromJson_shouldPass() throws MnemonicException.MnemonicLengthException, IOException, DecoderException {
 
         JSONObject json = new JSONObject();
         String seedHex = "0660cc198330660cc198330660cc1983";
