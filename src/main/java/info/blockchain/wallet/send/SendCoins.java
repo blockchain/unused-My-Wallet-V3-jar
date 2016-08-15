@@ -40,10 +40,10 @@ public class SendCoins	{
 
     private SendCoins () { ; }
 
-    private String[] from = null;
-    private HashMap<String,String> froms = null;
+    public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.000005460").longValue());
 
-    public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.00005460").longValue());
+    //Minimum fee accepted by push_tc endpoint - 10000 satoshis
+    public static final BigInteger bMinimumFeePerKb = BigInteger.valueOf(Coin.parseCoin("0.00001").longValue());
 
     public static SendCoins getInstance() {
 
