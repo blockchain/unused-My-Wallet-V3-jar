@@ -1,16 +1,17 @@
-package info.blockchain.wallet.util;
+package info.blockchain.util;
 
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-public class FeeUtilTest  {
+public class FeeUtilTest {
 
     /*
     absolute fee calculations - http://bitcoinfees.com/
     absoluteFee = ceil (148 * number_of_inputs + 34 * number_of_outputs + 10) * feePrKb/1000
      */
+
     @Test
     public void testEstimatedFee() throws Exception {
 
@@ -33,5 +34,24 @@ public class FeeUtilTest  {
             BigInteger absoluteFee = FeeUtil.estimatedFee(inputs, outputs, BigInteger.valueOf(cases.get(testCase)[2]));
             assert(cases.get(testCase)[3] == absoluteFee.longValue());
         }
+
+    }
+
+    @Test
+    public void testEstimatedSize() throws Exception {
+
+        System.out.println(FeeUtil.estimatedSize(1, 1));
+        System.out.println(FeeUtil.estimatedSize(1, 2));
+        System.out.println(FeeUtil.estimatedSize(2, 1));
+    }
+
+    @Test
+    public void testGetMinimumFee() throws Exception {
+
+        System.out.println(FeeUtil.isAdequateFee(1, 2, BigInteger.valueOf(4000l)));
+//        System.out.println(FeeUtil.isAdequateFee(1, 1, BigInteger.valueOf(200l)));
+//        System.out.println(FeeUtil.isAdequateFee(1, 1, BigInteger.valueOf(300l)));
+//        System.out.println(FeeUtil.isAdequateFee(1, 1, BigInteger.valueOf(400l)));
+//        System.out.println(FeeUtil.isAdequateFee(1, 1, BigInteger.valueOf(500l)));
     }
 }

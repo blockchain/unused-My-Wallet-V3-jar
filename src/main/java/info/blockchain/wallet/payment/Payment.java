@@ -97,7 +97,12 @@ public class Payment {
 
         //All inputs, 1 output = no change
         BigInteger feeForAll = FeeUtil.estimatedFee(allCoins.size(), 1, feePerKb);
-        sweepBundle.setSweepAmount(sweepBalance.subtract(feeForAll));
+        BigInteger balanceAfterFee = sweepBalance.subtract(feeForAll);
+        if(balanceAfterFee.compareTo(BigInteger.ZERO) == -1) {
+            sweepBundle.setSweepAmount(BigInteger.ZERO);
+        }else{
+            sweepBundle.setSweepAmount(balanceAfterFee);
+        }
         sweepBundle.setSweepFee(feeForAll);
         return sweepBundle;
     }

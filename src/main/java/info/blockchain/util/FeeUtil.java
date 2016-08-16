@@ -1,5 +1,6 @@
 package info.blockchain.util;
 
+import info.blockchain.wallet.send.SendCoins;
 import org.bitcoinj.core.Coin;
 
 import java.math.BigInteger;
@@ -25,7 +26,35 @@ public class FeeUtil  {
     private static BigInteger calculateFee(int size, BigInteger feePerKb)   {
 
         double txBytes = ((double)size / 1000.0);
-        long fee = (long)Math.ceil(feePerKb.doubleValue() * txBytes);
-        return BigInteger.valueOf(fee);
+        long absoluteFee = (long)Math.ceil(feePerKb.doubleValue() * txBytes);
+        return BigInteger.valueOf(absoluteFee);
     }
+
+    public static boolean isAdequateFee(int inputs, int outputs, BigInteger absoluteFee){
+
+        double txBytes = ((double)estimatedSize(inputs, outputs) / 1000.0);
+        long feePerkb = (long)Math.ceil(absoluteFee.doubleValue() / txBytes);
+        return feePerkb > SendCoins.bMinimumFeePerKb.longValue();
+    }
+
+    /*
+    // Future use
+    // use unsigned tx here
+    //
+    public static long getPriority(Transaction tx, List<MyTransactionOutPoint> outputs)   {
+
+        long priority = 0L;
+
+        for(MyTransactionOutPoint output : outputs)   {
+            priority += output.getValue().longValue() * output.getConfirmations();
+        }
+        //
+        // calculate priority
+        //
+        long estimatedSize = tx.bitcoinSerialize().length + (114 * tx.getInputs().size());
+        priority /= estimatedSize;
+
+        return priority;
+    }
+     */
 }
