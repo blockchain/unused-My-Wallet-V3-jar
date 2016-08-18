@@ -1,7 +1,12 @@
 package info.blockchain.wallet.exceptions;
 
-/**
- * Created by riaanvos on 18/08/16.
- */
-public class DecryptionException {
+public class DecryptionException extends Exception {
+    //Parameterless Constructor
+    public DecryptionException() {
+    }
+
+    //Constructor that accepts a message
+    public DecryptionException(String message) {
+        super(message);
+    }
 }
