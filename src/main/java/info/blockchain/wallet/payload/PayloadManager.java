@@ -118,7 +118,6 @@ public class PayloadManager {
         String walletResponse = null;
         try {
             walletResponse = fetchPayload(guid, sharedKey);
-            System.out.println(walletResponse);
         } catch (Exception e) {
 
             e.printStackTrace();
