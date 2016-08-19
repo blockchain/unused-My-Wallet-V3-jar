@@ -170,6 +170,45 @@ public class PayloadManagerTest {
     }
 
     @Test
+    public void getPayloadFromServerAndDecrypt_withIncompatibleVersion_shouldCall_OnWalletVersionNotSupported() throws Exception{
+
+        payloadManager.setVersion(4.0);
+
+        payloadManager.savePayloadToServer();
+
+        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+            public void onSuccess() {
+                assertThat("Incompatible version should not pass", false);
+            }
+
+            public void onInvalidGuidOrSharedKey() {
+                assertThat("onInvalidGuidOrSharedKey", false);
+            }
+
+            public void onServerError(String error) {
+                assertThat("onServerConnectionFail", false);
+            }
+
+            public void onEmptyPayloadReturned() {
+                assertThat("onEmptyPayloadReturned", false);
+            }
+
+            public void onDecryptionFail() {
+                assertThat("onDecryptionFail", false);
+            }
+
+            public void onWalletSyncFail() {
+                assertThat("onWalletSyncFail", false);
+            }
+
+            public void onWalletVersionNotSupported() {
+                assertThat("onWalletVersionNotSupported", true);
+            }
+        });
+        try{Thread.sleep(500);}catch (Exception e){}
+    }
+    
+    @Test
     public void upgradeV2PayloadToV3_shouldPass() throws Exception {
 
         final PayloadManager payloadManager = PayloadManager.getInstance();
