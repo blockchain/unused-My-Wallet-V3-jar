@@ -56,6 +56,10 @@ public class PayloadManagerTest {
             public void onWalletSyncFail() {
                 assertThat("onWalletSyncFail", false);
             }
+
+            public void onWalletVersionNotSupported() {
+                assertThat("onWalletVersionNotSupported", false);
+            }
         });
         try{Thread.sleep(500);}catch (Exception e){}
     }
@@ -86,6 +90,10 @@ public class PayloadManagerTest {
 
             public void onWalletSyncFail() {
                 assertThat("onWalletSyncFail", false);
+            }
+
+            public void onWalletVersionNotSupported() {
+                assertThat("onWalletVersionNotSupported", false);
             }
         });
         try{Thread.sleep(500);}catch (Exception e){}
@@ -118,6 +126,10 @@ public class PayloadManagerTest {
             public void onWalletSyncFail() {
                 assertThat("onWalletSyncFail", false);
             }
+
+            public void onWalletVersionNotSupported() {
+                assertThat("onWalletVersionNotSupported", false);
+            }
         });
         try{Thread.sleep(500);}catch (Exception e){}
     }
@@ -148,6 +160,10 @@ public class PayloadManagerTest {
 
             public void onWalletSyncFail() {
                 assertThat("onWalletSyncFail", false);
+            }
+
+            public void onWalletVersionNotSupported() {
+                assertThat("onWalletVersionNotSupported", false);
             }
         });
         try{Thread.sleep(500);}catch (Exception e){}
