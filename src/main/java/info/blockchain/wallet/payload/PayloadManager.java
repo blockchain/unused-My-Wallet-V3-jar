@@ -286,15 +286,9 @@ public class PayloadManager {
 
         String payloadCleartext = null;
 
-        int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS;
-        boolean syncPubkeys = false;
-        String oldChecksum = null;
-
-        if(bciWallet != null){
-            iterations = bciWallet.getPdfdf2Iterations();
-            syncPubkeys = bciWallet.isSyncPubkeys();
-            oldChecksum = bciWallet.getPayloadChecksum();
-        }
+        int iterations = bciWallet.getPdfdf2Iterations();
+        boolean syncPubkeys = bciWallet.isSyncPubkeys();
+        String oldChecksum = bciWallet.getPayloadChecksum();
 
         StringBuilder args = new StringBuilder();
         try {
@@ -311,7 +305,7 @@ public class PayloadManager {
             rootObj.put("payload", payloadEncrypted);
 
             String strCheckSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
-            if(bciWallet != null)bciWallet.setPayloadChecksum(strCheckSum);
+            bciWallet.setPayloadChecksum(strCheckSum);
 
             String method = isNew ? "insert" : "update";
 
@@ -495,6 +489,8 @@ public class PayloadManager {
         payload = pair.payload;
         setNew(true);
 
+        bciWallet = new BlockchainWallet(payload);
+
         if (!savePayloadToServer()) {
             //if save failed don't return payload
             payload = null;
@@ -511,6 +507,8 @@ public class PayloadManager {
         payload = pair.payload;
         setNew(true);
 
+        bciWallet = new BlockchainWallet(payload);
+
         if (!savePayloadToServer()) {
             //if save failed don't return payload
             payload = null;
@@ -526,6 +524,8 @@ public class PayloadManager {
         wallet = pair.wallet;
         payload = pair.payload;
         setNew(true);
+
+        bciWallet = new BlockchainWallet(payload);
 
         if (!savePayloadToServer()) {
             //if save failed don't return payload

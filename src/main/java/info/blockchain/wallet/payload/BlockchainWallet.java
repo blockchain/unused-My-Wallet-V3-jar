@@ -7,6 +7,11 @@ import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
+import org.spongycastle.util.encoders.Hex;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class BlockchainWallet {
 
@@ -36,12 +41,18 @@ public class BlockchainWallet {
     private final String KEY_VERSION = "version";
     private final String KEY_PBKDF2_ITERATIONS = "pbkdf2_iterations";
 
-    public BlockchainWallet(Payload payload) {
+    /**
+     *
+     * @param payload
+     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException
+     */
+    public BlockchainWallet(Payload payload) throws UnsupportedEncodingException, NoSuchAlgorithmException {
 
         this.pdfdf2Iterations = DEFAULT_PBKDF2_ITERATIONS;
         this.version = 3.0;
         this.syncPubkeys = false;
-        this.payloadChecksum = "";//TODO - set checksum
+        this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.dumpJSON().toString().getBytes("UTF-8"))));
     }
 
     public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException {
