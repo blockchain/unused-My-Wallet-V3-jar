@@ -1,16 +1,18 @@
 package info.blockchain.wallet.util;
 
-import java.util.regex.Pattern;
-import java.nio.ByteBuffer;
-
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.uri.BitcoinURI;
-import org.bitcoinj.uri.BitcoinURIParseException;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.core.WrongNetworkException;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.uri.BitcoinURI;
+import org.bitcoinj.uri.BitcoinURIParseException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.nio.ByteBuffer;
+import java.util.regex.Pattern;
 
 public class FormatsUtil {
 
@@ -206,4 +208,16 @@ public class FormatsUtil {
 			}
 	}
 
+	public boolean isValidJson(String json) {
+		try {
+			new JSONObject(json);
+		} catch (JSONException ex) {
+			try {
+				new JSONArray(json);
+			} catch (JSONException ex1) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

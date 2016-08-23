@@ -1,15 +1,15 @@
 package info.blockchain.wallet.payload;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Options {
 
-    private int iterations = PayloadManager.WalletPbkdf2Iterations;
+    private int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS;
     private long fee_per_kb = 10000L;
     private long logout_time = 600000L;
     private List<String> additionalSeeds = null;

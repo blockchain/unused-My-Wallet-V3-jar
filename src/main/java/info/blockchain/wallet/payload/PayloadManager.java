@@ -40,7 +40,7 @@ public class PayloadManager {
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
     public static final int RECEIVE_CHAIN = 0;
-    public static final int CHANGE_CHAIN = 0;
+    public static final int CHANGE_CHAIN = 1;
 
     private static PayloadManager instance = null;
     // active payload:
@@ -48,16 +48,13 @@ public class PayloadManager {
     // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
     private static String cached_payload = null;
 
-    private static final int WalletDefaultPbkdf2Iterations = 5000;
-    public static int WalletPbkdf2Iterations = WalletDefaultPbkdf2Iterations;
-
     private static CharSequenceX strTempPassword = null;
-    private static String strCheckSum = null;
     private static boolean isNew = false;
-    private static boolean syncPubKeys = true;
     private static String email = null;
 
     private static double version = 2.0;
+
+    private static BlockchainWallet bciWallet;
 
     private static HDPayloadBridge hdPayloadBridge;
     private static Wallet wallet;
@@ -117,9 +114,9 @@ public class PayloadManager {
      */
     public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) {
 
-        String walletResponse = null;
+        String walletData = null;
         try {
-            walletResponse = fetchPayload(guid, sharedKey);
+            walletData = fetchWalletData(guid, sharedKey);
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -133,7 +130,9 @@ public class PayloadManager {
         }
 
         try {
-            payload = decryptPayload(walletResponse, password);
+
+            bciWallet = new BlockchainWallet(walletData, password);
+            payload = bciWallet.getPayload();
 
             if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
                 listener.onWalletVersionNotSupported();
@@ -162,7 +161,14 @@ public class PayloadManager {
         listener.onSuccess();
     }
 
-    private String fetchPayload(String guid, String sharedKey) throws Exception {
+    /**
+     * Fetches wallet data from server
+     * @param guid
+     * @param sharedKey
+     * @return Either encrypted string (v1) or json (v2, v3)
+     * @throws Exception
+     */
+    private String fetchWalletData(String guid, String sharedKey) throws Exception {
 
         String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, "method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json" + "&api_code=" + WebUtil.API_CODE);
 
@@ -172,6 +178,10 @@ public class PayloadManager {
             throw new Exception("Payload fetch from server is null");
     }
 
+    /**
+     * Syncs payload wallet and bip44 wallet
+     * @throws HDWalletException
+     */
     private void syncWallet() throws HDWalletException {
         if (payload.getHdWallet() != null) {
             if (payload.isDoubleEncrypted()) {
@@ -217,7 +227,7 @@ public class PayloadManager {
      * @return String
      */
     public String getCheckSum() {
-        return strCheckSum;
+        return bciWallet.getPayloadChecksum();
     }
 
     /**
@@ -225,9 +235,9 @@ public class PayloadManager {
      *
      * @param checksum Checksum to be set for this payload
      */
-    public void setCheckSum(String checksum) {
-        this.strCheckSum = checksum;
-    }
+//    public void setCheckSum(String checksum) {
+//        this.strCheckSum = checksum;
+//    }
 
     /**
      * Check if this payload is for a new Blockchain account.
@@ -245,114 +255,6 @@ public class PayloadManager {
      */
     public void setNew(boolean isNew) {
         this.isNew = isNew;
-    }
-
-    /**
-     * Get refreshed payload from server.
-     *
-     * @param walletResponse String returned from wallet endpoint - use the {@link #fetchPayload(String, String) method}
-     * @param password       User password
-     * @return Payload
-     * @throws PayloadException
-     * @throws DecryptionException
-     */
-    private Payload decryptPayload(String walletResponse, CharSequenceX password) throws PayloadException, DecryptionException {
-
-        Payload payload = null;
-        String checksum = null;
-
-        JSONObject jsonObject = new JSONObject(walletResponse);
-
-        if (jsonObject.has("payload_checksum")) {
-            checksum = jsonObject.get("payload_checksum").toString();
-        }
-
-        if (jsonObject.has("payload")) {
-
-            String encrypted_payload = null;
-            JSONObject payloadJsonObject = null;
-
-            try {
-                payloadJsonObject = new JSONObject((String) jsonObject.get("payload"));
-            } catch (Exception e) {
-                throw new PayloadException("JSONObject has no payload value");
-            }
-
-            if (payloadJsonObject != null && payloadJsonObject.has("payload")) {
-
-                if (payloadJsonObject.has("pbkdf2_iterations")) {
-                    WalletPbkdf2Iterations = Integer.valueOf(payloadJsonObject.get("pbkdf2_iterations").toString());
-                }
-                if (payloadJsonObject.has("version")) {
-                    version = Double.valueOf(payloadJsonObject.get("version").toString());
-                }
-                encrypted_payload = (String) payloadJsonObject.get("payload");
-
-            } else {
-
-                if (jsonObject.has("pbkdf2_iterations")) {
-                    WalletPbkdf2Iterations = Integer.valueOf(jsonObject.get("pbkdf2_iterations").toString());
-                }
-                if (jsonObject.has("version")) {
-                    version = Double.valueOf(jsonObject.get("version").toString());
-                }
-                encrypted_payload = (String) jsonObject.get("payload");
-            }
-
-            String decrypted = null;
-            try {
-                decrypted = AESUtil.decrypt(encrypted_payload, password, WalletPbkdf2Iterations);
-            } catch (Exception e) {
-                throw new DecryptionException(e.getMessage());
-            }
-
-            if (decrypted == null) {
-                try {
-                    // v1 wallet fixed PBKDF2 iterations at 10
-                    decrypted = AESUtil.decrypt(encrypted_payload, password, 10);
-                } catch (Exception e) {
-                    throw new DecryptionException(e.getMessage());
-                }
-
-                if (decrypted == null) {
-                    throw new DecryptionException("Empty after decrypt");
-                }
-            }
-
-            payload = new Payload(decrypted);
-            if (payload.getJSON() == null) {
-                //Iterations might be wrong
-                throw new PayloadException("Can't parse JSON");
-            }
-
-            // Default to wallet pbkdf2 iterations in case the double encryption pbkdf2 iterations is not set in wallet.json > options
-            payload.setDoubleEncryptionPbkdf2Iterations(WalletPbkdf2Iterations);
-
-            try {
-                payload.parseJSON();
-
-                if (payload.stepNumber != 9) {
-                    throw new PayloadException("Payload not fully parsed. Failed at step " + payload.stepNumber);
-                }
-
-            } catch (Exception e) {
-                throw new PayloadException(e.getMessage());
-            }
-
-        } else {
-            throw new PayloadException("JSONObject has no payload key");
-        }
-
-        if (StringUtils.isNotEmpty(checksum)) {
-            strCheckSum = checksum;
-        }
-
-        if (payload == null) {
-            //This shouldn't happen at this point
-            throw new PayloadException("Payload is null");
-        }
-
-        return payload;
     }
 
     /**
@@ -382,8 +284,17 @@ public class PayloadManager {
 
         if (payload == null) return false;
 
-        String strOldCheckSum = strCheckSum;
         String payloadCleartext = null;
+
+        int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS;
+        boolean syncPubkeys = false;
+        String oldChecksum = null;
+
+        if(bciWallet != null){
+            iterations = bciWallet.getPdfdf2Iterations();
+            syncPubkeys = bciWallet.isSyncPubkeys();
+            oldChecksum = bciWallet.getPayloadChecksum();
+        }
 
         StringBuilder args = new StringBuilder();
         try {
@@ -393,13 +304,14 @@ public class PayloadManager {
             }
 
             payloadCleartext = payload.dumpJSON().toString();
-            String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), WalletPbkdf2Iterations);
+            String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), iterations);
             JSONObject rootObj = new JSONObject();
             rootObj.put("version", getVersion());
-            rootObj.put("pbkdf2_iterations", WalletPbkdf2Iterations);
+            rootObj.put("pbkdf2_iterations", iterations);
             rootObj.put("payload", payloadEncrypted);
 
-            strCheckSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
+            String strCheckSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
+            if(bciWallet != null)bciWallet.setPayloadChecksum(strCheckSum);
 
             String method = isNew ? "insert" : "update";
 
@@ -429,7 +341,7 @@ public class PayloadManager {
             return false;
         }
 
-        if (syncPubKeys) {
+        if (syncPubkeys) {
             args.append("&active=");
 
             String[] legacyAddrs = null;
@@ -456,9 +368,9 @@ public class PayloadManager {
         args.append("&device=");
         args.append("android");
 
-        if (strOldCheckSum != null && strOldCheckSum.length() > 0) {
+        if(oldChecksum != null && oldChecksum.length() > 0) {
             args.append("&old_checksum=");
-            args.append(strOldCheckSum);
+            args.append(oldChecksum);
         }
 
         args.append("&api_code=" + WebUtil.API_CODE);
@@ -622,7 +534,6 @@ public class PayloadManager {
 
         return payload;
     }
-
 
     public interface UpgradePayloadListener {
         void onDoubleEncryptionPasswordError();

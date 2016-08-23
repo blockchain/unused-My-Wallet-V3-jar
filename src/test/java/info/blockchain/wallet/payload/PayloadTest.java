@@ -1,7 +1,6 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.test_data.PayloadTestData;
-import org.json.JSONObject;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -12,10 +11,7 @@ public class PayloadTest {
     @Test
     public void parsePayload_shouldPass() throws Exception {
 
-        Payload payload = new Payload();
-        payload.parsePayload(new JSONObject(PayloadTestData.jsonObject));
-
-        System.out.println(payload.dumpJSON());
+        Payload payload = new Payload(PayloadTestData.jsonObject, 5000);
 
         assertThat(payload.getGuid(), is(PayloadTestData.GUID));
         assertThat(payload.getSharedKey(), is(PayloadTestData.SHARED_KEY));
@@ -68,10 +64,7 @@ public class PayloadTest {
     @Test
     public void parsePayload_withMinimalValues_shouldPass() throws Exception {
 
-        Payload payload = new Payload();
-        payload.parsePayload(new JSONObject(PayloadTestData.jsonObject_minimal));
-
-        System.out.println(payload.dumpJSON());
+        Payload payload = new Payload(PayloadTestData.jsonObject_minimal, 5000);
 
         assertThat(payload.getGuid(), is(PayloadTestData.GUID));
         assertThat(payload.getSharedKey(), is(PayloadTestData.SHARED_KEY));
@@ -80,6 +73,6 @@ public class PayloadTest {
         assertThat(payload.isDoubleEncrypted(), is(false));
 
         assertThat(payload.getOptions().isHtml5Notifications(), is(false));
-        assertThat(payload.getOptions().getIterations(), is(PayloadManager.WalletPbkdf2Iterations));//Default
+        assertThat(payload.getOptions().getIterations(), is(BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS));
     }
 }

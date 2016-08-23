@@ -1,16 +1,13 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.util.FormatsUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import javax.annotation.Nonnull;
+import java.util.*;
 
 /**
  *
@@ -30,7 +27,6 @@ import java.util.TreeMap;
  */
 public class Payload {
 
-    private JSONObject jsonObject = null;
     private String strGuid = null;
     private String strSharedKey = null;
     private Options options = null;
@@ -45,6 +41,8 @@ public class Payload {
     private Map<String,PaidTo> paidTo = null;
     private Map<String,Integer> xpub2Account = null;
     private Map<Integer,String> account2Xpub = null;
+
+    private String decryptedPayload = null;
 
     private boolean isUpgraded = false;
 
@@ -63,7 +61,7 @@ public class Payload {
         account2Xpub = new HashMap<Integer,String>();
     }
 
-    public Payload(String json) {
+    public Payload(String decryptedPayload, int pdfdf2Iterations) throws PayloadException{
         legacyAddresses = new ArrayList<LegacyAddress>();
         addressBookEntries = new ArrayList<AddressBookEntry>();
         hdWallets = new ArrayList<HDWallet>();
@@ -71,31 +69,30 @@ public class Payload {
         tags = new HashMap<String,List<Integer>>();
         tag_names = new HashMap<Integer,String>();
         paidTo = new HashMap<String,PaidTo>();
-        options = new Options();
         xpub2Account = new HashMap<String,Integer>();
         account2Xpub = new HashMap<Integer,String>();
 
-        try {
-            jsonObject = new JSONObject(json);
-        }
-        catch(JSONException je) {
-            je.printStackTrace();
-            jsonObject = null;
-        }
+        options = new Options();
+        options.setIterations(pdfdf2Iterations);
+
+        this.decryptedPayload = decryptedPayload;
+
+        parseWalletData(decryptedPayload, pdfdf2Iterations);
     }
 
-    public void setJSON(String json)  {
-        try {
-            jsonObject = new JSONObject(json);
-        }
-        catch(JSONException je) {
-            je.printStackTrace();
-            jsonObject = null;
-        }
-    }
+    private void parseWalletData(final String decryptedPayload, int pdfdf2Iterations) throws PayloadException {
 
-    public JSONObject getJSON()  {
-        return jsonObject;
+        if(FormatsUtil.getInstance().isValidJson(decryptedPayload)){
+
+            parsePayload(new JSONObject(decryptedPayload));
+
+            // Default to wallet pbkdf2 iterations in case the double encryption pbkdf2 iterations is not set in wallet.json > options
+            setDoubleEncryptionPbkdf2Iterations(pdfdf2Iterations);
+
+        }else{
+            //Iterations might be incorrect
+            throw new PayloadException("Payload not valid json");
+        }
     }
 
     public String getGuid() {
@@ -286,447 +283,423 @@ public class Payload {
         this.strDoublePWHash = hash2;
     }
 
-    public void parseJSON() throws JSONException, Exception  {
-
-        if(jsonObject != null)  {
-            //
-            // test for version 2 (see https://blockchain.info/en/wallet/wallet-format)
-            //
-            try  {
-                if(jsonObject.has("payload"))  {
-                    parsePayload((JSONObject)jsonObject.get("payload"));
-                }
-                else  {
-                    parsePayload(jsonObject);
-                }
-            }
-            catch(JSONException je)  {
-                je.printStackTrace();
-            }
-        }
-        else  {
-          ;
-        }
-
-    }
-
     /**
      * Parser for Blockchain HD JSON object.
      *
      * <p>Parses the JSONObject passed as an argument and populates the payload instance
      * with all payload data for legacy and HD parts of the wallet.
      *
-     * @param JSONObject jsonObject JSON object to be parsed
+     * @param jsonObject JSON object to be parsed
      *
      */
-    public void parsePayload(JSONObject jsonObject) throws JSONException, Exception  {
+    public void parsePayload(@Nonnull JSONObject jsonObject)   {
 
-        if(jsonObject != null)  {
-            strGuid = (String)jsonObject.get("guid");
-            strSharedKey = (String)jsonObject.get("sharedKey");
+        strGuid = jsonObject.getString("guid");
 
-            doubleEncryption = jsonObject.has("double_encryption") ? (Boolean)jsonObject.get("double_encryption") : false;
-            strDoublePWHash = jsonObject.has("dpasswordhash") ? (String)jsonObject.get("dpasswordhash") : "";
+        if (jsonObject.has("sharedKey")) {
+            strSharedKey = jsonObject.getString("sharedKey");
+        }
 
-            stepNumber = 1;
+        doubleEncryption = jsonObject.has("double_encryption") ? (Boolean)jsonObject.get("double_encryption") : false;
+        strDoublePWHash = jsonObject.has("dpasswordhash") ? (String)jsonObject.get("dpasswordhash") : "";
 
-            //
-            // "options" or "wallet_options" ?
-            //
-            JSONObject optionsObj = null;
-            options = new Options();
-            if(jsonObject.has("options"))  {
-                optionsObj = (JSONObject)jsonObject.get("options");
+        stepNumber = 1;
+
+        //
+        // "options" or "wallet_options" ?
+        //
+        JSONObject optionsObj = null;
+        options = new Options();
+        if(jsonObject.has("options"))  {
+            optionsObj = (JSONObject)jsonObject.get("options");
+        }
+        if(optionsObj == null && jsonObject.has("wallet_options"))  {
+            optionsObj = (JSONObject)jsonObject.get("wallet_options");
+        }
+        if(optionsObj != null)  {
+            if(optionsObj.has("pbkdf2_iterations"))  {
+                int val = (Integer)optionsObj.get("pbkdf2_iterations");
+                options.setIterations(val);
             }
-            if(optionsObj == null && jsonObject.has("wallet_options"))  {
-                optionsObj = (JSONObject)jsonObject.get("wallet_options");
+            if(optionsObj.has("fee_per_kb"))  {
+                long val = optionsObj.getLong("fee_per_kb");
+                options.setFeePerKB(val);
             }
-            if(optionsObj != null)  {
-                if(optionsObj.has("pbkdf2_iterations"))  {
-                    int val = (Integer)optionsObj.get("pbkdf2_iterations");
-                    options.setIterations(val);
+            if(optionsObj.has("logout_time"))  {
+                long val = optionsObj.getLong("logout_time");
+                options.setLogoutTime(val);
+            }
+            if(optionsObj.has("html5_notifications"))  {
+                boolean val = optionsObj.getBoolean("html5_notifications");
+                options.setHtml5Notifications(val);
+            }
+            if(optionsObj.has("additional_seeds"))  {
+                JSONArray seeds = (JSONArray)optionsObj.get("additional_seeds");
+                List<String> additionalSeeds = new ArrayList<String>();
+                for(int i = 0; i < seeds.length(); i++)  {
+                    additionalSeeds.add((String)seeds.get(i));
                 }
-                if(optionsObj.has("fee_per_kb"))  {
-                    long val = optionsObj.getLong("fee_per_kb");
-                    options.setFeePerKB(val);
+                options.setAdditionalSeeds(additionalSeeds);
+            }
+        }
+
+        stepNumber = 2;
+
+        if(jsonObject.has("tx_notes"))  {
+            JSONObject tx_notes = (JSONObject)jsonObject.get("tx_notes");
+            Map<String,String> notes = new HashMap<String,String>();
+            for(Iterator<String> keys = tx_notes.keys(); keys.hasNext();)  {
+                String key = keys.next();
+                String note = (String)tx_notes.get(key);
+                notes.put(key, note);
+            }
+            setNotes(notes);
+        }
+
+        stepNumber = 3;
+
+        if(jsonObject.has("tx_tags"))  {
+            JSONObject tx_tags = (JSONObject)jsonObject.get("tx_tags");
+            Map<String,List<Integer>> _tags = new HashMap<String,List<Integer>>();
+            for(Iterator<String> keys = tx_tags.keys(); keys.hasNext();)  {
+                String key = keys.next();
+                JSONArray tagsObj = (JSONArray)tx_tags.get(key);
+                List<Integer> tags = new ArrayList<Integer>();
+                for(int i = 0; i < tagsObj.length(); i++)  {
+                    long val = (Long)tagsObj.get(i);
+                    tags.add((int)val);
                 }
-                if(optionsObj.has("logout_time"))  {
-                    long val = optionsObj.getLong("logout_time");
-                    options.setLogoutTime(val);
+                _tags.put(key, tags);
+            }
+            setTags(_tags);
+        }
+
+        stepNumber = 4;
+
+        if(jsonObject.has("tag_names"))  {
+            JSONArray tnames = (JSONArray)jsonObject.get("tag_names");
+            Map<Integer,String> _tnames = new HashMap<Integer,String>();
+            for(int i = 0; i < tnames.length(); i++)  {
+                _tnames.put(i, (String)tnames.get(i));
+            }
+            setTagNames(_tnames);
+        }
+
+        stepNumber = 5;
+
+        if(jsonObject.has("paidTo"))  {
+            JSONObject paid2 = (JSONObject)jsonObject.get("paidTo");
+            Map<String,PaidTo> pto = new HashMap<String,PaidTo>();
+            for(Iterator<String> keys = paid2.keys(); keys.hasNext();)  {
+                String key = keys.next();
+                PaidTo p = new PaidTo();
+                JSONObject t = (JSONObject)paid2.get(key);
+                p.setEmail(t.isNull("email") ? null : t.optString("email", null));
+                p.setMobile(t.isNull("mobile") ? null : t.optString("mobile", null));
+                p.setRedeemedAt(t.isNull("redeemedAt") ? null : (Integer)t.get("redeemedAt"));
+                p.setAddress(t.isNull("address") ? null : t.optString("address", null));
+                pto.put(key, p);
+            }
+            setPaidTo(pto);
+        }
+
+        stepNumber = 6;
+
+        if(jsonObject.has("hd_wallets"))  {
+            isUpgraded = true;
+
+            JSONArray wallets = (JSONArray)jsonObject.get("hd_wallets");
+            JSONObject wallet = (JSONObject)wallets.get(0);
+            HDWallet hdw = new HDWallet();
+
+            if(wallet.has("seed_hex"))  {
+                hdw.setSeedHex((String)wallet.get("seed_hex"));
+            }
+            if(wallet.has("passphrase"))  {
+                hdw.setPassphrase((String)wallet.get("passphrase"));
+            }
+            if(wallet.has("mnemonic_verified"))  {
+                hdw.mnemonic_verified(wallet.getBoolean("mnemonic_verified"));
+            }
+            if(wallet.has("default_account_idx"))  {
+                int i = 0;
+                try  {
+                    String val = (String)wallet.get("default_account_idx");
+                    i = Integer.parseInt(val);
                 }
-                if(optionsObj.has("html5_notifications"))  {
-                    boolean val = optionsObj.getBoolean("html5_notifications");
-                    options.setHtml5Notifications(val);
+                catch(java.lang.ClassCastException cce)  {
+                    i = (Integer)wallet.get("default_account_idx");
                 }
-                if(optionsObj.has("additional_seeds"))  {
-                    JSONArray seeds = (JSONArray)optionsObj.get("additional_seeds");
-                    List<String> additionalSeeds = new ArrayList<String>();
-                    for(int i = 0; i < seeds.length(); i++)  {
-                        additionalSeeds.add((String)seeds.get(i));
-                    }
-                    options.setAdditionalSeeds(additionalSeeds);
-                }
+                hdw.setDefaultIndex(i);
             }
 
-            stepNumber = 2;
+            if(((JSONObject)wallets.get(0)).has("accounts"))  {
 
-            if(jsonObject.has("tx_notes"))  {
-                JSONObject tx_notes = (JSONObject)jsonObject.get("tx_notes");
-                Map<String,String> notes = new HashMap<String,String>();
-                for(Iterator<String> keys = tx_notes.keys(); keys.hasNext();)  {
-                    String key = keys.next();
-                    String note = (String)tx_notes.get(key);
-                    notes.put(key, note);
-                }
-                setNotes(notes);
-            }
+                JSONArray accounts = (JSONArray)((JSONObject)wallets.get(0)).get("accounts");
+                if(accounts != null && accounts.length() > 0)  {
+                    List<Account> walletAccounts = new ArrayList<Account>();
+                    for(int i = 0; i < accounts.length(); i++)  {
 
-            stepNumber = 3;
+                        JSONObject accountObj = (JSONObject)accounts.get(i);
+                        Account account = new Account();
+                        account.setRealIdx(i);
+                        account.setArchived(accountObj.has("archived") ? (Boolean)accountObj.get("archived") : false);
+                        if(accountObj.has("archived") && (Boolean)accountObj.get("archived"))  {
+                            account.setArchived(true);
+                        }
+                        else  {
+                            account.setArchived(false);
+                        }
+                        account.setLabel(accountObj.has("label") ? (String)accountObj.get("label") : "");
+                        if(accountObj.has("xpub") && ((String)accountObj.get("xpub")) != null && ((String)accountObj.get("xpub")).length() > 0)  {
+                            account.setXpub((String)accountObj.get("xpub"));
+                            xpub2Account.put((String)accountObj.get("xpub"), i);
+                            account2Xpub.put(i, (String)accountObj.get("xpub"));
+                        }
+                        else  {
+                            continue;
+                        }
+                        if(accountObj.has("xpriv") && ((String)accountObj.get("xpriv")) != null && ((String)accountObj.get("xpriv")).length() > 0)  {
+                            account.setXpriv((String)accountObj.get("xpriv"));
+                        }
+                        else  {
+                            continue;
+                        }
 
-            if(jsonObject.has("tx_tags"))  {
-                JSONObject tx_tags = (JSONObject)jsonObject.get("tx_tags");
-                Map<String,List<Integer>> _tags = new HashMap<String,List<Integer>>();
-                for(Iterator<String> keys = tx_tags.keys(); keys.hasNext();)  {
-                    String key = keys.next();
-                    JSONArray tagsObj = (JSONArray)tx_tags.get(key);
-                    List<Integer> tags = new ArrayList<Integer>();
-                    for(int i = 0; i < tagsObj.length(); i++)  {
-                        long val = (Long)tagsObj.get(i);
-                        tags.add((int)val);
-                    }
-                    _tags.put(key, tags);
-                }
-                setTags(_tags);
-            }
-
-            stepNumber = 4;
-
-            if(jsonObject.has("tag_names"))  {
-                JSONArray tnames = (JSONArray)jsonObject.get("tag_names");
-                Map<Integer,String> _tnames = new HashMap<Integer,String>();
-                for(int i = 0; i < tnames.length(); i++)  {
-                    _tnames.put(i, (String)tnames.get(i));
-                }
-                setTagNames(_tnames);
-            }
-
-            stepNumber = 5;
-
-            if(jsonObject.has("paidTo"))  {
-                JSONObject paid2 = (JSONObject)jsonObject.get("paidTo");
-                Map<String,PaidTo> pto = new HashMap<String,PaidTo>();
-                for(Iterator<String> keys = paid2.keys(); keys.hasNext();)  {
-                    String key = keys.next();
-                    PaidTo p = new PaidTo();
-                    JSONObject t = (JSONObject)paid2.get(key);
-                    p.setEmail(t.isNull("email") ? null : t.optString("email", null));
-                    p.setMobile(t.isNull("mobile") ? null : t.optString("mobile", null));
-                    p.setRedeemedAt(t.isNull("redeemedAt") ? null : (Integer)t.get("redeemedAt"));
-                    p.setAddress(t.isNull("address") ? null : t.optString("address", null));
-                    pto.put(key, p);
-                }
-                setPaidTo(pto);
-            }
-
-            stepNumber = 6;
-
-            if(jsonObject.has("hd_wallets"))  {
-                isUpgraded = true;
-
-                JSONArray wallets = (JSONArray)jsonObject.get("hd_wallets");
-                JSONObject wallet = (JSONObject)wallets.get(0);
-                HDWallet hdw = new HDWallet();
-
-                if(wallet.has("seed_hex"))  {
-                    hdw.setSeedHex((String)wallet.get("seed_hex"));
-                }
-                if(wallet.has("passphrase"))  {
-                    hdw.setPassphrase((String)wallet.get("passphrase"));
-                }
-                if(wallet.has("mnemonic_verified"))  {
-                    hdw.mnemonic_verified(wallet.getBoolean("mnemonic_verified"));
-                }
-                if(wallet.has("default_account_idx"))  {
-                    int i = 0;
-                    try  {
-                        String val = (String)wallet.get("default_account_idx");
-                        i = Integer.parseInt(val);
-                    }
-                    catch(java.lang.ClassCastException cce)  {
-                        i = (Integer)wallet.get("default_account_idx");
-                    }
-                    hdw.setDefaultIndex(i);
-                }
-
-                if(((JSONObject)wallets.get(0)).has("accounts"))  {
-
-                    JSONArray accounts = (JSONArray)((JSONObject)wallets.get(0)).get("accounts");
-                    if(accounts != null && accounts.length() > 0)  {
-                        List<Account> walletAccounts = new ArrayList<Account>();
-                        for(int i = 0; i < accounts.length(); i++)  {
-
-                            JSONObject accountObj = (JSONObject)accounts.get(i);
-                            Account account = new Account();
-                            account.setRealIdx(i);
-                            account.setArchived(accountObj.has("archived") ? (Boolean)accountObj.get("archived") : false);
-                            if(accountObj.has("archived") && (Boolean)accountObj.get("archived"))  {
-                                account.setArchived(true);
-                            }
-                            else  {
-                                account.setArchived(false);
-                            }
-                            account.setLabel(accountObj.has("label") ? (String)accountObj.get("label") : "");
-                            if(accountObj.has("xpub") && ((String)accountObj.get("xpub")) != null && ((String)accountObj.get("xpub")).length() > 0)  {
-                                account.setXpub((String)accountObj.get("xpub"));
-                                xpub2Account.put((String)accountObj.get("xpub"), i);
-                                account2Xpub.put(i, (String)accountObj.get("xpub"));
-                            }
-                            else  {
-                                continue;
-                            }
-                            if(accountObj.has("xpriv") && ((String)accountObj.get("xpriv")) != null && ((String)accountObj.get("xpriv")).length() > 0)  {
-                                account.setXpriv((String)accountObj.get("xpriv"));
-                            }
-                            else  {
-                                continue;
-                            }
-
-                            if(accountObj.has("receive_addresses"))  {
-                                JSONArray receives = (JSONArray)accountObj.get("receive_addresses");
-                                List<ReceiveAddress> receiveAddresses = new ArrayList<ReceiveAddress>();
-                                for(int j = 0; j < receives.length(); j++)  {
-                                    JSONObject receiveObj = (JSONObject)receives.get(j);
-                                    ReceiveAddress receiveAddress = new ReceiveAddress();
-                                    if(receiveObj.has("index"))  {
-                                        int val = (Integer)receiveObj.get("index");
-                                        receiveAddress.setIndex(val);
-                                    }
-                                    receiveAddress.setLabel(receiveObj.has("label") ? (String)receiveObj.get("label") : "");
-                                    receiveAddress.setAmount(receiveObj.has("amount") ? (Long)receiveObj.getLong("amount") : 0L);
-                                    receiveAddress.setPaid(receiveObj.has("paid") ? (Long)receiveObj.getLong("paid") : 0L);
+                        if(accountObj.has("receive_addresses"))  {
+                            JSONArray receives = (JSONArray)accountObj.get("receive_addresses");
+                            List<ReceiveAddress> receiveAddresses = new ArrayList<ReceiveAddress>();
+                            for(int j = 0; j < receives.length(); j++)  {
+                                JSONObject receiveObj = (JSONObject)receives.get(j);
+                                ReceiveAddress receiveAddress = new ReceiveAddress();
+                                if(receiveObj.has("index"))  {
+                                    int val = (Integer)receiveObj.get("index");
+                                    receiveAddress.setIndex(val);
+                                }
+                                receiveAddress.setLabel(receiveObj.has("label") ? (String)receiveObj.get("label") : "");
+                                receiveAddress.setAmount(receiveObj.has("amount") ? (Long)receiveObj.getLong("amount") : 0L);
+                                receiveAddress.setPaid(receiveObj.has("paid") ? (Long)receiveObj.getLong("paid") : 0L);
 //                                    receiveAddress.setCancelled(receiveObj.has("cancelled") ? (Boolean)receiveObj.get("cancelled") : false);
 //                                    receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
-                                    receiveAddresses.add(receiveAddress);
-                                }
-                                account.setReceiveAddresses(receiveAddresses);
+                                receiveAddresses.add(receiveAddress);
                             }
-
-                            if(accountObj.has("tags"))  {
-                                JSONArray tags = (JSONArray)accountObj.get("tags");
-                                if(tags != null && tags.length() > 0)  {
-                                    List<String> accountTags = new ArrayList<String>();
-                                    for(int j = 0; j < tags.length(); j++)  {
-                                        accountTags.add((String)tags.get(j));
-                                    }
-                                    account.setTags(accountTags);
-                                }
-                            }
-
-                            if(accountObj.has("address_labels"))  {
-                                JSONArray labels = (JSONArray)accountObj.get("address_labels");
-                                if(labels != null && labels.length() > 0)  {
-                                    TreeMap<Integer,String> addressLabels = new TreeMap<Integer,String>();
-                                    for(int j = 0; j < labels.length(); j++)  {
-                                        JSONObject obj = labels.getJSONObject(j);
-                                        addressLabels.put(obj.getInt("index"), obj.getString("label"));
-                                    }
-                                    account.setAddressLabels(addressLabels);
-                                }
-                            }
-
-                            if(accountObj.has("cache"))  {
-
-                                JSONObject cacheObj = (JSONObject)accountObj.get("cache");
-
-                                Cache cache = new Cache();
-
-                                if(cacheObj.has("receiveAccount"))  {
-                                    cache.setReceiveAccount((String)cacheObj.get("receiveAccount"));
-                                }
-
-                                if(cacheObj.has("changeAccount"))  {
-                                    cache.setChangeAccount((String)cacheObj.get("changeAccount"));
-                                }
-
-                                account.setCache(cache);
-
-                            }
-
-                            walletAccounts.add(account);
+                            account.setReceiveAddresses(receiveAddresses);
                         }
 
-                        hdw.setAccounts(walletAccounts);
-
-                    }
-                }
-
-                hdWallets.add(hdw);
-            }
-            else    {
-                isUpgraded = false;
-            }
-
-            stepNumber = 7;
-
-            if(jsonObject.has("keys"))  {
-                JSONArray keys = (JSONArray)jsonObject.get("keys");
-                if(keys != null && keys.length() > 0)  {
-                    List<String> seenAddrs = new ArrayList<String>();
-                    String addr = null;
-                    JSONObject key = null;
-                    LegacyAddress legacyAddress = null;
-                    for(int i = 0; i < keys.length(); i++)  {
-                        key = (JSONObject)keys.get(i);
-
-                        stepNumber = 101;
-
-                        addr = (String)key.get("addr");
-
-                        stepNumber = 102;
-
-                        if(addr != null && !addr.equals("null") && !seenAddrs.contains(addr))  {
-
-                            String priv = null;
-                            long created_time = 0L;
-                            String label = null;
-                            long tag = 0L;
-                            String created_device_name = null;
-                            String created_device_version = null;
-                            boolean watchOnly = false;
-
-                            try {
-                              if(key.has("priv"))  {
-                                priv = key.getString("priv");
-                              }
-                              if(priv == null || priv.equals("null"))  {
-                                priv = "";
-                              }
-                            }
-                            catch(Exception e) {
-                              priv = "";
-                            }
-
-                            stepNumber = 103;
-
-                            if(priv.length() == 0)  {
-                                watchOnly = true;
-                            }
-
-                            stepNumber = 104;
-
-                            if(key.has("created_time"))  {
-                                try {
-                                  created_time = key.getLong("created_time");
+                        if(accountObj.has("tags"))  {
+                            JSONArray tags = (JSONArray)accountObj.get("tags");
+                            if(tags != null && tags.length() > 0)  {
+                                List<String> accountTags = new ArrayList<String>();
+                                for(int j = 0; j < tags.length(); j++)  {
+                                    accountTags.add((String)tags.get(j));
                                 }
-                                catch(Exception e) {
-                                  created_time = 0L;
-                                }
+                                account.setTags(accountTags);
                             }
-                            else  {
-                                created_time = 0L;
-                            }
-
-                            stepNumber = 105;
-
-                            try {
-                              if(key.has("label"))  {
-                                label = key.getString("label");
-                              }
-                              if(label == null || label.equals("null"))  {
-                                label = "";
-                              }
-                            }
-                            catch(Exception e) {
-                              label = "";
-                            }
-
-                            stepNumber = 106;
-
-                            if(key.has("tag"))  {
-                              try {
-                                tag = key.getLong("tag");
-                              }
-                              catch(Exception e) {
-                                tag = 0L;
-                              }
-                            }
-                            else  {
-                                tag = 0L;
-                            }
-
-                            stepNumber = 107;
-
-                            try {
-                              if(key.has("created_device_name"))  {
-                                created_device_name = key.getString("created_device_name");
-                              }
-                              if(created_device_name == null || created_device_name.equals("null"))  {
-                                created_device_name = "";
-                              }
-                            }
-                            catch(Exception e) {
-                              created_device_name = "";
-                            }
-
-                            stepNumber = 108;
-
-                            try {
-                              if(key.has("created_device_version"))  {
-                                created_device_version = key.getString("created_device_version");
-                              }
-                              if(created_device_version == null || created_device_version.equals("null"))  {
-                                created_device_version = "";
-                              }
-                            }
-                            catch(Exception e) {
-                              created_device_version = "";
-                            }
-
-                            stepNumber = 109;
-
-                            legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
-                            legacyAddresses.add(legacyAddress);
-                            seenAddrs.add(addr);
-
-                            stepNumber = 110;
                         }
+
+                        if(accountObj.has("address_labels"))  {
+                            JSONArray labels = (JSONArray)accountObj.get("address_labels");
+                            if(labels != null && labels.length() > 0)  {
+                                TreeMap<Integer,String> addressLabels = new TreeMap<Integer,String>();
+                                for(int j = 0; j < labels.length(); j++)  {
+                                    JSONObject obj = labels.getJSONObject(j);
+                                    addressLabels.put(obj.getInt("index"), obj.getString("label"));
+                                }
+                                account.setAddressLabels(addressLabels);
+                            }
+                        }
+
+                        if(accountObj.has("cache"))  {
+
+                            JSONObject cacheObj = (JSONObject)accountObj.get("cache");
+
+                            Cache cache = new Cache();
+
+                            if(cacheObj.has("receiveAccount"))  {
+                                cache.setReceiveAccount((String)cacheObj.get("receiveAccount"));
+                            }
+
+                            if(cacheObj.has("changeAccount"))  {
+                                cache.setChangeAccount((String)cacheObj.get("changeAccount"));
+                            }
+
+                            account.setCache(cache);
+
+                        }
+
+                        walletAccounts.add(account);
                     }
+
+                    hdw.setAccounts(walletAccounts);
+
                 }
             }
 
-            stepNumber = 8;
-
-            if(jsonObject.has("address_book"))  {
-
-                stepNumber = 201;
-
-                JSONArray address_book = (JSONArray)jsonObject.get("address_book");
-
-                stepNumber = 202;
-
-                if(address_book != null && address_book.length() > 0)  {
-                    JSONObject addr = null;
-                    AddressBookEntry addr_entry = null;
-                    for(int i = 0; i < address_book.length(); i++)  {
-                        addr = (JSONObject)address_book.get(i);
-
-                        stepNumber = 202;
-
-                        addr_entry = new AddressBookEntry(
-                                addr.has("addr") ? (String)addr.get("addr") : null,
-                                addr.has("label") ? (String)addr.get("label") : null
-                        );
-
-                        stepNumber = 203;
-
-                        addressBookEntries.add(addr_entry);
-                    }
-                }
-            }
-
-            stepNumber = 9;
-
+            hdWallets.add(hdw);
         }
+        else    {
+            isUpgraded = false;
+        }
+
+        stepNumber = 7;
+
+        if(jsonObject.has("keys"))  {
+            JSONArray keys = (JSONArray)jsonObject.get("keys");
+            if(keys != null && keys.length() > 0)  {
+                List<String> seenAddrs = new ArrayList<String>();
+                String addr = null;
+                JSONObject key = null;
+                LegacyAddress legacyAddress = null;
+                for(int i = 0; i < keys.length(); i++)  {
+                    key = (JSONObject)keys.get(i);
+
+                    stepNumber = 101;
+
+                    addr = (String)key.get("addr");
+
+                    stepNumber = 102;
+
+                    if(addr != null && !addr.equals("null") && !seenAddrs.contains(addr))  {
+
+                        String priv = null;
+                        long created_time = 0L;
+                        String label = null;
+                        long tag = 0L;
+                        String created_device_name = null;
+                        String created_device_version = null;
+                        boolean watchOnly = false;
+
+                        try {
+                          if(key.has("priv"))  {
+                            priv = key.getString("priv");
+                          }
+                          if(priv == null || priv.equals("null"))  {
+                            priv = "";
+                          }
+                        }
+                        catch(Exception e) {
+                          priv = "";
+                        }
+
+                        stepNumber = 103;
+
+                        if(priv.length() == 0)  {
+                            watchOnly = true;
+                        }
+
+                        stepNumber = 104;
+
+                        if(key.has("created_time"))  {
+                            try {
+                              created_time = key.getLong("created_time");
+                            }
+                            catch(Exception e) {
+                              created_time = 0L;
+                            }
+                        }
+                        else  {
+                            created_time = 0L;
+                        }
+
+                        stepNumber = 105;
+
+                        try {
+                          if(key.has("label"))  {
+                            label = key.getString("label");
+                          }
+                          if(label == null || label.equals("null"))  {
+                            label = "";
+                          }
+                        }
+                        catch(Exception e) {
+                          label = "";
+                        }
+
+                        stepNumber = 106;
+
+                        if(key.has("tag"))  {
+                          try {
+                            tag = key.getLong("tag");
+                          }
+                          catch(Exception e) {
+                            tag = 0L;
+                          }
+                        }
+                        else  {
+                            tag = 0L;
+                        }
+
+                        stepNumber = 107;
+
+                        try {
+                          if(key.has("created_device_name"))  {
+                            created_device_name = key.getString("created_device_name");
+                          }
+                          if(created_device_name == null || created_device_name.equals("null"))  {
+                            created_device_name = "";
+                          }
+                        }
+                        catch(Exception e) {
+                          created_device_name = "";
+                        }
+
+                        stepNumber = 108;
+
+                        try {
+                          if(key.has("created_device_version"))  {
+                            created_device_version = key.getString("created_device_version");
+                          }
+                          if(created_device_version == null || created_device_version.equals("null"))  {
+                            created_device_version = "";
+                          }
+                        }
+                        catch(Exception e) {
+                          created_device_version = "";
+                        }
+
+                        stepNumber = 109;
+
+                        legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
+                        legacyAddresses.add(legacyAddress);
+                        seenAddrs.add(addr);
+
+                        stepNumber = 110;
+                    }
+                }
+            }
+        }
+
+        stepNumber = 8;
+
+        if(jsonObject.has("address_book"))  {
+
+            stepNumber = 201;
+
+            JSONArray address_book = (JSONArray)jsonObject.get("address_book");
+
+            stepNumber = 202;
+
+            if(address_book != null && address_book.length() > 0)  {
+                JSONObject addr = null;
+                AddressBookEntry addr_entry = null;
+                for(int i = 0; i < address_book.length(); i++)  {
+                    addr = (JSONObject)address_book.get(i);
+
+                    stepNumber = 202;
+
+                    addr_entry = new AddressBookEntry(
+                            addr.has("addr") ? (String)addr.get("addr") : null,
+                            addr.has("label") ? (String)addr.get("label") : null
+                    );
+
+                    stepNumber = 203;
+
+                    addressBookEntries.add(addr_entry);
+                }
+            }
+        }
+
+        stepNumber = 9;
 
     }
 
@@ -833,4 +806,33 @@ public class Payload {
         return obj;
     }
 
+    @Override
+    public String toString() {
+        return "Payload{" +
+                "strGuid='" + strGuid + '\'' +
+                ", strSharedKey='" + strSharedKey + '\'' +
+                ", options=" + options +
+                ", doubleEncryption=" + doubleEncryption +
+                ", strDoublePWHash='" + strDoublePWHash + '\'' +
+                ", legacyAddresses=" + legacyAddresses +
+                ", addressBookEntries=" + addressBookEntries +
+                ", hdWallets=" + hdWallets +
+                ", notes=" + notes +
+                ", tags=" + tags +
+                ", tag_names=" + tag_names +
+                ", paidTo=" + paidTo +
+                ", xpub2Account=" + xpub2Account +
+                ", account2Xpub=" + account2Xpub +
+                ", isUpgraded=" + isUpgraded +
+                ", stepNumber=" + stepNumber +
+                '}';
+    }
+
+    public String getDecryptedPayload() {
+        return decryptedPayload;
+    }
+
+    public void setDecryptedPayload(String decryptedPayload) {
+        this.decryptedPayload = decryptedPayload;
+    }
 }
