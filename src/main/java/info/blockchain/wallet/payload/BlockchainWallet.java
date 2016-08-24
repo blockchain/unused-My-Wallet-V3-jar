@@ -24,6 +24,7 @@ public class BlockchainWallet {
     private String storageToken;
     private boolean syncPubkeys;
 
+    private String walletData;//Debugging purposes
     private Payload payload;
 
     private final String KEY_EXTRA_SEED = "extra_seed";
@@ -56,6 +57,8 @@ public class BlockchainWallet {
     }
 
     public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException {
+
+        this.walletData = walletData;
 
         if (FormatsUtil.getInstance().isValidJson(walletData)) {
             parseWallet(new JSONObject(walletData), password);
@@ -242,5 +245,9 @@ public class BlockchainWallet {
     public String decryptWallet(String encryptedPayload, CharSequenceX password, int pdfdf2Iterations) {
 
         return AESUtil.decrypt(encryptedPayload, password, pdfdf2Iterations);
+    }
+
+    public String getWalletData(){
+        return walletData;
     }
 }

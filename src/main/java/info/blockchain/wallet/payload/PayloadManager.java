@@ -856,4 +856,12 @@ public class PayloadManager {
 
         return hd_address;
     }
+
+    /**
+     * Debugging purposes
+     * @return
+     */
+    public BlockchainWallet getBciWallet(){
+        return bciWallet;
+    }
 }
