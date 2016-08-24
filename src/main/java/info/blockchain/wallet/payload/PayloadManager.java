@@ -4,9 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.util.*;
 import org.apache.commons.codec.DecoderException;
@@ -90,18 +88,6 @@ public class PayloadManager {
 
     public interface InitiatePayloadListener {
         void onSuccess();
-
-        void onServerError(String error);
-
-        void onInvalidGuidOrSharedKey();
-
-        void onEmptyPayloadReturned();
-
-        void onDecryptionFail();
-
-        void onWalletSyncFail();
-
-        void onWalletVersionNotSupported();
     }
 
     /**
@@ -112,7 +98,7 @@ public class PayloadManager {
      * @param password
      * @param listener
      */
-    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) {
+    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException, ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
 
         String walletData = null;
         try {
@@ -122,41 +108,22 @@ public class PayloadManager {
             e.printStackTrace();
 
             if (e.getMessage().contains("Invalid GUID")) {
-                listener.onInvalidGuidOrSharedKey();
+                throw new InvalidCredentialsException();
             } else {
-                listener.onServerError(e.getMessage());
+                throw new ServerConnectionException();
             }
-            return;
         }
 
-        try {
+        bciWallet = new BlockchainWallet(walletData, password);
+        payload = bciWallet.getPayload();
 
-            bciWallet = new BlockchainWallet(walletData, password);
-            payload = bciWallet.getPayload();
+        if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
 
-            if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
-                listener.onWalletVersionNotSupported();
-                payload = null;
-                return;
-            }
-
-        } catch (PayloadException e) {
-            e.printStackTrace();
-            listener.onEmptyPayloadReturned();
-            return;
-        } catch (DecryptionException e) {
-            e.printStackTrace();
-            listener.onDecryptionFail();
-            return;
+            payload = null;
+            throw new UnsupportedVersionException(getVersion()+"");
         }
 
-        try {
-            syncWallet();
-        } catch (HDWalletException e) {
-            e.printStackTrace();
-            listener.onWalletSyncFail();
-            return;
-        }
+        syncWallet();
 
         listener.onSuccess();
     }

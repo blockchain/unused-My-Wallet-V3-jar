@@ -1,5 +1,8 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.junit.After;
@@ -36,175 +39,86 @@ public class PayloadManagerTest {
             public void onSuccess() {
                 assertThat("Payload successfully fetch and decrypted", true);
             }
-
-            public void onInvalidGuidOrSharedKey() {
-                assertThat("onInvalidGuidOrSharedKey", false);
-            }
-
-            public void onServerError(String error) {
-                assertThat("onServerConnectionFail", false);
-            }
-
-            public void onEmptyPayloadReturned() {
-                assertThat("onEmptyPayloadReturned", false);
-            }
-
-            public void onDecryptionFail() {
-                assertThat("onDecryptionFail", false);
-            }
-
-            public void onWalletSyncFail() {
-                assertThat("onWalletSyncFail", false);
-            }
-
-            public void onWalletVersionNotSupported() {
-                assertThat("onWalletVersionNotSupported", false);
-            }
         });
         try{Thread.sleep(500);}catch (Exception e){}
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldCall_onInvalidGuid(){
+    public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldThrow_AuthenticationException(){
 
-        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid()+"a", new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
-            public void onSuccess() {
-                assertThat("onSuccess", false);
-            }
-
-            public void onInvalidGuidOrSharedKey() {
+        try {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid() + "addSomeTextToFail", new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+                public void onSuccess() {
+                    assertThat("onSuccess", false);
+                }
+            });
+        } catch (Exception e) {
+            if (e instanceof InvalidCredentialsException) {
                 assertThat("Invalid Guid successfully detected", true);
+            } else {
+                assertThat("Auth should not pass with invalid guid", false);
             }
-
-            public void onServerError(String error) {
-                assertThat("onServerConnectionFail", false);
-            }
-
-            public void onEmptyPayloadReturned() {
-                assertThat("onEmptyPayloadReturned", false);
-            }
-
-            public void onDecryptionFail() {
-                assertThat("onDecryptionFail", false);
-            }
-
-            public void onWalletSyncFail() {
-                assertThat("onWalletSyncFail", false);
-            }
-
-            public void onWalletVersionNotSupported() {
-                assertThat("onWalletVersionNotSupported", false);
-            }
-        });
+        }
         try{Thread.sleep(500);}catch (Exception e){}
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidPassword_shouldCall_onDecryptionFail(){
+    public void getPayloadFromServerAndDecrypt_withInvalidPassword_shouldThrow_DecryptionException(){
 
-        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password+"a"), new PayloadManager.InitiatePayloadListener() {
-            public void onSuccess() {
-                assertThat("onSuccess", false);
-            }
-
-            public void onInvalidGuidOrSharedKey() {
-                assertThat("onInvalidGuidOrSharedKey", false);
-            }
-
-            public void onServerError(String error) {
-                assertThat("onServerConnectionFail", false);
-            }
-
-            public void onEmptyPayloadReturned() {
-                assertThat("onEmptyPayloadReturned", false);
-            }
-
-            public void onDecryptionFail() {
+        try {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password + "addSomeTextToFail"), new PayloadManager.InitiatePayloadListener() {
+                public void onSuccess() {
+                    assertThat("onSuccess", false);
+                }
+            });
+        } catch (Exception e) {
+            if (e instanceof DecryptionException) {
                 assertThat("Decryption failed as expected", true);
+            } else {
+                assertThat("Auth should not pass with invalid guid", false);
             }
-
-            public void onWalletSyncFail() {
-                assertThat("onWalletSyncFail", false);
-            }
-
-            public void onWalletVersionNotSupported() {
-                assertThat("onWalletVersionNotSupported", false);
-            }
-        });
+        }
         try{Thread.sleep(500);}catch (Exception e){}
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidShaeredKey_shouldCall_onDecryptionFail(){
+    public void getPayloadFromServerAndDecrypt_withInvalidSharedKey_shouldThrow_AuthenticationException(){
 
-        payloadManager.initiatePayload(payload.getSharedKey()+"a", payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
-            public void onSuccess() {
-                assertThat("onSuccess", false);
-            }
-
-            public void onInvalidGuidOrSharedKey() {
+        try {
+            payloadManager.initiatePayload(payload.getSharedKey() + "addSomeTextToFail", payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+                public void onSuccess() {
+                    assertThat("onSuccess", false);
+                }
+            });
+        }catch (Exception e){
+            if (e instanceof InvalidCredentialsException) {
                 assertThat("Invalid shared key successfully detected", true);
+            } else {
+                assertThat("Auth should not pass with invalid shared key", false);
             }
-
-            public void onServerError(String error) {
-                assertThat("onServerConnectionFail", false);
-            }
-
-            public void onEmptyPayloadReturned() {
-                assertThat("onEmptyPayloadReturned", false);
-            }
-
-            public void onDecryptionFail() {
-                assertThat("onDecryptionFail", false);
-            }
-
-            public void onWalletSyncFail() {
-                assertThat("onWalletSyncFail", false);
-            }
-
-            public void onWalletVersionNotSupported() {
-                assertThat("onWalletVersionNotSupported", false);
-            }
-        });
+        }
         try{Thread.sleep(500);}catch (Exception e){}
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withIncompatibleVersion_shouldCall_OnWalletVersionNotSupported() throws Exception{
+    public void getPayloadFromServerAndDecrypt_withIncompatibleVersion_shouldThrow_UnsupportedVersionException() {
 
         payloadManager.setVersion(4.0);
 
         payloadManager.savePayloadToServer();
 
+        try{
         payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
             public void onSuccess() {
                 assertThat("Incompatible version should not pass", false);
             }
-
-            public void onInvalidGuidOrSharedKey() {
-                assertThat("onInvalidGuidOrSharedKey", false);
+        });}catch (Exception e){
+            if (e instanceof UnsupportedVersionException) {
+                assertThat("Unsupported version detected", true);
+            } else {
+                assertThat("Unsupported version should not pass", false);
             }
-
-            public void onServerError(String error) {
-                assertThat("onServerConnectionFail", false);
-            }
-
-            public void onEmptyPayloadReturned() {
-                assertThat("onEmptyPayloadReturned", false);
-            }
-
-            public void onDecryptionFail() {
-                assertThat("onDecryptionFail", false);
-            }
-
-            public void onWalletSyncFail() {
-                assertThat("onWalletSyncFail", false);
-            }
-
-            public void onWalletVersionNotSupported() {
-                assertThat("onWalletVersionNotSupported", true);
-            }
-        });
+        }
         try{Thread.sleep(500);}catch (Exception e){}
     }
     

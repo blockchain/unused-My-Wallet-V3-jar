@@ -120,7 +120,7 @@ public class BlockchainWallet {
             if (payloadWrapper.has(KEY_PAYLOAD)) {
                 String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pdfdf2Iterations);
 
-                if (decryptedPayload != null) {
+                if (decryptedPayload != null && FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
                     payload = new Payload(decryptedPayload, pdfdf2Iterations);
                 } else {
                     throw new DecryptionException("Payload null after decrypt.");
