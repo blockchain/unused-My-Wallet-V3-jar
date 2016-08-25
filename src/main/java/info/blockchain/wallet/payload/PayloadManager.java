@@ -253,7 +253,7 @@ public class PayloadManager {
 
         String payloadCleartext = null;
 
-        int iterations = bciWallet.getPdfdf2Iterations();
+        int iterations = bciWallet.getPbkdf2Iterations();
         boolean syncPubkeys = bciWallet.isSyncPubkeys();
         String oldChecksum = bciWallet.getPayloadChecksum();
 

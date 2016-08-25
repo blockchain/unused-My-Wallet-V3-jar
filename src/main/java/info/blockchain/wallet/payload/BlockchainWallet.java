@@ -36,7 +36,7 @@ public class BlockchainWallet {
     private final String KEY_SYNC_PUBKEYS = "sync_pubkeys";
 
     //Payload wrapper
-    private int pdfdf2Iterations;
+    private int pbkdf2Iterations;
     private double version;
 
     private final String KEY_VERSION = "version";
@@ -50,7 +50,7 @@ public class BlockchainWallet {
      */
     public BlockchainWallet(Payload payload) throws UnsupportedEncodingException, NoSuchAlgorithmException {
 
-        this.pdfdf2Iterations = DEFAULT_PBKDF2_ITERATIONS;
+        this.pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS;
         this.version = 3.0;
         this.syncPubkeys = false;
         this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.dumpJSON().toString().getBytes("UTF-8"))));
@@ -74,8 +74,8 @@ public class BlockchainWallet {
         Pair pair = decryptV1Wallet(walletData, password);
 
         String decyptedPayload = (String) pair.getLeft();
-        pdfdf2Iterations = (Integer) pair.getRight();
-        payload = new Payload(decyptedPayload, pdfdf2Iterations);
+        pbkdf2Iterations = (Integer) pair.getRight();
+        payload = new Payload(decyptedPayload, pbkdf2Iterations);
     }
 
     private void parseWallet(JSONObject walletJson, CharSequenceX password) throws PayloadException, DecryptionException {
@@ -112,16 +112,16 @@ public class BlockchainWallet {
             version = payloadWrapper.getDouble(KEY_VERSION);
 
             if (payloadWrapper.has(KEY_PBKDF2_ITERATIONS)) {
-                pdfdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
+                pbkdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
             } else {
-                pdfdf2Iterations = DEFAULT_PBKDF2_ITERATIONS;
+                pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS;
             }
 
             if (payloadWrapper.has(KEY_PAYLOAD)) {
-                String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pdfdf2Iterations);
+                String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pbkdf2Iterations);
 
                 if (decryptedPayload != null && FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
-                    payload = new Payload(decryptedPayload, pdfdf2Iterations);
+                    payload = new Payload(decryptedPayload, pbkdf2Iterations);
                 } else {
                     throw new DecryptionException("Payload null after decrypt.");
                 }
@@ -191,12 +191,12 @@ public class BlockchainWallet {
         this.syncPubkeys = syncPubkeys;
     }
 
-    public int getPdfdf2Iterations() {
-        return pdfdf2Iterations;
+    public int getPbkdf2Iterations() {
+        return pbkdf2Iterations;
     }
 
-    public void setPdfdf2Iterations(int pdfdf2Iterations) {
-        this.pdfdf2Iterations = pdfdf2Iterations;
+    public void setPbkdf2Iterations(int pbkdf2Iterations) {
+        this.pbkdf2Iterations = pbkdf2Iterations;
     }
 
     public double getVersion() {
