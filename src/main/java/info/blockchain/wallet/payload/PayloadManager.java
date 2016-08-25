@@ -139,10 +139,12 @@ public class PayloadManager {
 
         String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, "method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json" + "&api_code=" + WebUtil.API_CODE);
 
-        if (response != null)
-            return response;
-        else
+        if (response == null){
             throw new Exception("Payload fetch from server is null");
+        }
+
+        return response;
+
     }
 
     /**
@@ -196,15 +198,6 @@ public class PayloadManager {
     public String getCheckSum() {
         return bciWallet.getPayloadChecksum();
     }
-
-    /**
-     * Set checksum for this payload.
-     *
-     * @param checksum Checksum to be set for this payload
-     */
-//    public void setCheckSum(String checksum) {
-//        this.strCheckSum = checksum;
-//    }
 
     /**
      * Check if this payload is for a new Blockchain account.
