@@ -12,7 +12,7 @@ public class DoubleEncryptionFactoryTest {
 
     String cleartext = "test data";
     CharSequenceX pw = new CharSequenceX("password");
-    int iterations = AESUtil.PinPbkdf2Iterations;
+    int iterations = AESUtil.PIN_PBKDF2_ITERATIONS;
     String sharedKey = "524b5e9f-72ea-4690-b28c-8c1cfce65ca0";
 
     @Test

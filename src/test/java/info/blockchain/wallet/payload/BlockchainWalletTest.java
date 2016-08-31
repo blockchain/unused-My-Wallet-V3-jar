@@ -93,6 +93,7 @@ public class BlockchainWalletTest {
 
             BlockchainWallet bciWallet = new BlockchainWallet(walletString, new CharSequenceX(password));
 
+
             assertThat(bciWallet.getVersion(), is(credentialsJson.getDouble("version")));
             assertThat(bciWallet.getPbkdf2Iterations(), is(credentialsJson.getInt("iterations")));
             assertThat(bciWallet.getVersion(), is(credentialsJson.getDouble("version")));

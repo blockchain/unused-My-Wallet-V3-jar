@@ -7,6 +7,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
+import org.spongycastle.crypto.paddings.*;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.UnsupportedEncodingException;
@@ -16,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 public class BlockchainWallet {
 
     public static final int DEFAULT_PBKDF2_ITERATIONS = 5000;
+    private static final int DEFAULT_ITERATIONS = 10;
 
     private String extraSeed;
     private String payloadChecksum;
@@ -207,39 +209,42 @@ public class BlockchainWallet {
         this.version = version;
     }
 
-    public Pair decryptV1Wallet(String encryptedPayload, CharSequenceX password) {
-
-        final int defaultIterations = 10;
+    public Pair decryptV1Wallet(String encryptedPayload, CharSequenceX password) throws DecryptionException {
 
         String decrypted = null;
         int succeededIterations = 1;
 
-        int iterations = 1;
-        boolean isBCB = true;
-        while (decrypted == null && iterations <= defaultIterations) {
-            try {
-                if (isBCB) {
-                    decrypted = AESUtil.decrypt(encryptedPayload, password, iterations);
-                } else {
-                    decrypted = AESUtil.decrypt_OFB(encryptedPayload, password, iterations);
-                }
+        int iterations[] = {1, 10};
+        int modes[] = {AESUtil.MODE_CBC, AESUtil.MODE_OFB};
+        BlockCipherPadding[] paddings = {
+                new ISO10126d2Padding(),
+                new ISO7816d4Padding(),
+                new ZeroBytePadding(),
+                null};//NoPadding
 
-                //Ensure it's parsable
-                new JSONObject(decrypted);
+        for (int iteration : iterations) {
 
-                succeededIterations = iterations;
+            for (int mode : modes) {
 
-            } catch (Exception e) {
-                decrypted = null;
-            } finally {
-                iterations++;
-                if (iterations > 10 && isBCB) {
-                    iterations = 0;
-                    isBCB = false;
+                for (BlockCipherPadding padding : paddings) {
+
+                    try {
+                        decrypted = AESUtil.decryptWithSetMode(encryptedPayload, password, iteration, mode, padding);
+                        //Ensure it's parsable
+                        new JSONObject(decrypted);
+
+                        succeededIterations = iteration;
+
+                        return Pair.of(decrypted, succeededIterations);
+
+                    } catch (Exception e) {
+                        decrypted = null;
+                    }
                 }
             }
         }
-        return Pair.of(decrypted, succeededIterations);
+
+        throw new DecryptionException("Failed to decrypt");
     }
 
     public String decryptWallet(String encryptedPayload, CharSequenceX password, int pdfdf2Iterations) {
