@@ -41,8 +41,13 @@ public class Settings {
             "ISK", "JPY", "KRW", "NZD", "PLN", "RUB", "SEK", "SGD", "THB", "TWD", "USD"
     };
 
-    public static final int NOTIFICATION_TYPE_ALL_DISABLE = 0;
+    public static final int NOTIFICATION_ON = 2;
+    public static final int NOTIFICATION_OFF = 0;
+
+    public static final int NOTIFICATION_TYPE_NONE = 0;
     public static final int NOTIFICATION_TYPE_EMAIL = 1;
+    public static final int NOTIFICATION_TYPE_SMS = 32;
+    public static final int NOTIFICATION_TYPE_ALL = 33;
 
     public static final int AUTH_TYPE_OFF = 0;
     public static final int AUTH_TYPE_YUBI_KEY = 1;
@@ -348,31 +353,108 @@ public class Settings {
         }
     }
 
-    public void enableNotifications(boolean enable, ResultListener listener){
-        int value;
-        if(enable) {
-            value = 2;//on
-        }else{
-            value = 0;//off
+    /**
+     *
+     * @param type NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL, NOTIFICATION_TYPE_ALL
+     * @param listener
+     */
+    public void enableNotification(int type, ResultListener listener) {
+
+        if ((type == NOTIFICATION_TYPE_EMAIL && notificationType.contains((Integer) NOTIFICATION_TYPE_SMS)) ||
+                (type == NOTIFICATION_TYPE_SMS && notificationType.contains((Integer) NOTIFICATION_TYPE_EMAIL))) {
+            type = NOTIFICATION_TYPE_ALL;
         }
-        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_ON, value+"");
+
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, type + "");
+        if (success) {
+            if (!notificationType.contains(type)) {
+                notificationType.add(type);
+            }
+
+            enableNotifications(true, listener);
+
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
+    }
+
+    public void disableNotification(int type, ResultListener listener){
+
+        if (notificationType.contains(type)){
+            notificationType.remove((Integer)type);
+
+            if(notificationType.size() > 0){
+
+                //SMS removed. Email type still active
+                if(type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL)){
+                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_EMAIL+"");
+                    if(success){
+                        listener.onSuccess();
+                    }else{
+                        listener.onFail();
+                    }
+                }
+
+                //Email removed. Sms type still active
+                if(type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS)){
+                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_SMS+"");
+                    if(success){
+                        listener.onSuccess();
+                    }else{
+                        listener.onFail();
+                    }
+                }
+
+            }else{
+                //No more notifications left - disable all
+                disableAllNotifications(listener);
+            }
+
+        }else{
+            listener.onSuccess();
+        }
+    }
+
+    public void enableAllNotifications(ResultListener listener){
+
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_ALL+"");
         if(success){
-            this.notificationsOn = enable;
+            if(!notificationType.contains(NOTIFICATION_TYPE_ALL)) {
+                notificationType.add(NOTIFICATION_TYPE_ALL);
+                enableNotifications(true, listener);
+            }
+
             listener.onSuccess();
         }else{
             listener.onFail();
         }
     }
 
-    public void setNotificationType(int type, ResultListener listener){
-        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, type+"");
+    public void disableAllNotifications(ResultListener listener){
+
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_NONE+"");
         if(success){
-            if(!this.notificationType.contains(type))
-                this.notificationType.add(type);
+            notificationType = new ArrayList<Integer>();
 
-            if(type == NOTIFICATION_TYPE_ALL_DISABLE)
-                this.notificationType = new ArrayList<Integer>();
+            enableNotifications(false, listener);
 
+            listener.onSuccess();
+        }else{
+            listener.onFail();
+        }
+    }
+
+    private void enableNotifications(boolean enable, ResultListener listener){
+        int value;
+        if(enable) {
+            value = NOTIFICATION_ON;
+        }else{
+            value = NOTIFICATION_OFF;
+        }
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_ON, value+"");
+        if(success){
+            this.notificationsOn = enable;
             listener.onSuccess();
         }else{
             listener.onFail();

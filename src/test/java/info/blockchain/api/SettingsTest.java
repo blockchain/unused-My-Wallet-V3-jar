@@ -2,6 +2,7 @@ package info.blockchain.api;
 
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -194,25 +195,12 @@ public class SettingsTest {
     }
 
     @Test
-    public void testEnableNotifications() throws Exception {
+    public void testEnableOnlyEmailNotifications() throws Exception {
 
-        settingsApi.enableNotifications(false, new Settings.ResultListener() {
-            public void onSuccess() {
-                assertThat("notifications toggle", !settingsApi.isNotificationsOn());
-            }
-
-            public void onFail() {
-                fail("");
-            }
-
-            public void onBadRequest() {
-                fail("");
-            }
-        });
-
-        settingsApi.enableNotifications(true, new Settings.ResultListener() {
+        settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_EMAIL, new Settings.ResultListener() {
             public void onSuccess() {
                 assertThat("notifications toggle", settingsApi.isNotificationsOn());
+                assertThat("notifications toggle", settingsApi.getNotificationTypes().contains(Settings.NOTIFICATION_TYPE_EMAIL));
             }
 
             public void onFail() {
@@ -226,11 +214,64 @@ public class SettingsTest {
     }
 
     @Test
-    public void testSetNotificationsType() throws Exception {
+    public void testEnableOnlySmsNotifications() throws Exception {
 
-        settingsApi.setNotificationType(Settings.NOTIFICATION_TYPE_EMAIL, new Settings.ResultListener() {
+        settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_SMS, new Settings.ResultListener() {
             public void onSuccess() {
-                assertThat("notifications types", settingsApi.getNotificationTypes().contains(Settings.NOTIFICATION_TYPE_EMAIL));
+                assertThat("notifications toggle", settingsApi.isNotificationsOn());
+                assertThat("notifications toggle", settingsApi.getNotificationTypes().contains(Settings.NOTIFICATION_TYPE_SMS));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+    }
+
+    @Test
+    public void testEnableEmailAndSmsNotifications() throws Exception {
+
+        settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_ALL, new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("notifications toggle", settingsApi.isNotificationsOn());
+                assertThat( settingsApi.getNotificationTypes(), CoreMatchers.hasItem(Settings.NOTIFICATION_TYPE_ALL));
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+    }
+
+    @Test
+    public void testDisableNotifications() throws Exception {
+
+        settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_EMAIL, new Settings.ResultListener() {
+            public void onSuccess() {}
+            public void onFail() {}
+            public void onBadRequest() {}
+        });
+        settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_SMS, new Settings.ResultListener() {
+            public void onSuccess() {}
+            public void onFail() {}
+            public void onBadRequest() {}
+        });
+
+        Thread.sleep(1000);
+
+        settingsApi.disableNotification(Settings.NOTIFICATION_TYPE_SMS, new Settings.ResultListener() {
+            public void onSuccess() {
+                //Only email should be active now
+                assertThat("notifications toggle", settingsApi.isNotificationsOn());
+                assertThat("notifications toggle", settingsApi.getNotificationTypes().contains(Settings.NOTIFICATION_TYPE_EMAIL));
             }
 
             public void onFail() {
@@ -242,8 +283,29 @@ public class SettingsTest {
             }
         });
 
-        settingsApi.setNotificationType(Settings.NOTIFICATION_TYPE_ALL_DISABLE, new Settings.ResultListener() {
+        settingsApi.disableNotification(Settings.NOTIFICATION_TYPE_EMAIL, new Settings.ResultListener() {
             public void onSuccess() {
+                //None should be active now
+                assertThat("notifications toggle", !settingsApi.isNotificationsOn());
+                assertThat("notifications toggle", settingsApi.getNotificationTypes().isEmpty());
+            }
+
+            public void onFail() {
+                fail("");
+            }
+
+            public void onBadRequest() {
+                fail("");
+            }
+        });
+    }
+
+    @Test
+    public void testDisableAllNotifications() throws Exception {
+
+        settingsApi.disableAllNotifications(new Settings.ResultListener() {
+            public void onSuccess() {
+                assertThat("notifications toggle", !settingsApi.isNotificationsOn());
                 assertThat("notifications toggle", settingsApi.getNotificationTypes().isEmpty());
             }
 
