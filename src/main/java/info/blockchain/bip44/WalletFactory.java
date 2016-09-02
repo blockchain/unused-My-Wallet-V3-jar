@@ -210,7 +210,7 @@ public class WalletFactory {
 
         String data = null;
         if(password != null) {
-            data = AESUtil.encrypt(jsonstr, new CharSequenceX(password), AESUtil.QrCodePbkdf2Iterations);
+            data = AESUtil.encrypt(jsonstr, new CharSequenceX(password), AESUtil.QR_CODE_PBKDF_2ITERATIONS);
         }
         else {
             data = jsonstr;
@@ -249,7 +249,7 @@ public class WalletFactory {
             node = new JSONObject(sb.toString());
         }
         else {
-            node = new JSONObject(AESUtil.decrypt(sb.toString(), new CharSequenceX(password), AESUtil.QrCodePbkdf2Iterations));
+            node = new JSONObject(AESUtil.decrypt(sb.toString(), new CharSequenceX(password), AESUtil.QR_CODE_PBKDF_2ITERATIONS));
         }
 
         return node;

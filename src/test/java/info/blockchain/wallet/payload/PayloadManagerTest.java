@@ -1,7 +1,12 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -9,11 +14,114 @@ import java.util.ArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-/**
- * Created by riaanvos on 07/07/16.
- */
 public class PayloadManagerTest {
 
+    PayloadManager payloadManager;
+    String password = "password";
+    String label = "Account 1";
+    Payload payload;
+
+    @Before
+    public void setUp() throws Exception {
+        payloadManager = PayloadManager.getInstance();
+        payload = payloadManager.createHDWallet(password,label);
+    }
+
+    @After
+    public void tearDown() throws Exception{
+        PayloadManager.getInstance().wipe();
+    }
+
+    @Test
+    public void getPayloadFromServerAndDecrypt_withValidVars_shouldPass() throws Exception{
+
+        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+            public void onSuccess() {
+                assertThat("Payload successfully fetch and decrypted", true);
+            }
+        });
+        try{Thread.sleep(500);}catch (Exception e){}
+    }
+
+    @Test
+    public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldThrow_AuthenticationException(){
+
+        try {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid() + "addSomeTextToFail", new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+                public void onSuccess() {
+                    assertThat("onSuccess", false);
+                }
+            });
+        } catch (Exception e) {
+            if (e instanceof InvalidCredentialsException) {
+                assertThat("Invalid Guid successfully detected", true);
+            } else {
+                assertThat("Auth should not pass with invalid guid", false);
+            }
+        }
+        try{Thread.sleep(500);}catch (Exception e){}
+    }
+
+    @Test
+    public void getPayloadFromServerAndDecrypt_withInvalidPassword_shouldThrow_DecryptionException(){
+
+        try {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password + "addSomeTextToFail"), new PayloadManager.InitiatePayloadListener() {
+                public void onSuccess() {
+                    assertThat("onSuccess", false);
+                }
+            });
+        } catch (Exception e) {
+            if (e instanceof DecryptionException) {
+                assertThat("Decryption failed as expected", true);
+            } else {
+                assertThat("Auth should not pass with invalid guid", false);
+            }
+        }
+        try{Thread.sleep(500);}catch (Exception e){}
+    }
+
+    @Test
+    public void getPayloadFromServerAndDecrypt_withInvalidSharedKey_shouldThrow_AuthenticationException(){
+
+        try {
+            payloadManager.initiatePayload(payload.getSharedKey() + "addSomeTextToFail", payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+                public void onSuccess() {
+                    assertThat("onSuccess", false);
+                }
+            });
+        }catch (Exception e){
+            if (e instanceof InvalidCredentialsException) {
+                assertThat("Invalid shared key successfully detected", true);
+            } else {
+                assertThat("Auth should not pass with invalid shared key", false);
+            }
+        }
+        try{Thread.sleep(500);}catch (Exception e){}
+    }
+
+    @Test
+    public void getPayloadFromServerAndDecrypt_withIncompatibleVersion_shouldThrow_UnsupportedVersionException() {
+
+        payloadManager.setVersion(4.0);
+
+        payloadManager.savePayloadToServer();
+
+        try{
+        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+            public void onSuccess() {
+                assertThat("Incompatible version should not pass", false);
+            }
+        });}catch (Exception e){
+            if (e instanceof UnsupportedVersionException) {
+                assertThat("Unsupported version detected", true);
+            } else {
+                assertThat("Unsupported version should not pass", false);
+            }
+        }
+        try{Thread.sleep(500);}catch (Exception e){}
+    }
+    
     @Test
     public void upgradeV2PayloadToV3_shouldPass() throws Exception {
 

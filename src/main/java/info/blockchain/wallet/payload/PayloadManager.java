@@ -1,8 +1,10 @@
 package info.blockchain.wallet.payload;
 
+import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.util.*;
 import org.apache.commons.codec.DecoderException;
@@ -16,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -27,9 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * PayloadManager.java : singleton class for reading/writing/parsing Blockchain HD JSON payload
- *
  */
 public class PayloadManager {
 
@@ -37,7 +38,7 @@ public class PayloadManager {
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
     public static final int RECEIVE_CHAIN = 0;
-    public static final int CHANGE_CHAIN = 0;
+    public static final int CHANGE_CHAIN = 1;
 
     private static PayloadManager instance = null;
     // active payload:
@@ -45,16 +46,13 @@ public class PayloadManager {
     // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
     private static String cached_payload = null;
 
-    private static final int WalletDefaultPbkdf2Iterations = 5000;
-    public static int WalletPbkdf2Iterations = WalletDefaultPbkdf2Iterations;
-
     private static CharSequenceX strTempPassword = null;
-    private static String strCheckSum = null;
     private static boolean isNew = false;
-    private static boolean syncPubKeys = true;
     private static String email = null;
 
     private static double version = 2.0;
+
+    private static BlockchainWallet bciWallet;
 
     private static HDPayloadBridge hdPayloadBridge;
     private static Wallet wallet;
@@ -89,50 +87,86 @@ public class PayloadManager {
     }
 
     public interface InitiatePayloadListener {
-        void onInitSuccess();
-
-        void onInitPairFail();
-
-        void onInitCreateFail(String error);
+        void onSuccess();
     }
 
-    /*
-    Initiate payload after pairing or after PIN entered
+    /**
+     * Downloads payload from server, decrypts, and stores as local var {@link Payload}
+     *
+     * @param sharedKey
+     * @param guid
+     * @param password
+     * @param listener
      */
-    public void initiatePayload(String sharedKey, String guid, CharSequenceX password, InitiatePayloadListener listener) throws Exception {
+    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException, ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
 
-        payload = getPayloadFromServer(guid, sharedKey, password);
+        String walletData = null;
+        try {
+            walletData = fetchWalletData(guid, sharedKey);
+        } catch (Exception e) {
 
-        if (payload == null || payload.stepNumber != 9) {
-            String error = "";
-            if (payload != null) {
-                error = error + " Failed at step: " + payload.stepNumber;
-                if (payload.lastErrorMessage != null) {
-                    error = error + " with message: " + payload.lastErrorMessage;
-                }
+            e.printStackTrace();
+
+            if (e.getMessage().contains("Invalid GUID")) {
+                throw new InvalidCredentialsException();
+            } else {
+                throw new ServerConnectionException();
             }
-            if(listener != null)listener.onInitCreateFail(error);
         }
 
-        if (payload.getJSON() == null && listener != null) {
-            listener.onInitPairFail();
+        bciWallet = new BlockchainWallet(walletData, password);
+        payload = bciWallet.getPayload();
+
+        if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
+
+            payload = null;
+            throw new UnsupportedVersionException(getVersion()+"");
         }
 
         syncWallet();
 
-        if(listener != null){
-            listener.onInitSuccess();
-        }
+        listener.onSuccess();
     }
 
-    private void syncWallet() throws Exception{
+    /**
+     * Fetches wallet data from server
+     * @param guid
+     * @param sharedKey
+     * @return Either encrypted string (v1) or json (v2, v3)
+     * @throws Exception
+     */
+    private String fetchWalletData(String guid, String sharedKey) throws Exception {
+
+        String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, "method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json" + "&api_code=" + WebUtil.API_CODE);
+
+        if (response == null){
+            throw new Exception("Payload fetch from server is null");
+        }
+
+        return response;
+
+    }
+
+    /**
+     * Syncs payload wallet and bip44 wallet
+     * @throws HDWalletException
+     */
+    private void syncWallet() throws HDWalletException {
         if (payload.getHdWallet() != null) {
             if (payload.isDoubleEncrypted()) {
-                watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
+                try {
+                    watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
+                } catch (Exception e) {
+                    throw new HDWalletException("Watch-only bip44 wallet error: " + e.getMessage());
+                }
             } else {
-                wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
+                try {
+                    wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
+                } catch (Exception e) {
+                    throw new HDWalletException("Bip44 wallet error: " + e.getMessage());
+                }
             }
-        }else{
+        } else {
             //V2 wallet - no need to keep in sync with bp44 wallet
         }
     }
@@ -162,16 +196,7 @@ public class PayloadManager {
      * @return String
      */
     public String getCheckSum() {
-        return strCheckSum;
-    }
-
-    /**
-     * Set checksum for this payload.
-     *
-     * @param checksum Checksum to be set for this payload
-     */
-    public void setCheckSum(String checksum) {
-        this.strCheckSum = checksum;
+        return bciWallet.getPayloadChecksum();
     }
 
     /**
@@ -190,111 +215,6 @@ public class PayloadManager {
      */
     public void setNew(boolean isNew) {
         this.isNew = isNew;
-    }
-
-    /**
-     * Remote get(). Get refreshed payload from server.
-     *
-     * @param guid      User's wallet 'guid'
-     * @param sharedKey User's sharedKey value
-     * @param password  User password
-     * @return Payload
-     */
-    private Payload getPayloadFromServer(String guid, String sharedKey, CharSequenceX password) {
-
-        Payload payload = null;
-        String checksum = null;
-
-        try {
-            String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, "method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json" + "&api_code=" + WebUtil.API_CODE);
-            JSONObject jsonObject = new JSONObject(response);
-
-            if (jsonObject.has("payload_checksum")) {
-                checksum = jsonObject.get("payload_checksum").toString();
-            }
-
-            if (jsonObject.has("payload")) {
-                String encrypted_payload = null;
-                JSONObject _jsonObject = null;
-                try {
-                    _jsonObject = new JSONObject((String) jsonObject.get("payload"));
-                } catch (Exception e) {
-                    _jsonObject = null;
-                }
-                if (_jsonObject != null && _jsonObject.has("payload")) {
-                    if (_jsonObject.has("pbkdf2_iterations")) {
-                        WalletPbkdf2Iterations = Integer.valueOf(_jsonObject.get("pbkdf2_iterations").toString());
-                    }
-                    if (_jsonObject.has("version")) {
-                        version = Double.valueOf(_jsonObject.get("version").toString());
-                    }
-                    encrypted_payload = (String) _jsonObject.get("payload");
-                } else {
-                    if (jsonObject.has("pbkdf2_iterations")) {
-                        WalletPbkdf2Iterations = Integer.valueOf(jsonObject.get("pbkdf2_iterations").toString());
-                    }
-                    if (jsonObject.has("version")) {
-                        version = Double.valueOf(jsonObject.get("version").toString());
-                    }
-                    encrypted_payload = (String) jsonObject.get("payload");
-                }
-
-                String decrypted = null;
-                try {
-                    decrypted = AESUtil.decrypt(encrypted_payload, password, WalletPbkdf2Iterations);
-                } catch (Exception e) {
-                    payload.lastErrorMessage = e.getMessage();
-                    e.printStackTrace();
-                    return null;
-                }
-                if (decrypted == null) {
-                    try {
-                        // v1 wallet fixed PBKDF2 iterations at 10
-                        decrypted = AESUtil.decrypt(encrypted_payload, password, 10);
-                    } catch (Exception e) {
-                        payload.lastErrorMessage = e.getMessage();
-                        e.printStackTrace();
-                        return null;
-                    }
-                    if (decrypted == null) {
-                        payload.lastErrorMessage = "Empty after decrypt";
-                        return null;
-                    }
-                }
-                payload = new Payload(decrypted);
-                if (payload.getJSON() == null) {
-                    payload.lastErrorMessage = "Can't parse JSON";
-                    return null;
-                }
-
-                // Default to wallet pbkdf2 iterations in case the double encryption pbkdf2 iterations is not set in wallet.json > options
-                payload.setDoubleEncryptionPbkdf2Iterations(WalletPbkdf2Iterations);
-
-                try {
-                    payload.parseJSON();
-                } catch (JSONException je) {
-                    payload.lastErrorMessage = je.getMessage();
-                    je.printStackTrace();
-                    return null;
-                }
-            } else {
-//                Log.i("PayloadManager", "jsonObject has no payload");
-                return null;
-            }
-        } catch (JSONException e) {
-            payload.lastErrorMessage = e.getMessage();
-            e.printStackTrace();
-            return null;
-        } catch (Exception e) {
-            payload.lastErrorMessage = e.getMessage();
-            e.printStackTrace();
-            return null;
-        }
-
-        if (StringUtils.isNotEmpty(checksum)) {
-            strCheckSum = checksum;
-        }
-        return payload;
     }
 
     /**
@@ -324,8 +244,11 @@ public class PayloadManager {
 
         if (payload == null) return false;
 
-        String strOldCheckSum = strCheckSum;
         String payloadCleartext = null;
+
+        int iterations = bciWallet.getPbkdf2Iterations();
+        boolean syncPubkeys = bciWallet.isSyncPubkeys();
+        String oldChecksum = bciWallet.getPayloadChecksum();
 
         StringBuilder args = new StringBuilder();
         try {
@@ -335,13 +258,14 @@ public class PayloadManager {
             }
 
             payloadCleartext = payload.dumpJSON().toString();
-            String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), WalletPbkdf2Iterations);
+            String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), iterations);
             JSONObject rootObj = new JSONObject();
-            rootObj.put("version", payload.isUpgraded() ? 3.0 : 2.0);
-            rootObj.put("pbkdf2_iterations", WalletPbkdf2Iterations);
+            rootObj.put("version", getVersion());
+            rootObj.put("pbkdf2_iterations", iterations);
             rootObj.put("payload", payloadEncrypted);
 
-            strCheckSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
+            String strCheckSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
+            bciWallet.setPayloadChecksum(strCheckSum);
 
             String method = isNew ? "insert" : "update";
 
@@ -371,7 +295,7 @@ public class PayloadManager {
             return false;
         }
 
-        if (syncPubKeys) {
+        if (syncPubkeys) {
             args.append("&active=");
 
             String[] legacyAddrs = null;
@@ -398,9 +322,9 @@ public class PayloadManager {
         args.append("&device=");
         args.append("android");
 
-        if (strOldCheckSum != null && strOldCheckSum.length() > 0) {
+        if(oldChecksum != null && oldChecksum.length() > 0) {
             args.append("&old_checksum=");
-            args.append(strOldCheckSum);
+            args.append(oldChecksum);
         }
 
         args.append("&api_code=" + WebUtil.API_CODE);
@@ -447,7 +371,12 @@ public class PayloadManager {
         return version;
     }
 
-    public boolean validateSecondPassword(String secondPassword){
+    @VisibleForTesting
+    double setVersion(double version) {
+        return this.version = version;
+    }
+
+    public boolean validateSecondPassword(String secondPassword) {
         return DoubleEncryptionFactory.getInstance().validateSecondPassword(
                 payload.getDoublePasswordHash(),
                 payload.getSharedKey(),
@@ -507,7 +436,7 @@ public class PayloadManager {
                     return null;
                 }
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -520,7 +449,9 @@ public class PayloadManager {
         payload = pair.payload;
         setNew(true);
 
-        if(!savePayloadToServer()){
+        bciWallet = new BlockchainWallet(payload);
+
+        if (!savePayloadToServer()) {
             //if save failed don't return payload
             payload = null;
         }
@@ -536,7 +467,9 @@ public class PayloadManager {
         payload = pair.payload;
         setNew(true);
 
-        if(!savePayloadToServer()){
+        bciWallet = new BlockchainWallet(payload);
+
+        if (!savePayloadToServer()) {
             //if save failed don't return payload
             payload = null;
         }
@@ -552,7 +485,9 @@ public class PayloadManager {
         payload = pair.payload;
         setNew(true);
 
-        if(!savePayloadToServer()){
+        bciWallet = new BlockchainWallet(payload);
+
+        if (!savePayloadToServer()) {
             //if save failed don't return payload
             payload = null;
         }
@@ -560,12 +495,14 @@ public class PayloadManager {
         return payload;
     }
 
-
-    public interface UpgradePayloadListener{
+    public interface UpgradePayloadListener {
         void onDoubleEncryptionPasswordError();
+
         void onUpgradeSuccess();
+
         void onUpgradeFail();
     }
+
     /*
     When called from Android - First apply PRNGFixes
      */
@@ -582,7 +519,7 @@ public class PayloadManager {
 
         //Upgrade
         boolean isUpgradeSuccessful = hdPayloadBridge.upgradeV2PayloadToV3(payload, secondPassword, isNewlyCreated, defaultAccountName);
-        if(isUpgradeSuccessful) {
+        if (isUpgradeSuccessful) {
 
             if (savePayloadToServer()) {
 
@@ -590,10 +527,10 @@ public class PayloadManager {
                 updateBalancesAndTransactions();
                 cachePayload();
                 listener.onUpgradeSuccess();
-            }else{
+            } else {
                 listener.onUpgradeFail();//failed to save
             }
-        }else{
+        } else {
             listener.onUpgradeFail();//failed to create
         }
 
@@ -714,20 +651,19 @@ public class PayloadManager {
         String xpub = null;
         String xpriv = null;
 
-        if(!payload.isDoubleEncrypted()) {
+        if (!payload.isDoubleEncrypted()) {
 
             wallet.addAccount();
 
             xpub = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xpubstr();
             xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xprvstr();
-        }
-        else {
+        } else {
 
-            if(DoubleEncryptionFactory.getInstance().validateSecondPassword(
+            if (DoubleEncryptionFactory.getInstance().validateSecondPassword(
                     payload.getDoublePasswordHash(),
                     payload.getSharedKey(),
                     new CharSequenceX(secondPassword),
-                    payload.getOptions().getIterations())){
+                    payload.getOptions().getIterations())) {
 
                 String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
                         payload.getHdWallet().getSeedHex(),
@@ -742,7 +678,7 @@ public class PayloadManager {
                 xpub = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xpubstr();
                 xpriv = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xprvstr();
 
-            }else{
+            } else {
                 listener.onSecondPasswordFail();
                 return;
             }
@@ -759,10 +695,9 @@ public class PayloadManager {
         //Create new account (label, xpub, xpriv)
         Account account = new Account(accountLabel);
         account.setXpub(xpub);
-        if(!payload.isDoubleEncrypted()) {
+        if (!payload.isDoubleEncrypted()) {
             account.setXpriv(xpriv);
-        }
-        else {
+        } else {
             String encrypted_xpriv = DoubleEncryptionFactory.getInstance().encrypt(
                     xpriv,
                     payload.getSharedKey(),
@@ -772,19 +707,18 @@ public class PayloadManager {
         }
 
         //Add new account to payload
-        if(accounts.get(accounts.size() - 1) instanceof ImportedAccount) {
+        if (accounts.get(accounts.size() - 1) instanceof ImportedAccount) {
             accounts.add(accounts.size() - 1, account);
-        }
-        else {
+        } else {
             accounts.add(account);
         }
         payload.getHdWallet().setAccounts(accounts);
 
         //Save payload
         if (savePayloadToServer()) {
-            if(listener != null)listener.onAccountAddSuccess(account);
+            if (listener != null) listener.onAccountAddSuccess(account);
         } else {
-            if(listener != null)listener.onPayloadSaveFail();
+            if (listener != null) listener.onPayloadSaveFail();
         }
     }
 
@@ -792,9 +726,9 @@ public class PayloadManager {
     Generate V2 legacy address
     When called from Android - First apply PRNGFixes
      */
-    public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion, String secondPassword){
+    public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion, String secondPassword) {
 
-        if(payload.isDoubleEncrypted() && !validateSecondPassword(secondPassword)){
+        if (payload.isDoubleEncrypted() && !validateSecondPassword(secondPassword)) {
             return null;//second password validation failed
         }
 
@@ -818,7 +752,7 @@ public class PayloadManager {
         return legacyAddress;
     }
 
-    public boolean addLegacyAddress(LegacyAddress legacyAddress){
+    public boolean addLegacyAddress(LegacyAddress legacyAddress) {
         List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddresses();
         updatedLegacyAddresses.add(legacyAddress);
         payload.setLegacyAddresses(updatedLegacyAddresses);
@@ -881,5 +815,13 @@ public class PayloadManager {
         }
 
         return hd_address;
+    }
+
+    /**
+     * Debugging purposes
+     * @return
+     */
+    public BlockchainWallet getBciWallet(){
+        return bciWallet;
     }
 }
