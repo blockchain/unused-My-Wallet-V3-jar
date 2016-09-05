@@ -1,8 +1,8 @@
 package info.blockchain.wallet.payload;
 
 import com.google.common.annotations.VisibleForTesting;
+import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
-import info.blockchain.bip44.Wallet;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -54,8 +54,8 @@ public class PayloadManager {
     private static BlockchainWallet bciWallet;
 
     private static HDPayloadBridge hdPayloadBridge;
-    private static Wallet wallet;
-    private static Wallet watchOnlyWallet;
+    private static info.blockchain.bip44.Wallet wallet;
+    private static info.blockchain.bip44.Wallet watchOnlyWallet;
 
     private PayloadManager() {
         ;
@@ -101,7 +101,7 @@ public class PayloadManager {
 
         String walletData = null;
         try {
-            walletData = fetchWalletData(guid, sharedKey);
+            walletData = new WalletPayload().fetchWalletData(guid, sharedKey);
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -125,25 +125,6 @@ public class PayloadManager {
         syncWallet();
 
         listener.onSuccess();
-    }
-
-    /**
-     * Fetches wallet data from server
-     * @param guid
-     * @param sharedKey
-     * @return Either encrypted string (v1) or json (v2, v3)
-     * @throws Exception
-     */
-    private String fetchWalletData(String guid, String sharedKey) throws Exception {
-
-        String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, "method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json" + "&api_code=" + WebUtil.API_CODE);
-
-        if (response == null){
-            throw new Exception("Payload fetch from server is null");
-        }
-
-        return response;
-
     }
 
     /**
@@ -328,19 +309,16 @@ public class PayloadManager {
 
         args.append("&api_code=" + WebUtil.API_CODE);
 
-        try {
-            String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, args.toString());
+        // TODO: 05/09/16 This could be done better
+        boolean success = new WalletPayload().savePayloadToServer(args.toString());
+
+        if (success){
             isNew = false;
-            if (response.contains("Wallet successfully synced")) {
-                cachePayload();
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            cachePayload();
+            return true;
+        }else{
             return false;
         }
-
-        return true;
     }
 
     /**
@@ -763,7 +741,7 @@ public class PayloadManager {
         String result = null;
         byte[] data = null;
         try {
-            result = WebUtil.getInstance().getURL(WebUtil.EXTERNAL_ENTROPY_URL);
+            result = WebUtil.getInstance().getURL(WebUtil.PROD_EXTERNAL_ENTROPY_URL);
             if (!result.matches("^[A-Fa-f0-9]{64}$")) {
                 return null;
             }

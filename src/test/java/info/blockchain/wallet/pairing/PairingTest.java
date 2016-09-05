@@ -1,6 +1,6 @@
 package info.blockchain.wallet.pairing;
 
-import info.blockchain.api.Access;
+import info.blockchain.api.WalletPayload;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,7 +35,7 @@ public class PairingTest {
 
         String encryptionPassword = null;
         try {
-            encryptionPassword = new Access().getPairingEncryptionPassword(guid);
+            encryptionPassword = new WalletPayload().getPairingEncryptionPassword(guid);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,7 +57,7 @@ public class PairingTest {
 //    @Test
 //    public void getSharedKeyAndPassword_whenGoodString_shouldPass() throws Exception {
 //
-//        String encryptionPassword = new Access().getPairingEncryptionPassword(guid);
+//        String encryptionPassword = new Wallet().getPairingEncryptionPassword(guid);
 //
 //        PairingQRComponents components = pairing.getQRComponentsFromRawString(qrRaw_Good);
 //        String[] sharedKeyAndPassword = pairing.getSharedKeyAndPassword(components.encryptedPairingCode, encryptionPassword);

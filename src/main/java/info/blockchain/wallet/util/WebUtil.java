@@ -11,32 +11,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class WebUtil	{
+public class WebUtil{
 
+    // TODO: 05/09/16 Sorted this out slightly for dev/staging testing ,but overall needs a good cleanup
+
+    //Android API code
     public static final String API_CODE = "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
 
-    public static final String PROTOCOL = "https://";
-    public static final String SERVER_ADDRESS = "blockchain.info/";
-    public static final String API_SUBDOMAIN = "api.";
-    public static final String MERCHANT_DIRECTORY_SUBDOMAIN = "merchant-directory.";
+    //Protocols
+    private static final String PROTOCOL = "https://";
 
-    public static final String VALIDATE_SSL_URL = PROTOCOL + SERVER_ADDRESS;
-    public static final String SPEND_URL = PROTOCOL + SERVER_ADDRESS + "pushtx";
-    public static final String PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + "wallet";
-    public static final String PAIRING_URL = PAYLOAD_URL;
-    public static final String SID_URL = PAYLOAD_URL;
-    public static final String MULTIADDR_URL = PROTOCOL + SERVER_ADDRESS + "multiaddr?active=";
-    public static final String BALANCE_URL = PROTOCOL + SERVER_ADDRESS + "balance?active=";
-    public static final String EXCHANGE_URL = PROTOCOL + SERVER_ADDRESS + "ticker";
-    public static final String ACCESS_URL = PROTOCOL + SERVER_ADDRESS + "pin-store";
-    public static final String UNSPENT_OUTPUTS_URL = PROTOCOL + SERVER_ADDRESS + "unspent?active=";
-    public static final String ADDRESS_INFO_URL = PROTOCOL + SERVER_ADDRESS + "address/";
-    public static final String TRANSACTION = PROTOCOL + SERVER_ADDRESS+ "tx/";
-    public static final String EXTERNAL_ENTROPY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "v2/randombytes?bytes=32&format=hex";
-    public static final String MERCHANT_DIRECTORY_URL = PROTOCOL + MERCHANT_DIRECTORY_SUBDOMAIN + SERVER_ADDRESS + "cgi-bin/btcd.pl?";
+    //Sub-domains
+    private static final String API_SUBDOMAIN = "api.";
 
-    public static final String BTCX_FEE = "http://bitcoinexchangerate.org/fees";
-    public static final String DYNAMIC_FEE = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "fees";
+    //Domain
+    private static final String SERVER_ADDRESS = "blockchain.info/";
+
+    //Wallet
+    public static final String PROD_VALIDATE_SSL_URL = PROTOCOL + SERVER_ADDRESS;
+    public static final String PROD_EXTERNAL_ENTROPY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "v2/randombytes?bytes=32&format=hex";
+
+    //Fees
+    private static final String FEES = "fees";
+    public static final String PROD_BTCX_FEE_URL = "http://bitcoinexchangerate.org/"+FEES;
+    public static final String PROD_EXCHANGE_URL = PROTOCOL + SERVER_ADDRESS + "ticker";
+
+    //Merchant
+    private static final String MERCHANT_DIRECTORY_SUBDOMAIN = "merchant-directory.";
+    public static final String PROD_MERCHANT_DIRECTORY_URL = PROTOCOL + MERCHANT_DIRECTORY_SUBDOMAIN + SERVER_ADDRESS + "cgi-bin/btcd.pl?";
 
     private static final int DefaultRequestRetry = 2;
     private static final int DefaultRequestTimeout = 60000;

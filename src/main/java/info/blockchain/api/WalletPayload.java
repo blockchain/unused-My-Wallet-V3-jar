@@ -3,7 +3,7 @@ package info.blockchain.api;
 import info.blockchain.wallet.util.WebUtil;
 import org.json.JSONObject;
 
-public class Wallet {
+public class WalletPayload {
 
     //Protocols
     private static final String PROTOCOL = "https://";
@@ -28,14 +28,14 @@ public class Wallet {
 
     private String payloadUrl = PROD_PAYLOAD_URL;
 
-    public Wallet() {
+    public WalletPayload() {
     }
 
     /**
      *
      * @param customPayloadUrl PROD_PAYLOAD_URL, DEV_PAYLOAD_URL, STAGING_PAYLOAD_URL
      */
-    public Wallet(String customPayloadUrl) {
+    public WalletPayload(String customPayloadUrl) {
         this.payloadUrl = customPayloadUrl;
     }
 
@@ -96,7 +96,7 @@ public class Wallet {
     public String fetchWalletData(String guid, String sharedKey) throws Exception {
 
         String response = WebUtil.getInstance().postURL(
-                WebUtil.PROD_PAYLOAD_URL,
+                payloadUrl,
                 "method=wallet.aes.json&guid=" + guid +
                         "&sharedKey=" + sharedKey +
                         "&format=json" +
@@ -108,5 +108,20 @@ public class Wallet {
 
         return response;
 
+    }
+
+    public boolean savePayloadToServer(String args) {
+
+        try {
+            String response = WebUtil.getInstance().postURL(payloadUrl, args);
+            if (response.contains("Wallet successfully synced")) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 }

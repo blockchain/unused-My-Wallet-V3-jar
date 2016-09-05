@@ -9,6 +9,40 @@ import java.util.ArrayList;
 
 public class Settings {
 
+    //Protocols
+    private static final String PROTOCOL = "https://";
+
+    //Sub-domains
+    private static final String DEV_SUBDOMAIN = "dev.";
+    private static final String STAGING_SUBDOMAIN = "staging.";
+    private static final String WALLET_DEV_SUBDOMAIN = "explorer."+DEV_SUBDOMAIN;
+    private static final String WALLET_STAGING_SUBDOMAIN = "explorer."+STAGING_SUBDOMAIN;
+
+    //Domain
+    private static final String SERVER_ADDRESS = "blockchain.info/";
+
+    //Wallet
+    private static final String WALLET = "wallet";
+    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET; //PAIRING_URL and SID_URL
+    public static final String DEV_PAYLOAD_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + SERVER_ADDRESS + WALLET;
+    public static final String STAGING_PAYLOAD_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + SERVER_ADDRESS + WALLET;
+
+    private String sessionId;
+    public static String KEY_AUTH_REQUIRED = "Authorization Required";
+
+    private String settingsUrl = PROD_PAYLOAD_URL;
+
+    public Settings() {
+    }
+
+    /**
+     *
+     * @param customPayloadUrl PROD_PAYLOAD_URL, DEV_PAYLOAD_URL, STAGING_PAYLOAD_URL
+     */
+    public Settings(String customPayloadUrl, boolean none) {
+        this.settingsUrl = customPayloadUrl;
+    }
+
     //API methods
     public static final String METHOD_GET_INFO = "get-info";
     public static final String METHOD_TOGGLE_SAVE_2FA = "update-never-save-auth-type";
@@ -128,7 +162,7 @@ public class Settings {
         args.append("&api_code=" + WebUtil.API_CODE);
         args.append("&format=plain");
 
-        String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, args.toString());
+        String response = WebUtil.getInstance().postURL(settingsUrl, args.toString());
         return response;
     }
 
