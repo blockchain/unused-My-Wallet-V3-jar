@@ -5,6 +5,7 @@ import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
 import org.spongycastle.crypto.paddings.*;
@@ -16,8 +17,9 @@ import java.security.NoSuchAlgorithmException;
 
 public class BlockchainWallet {
 
-    public static final int DEFAULT_PBKDF2_ITERATIONS = 5000;
-    private static final int DEFAULT_ITERATIONS = 10;
+    public static final int DEFAULT_PBKDF2_ITERATIONS_V2 = 5000;
+    private static final int DEFAULT_PBKDF2_ITERATIONS_V1_A = 1;
+    private static final int DEFAULT_PBKDF2_ITERATIONS_V1_B = 10;
 
     private String extraSeed;
     private String payloadChecksum;
@@ -26,7 +28,7 @@ public class BlockchainWallet {
     private String storageToken;
     private boolean syncPubkeys;
 
-    private String walletData;//Debugging purposes
+    private String unparsedWalletData;//Un-parsed wallet data - Debugging purposes
     private Payload payload;
 
     private final String KEY_EXTRA_SEED = "extra_seed";
@@ -52,7 +54,7 @@ public class BlockchainWallet {
      */
     public BlockchainWallet(Payload payload) throws UnsupportedEncodingException, NoSuchAlgorithmException {
 
-        this.pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS;
+        this.pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
         this.version = 3.0;
         this.syncPubkeys = false;
         this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.dumpJSON().toString().getBytes("UTF-8"))));
@@ -60,7 +62,7 @@ public class BlockchainWallet {
 
     public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException {
 
-        this.walletData = walletData;
+        this.unparsedWalletData = walletData;
 
         if (FormatsUtil.getInstance().isValidJson(walletData)) {
             parseWallet(new JSONObject(walletData), password);
@@ -106,8 +108,10 @@ public class BlockchainWallet {
             syncPubkeys = walletJson.getBoolean(KEY_SYNC_PUBKEYS);
         }
 
-        if (walletJson.has(KEY_PAYLOAD)) {
+        if (!walletJson.has(KEY_PAYLOAD)) {
+            throw new PayloadException("No payload wrapper in json.");
 
+        } else {
             //Payload wrapper contains version, iterations and encrypted payload
             JSONObject payloadWrapper = new JSONObject(walletJson.getString(KEY_PAYLOAD));
 
@@ -116,10 +120,13 @@ public class BlockchainWallet {
             if (payloadWrapper.has(KEY_PBKDF2_ITERATIONS)) {
                 pbkdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
             } else {
-                pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS;
+                pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
             }
 
-            if (payloadWrapper.has(KEY_PAYLOAD)) {
+            if (!payloadWrapper.has(KEY_PAYLOAD)) {
+                throw new PayloadException("No payload in payload wrapper.");
+
+            } else {
                 String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pbkdf2Iterations);
 
                 if (decryptedPayload != null && FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
@@ -127,13 +134,7 @@ public class BlockchainWallet {
                 } else {
                     throw new DecryptionException("Payload null after decrypt.");
                 }
-
-            } else {
-                throw new PayloadException("No payload in payload wrapper.");
             }
-
-        } else {
-            throw new PayloadException("No payload wrapper in json.");
         }
     }
 
@@ -214,7 +215,7 @@ public class BlockchainWallet {
         String decrypted = null;
         int succeededIterations = 1;
 
-        int iterations[] = {1, 10};
+        int iterations[] = {DEFAULT_PBKDF2_ITERATIONS_V1_A, DEFAULT_PBKDF2_ITERATIONS_V1_B};
         int modes[] = {AESUtil.MODE_CBC, AESUtil.MODE_OFB};
         BlockCipherPadding[] paddings = {
                 new ISO10126d2Padding(),
@@ -252,7 +253,12 @@ public class BlockchainWallet {
         return AESUtil.decrypt(encryptedPayload, password, pdfdf2Iterations);
     }
 
-    public String getWalletData(){
-        return walletData;
+    public String getUnparsedWalletData(){
+        return unparsedWalletData;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

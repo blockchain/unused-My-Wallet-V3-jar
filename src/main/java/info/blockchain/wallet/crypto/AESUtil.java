@@ -21,7 +21,6 @@ public class AESUtil	{
 
 //    private static Logger mLogger = LoggerFactory.getLogger(AESUtil.class);
 
-    // TODO this is set to 1 on iOS
     public static final int PIN_PBKDF2_ITERATIONS = 5000;
     public static final int QR_CODE_PBKDF_2ITERATIONS = 10;
 
@@ -57,20 +56,19 @@ public class AESUtil	{
 
         CipherParameters params = new ParametersWithIV(keyParam, iv);
 
-        BufferedBlockCipher cipher = null;
-        if (mode == MODE_CBC) {
-            if (padding != null) {
-                cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()), padding);
-            } else {
-                cipher = new BufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
-            }
+        BlockCipher cipherMode = null;
+        if (mode == MODE_CBC){
+            cipherMode = new CBCBlockCipher(new AESEngine());
 
-        } else if (mode == MODE_OFB) {
-            if (padding != null) {
-                cipher = new PaddedBufferedBlockCipher(new OFBBlockCipher(new AESEngine(), 128), padding);
-            } else {
-                cipher = new BufferedBlockCipher(new OFBBlockCipher(new AESEngine(), 128));
-            }
+        }else if (mode == MODE_OFB){
+            cipherMode = new OFBBlockCipher(new AESEngine(), 128);
+        }
+
+        BufferedBlockCipher cipher = null;
+        if (padding != null) {
+            cipher = new PaddedBufferedBlockCipher(cipherMode, padding);
+        } else {
+            cipher = new BufferedBlockCipher(cipherMode);
         }
 
         cipher.reset();
@@ -136,20 +134,19 @@ public class AESUtil	{
 
         CipherParameters params = new ParametersWithIV(keyParam, iv);
 
-        BufferedBlockCipher cipher = null;
-        if (mode == MODE_CBC) {
-            if (padding != null) {
-                cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESEngine()), padding);
-            } else {
-                cipher = new BufferedBlockCipher(new CBCBlockCipher(new AESEngine()));
-            }
+        BlockCipher cipherMode = null;
+        if (mode == MODE_CBC){
+            cipherMode = new CBCBlockCipher(new AESEngine());
 
-        } else if (mode == MODE_OFB) {
-            if (padding != null) {
-                cipher = new PaddedBufferedBlockCipher(new OFBBlockCipher(new AESEngine(), 128), padding);
-            } else {
-                cipher = new BufferedBlockCipher(new OFBBlockCipher(new AESEngine(), 128));
-            }
+        }else if (mode == MODE_OFB){
+            cipherMode = new OFBBlockCipher(new AESEngine(), 128);
+        }
+
+        BufferedBlockCipher cipher = null;
+        if (padding != null) {
+            cipher = new PaddedBufferedBlockCipher(cipherMode, padding);
+        } else {
+            cipher = new BufferedBlockCipher(cipherMode);
         }
 
         cipher.reset();
