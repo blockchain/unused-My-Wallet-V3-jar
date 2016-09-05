@@ -1,30 +1,20 @@
-package info.blockchain.wallet.util;
+package info.blockchain.api;
 
+import info.blockchain.wallet.util.WebUtil;
 import org.json.JSONObject;
 
-//import android.util.Log;
+public class Transaction {
 
-public class AddressInfo	{
-
-    private static AddressInfo instance = null;
-
-    private AddressInfo()	{ ; }
-
-    public static AddressInfo getInstance() {
-
-        if(instance == null) {
-            instance = new AddressInfo();
-        }
-
-        return instance;
-    }
+    private static final String PROTOCOL = "https://";
+    private static final String SERVER_ADDRESS = "blockchain.info/";
+    public static final String PROD_ADDRESS_INFO_URL = PROTOCOL + SERVER_ADDRESS + "address/";
 
     public JSONObject getAddressInfo(String address, String parameter) {
 
         JSONObject jsonObject  = null;
 
         try {
-            StringBuilder url = new StringBuilder(WebUtil.ADDRESS_INFO_URL);
+            StringBuilder url = new StringBuilder(PROD_ADDRESS_INFO_URL);
             url.append(address);
             url.append("?format=json");
             if(parameter != null && !parameter.isEmpty())
@@ -40,5 +30,4 @@ public class AddressInfo	{
 
         return jsonObject;
     }
-
 }

@@ -6,6 +6,18 @@ import org.json.JSONObject;
 
 public class Balance {
 
+    private static final String PROTOCOL = "https://";
+    private static final String DEV_SUBDOMAIN = "dev.";
+    private static final String STAGING_SUBDOMAIN = "staging.";
+    private static final String WALLET_DEV_SUBDOMAIN = "explorer."+DEV_SUBDOMAIN;
+    private static final String WALLET_STAGING_SUBDOMAIN = "explorer."+STAGING_SUBDOMAIN;
+    private static final String SERVER_ADDRESS = "blockchain.info/";
+    private static final String BALANCE = "balance?active=";
+
+    public static final String PROD_BALANCE_URL = PROTOCOL + SERVER_ADDRESS + BALANCE;
+    public static final String DEV_MULTIADDR_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + SERVER_ADDRESS + BALANCE;
+    public static final String STAGING_MULTIADDR_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + SERVER_ADDRESS + BALANCE;
+
     public static final int TxFilterSent = 1;
     public static final int TxFilterReceived = 2;
     public static final int TxFilterMoved = 3;
@@ -13,6 +25,18 @@ public class Balance {
     public static final int TxFilterConfirmedOnly = 5;
     public static final int TxFilterRemoveUnspendable = 6;
     public static final int TxFilterUnconfirmedOnly = 7;
+
+    private String balanceUrl = PROD_BALANCE_URL;
+
+    public Balance() {
+    }
+
+    /**
+     * @param customUrl PROD_BALANCE_URL, DEV_MULTIADDR_URL, STAGING_MULTIADDR_URL
+     */
+    public Balance(String customUrl) {
+        this.balanceUrl = customUrl;
+    }
 
     public JSONObject getBalance(String[] addresses) throws Exception{
         return getBalanceAPICall(addresses, -1);
@@ -24,7 +48,7 @@ public class Balance {
 
     private JSONObject getBalanceAPICall(String[] addresses, int filter) throws Exception{
 
-        StringBuilder url = new StringBuilder(WebUtil.BALANCE_URL);
+        StringBuilder url = new StringBuilder(balanceUrl);
         url.append(StringUtils.join(addresses, "|"));
         if(filter > 0)url.append("&filter="+filter);
         url.append("&api_code="+WebUtil.API_CODE);
