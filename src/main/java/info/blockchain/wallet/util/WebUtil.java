@@ -27,12 +27,8 @@ public class WebUtil{
     //Wallet
     public static final String PROD_VALIDATE_SSL_URL = PROTOCOL + SERVER_ADDRESS;
 
-    //Fees
-    private static final String FEES = "fees";
-    public static final String PROD_BTCX_FEE_URL = "http://bitcoinexchangerate.org/"+FEES;
-    public static final String PROD_EXCHANGE_URL = PROTOCOL + SERVER_ADDRESS + "ticker";
-
     //Merchant
+    // TODO: 06/09/16 use new - api.blockchain.info/api/merchant
     private static final String MERCHANT_DIRECTORY_SUBDOMAIN = "merchant-directory.";
     public static final String PROD_MERCHANT_DIRECTORY_URL = PROTOCOL + MERCHANT_DIRECTORY_SUBDOMAIN + SERVER_ADDRESS + "cgi-bin/btcd.pl?";
 
