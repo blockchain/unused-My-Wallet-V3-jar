@@ -3,27 +3,33 @@ package info.blockchain.api;
 import info.blockchain.wallet.util.WebUtil;
 import org.json.JSONObject;
 
-public class AddressInfo {
+public class AddressInfo implements BaseApi {
 
-    private static final String PROTOCOL = "https://";
-    private static final String SERVER_ADDRESS = "blockchain.info/";
-    public static final String PROD_ADDRESS_INFO_URL = PROTOCOL + SERVER_ADDRESS + "address/";
+    private static final String ADDRESS = "address/";
+    public static final String PROD_ADDRESS_INFO_URL = PROTOCOL + SERVER_ADDRESS + ADDRESS;
+    public static final String DEV_ADDRESS_INFO_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + ADDRESS;
+    public static final String STAGING_ADDRESS_INFO_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + ADDRESS;
+
+    private String addressInfoUrl = PROD_ADDRESS_INFO_URL;
+
+    public AddressInfo() {
+        addressInfoUrl = PersistentUrls.getInstance().getAddressInfoUrl();
+    }
 
     public JSONObject getAddressInfo(String address, String parameter) {
 
-        JSONObject jsonObject  = null;
+        JSONObject jsonObject = null;
 
         try {
-            StringBuilder url = new StringBuilder(PROD_ADDRESS_INFO_URL);
+            StringBuilder url = new StringBuilder(addressInfoUrl);
             url.append(address);
             url.append("?format=json");
-            if(parameter != null && !parameter.isEmpty())
+            if (parameter != null && !parameter.isEmpty())
                 url.append(parameter);
 
             String response = WebUtil.getInstance().getURL(url.toString());
             jsonObject = new JSONObject(response);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             jsonObject = null;
             e.printStackTrace();
         }

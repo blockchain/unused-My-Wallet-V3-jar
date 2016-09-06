@@ -4,19 +4,26 @@ import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.WebUtil;
 import org.json.JSONObject;
 
-public class TransactionDetails {
+public class TransactionDetails implements BaseApi {
 
-    private static final String PROTOCOL = "https://";
-    private static final String SERVER_ADDRESS = "blockchain.info/";
-    public static final String PROD_TRANSACTION_URL = PROTOCOL + SERVER_ADDRESS+ "tx/";
+    private static final String TX = "tx/";
+    public static final String PROD_TRANSACTION_URL = PROTOCOL + SERVER_ADDRESS + TX;
+    public static final String DEV_TRANSACTION_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + TX;
+    public static final String STAGING_TRANSACTION_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + TX;
+
+    private String txDetailsUrl = PROD_TRANSACTION_URL;
+
+    public TransactionDetails() {
+        txDetailsUrl = PersistentUrls.getInstance().getTransactionDetailsUrl();
+    }
 
     public info.blockchain.wallet.payload.Transaction getTransactionDetails(String hash) throws Exception {
 
-        String response = WebUtil.getInstance().getURL(PROD_TRANSACTION_URL + hash + "?format=json");
+        String response = WebUtil.getInstance().getURL(txDetailsUrl + hash + "?format=json");
 
-        if(response != null && FormatsUtil.getInstance().isValidJson(response)) {
+        if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
             return new info.blockchain.wallet.payload.Transaction(new JSONObject(response));
-        }else{
+        } else {
             return null;
         }
     }

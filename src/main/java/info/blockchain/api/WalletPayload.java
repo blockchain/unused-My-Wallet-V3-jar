@@ -3,25 +3,12 @@ package info.blockchain.api;
 import info.blockchain.wallet.util.WebUtil;
 import org.json.JSONObject;
 
-public class WalletPayload {
+public class WalletPayload implements BaseApi {
 
-    //Protocols
-    private static final String PROTOCOL = "https://";
-
-    //Sub-domains
-    private static final String DEV_SUBDOMAIN = "dev.";
-    private static final String STAGING_SUBDOMAIN = "staging.";
-    private static final String WALLET_DEV_SUBDOMAIN = "explorer."+DEV_SUBDOMAIN;
-    private static final String WALLET_STAGING_SUBDOMAIN = "explorer."+STAGING_SUBDOMAIN;
-
-    //Domain
-    private static final String SERVER_ADDRESS = "blockchain.info/";
-
-    //Wallet
     private static final String WALLET = "wallet";
-    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET; //PAIRING_URL and SID_URL
-    public static final String DEV_PAYLOAD_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + SERVER_ADDRESS + WALLET;
-    public static final String STAGING_PAYLOAD_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + SERVER_ADDRESS + WALLET;
+    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
+    public static final String DEV_PAYLOAD_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + WALLET;
+    public static final String STAGING_PAYLOAD_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + WALLET;
 
     private String sessionId;
     public static String KEY_AUTH_REQUIRED = "Authorization Required";
@@ -29,19 +16,12 @@ public class WalletPayload {
     private String payloadUrl = PROD_PAYLOAD_URL;
 
     public WalletPayload() {
-    }
-
-    /**
-     *
-     * @param customPayloadUrl PROD_PAYLOAD_URL, DEV_PAYLOAD_URL, STAGING_PAYLOAD_URL
-     */
-    public WalletPayload(String customPayloadUrl) {
-        this.payloadUrl = customPayloadUrl;
+        payloadUrl = PersistentUrls.getInstance().getWalletPayloadUrl();
     }
 
     public String getSessionId(String guid) throws Exception {
 
-        if(sessionId == null) {
+        if (sessionId == null) {
             sessionId = WebUtil.getInstance().getCookie(
                     payloadUrl + "/" +
                             guid +
@@ -88,6 +68,7 @@ public class WalletPayload {
 
     /**
      * Fetches wallet data from server
+     *
      * @param guid
      * @param sharedKey
      * @return Either encrypted string (v1) or json (v2, v3)
@@ -100,9 +81,9 @@ public class WalletPayload {
                 "method=wallet.aes.json&guid=" + guid +
                         "&sharedKey=" + sharedKey +
                         "&format=json" +
-                        "&api_code=" + WebUtil.API_CODE);
+                        "&api_code=" + API_CODE);
 
-        if (response == null){
+        if (response == null) {
             throw new Exception("Payload fetch from server is null");
         }
 

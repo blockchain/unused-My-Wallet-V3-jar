@@ -307,7 +307,8 @@ public class PayloadManager {
             args.append(oldChecksum);
         }
 
-        args.append("&api_code=" + WebUtil.API_CODE);
+        // TODO: 06/09/16 All of this needs to move
+        args.append("&api_code=" + "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3");
 
         // TODO: 05/09/16 This could be done better
         boolean success = new WalletPayload().savePayloadToServer(args.toString());

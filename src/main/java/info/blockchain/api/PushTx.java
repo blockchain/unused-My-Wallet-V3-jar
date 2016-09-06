@@ -4,25 +4,23 @@ import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.WebUtil;
 import org.bitcoinj.core.Transaction;
 
-public class PushTx {
+public class PushTx implements BaseApi {
 
-    private static final String PROTOCOL = "https://";
-    private static final String SERVER_ADDRESS = "blockchain.info/";
     public static final String PROD_SPEND_URL = PROTOCOL + SERVER_ADDRESS + "pushtx";
 
     public String submitTransaction(String hexString) throws Exception {
 
-        hexString += "&api_code="+WebUtil.API_CODE;
+        hexString += "&api_code=" + API_CODE;
 
         String response = WebUtil.getInstance().postURL(PROD_SPEND_URL, "tx=" + hexString);
 
         return response;
     }
 
-    public String submitTransaction(Transaction tx) throws Exception{
+    public String submitTransaction(Transaction tx) throws Exception {
 
         String encoded = SendCoins.getInstance().encodeHex(tx);
-        encoded += "&api_code="+WebUtil.API_CODE;
+        encoded += "&api_code=" + API_CODE;
 
         String response = WebUtil.getInstance().postURL(PROD_SPEND_URL, "tx=" + encoded);
 

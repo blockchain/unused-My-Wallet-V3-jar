@@ -15,9 +15,6 @@ public class WebUtil{
 
     // TODO: 05/09/16 Sorted this out slightly for dev/staging testing ,but overall needs a good cleanup
 
-    //Android API code
-    public static final String API_CODE = "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
-
     //Protocols
     private static final String PROTOCOL = "https://";
 

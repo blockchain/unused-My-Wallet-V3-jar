@@ -9,33 +9,17 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-public class DynamicFee {
-
-    private static final String PROTOCOL = "https://";
-    private static final String SERVER_ADDRESS = "blockchain.info/";
-
-    private static final String API_SUBDOMAIN = "api.";
-    private static final String DEV_SUBDOMAIN = "dev.";
-    private static final String STAGING_SUBDOMAIN = "staging.";
-
-    private static final String API_DEV_SUBDOMAIN = API_SUBDOMAIN +DEV_SUBDOMAIN;
-    private static final String API_STAGING_SUBDOMAIN = API_SUBDOMAIN +STAGING_SUBDOMAIN;
+public class DynamicFee implements BaseApi {
 
     private static final String FEES = "fees";
     public static final String PROD_DYNAMIC_FEE = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + FEES;
-    public static final String DEV_DYNAMIC_FEE = PROTOCOL + API_DEV_SUBDOMAIN + SERVER_ADDRESS + FEES;
-    public static final String STAGING_DYNAMIC_FEE = PROTOCOL + API_STAGING_SUBDOMAIN + SERVER_ADDRESS + FEES;
+    public static final String DEV_DYNAMIC_FEE = PROTOCOL + API_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + FEES;
+    public static final String STAGING_DYNAMIC_FEE = PROTOCOL + API_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + FEES;
 
     private String dynamicFeeUrl = PROD_DYNAMIC_FEE;
 
     public DynamicFee() {
-    }
-
-    /**
-     * @param customUrl PROD_DYNAMIC_FEE, DEV_DYNAMIC_FEE, STAGING_DYNAMIC_FEE
-     */
-    public DynamicFee(String customUrl) {
-        this.dynamicFeeUrl = customUrl;
+        dynamicFeeUrl = PersistentUrls.getInstance().getDynamicFeeUrl();
     }
 
     public SuggestedFee getDynamicFee() {
@@ -48,10 +32,10 @@ public class DynamicFee {
             return getDefaultFee();
         }
 
-        if(response != null) {
+        if (response != null) {
 
             JSONObject dynamicFeeJson = new JSONObject(response);
-            if(dynamicFeeJson != null){
+            if (dynamicFeeJson != null) {
 
                 SuggestedFee suggestedFee = new SuggestedFee();
                 JSONObject defaultJson = dynamicFeeJson.getJSONObject("default");
@@ -60,7 +44,7 @@ public class DynamicFee {
 
                 JSONArray estimateArray = dynamicFeeJson.getJSONArray("estimate");
                 suggestedFee.estimateList = new ArrayList<SuggestedFee.Estimates>();
-                for(int i = 0; i < estimateArray.length(); i++){
+                for (int i = 0; i < estimateArray.length(); i++) {
 
                     JSONObject estimateJson = estimateArray.getJSONObject(i);
 
@@ -78,7 +62,7 @@ public class DynamicFee {
         return getDefaultFee();
     }
 
-    public SuggestedFee getDefaultFee(){
+    public SuggestedFee getDefaultFee() {
         SuggestedFee defaultFee = new SuggestedFee();
         defaultFee.defaultFeePerKb = FeeUtil.AVERAGE_FEE_PER_KB;
         return defaultFee;
