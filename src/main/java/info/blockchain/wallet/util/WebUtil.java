@@ -26,7 +26,6 @@ public class WebUtil{
 
     //Wallet
     public static final String PROD_VALIDATE_SSL_URL = PROTOCOL + SERVER_ADDRESS;
-    public static final String PROD_EXTERNAL_ENTROPY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "v2/randombytes?bytes=32&format=hex";
 
     //Fees
     private static final String FEES = "fees";

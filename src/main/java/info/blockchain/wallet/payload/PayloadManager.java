@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import com.google.common.annotations.VisibleForTesting;
+import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.wallet.crypto.AESUtil;
@@ -739,14 +740,9 @@ public class PayloadManager {
 
     private ECKey getRandomECKey() {
 
-        String result = null;
         byte[] data = null;
         try {
-            result = WebUtil.getInstance().getURL(WebUtil.PROD_EXTERNAL_ENTROPY_URL);
-            if (!result.matches("^[A-Fa-f0-9]{64}$")) {
-                return null;
-            }
-            data = Hex.decode(result);
+            data = new ExternalEntropy().getRandomBytes();
         } catch (Exception e) {
             return null;
         }
