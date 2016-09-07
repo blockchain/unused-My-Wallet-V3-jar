@@ -42,7 +42,7 @@ public class WebUtil{
     }
 
     private  String postURLCall(String request, String urlParameters, int requestRetry, String contentType) throws Exception {
-        System.out.println("URL: "+request);
+
         String error = null;
 
         for (int ii = 0; ii < requestRetry; ++ii) {
@@ -106,7 +106,7 @@ public class WebUtil{
     }
 
     private String getURLCall(String URL, String cookie) throws Exception {
-        System.out.println("URL: "+URL);
+
         URL url = new URL(URL);
 
         String error = null;
@@ -146,7 +146,7 @@ public class WebUtil{
     }
 
     public String getCookie(String url, String cname) throws Exception {
-        System.out.println("URL: "+url);
+
         String ret = null;
 
         URLConnection conn = new URL(url).openConnection();
