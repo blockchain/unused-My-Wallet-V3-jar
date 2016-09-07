@@ -1,7 +1,15 @@
 package info.blockchain.api;
 
+import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WalletPayload implements BaseApi {
 
@@ -91,10 +99,68 @@ public class WalletPayload implements BaseApi {
 
     }
 
-    public boolean savePayloadToServer(String args) {
+    public boolean savePayloadToServer(String method, String guid, String sharedKey, List<LegacyAddress> legacyAddresses, JSONObject encryptedPayload, boolean syncPubkeys, String newChecksum, String oldChecksum, String email) {
+
+        StringBuilder args = new StringBuilder();
+        try {
+
+            String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString());
+
+            args.append("guid=");
+            args.append(URLEncoder.encode(guid, "utf-8"));
+            args.append("&sharedKey=");
+            args.append(URLEncoder.encode(sharedKey, "utf-8"));
+            args.append("&payload=");
+            args.append(urlEncodedPayload);
+            args.append("&method=");
+            args.append(method);
+            args.append("&length=");
+            args.append(encryptedPayload.toString().length());
+            args.append("&checksum=");
+            args.append(URLEncoder.encode(newChecksum, "utf-8"));
+
+        } catch (UnsupportedEncodingException uee) {
+            uee.printStackTrace();
+            return false;
+        } catch (JSONException je) {
+            je.printStackTrace();
+            return false;
+        }
+
+        if (legacyAddresses != null && syncPubkeys) {
+            args.append("&active=");
+
+            List<String> addrs = new ArrayList<String>();
+            for (LegacyAddress addr : legacyAddresses) {
+                if (addr.getTag() == 0L) {
+                    addrs.add(addr.getAddress());
+                }
+            }
+
+            args.append(StringUtils.join(addrs.toArray(new String[addrs.size()]), "|"));
+        }
+
+        if (email != null && email.length() > 0) {
+            try {
+                args.append("&email=");
+                args.append(URLEncoder.encode(email, "utf-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        args.append("&device=");
+        args.append("android");
+
+        if(oldChecksum != null && oldChecksum.length() > 0) {
+            args.append("&old_checksum=");
+            args.append(oldChecksum);
+        }
+
+        args.append("&api_code=" + API_CODE);
 
         try {
-            String response = WebUtil.getInstance().postURL(payloadUrl, args);
+            String response = WebUtil.getInstance().postURL(payloadUrl, args.toString());
             if (response.contains("Wallet successfully synced")) {
                 return true;
             }

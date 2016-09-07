@@ -1,14 +1,21 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.spongycastle.util.encoders.Hex;
 
 import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -773,5 +780,18 @@ public class Payload implements Serializable{
 
     public void setDecryptedPayload(String decryptedPayload) {
         this.decryptedPayload = decryptedPayload;
+    }
+
+    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+        String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
+        JSONObject rootObj = new JSONObject();
+        rootObj.put("version", version);
+        rootObj.put("pbkdf2_iterations", iterations);
+        rootObj.put("payload", payloadEncrypted);
+
+        String checkSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
+
+        return Pair.of(checkSum, rootObj);
     }
 }
