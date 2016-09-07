@@ -13,25 +13,6 @@ import java.util.Set;
 
 public class WebUtil{
 
-    // TODO: 05/09/16 Sorted this out slightly for dev/staging testing ,but overall needs a good cleanup
-
-    //Protocols
-    private static final String PROTOCOL = "https://";
-
-    //Sub-domains
-    private static final String API_SUBDOMAIN = "api.";
-
-    //Domain
-    private static final String SERVER_ADDRESS = "blockchain.info/";
-
-    //Wallet
-    public static final String PROD_VALIDATE_SSL_URL = PROTOCOL + SERVER_ADDRESS;
-
-    //Merchant
-    // TODO: 06/09/16 use new - api.blockchain.info/api/merchant
-    private static final String MERCHANT_DIRECTORY_SUBDOMAIN = "merchant-directory.";
-    public static final String PROD_MERCHANT_DIRECTORY_URL = PROTOCOL + MERCHANT_DIRECTORY_SUBDOMAIN + SERVER_ADDRESS + "cgi-bin/btcd.pl?";
-
     private static final int DefaultRequestRetry = 2;
     private static final int DefaultRequestTimeout = 60000;
 
