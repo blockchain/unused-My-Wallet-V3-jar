@@ -7,3 +7,6 @@ jdk:
 
 script:
   - mvn clean verify
+
+notifications:
+  slack: blockc:WGksx2bTw7tlaztmZD5aXidL
