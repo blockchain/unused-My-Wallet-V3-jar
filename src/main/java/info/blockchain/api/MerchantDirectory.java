@@ -11,14 +11,12 @@ import java.util.ArrayList;
 
 public class MerchantDirectory implements BaseApi {
 
-    // TODO: 06/09/16 use new - api.blockchain.info/api/merchant (not working yet)
-    private static final String MERCHANT_DIRECTORY_SUBDOMAIN = "merchant-directory.";
-    public static final String PROD_MERCHANT_DIRECTORY_URL_OLD = PROTOCOL + MERCHANT_DIRECTORY_SUBDOMAIN + SERVER_ADDRESS + "api/merchant";
+    public static final String PROD_MERCHANT_DIRECTORY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "merchant";
 
 
     public ArrayList<Merchant> getAllMerchants() throws Exception {
 
-        String result = WebUtil.getInstance().getURL(PROD_MERCHANT_DIRECTORY_URL_OLD);
+        String result = WebUtil.getInstance().getURL(PROD_MERCHANT_DIRECTORY_URL);
 
         if (result == null || !FormatsUtil.getInstance().isValidJson(result)) {
             throw new Exception("Merchant api call returned null or empty");
