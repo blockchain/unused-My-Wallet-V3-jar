@@ -5,6 +5,11 @@ sudo: required
 jdk:
   - oraclejdk8
 
+# Build all pushes to master & pull requests
+branches:
+  only:
+    - master
+
 script:
   - mvn clean verify
 
