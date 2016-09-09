@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Options {
 
-    private int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS;
+    private int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2;
     private long fee_per_kb = 10000L;
     private long logout_time = 600000L;
     private List<String> additionalSeeds = null;

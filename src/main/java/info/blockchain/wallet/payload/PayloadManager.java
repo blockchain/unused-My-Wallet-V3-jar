@@ -36,9 +36,7 @@ public class PayloadManager {
 
     public static final double SUPPORTED_ENCRYPTION_VERSION = 3.0;
     public static final long NORMAL_ADDRESS = 0L;
-    public static final long ARCHIVED_ADDRESS = 2L;
     public static final int RECEIVE_CHAIN = 0;
-    public static final int CHANGE_CHAIN = 1;
 
     private static PayloadManager instance = null;
     // active payload:

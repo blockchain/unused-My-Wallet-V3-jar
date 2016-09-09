@@ -73,6 +73,6 @@ public class PayloadTest {
         assertThat(payload.isDoubleEncrypted(), is(false));
 
         assertThat(payload.getOptions().isHtml5Notifications(), is(false));
-        assertThat(payload.getOptions().getIterations(), is(BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS));
+        assertThat(payload.getOptions().getIterations(), is(BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2));
     }
 }
