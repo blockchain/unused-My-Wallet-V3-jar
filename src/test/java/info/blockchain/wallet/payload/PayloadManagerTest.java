@@ -118,6 +118,8 @@ public class PayloadManagerTest {
             } else {
                 assertThat("Unsupported version should not pass", false);
             }
+        }finally {
+            payloadManager.setVersion(3.0);
         }
         try{Thread.sleep(500);}catch (Exception e){}
     }
