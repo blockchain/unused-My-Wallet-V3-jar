@@ -11,7 +11,7 @@ public class AccessTest {
     @Test
     public void getEncryptedPayload_whenBadString_shouldPass() throws Exception {
 
-        Access access = new Access();
+        WalletPayload access = new WalletPayload();
         String sessionId = access.getSessionId(guid);
         String payload = access.getEncryptedPayload(guid, sessionId);
         assertThat("Encrypted payload should not be null", payload != null);

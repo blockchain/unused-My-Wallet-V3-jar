@@ -7,7 +7,16 @@ import org.json.JSONObject;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-public class Settings {
+public class Settings implements BaseApi {
+
+    private static final String WALLET = "wallet";
+    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
+
+    private String settingsUrl = PROD_PAYLOAD_URL;
+
+    public Settings() {
+        settingsUrl = PersistentUrls.getInstance().getSettingsUrl();
+    }
 
     //API methods
     public static final String METHOD_GET_INFO = "get-info";
@@ -82,13 +91,15 @@ public class Settings {
     private String guid;
     private String sharedKey;
 
-    public interface ResultListener{
+    public interface ResultListener {
         public void onSuccess();
+
         public void onFail();
+
         public void onBadRequest();
     }
 
-    public Settings(String guid, String sharedKey){
+    public Settings(String guid, String sharedKey) {
 
         this.guid = guid;
         this.sharedKey = sharedKey;
@@ -100,43 +111,43 @@ public class Settings {
             e.printStackTrace();
         }
 
-        if(jsonString != null)
+        if (jsonString != null)
             parseJson(jsonString);
     }
 
-    public Settings(String settingsJson){
+    public Settings(String settingsJson) {
 
-        if(settingsJson != null)
+        if (settingsJson != null)
             parseJson(settingsJson);
     }
 
-    private String updateSettings(String method, String settingsPayload) throws Exception{
+    private String updateSettings(String method, String settingsPayload) throws Exception {
 
         settingsPayload = settingsPayload.trim();
 
         StringBuilder args = new StringBuilder();
-        if(settingsPayload != null && !settingsPayload.isEmpty()) {
+        if (settingsPayload != null && !settingsPayload.isEmpty()) {
             args.append("length=" + settingsPayload.length());
             args.append("&payload=" + URLEncoder.encode(settingsPayload, "utf-8"));
-            args.append("&method="+method);
-        }else{
-            args.append("method="+method);
+            args.append("&method=" + method);
+        } else {
+            args.append("method=" + method);
         }
 
-        args.append("&guid="+URLEncoder.encode(this.guid, "utf-8"));
-        args.append("&sharedKey="+URLEncoder.encode(this.sharedKey, "utf-8"));
-        args.append("&api_code=" + WebUtil.API_CODE);
+        args.append("&guid=" + URLEncoder.encode(this.guid, "utf-8"));
+        args.append("&sharedKey=" + URLEncoder.encode(this.sharedKey, "utf-8"));
+        args.append("&api_code=" + API_CODE);
         args.append("&format=plain");
 
-        String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, args.toString());
+        String response = WebUtil.getInstance().postURL(settingsUrl, args.toString());
         return response;
     }
 
-    public String getInfo() throws Exception{
+    public String getInfo() throws Exception {
         return updateSettings(METHOD_GET_INFO, "");
     }
 
-    private boolean updateValue(String method, String value){
+    private boolean updateValue(String method, String value) {
         try {
             updateSettings(method, value);
             return true;
@@ -146,39 +157,42 @@ public class Settings {
         }
     }
 
-    private void parseJson(String jsonString){
+    private void parseJson(String jsonString) {
 
         JSONObject jsonObject = new JSONObject(jsonString);
-        if(jsonObject.has("btc_currency"))btcCurrency = jsonObject.getString("btc_currency");
+        if (jsonObject.has("btc_currency")) btcCurrency = jsonObject.getString("btc_currency");
 
         notificationType = new ArrayList<Integer>();
         JSONArray notificationTypeJsonArray = jsonObject.getJSONArray("notifications_type");
-        for (int i = 0; i < notificationTypeJsonArray.length(); i++){
+        for (int i = 0; i < notificationTypeJsonArray.length(); i++) {
             notificationType.add(notificationTypeJsonArray.getInt(i));
         }
-        if(jsonObject.has("language"))language = jsonObject.getString("language");
-        if(jsonObject.has("notifications_on"))notificationsOn = toBoolean(jsonObject.getInt("notifications_on"));
-        if(jsonObject.has("ip_lock_on"))ipLockOn = toBoolean(jsonObject.getInt("ip_lock_on"));
-        if(jsonObject.has("dial_code"))dialCode = jsonObject.getString("dial_code");
-        if(jsonObject.has("block_tor_ips"))blockTorIps = toBoolean(jsonObject.getInt("block_tor_ips"));
-        if(jsonObject.has("currency"))currency = jsonObject.getString("currency");
-        if(jsonObject.has("notifications_confirmations"))notificationsConfirmations = jsonObject.getInt("notifications_confirmations");
-        if(jsonObject.has("auto_email_backup"))autoEmailBackup = toBoolean(jsonObject.getInt("auto_email_backup"));
-        if(jsonObject.has("never_save_auth_type"))neverSaveAuthType = toBoolean(jsonObject.getInt("never_save_auth_type"));
-        if(jsonObject.has("email"))email = jsonObject.getString("email");
-        if(jsonObject.has("sms_verified"))smsVerified = toBoolean(jsonObject.getInt("sms_verified"));
-        if(jsonObject.has("is_api_access_enabled"))isApiAccessEnabled = toBoolean(jsonObject.getInt("is_api_access_enabled"));
-        if(jsonObject.has("auth_type"))authType = jsonObject.getInt("auth_type");
-        if(jsonObject.has("my_ip"))myIp = jsonObject.getString("my_ip");
-        if(jsonObject.has("email_verified"))emailVerified = toBoolean(jsonObject.getInt("email_verified"));
-        if(jsonObject.has("password_hint1"))passwordHint1 = jsonObject.getString("password_hint1");
-        if(jsonObject.has("country_code"))countryCode = jsonObject.getString("country_code");
-        if(jsonObject.has("logging_level"))loggingLevel = jsonObject.getInt("logging_level");
-        if(jsonObject.has("guid"))guid = jsonObject.getString("guid");
-        if(jsonObject.has("sms_number"))sms = jsonObject.getString("sms_number");
+        if (jsonObject.has("language")) language = jsonObject.getString("language");
+        if (jsonObject.has("notifications_on")) notificationsOn = toBoolean(jsonObject.getInt("notifications_on"));
+        if (jsonObject.has("ip_lock_on")) ipLockOn = toBoolean(jsonObject.getInt("ip_lock_on"));
+        if (jsonObject.has("dial_code")) dialCode = jsonObject.getString("dial_code");
+        if (jsonObject.has("block_tor_ips")) blockTorIps = toBoolean(jsonObject.getInt("block_tor_ips"));
+        if (jsonObject.has("currency")) currency = jsonObject.getString("currency");
+        if (jsonObject.has("notifications_confirmations"))
+            notificationsConfirmations = jsonObject.getInt("notifications_confirmations");
+        if (jsonObject.has("auto_email_backup")) autoEmailBackup = toBoolean(jsonObject.getInt("auto_email_backup"));
+        if (jsonObject.has("never_save_auth_type"))
+            neverSaveAuthType = toBoolean(jsonObject.getInt("never_save_auth_type"));
+        if (jsonObject.has("email")) email = jsonObject.getString("email");
+        if (jsonObject.has("sms_verified")) smsVerified = toBoolean(jsonObject.getInt("sms_verified"));
+        if (jsonObject.has("is_api_access_enabled"))
+            isApiAccessEnabled = toBoolean(jsonObject.getInt("is_api_access_enabled"));
+        if (jsonObject.has("auth_type")) authType = jsonObject.getInt("auth_type");
+        if (jsonObject.has("my_ip")) myIp = jsonObject.getString("my_ip");
+        if (jsonObject.has("email_verified")) emailVerified = toBoolean(jsonObject.getInt("email_verified"));
+        if (jsonObject.has("password_hint1")) passwordHint1 = jsonObject.getString("password_hint1");
+        if (jsonObject.has("country_code")) countryCode = jsonObject.getString("country_code");
+        if (jsonObject.has("logging_level")) loggingLevel = jsonObject.getInt("logging_level");
+        if (jsonObject.has("guid")) guid = jsonObject.getString("guid");
+        if (jsonObject.has("sms_number")) sms = jsonObject.getString("sms_number");
     }
 
-    private boolean toBoolean (int value) {
+    private boolean toBoolean(int value) {
         return value != 0;
     }
 
@@ -234,10 +248,10 @@ public class Settings {
         return blockTorIps;
     }
 
-    private boolean isBadPasswordHint(String hint)  {
-        if(hint == null || hint.isEmpty() || hint.length() > 255){
+    private boolean isBadPasswordHint(String hint) {
+        if (hint == null || hint.isEmpty() || hint.length() > 255) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -246,58 +260,58 @@ public class Settings {
         return sms;
     }
 
-    public ArrayList<Integer> getNotificationTypes(){
+    public ArrayList<Integer> getNotificationTypes() {
         return notificationType;
     }
 
-    public void setEmail(String email, ResultListener listener){
+    public void setEmail(String email, ResultListener listener) {
 
-        if(email == null || email.isEmpty()){
+        if (email == null || email.isEmpty()) {
             listener.onBadRequest();
-        }else if(updateValue(METHOD_UPDATE_EMAIL, email)){
+        } else if (updateValue(METHOD_UPDATE_EMAIL, email)) {
             this.email = email;
             this.emailVerified = false;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void setSms(String sms, ResultListener listener){
-        if(sms == null || sms.isEmpty()){
+    public void setSms(String sms, ResultListener listener) {
+        if (sms == null || sms.isEmpty()) {
             listener.onBadRequest();
-        }else if(updateValue(METHOD_UPDATE_SMS, sms)){
+        } else if (updateValue(METHOD_UPDATE_SMS, sms)) {
             this.sms = sms;
             this.smsVerified = false;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void verifyEmail(String code, ResultListener listener){
-        if(code == null || code.isEmpty()){
+    public void verifyEmail(String code, ResultListener listener) {
+        if (code == null || code.isEmpty()) {
             listener.onBadRequest();
-        }else if(updateValue(METHOD_VERIFY_EMAIL, code)){
+        } else if (updateValue(METHOD_VERIFY_EMAIL, code)) {
             this.emailVerified = true;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void verifySms(String code, ResultListener listener){
-        if(code == null || code.isEmpty()){
+    public void verifySms(String code, ResultListener listener) {
+        if (code == null || code.isEmpty()) {
             listener.onBadRequest();
-        }else if(updateValue(METHOD_VERIFY_SMS, code)){
+        } else if (updateValue(METHOD_VERIFY_SMS, code)) {
             this.smsVerified = true;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void setPasswordHint1(String hint, ResultListener listener)  {
+    public void setPasswordHint1(String hint, ResultListener listener) {
         if (hint == null || hint.isEmpty() || isBadPasswordHint(hint)) {
             listener.onBadRequest();
         } else if (updateValue(METHOD_UPDATE_PASSWORD_HINT_1, hint)) {
@@ -319,43 +333,42 @@ public class Settings {
         }
     }
 
-    public void setBtcCurrency(String btcCurrency, ResultListener listener){
+    public void setBtcCurrency(String btcCurrency, ResultListener listener) {
         if (btcCurrency == null || btcCurrency.isEmpty()) {
             listener.onBadRequest();
-        } else if(updateValue(METHOD_UPDATE_BTC_CURRENCY, btcCurrency)){
+        } else if (updateValue(METHOD_UPDATE_BTC_CURRENCY, btcCurrency)) {
             this.btcCurrency = btcCurrency;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void setFiatCurrency(String currency, ResultListener listener){
+    public void setFiatCurrency(String currency, ResultListener listener) {
         if (currency == null || currency.isEmpty()) {
             listener.onBadRequest();
-        } else if(updateValue(METHOD_UPDATE_CURRENCY, currency)){
+        } else if (updateValue(METHOD_UPDATE_CURRENCY, currency)) {
             this.currency = currency;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void setTorBlocked(boolean block, ResultListener listener){
+    public void setTorBlocked(boolean block, ResultListener listener) {
         int value = 0;
-        if(block)value = 1;
-        boolean success = updateValue(METHOD_UPDATE_BLOCK_TOR_IPS, value+"");
-        if(success){
+        if (block) value = 1;
+        boolean success = updateValue(METHOD_UPDATE_BLOCK_TOR_IPS, value + "");
+        if (success) {
             this.blockTorIps = block;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
     /**
-     *
-     * @param type NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL, NOTIFICATION_TYPE_ALL
+     * @param type     NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL, NOTIFICATION_TYPE_ALL
      * @param listener
      */
     public void enableNotification(int type, ResultListener listener) {
@@ -379,94 +392,94 @@ public class Settings {
         }
     }
 
-    public void disableNotification(int type, ResultListener listener){
+    public void disableNotification(int type, ResultListener listener) {
 
-        if (notificationType.contains(type)){
-            notificationType.remove((Integer)type);
+        if (notificationType.contains(type)) {
+            notificationType.remove((Integer) type);
 
-            if(notificationType.size() > 0){
+            if (notificationType.size() > 0) {
 
                 //SMS removed. Email type still active
-                if(type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL)){
-                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_EMAIL+"");
-                    if(success){
+                if (type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL)) {
+                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_EMAIL + "");
+                    if (success) {
                         listener.onSuccess();
-                    }else{
+                    } else {
                         listener.onFail();
                     }
                 }
 
                 //Email removed. Sms type still active
-                if(type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS)){
-                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_SMS+"");
-                    if(success){
+                if (type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS)) {
+                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_SMS + "");
+                    if (success) {
                         listener.onSuccess();
-                    }else{
+                    } else {
                         listener.onFail();
                     }
                 }
 
-            }else{
+            } else {
                 //No more notifications left - disable all
                 disableAllNotifications(listener);
             }
 
-        }else{
+        } else {
             listener.onSuccess();
         }
     }
 
-    public void enableAllNotifications(ResultListener listener){
+    public void enableAllNotifications(ResultListener listener) {
 
-        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_ALL+"");
-        if(success){
-            if(!notificationType.contains(NOTIFICATION_TYPE_ALL)) {
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_ALL + "");
+        if (success) {
+            if (!notificationType.contains(NOTIFICATION_TYPE_ALL)) {
                 notificationType.add(NOTIFICATION_TYPE_ALL);
                 enableNotifications(true, listener);
             }
 
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void disableAllNotifications(ResultListener listener){
+    public void disableAllNotifications(ResultListener listener) {
 
-        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_NONE+"");
-        if(success){
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_NONE + "");
+        if (success) {
             notificationType = new ArrayList<Integer>();
 
             enableNotifications(false, listener);
 
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    private void enableNotifications(boolean enable, ResultListener listener){
+    private void enableNotifications(boolean enable, ResultListener listener) {
         int value;
-        if(enable) {
+        if (enable) {
             value = NOTIFICATION_ON;
-        }else{
+        } else {
             value = NOTIFICATION_OFF;
         }
-        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_ON, value+"");
-        if(success){
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_ON, value + "");
+        if (success) {
             this.notificationsOn = enable;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }
 
-    public void setAuthType(int type, ResultListener listener){
-        boolean success = updateValue(METHOD_UPDATE_AUTH_TYPE, type+"");
-        if(success){
+    public void setAuthType(int type, ResultListener listener) {
+        boolean success = updateValue(METHOD_UPDATE_AUTH_TYPE, type + "");
+        if (success) {
             authType = type;
             listener.onSuccess();
-        }else{
+        } else {
             listener.onFail();
         }
     }

@@ -4,7 +4,10 @@ import info.blockchain.wallet.util.WebUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
-public class Balance {
+public class Balance implements BaseApi {
+
+    private static final String BALANCE = "balance?active=";
+    public static final String PROD_BALANCE_URL = PROTOCOL + SERVER_ADDRESS + BALANCE;
 
     public static final int TxFilterSent = 1;
     public static final int TxFilterReceived = 2;
@@ -14,20 +17,26 @@ public class Balance {
     public static final int TxFilterRemoveUnspendable = 6;
     public static final int TxFilterUnconfirmedOnly = 7;
 
-    public JSONObject getBalance(String[] addresses) throws Exception{
+    private String balanceUrl = PROD_BALANCE_URL;
+
+    public Balance() {
+        balanceUrl = PersistentUrls.getInstance().getBalanceUrl();
+    }
+
+    public JSONObject getBalance(String[] addresses) throws Exception {
         return getBalanceAPICall(addresses, -1);
     }
 
-    public JSONObject getBalance(String[] addresses, int filter) throws Exception{
+    public JSONObject getBalance(String[] addresses, int filter) throws Exception {
         return getBalanceAPICall(addresses, filter);
     }
 
-    private JSONObject getBalanceAPICall(String[] addresses, int filter) throws Exception{
+    private JSONObject getBalanceAPICall(String[] addresses, int filter) throws Exception {
 
-        StringBuilder url = new StringBuilder(WebUtil.BALANCE_URL);
+        StringBuilder url = new StringBuilder(balanceUrl);
         url.append(StringUtils.join(addresses, "|"));
-        if(filter > 0)url.append("&filter="+filter);
-        url.append("&api_code="+WebUtil.API_CODE);
+        if (filter > 0) url.append("&filter=" + filter);
+        url.append("&api_code=" + API_CODE);
 
         String response = WebUtil.getInstance().getURL(url.toString());
 

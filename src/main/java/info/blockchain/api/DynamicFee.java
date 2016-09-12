@@ -9,22 +9,31 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-public class DynamicFee {
+public class DynamicFee implements BaseApi {
+
+    private static final String FEES = "fees";
+    public static final String PROD_DYNAMIC_FEE = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + FEES;
+
+    private String dynamicFeeUrl = PROD_DYNAMIC_FEE;
+
+    public DynamicFee() {
+        dynamicFeeUrl = PersistentUrls.getInstance().getDynamicFeeUrl();
+    }
 
     public SuggestedFee getDynamicFee() {
 
         String response = null;
         try {
-            response = WebUtil.getInstance().getURL(WebUtil.DYNAMIC_FEE);
+            response = WebUtil.getInstance().getURL(dynamicFeeUrl);
         } catch (Exception e) {
             e.printStackTrace();
             return getDefaultFee();
         }
 
-        if(response != null) {
+        if (response != null) {
 
             JSONObject dynamicFeeJson = new JSONObject(response);
-            if(dynamicFeeJson != null){
+            if (dynamicFeeJson != null) {
 
                 SuggestedFee suggestedFee = new SuggestedFee();
                 JSONObject defaultJson = dynamicFeeJson.getJSONObject("default");
@@ -33,7 +42,7 @@ public class DynamicFee {
 
                 JSONArray estimateArray = dynamicFeeJson.getJSONArray("estimate");
                 suggestedFee.estimateList = new ArrayList<SuggestedFee.Estimates>();
-                for(int i = 0; i < estimateArray.length(); i++){
+                for (int i = 0; i < estimateArray.length(); i++) {
 
                     JSONObject estimateJson = estimateArray.getJSONObject(i);
 
@@ -51,7 +60,7 @@ public class DynamicFee {
         return getDefaultFee();
     }
 
-    public SuggestedFee getDefaultFee(){
+    public SuggestedFee getDefaultFee() {
         SuggestedFee defaultFee = new SuggestedFee();
         defaultFee.defaultFeePerKb = FeeUtil.AVERAGE_FEE_PER_KB;
         return defaultFee;

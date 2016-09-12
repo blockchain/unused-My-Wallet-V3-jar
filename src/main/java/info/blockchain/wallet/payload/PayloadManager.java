@@ -1,14 +1,18 @@
 package info.blockchain.wallet.payload;
 
 import com.google.common.annotations.VisibleForTesting;
+import info.blockchain.api.ExternalEntropy;
+import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
-import info.blockchain.bip44.Wallet;
-import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.util.*;
+import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.util.PrivateKeyFactory;
+import info.blockchain.wallet.util.Util;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
@@ -16,15 +20,10 @@ import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.spongycastle.util.encoders.Hex;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +53,8 @@ public class PayloadManager {
     private static BlockchainWallet bciWallet;
 
     private static HDPayloadBridge hdPayloadBridge;
-    private static Wallet wallet;
-    private static Wallet watchOnlyWallet;
+    private static info.blockchain.bip44.Wallet wallet;
+    private static info.blockchain.bip44.Wallet watchOnlyWallet;
 
     private PayloadManager() {
         ;
@@ -101,7 +100,7 @@ public class PayloadManager {
 
         String walletData = null;
         try {
-            walletData = fetchWalletData(guid, sharedKey);
+            walletData = new WalletPayload().fetchWalletData(guid, sharedKey);
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -125,25 +124,6 @@ public class PayloadManager {
         syncWallet();
 
         listener.onSuccess();
-    }
-
-    /**
-     * Fetches wallet data from server
-     * @param guid
-     * @param sharedKey
-     * @return Either encrypted string (v1) or json (v2, v3)
-     * @throws Exception
-     */
-    private String fetchWalletData(String guid, String sharedKey) throws Exception {
-
-        String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, "method=wallet.aes.json&guid=" + guid + "&sharedKey=" + sharedKey + "&format=json" + "&api_code=" + WebUtil.API_CODE);
-
-        if (response == null){
-            throw new Exception("Payload fetch from server is null");
-        }
-
-        return response;
-
     }
 
     /**
@@ -234,113 +214,46 @@ public class PayloadManager {
         payload = p;
     }
 
-    /**
-     * Remote save of current client payload to server. Will not save if no change as compared to cached payload.
-     *
-     * @return boolean
-     */
     public boolean savePayloadToServer() {
 
         if (payload == null) return false;
 
-        String payloadCleartext = null;
-
-        int iterations = bciWallet.getPbkdf2Iterations();
-        boolean syncPubkeys = bciWallet.isSyncPubkeys();
-        String oldChecksum = bciWallet.getPayloadChecksum();
-
-        StringBuilder args = new StringBuilder();
-        try {
-
-            if (cached_payload != null && cached_payload.equals(payload.dumpJSON().toString())) {
-                return true;
-            }
-
-            payloadCleartext = payload.dumpJSON().toString();
-            String payloadEncrypted = AESUtil.encrypt(payloadCleartext, new CharSequenceX(strTempPassword), iterations);
-            JSONObject rootObj = new JSONObject();
-            rootObj.put("version", getVersion());
-            rootObj.put("pbkdf2_iterations", iterations);
-            rootObj.put("payload", payloadEncrypted);
-
-            String strCheckSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
-            bciWallet.setPayloadChecksum(strCheckSum);
-
-            String method = isNew ? "insert" : "update";
-
-            String urlEncodedPayload = URLEncoder.encode(rootObj.toString());
-
-            args.append("guid=");
-            args.append(URLEncoder.encode(payload.getGuid(), "utf-8"));
-            args.append("&sharedKey=");
-            args.append(URLEncoder.encode(payload.getSharedKey(), "utf-8"));
-            args.append("&payload=");
-            args.append(urlEncodedPayload);
-            args.append("&method=");
-            args.append(method);
-            args.append("&length=");
-            args.append(rootObj.toString().length());
-            args.append("&checksum=");
-            args.append(URLEncoder.encode(strCheckSum, "utf-8"));
-
-        } catch (NoSuchAlgorithmException nsae) {
-            nsae.printStackTrace();
-            return false;
-        } catch (UnsupportedEncodingException uee) {
-            uee.printStackTrace();
-            return false;
-        } catch (JSONException je) {
-            je.printStackTrace();
-            return false;
+        if (cached_payload != null && cached_payload.equals(payload.dumpJSON().toString())) {
+            return true;
         }
 
-        if (syncPubkeys) {
-            args.append("&active=");
-
-            String[] legacyAddrs = null;
-            List<LegacyAddress> legacyAddresses = payload.getLegacyAddresses();
-            List<String> addrs = new ArrayList<String>();
-            for (LegacyAddress addr : legacyAddresses) {
-                if (addr.getTag() == 0L) {
-                    addrs.add(addr.getAddress());
-                }
-            }
-
-            args.append(StringUtils.join(addrs.toArray(new String[addrs.size()]), "|"));
-        }
-
-        if (email != null && email.length() > 0) {
-            try {
-                args.append("&email=");
-                args.append(URLEncoder.encode(email, "utf-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
-
-        args.append("&device=");
-        args.append("android");
-
-        if(oldChecksum != null && oldChecksum.length() > 0) {
-            args.append("&old_checksum=");
-            args.append(oldChecksum);
-        }
-
-        args.append("&api_code=" + WebUtil.API_CODE);
+        String method = isNew ? "insert" : "update";
 
         try {
-            String response = WebUtil.getInstance().postURL(WebUtil.PAYLOAD_URL, args.toString());
-            isNew = false;
-            if (response.contains("Wallet successfully synced")) {
+            Pair pair = payload.encryptPayload(payload.dumpJSON().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
+
+            JSONObject encryptedPayload = (JSONObject) pair.getRight();
+            String newPayloadChecksum = (String)pair.getLeft();
+            String oldPayloadChecksum = bciWallet.getPayloadChecksum();
+
+            boolean success = new WalletPayload().savePayloadToServer(method,
+                    payload.getGuid(),
+                    payload.getSharedKey(),
+                    payload.getLegacyAddresses(),
+                    encryptedPayload,
+                    bciWallet.isSyncPubkeys(),
+                    newPayloadChecksum,
+                    oldPayloadChecksum,
+                    email);
+
+            bciWallet.setPayloadChecksum(newPayloadChecksum);
+
+            if (success){
+                isNew = false;
                 cachePayload();
                 return true;
             }
+
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -760,14 +673,9 @@ public class PayloadManager {
 
     private ECKey getRandomECKey() {
 
-        String result = null;
         byte[] data = null;
         try {
-            result = WebUtil.getInstance().getURL(WebUtil.EXTERNAL_ENTROPY_URL);
-            if (!result.matches("^[A-Fa-f0-9]{64}$")) {
-                return null;
-            }
-            data = Hex.decode(result);
+            data = new ExternalEntropy().getRandomBytes();
         } catch (Exception e) {
             return null;
         }
