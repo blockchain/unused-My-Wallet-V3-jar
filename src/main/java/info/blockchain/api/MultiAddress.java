@@ -8,8 +8,6 @@ public class MultiAddress implements BaseApi {
 
     private static final String MULTI_ADDRESS = "multiaddr?active=";
     public static final String PROD_MULTIADDR_URL = PROTOCOL + SERVER_ADDRESS + MULTI_ADDRESS;
-    public static final String DEV_MULTIADDR_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + MULTI_ADDRESS;
-    public static final String STAGING_MULTIADDR_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + MULTI_ADDRESS;
 
     private String multiAddrressUrl = PROD_MULTIADDR_URL;
 

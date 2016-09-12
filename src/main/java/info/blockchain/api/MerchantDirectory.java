@@ -13,7 +13,6 @@ public class MerchantDirectory implements BaseApi {
 
     public static final String PROD_MERCHANT_DIRECTORY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "merchant";
 
-
     public ArrayList<Merchant> getAllMerchants() throws Exception {
 
         String result = WebUtil.getInstance().getURL(PROD_MERCHANT_DIRECTORY_URL);

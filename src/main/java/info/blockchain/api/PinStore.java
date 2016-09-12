@@ -7,8 +7,6 @@ public class PinStore implements BaseApi {
 
     private static final String PIN_STORE = "pin-store";
     public static final String PROD_PIN_STORE_URL = PROTOCOL + SERVER_ADDRESS + PIN_STORE;
-    public static final String DEV_PIN_STORE_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + PIN_STORE;
-    public static final String STAGING_PIN_STORE_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + PIN_STORE;
 
     private String pinstoreUrl = PROD_PIN_STORE_URL;
 

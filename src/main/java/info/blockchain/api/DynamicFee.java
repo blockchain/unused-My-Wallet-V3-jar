@@ -13,8 +13,6 @@ public class DynamicFee implements BaseApi {
 
     private static final String FEES = "fees";
     public static final String PROD_DYNAMIC_FEE = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + FEES;
-    public static final String DEV_DYNAMIC_FEE = PROTOCOL + API_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + FEES;
-    public static final String STAGING_DYNAMIC_FEE = PROTOCOL + API_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + FEES;
 
     private String dynamicFeeUrl = PROD_DYNAMIC_FEE;
 

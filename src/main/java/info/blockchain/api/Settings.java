@@ -11,8 +11,6 @@ public class Settings implements BaseApi {
 
     private static final String WALLET = "wallet";
     public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
-    public static final String DEV_PAYLOAD_URL = PROTOCOL + WALLET_DEV_SUBDOMAIN + DEV_SERVER_ADDRESS + WALLET;
-    public static final String STAGING_PAYLOAD_URL = PROTOCOL + WALLET_STAGING_SUBDOMAIN + DEV_SERVER_ADDRESS + WALLET;
 
     private String settingsUrl = PROD_PAYLOAD_URL;
 
