@@ -42,17 +42,40 @@ public class HDPayloadBridge {
 
     public HDWalletPayloadPair restoreHDWallet(String seed, String defaultAccountName) throws Exception {
 
-        HDWalletPayloadPair result = new HDWalletPayloadPair();
-        result.wallet = bip44WalletFactory.restoreWallet(seed, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
-        result.payload = createBlockchainWallet(defaultAccountName, result.wallet);
-
-        return result;
+        return restoreWallet(seed, defaultAccountName, DEFAULT_PASSPHRASE);
     }
 
     public HDWalletPayloadPair restoreHDWallet(String seed, String defaultAccountName, String passphrase) throws Exception {
 
+        return restoreWallet(seed, defaultAccountName, passphrase);
+    }
+
+    private HDWalletPayloadPair restoreWallet(String seed, String defaultAccountName, String passphrase) throws Exception {
+
         HDWalletPayloadPair result = new HDWalletPayloadPair();
         result.wallet = bip44WalletFactory.restoreWallet(seed, passphrase, DEFAULT_NEW_WALLET_SIZE);
+
+        int index = 0;
+        int walletSize = 1;
+        final int lookAheadTotal = 10;
+        int lookAhead = lookAheadTotal;
+
+        while(lookAhead > 0) {
+
+            String xpub = result.wallet.getAccount(index).xpubstr();
+
+            boolean hasTransactions = (new Balance().getXpubTransactionCount(xpub) > 0L);
+            if (hasTransactions) {
+                lookAhead = lookAheadTotal;
+                walletSize++;
+            }
+
+            result.wallet.addAccount();
+            index++;
+            lookAhead--;
+        }
+
+        result.wallet = bip44WalletFactory.restoreWallet(seed, passphrase, walletSize);
         result.payload = createBlockchainWallet(defaultAccountName, result.wallet);
 
         return result;
@@ -86,8 +109,16 @@ public class HDPayloadBridge {
 
         List<info.blockchain.bip44.Account> hdAccounts = hdw.getAccounts();
         List<info.blockchain.wallet.payload.Account> payloadAccounts = new ArrayList<Account>();
+
+        int accountNumber = 1;
         for (int i = 0; i < hdAccounts.size(); i++) {
-            info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account(defaultAccountName);
+
+            String label = defaultAccountName;
+            if(accountNumber > 1){
+                label = defaultAccountName +" "+accountNumber;
+            }
+            info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account(label);
+            accountNumber++;
 
             String xpub = hdw.getAccounts().get(i).xpubstr();
             account.setXpub(xpub);
