@@ -1,26 +1,16 @@
 package info.blockchain.wallet.util;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.spongycastle.asn1.sec.SECNamedCurves;
-import org.spongycastle.crypto.generators.SCrypt;
-import org.spongycastle.util.encoders.Hex;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import org.apache.commons.codec.binary.Base64;
-
+import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
+import org.spongycastle.util.encoders.Hex;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class PrivateKeyFactory	{
 
@@ -32,6 +22,8 @@ public class PrivateKeyFactory	{
 	public final static String MINI = "mini";
 	public final static String WIF_COMPRESSED = "wif_c";
 	public final static String WIF_UNCOMPRESSED = "wif_u";
+
+
 
     private static PrivateKeyFactory instance = null;
 
@@ -78,17 +70,17 @@ public class PrivateKeyFactory	{
 			try {
 				Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
 				testBytes = hash.getBytes();
+
+				if((testBytes[0] == 0x00)) {
+					return MINI;
+				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
 
-			if(testBytes[0] == 0x00 && testBytes[1] == 0x00) {
-				return MINI;
-			}
-			else {
-				return null;
-			}
+			return null;
 		}
 		else {
 			return null;
