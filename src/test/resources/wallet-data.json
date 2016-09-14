@@ -104,11 +104,9 @@
     }
   ],
   "v1": [
-      "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"
+    {"extra_seed":"fd38fe32d040f0381045bc5daf2a32da99af97700e2b710e1e1da4e528df85caad8faea46bb48b70787eab1347faa7f2c6b669b40b8737df6aae1b80ba1db804","auth_type":0,"initial_success":"Reminder: Verify your email.","real_auth_type":0,"payload":"VPXtmcNa7D9HhfmMT2KnTKOvoIhuQyh2vxZFvwwd24C2zKsUXLew1umUcV3ZGSXUO8Hmq7giuf3uYdFLXWOqAXsNlmyI9GL22xec8ZWEnYBiKd72fbY1EelcG4qhbBN1aaFKA9z3\/wkmkipBdHOyIT7xmHhLypm+8o53yv0tZcmFoNXVUcM3KIcuFjcPFSBWW1uCEClPXW54Xu76yY1Siyo6KLclA\/mQ7FWJ+F5unoRDJBUxRN5ebF1Vpyj+Cvs+ZTSRxiqzHAfHzSCdMs15LtKurS2AsLVTSkeX6MXYeofOVzh45dtqtnibYglBfMwoEZHjfRXwhps79jVemNtn0FrwFeFzzO4waC2G3yhaynVCNtc1IM0vhbh\/WXoTnZUYc3vaDT\/MstlARsV3XKPYzsCS0vgpEPeV\/FgCNpw8ADBFqpuMoS0aTmoybcHX1I09yTkuO3Ryo8DhD\/Z63oYDC5Q1VojLlYxAUioIgGwyivX\/NmC3IHXVyuVUHZGk0adIuyKvALGnuwOiC4liw1ENaEMg2mJFOdASWji+ryngoJbywmLt+vlfo3guHI\/viF\/6lCE+\/kakStAPcXI1a1gMmjXdBfXx5BCWBz+iofpb8dGXqh4znahY03vhlyesK7rG5NSZzNoFXSFjZh6uXfm1pVMhp23\/OBI9KdxnMnEH5IaldSH0fLUPMF\/EfHZmlThclh4ScWUtEIcjXZMUvQVYh5z4SzmUXB9\/JWvWp\/JY3tDd20y7J+gG\/vly\/Rlq1HTAx+Tl5bEDkBGHUGfok9kNtqymW\/w+Z86pR1CyA7Ummt5RSz+yQhRBR4890ajqiHIQAac8v+GIabh3AJXyPOZcclBnK\/W1ZP1VblVw8i9FtLhc2y9sbTQubjlhbhqbQFTdqebOUxER00hdeTtqNsBhVfVAtHDeEgGJHWoVaaw9vcr8TpqmjAz62UZIYPNOSZbLRiNjodx4VOKpCS2u\/XTkcDklHhusoEsYeZQp0LQqvnKyBq0q3ruy7zXdwBpOnC6tJ0kS3Xvc\/97wVSTIfA8wKVPNhbQ7TYPZFiAE6Y8bVb5wtCTfRC8i528eNmusZ\/RUO6pjRgA0YvA4np2QNx9x1AKrwC\/ujRopULMImHbGDKRuKX3HYRMHyfsg7KGgkimaYQG\/uYzM5s905sM5qPa0\/Z1Anm+b7JKMuLGO4\/XiCKkVhEGdkhxw1Tq7jZxFjm3HDuLEwVKbJprxlBzBWdYVV\/ucS+LklDgjeFuny\/aJdTGyWH6bXOwu8GJmIfQEjgf7","symbol_local":{"symbol":"$","code":"USD","symbolAppearsAfter":false,"name":"U.S. dollar","local":true,"conversion":164338.53738702},"guid":"9ebb4d4f-f36e-40d6-9a3e-5a3cca5f83d6","payload_checksum":"26c0477b045655bb7ba3e81fb99d7e8ce16f4571400223026169ba8e207677a4","war_checksum":"3642b083667c7f4d","language":"en","symbol_btc":{"symbol":"BTC","code":"BTC","symbolAppearsAfter":true,"name":"Bitcoin","local":false,"conversion":100000000.00000000},"sync_pubkeys":false},
+    {"extra_seed":"7ffafcba53d3d014d13f7e33717bac748506fb1a2095d09a137851c628a3d27c584b3eb0f48c53f5e3b3f3fdf1a84d6ab91006def452e77127a42135b5c854f8","auth_type":0,"initial_success":"Reminder: Verify your email.","real_auth_type":0,"payload":"4gen70mZdnKx0YRnjpPSHTqz2UOMiEUGev9ZaU0L5daWQpqCBqZUgCIqEEbyNzmBQk6DhaQsReAOkzJz4L8q8VMeKk+\/h5JXIQTqxOwz0M470ZiyGnmKe7DFtEQGft3oAQAvc\/SA89gdu\/50SASEQk6fQPyRigkPunIrjmnxzWuO+Mak040Lea3qoScJXBY3xZG4C4ukJaFFhcZUTi+e45JYAg7AtmyONFFdcVLNpGjwRTkDvpAPobGJqMfOfFLHkdxNos+51khXYuyxEp3grU8jvwZbl2pCVgC1Z50IWFSUvSaZGvKkZaK5Ohw0Tn7RF4T4oUA4IrRYGpHY2F8yLUpcSJ47ctC90UPT7GITpDHA\/eQNpzdhtIv7Inkkza\/Okd5blx+59he+x\/AQFTdyc5YZmsEgN+g\/RUN06UNibe78iyqEEN4q88RiLDAwFMoHY4cYtzyd25CSza0NP+yBFFLf+NbKA64Ck2pItMgr4JXkCVU8shQmtKnVKfO8mC3MQSF+kZE0mClr7URa8LIbMhmGgQ3o2vGNbRiutzdO7\/L52F7GWTHJzKEo5FdWK2K218Spd0L31TpBn3aKXg6BLgw6WiggztP4hP4pVf6LK21KvgPKf3NegF4Or7wfDz1\/mP4uiz+xf18trCuFHoityhXduwrrtA9bhhf2SwLE4+Md9R+m1KOQ6q63ynujM0oeIGVj6NIH4uJS6pz\/3iIKZTkr\/4\/5TdEw8uBlKHHxJHBHBuHPsYN3bpd4A+VMiNn3EPV02aD7xCq6anFPvoYbj8BHW0p6kUHP32fcuETciO7NF0NLGSIoE3iTNHRSpXt58BEHIU\/p4Tx4KczwLfUiVvARzjnkF8KQMPrgzhZysiXhH8cwdw3LPU1hi0zDuyW3RR7UQxuCTOa\/T8v0ZnGZhFNIFkocwSvcDStef807vg6bu2Fe4BewCLzHLQDEudTUHxiFsWWfzo4E4\/3pCTNgAkI4N0swvUR7aBTQHminudxrdSxC2f\/6pgBnd4TqBv+W16qcWLf31x\/yV1wHFyG2rfTpbpTx07W4r3G4zoDq8XHecpfuDy2H+GKgctSyUSDO9BTb6Q93+JyrMDvuw2o4ennAmll8gQ8C5WjxsQ78oES2\/\/yeCqTgKQiEx121Dwa2\/MiposMiRg82pwMXZ7lERx74CQnII54z4YAHGA2EqtQwwNdzdCufJqGV8oHaEPAXRNnGuAK6fbDUlM10GiSQoCpvzmDtv5n3RYlXXgmXAjmDb1CodLEFqCps\/lPyAvav","symbol_local":{"symbol":"$","code":"USD","symbolAppearsAfter":false,"name":"U.S. dollar","local":true,"conversion":164338.53738702},"guid":"2ca9b0e4-6b82-4dae-9fef-e8b300c72aa2","payload_checksum":"57f97ace89c105c19c43a15f2d6e3091d457dec804243b15772d2062a32f8b7d","war_checksum":"3642b083667c7f4d","language":"en","symbol_btc":{"symbol":"BTC","code":"BTC","symbolAppearsAfter":true,"name":"Bitcoin","local":false,"conversion":100000000.00000000},"sync_pubkeys":false},
+    {"extra_seed":"efd75f2cbfb5a83bb6a9056d04b3f427e5c2547ec9b181d2bc719dafc3bb9f469cfa5c9935af1d09efe86091aaab674cad5f2e78b154032a76ee271c3d2c2f17","auth_type":0,"initial_success":"Reminder: Verify your email.","real_auth_type":0,"payload":"Ckrf7U\/FCmVwvdr7t0BG3cahov9Tk7iAHndok\/3ViaDH8\/PKtxef1wJz4LhgWWNeyC\/PfjowGGpXLH41fQ2LClFSD2k\/mitsF0YKQEqJb6FPYqcr5sYp8hofQbUkzcyOZaRfj4Ip4ldUJfrNSg59igbGHUtqbCNCqRtoatwH2A7NivUeethsqsJ3NndABd7OiadBhHmSIDJdRbD\/XsDfk4RbD3zHqIGlOCXlhwoTIzpHif9ltb0XKnyibpmpFzUeFz340FpONK8QMDphJOBrypZhwdFwy9Oy\/QybjKpzJdgYZcHhjS8ZyKMNSEv85npoTx6PS5RHJidSMTFgntWhEuJqi\/WqDFMvj2P2OUHJHGhZbJ3YP18MSxgI8rDYPW9aZE6Z1w\/uHuO9rinqU8apnd7iFSZM9WyEouN9tfJqeZFPBQtYgmzro3\/Y1tJtcD6hLnNWEV+lDJwVzNcU1KHzpSuw7OdFO1dAKIysxOyFaMviSe3lKtiQdLxYJOSeVwFxH8QQOkG\/awVab\/q\/LbxP+YZdPSut8MTn6NRh6Zv4mnX0FNP0DtToV5rXICqaK\/FisNLizkUEHs6Tn5AVlwKx2xf00LsqNnSarTckRHaN9Q9eI\/yeV5sSrb1azfH8QM\/mvR9SyJVtH9L2QurJwom3jL2DoJSsUNdhZGNI5HMv7L9qjGeSS65vd\/hiFXJtP6+gw72Xj0m3Fk5YZImWxCLioxLtGBr1mKDFyyGFkYsGoapm1Cyg9xwGem9qazbl2g2J7DGrFMNEDBgPJzbBFLQ739DmxBnRwE5l6BZqwgqD54AqV1HSnCiB1nA2iWWJx2K6Y6ltAs7Ut5IemrGGHS2hObmegvenJN+YLAoE7Zd8zsq5RJFzDKXctRypCWA+Qi2n7kRS7mP9ycdSsoAmq6gzPuGnWl0igEQx5EjsXJCZ0xuU7iCEdr\/qrODeWzgsCGNzQLYliTX5yYicLqu6ewXOIJD8z8CoWA62ck6T68FioJLXkeLOIOQcs9UH3Pps99UKH8OqtTrvP3Ya77HNfAGMSWyzLd2dD+Mx7NPh7fEcpmnbJ1k\/ZahwHjJ\/NuCYHfrN1Q0znKbLoNwum\/I\/g2LLh2cz13X8csmCgD238cV96A26w54TdMP68N1QnmLG6pVQsVzyKKYRA03oDFNfX2pqYDLUO5fNxEz49O5caZyjPxC4uAIaKSOEpnaAv34bhWXYOAT3e1GzAWd+9FfR1agPqPY2yVIeOnLcqL5b18H1a3g144w+67ZgHOUI0fbGp+FexmKdKJ2yYKGKOPE3uuH6TQabTUxVSY8NYrb0n\/ZP+lcPpvQ+CLBzsnQvKYyOjQsU+UUvARJkOq9UZORlI4xQUzRFr5I5NjMixyp3x+NRC3j5lHcC6NjE3H9AuUGL\/SD0rSbpnNaXsA4vA1TIFWSNXANNPqjKADL++Q0\/qzuQvN\/zL\/pDabU87Hr9Ig4bZ6LQoxgN9kcFNq+NPvwXHGBcs5j8OgY4Gz4\/mN\/046vhr6r4ImL4\/OWxRQgx2lrTjDf9ff1EuXctwVqf6Gv85qzyK6Y\/\/vJtoHrxIZoMwdIY\/ojeBk0m3nVaDH42iJtifVMvA+5HCYSG03vKWPi9K+3rNIB245cq09ZWXB8CPs3mA0atVjb8JCrZxZg1aIHJRb4iyieDaLKrAlUAoMAnnQYarxPvFBUe\/9KfVt8GI9XuiiM=","symbol_local":{"symbol":"$","code":"USD","symbolAppearsAfter":false,"name":"U.S. dollar","local":true,"conversion":164338.53738702},"guid":"4077b6d9-73b3-4d22-96d4-9f8810fec435","payload_checksum":"a4b67f406268dced75ac5c628da854898c9a3134b7e3755311f199723d426765","war_checksum":"3642b083667c7f4d","language":"en","symbol_btc":{"symbol":"BTC","code":"BTC","symbolAppearsAfter":true,"name":"Bitcoin","local":false,"conversion":100000000.00000000},"sync_pubkeys":false}
   ],
 
   "v3_credentials": [
@@ -149,34 +147,35 @@
   ],
   "v1_credentials": [
     {
-      "guid": "6253e902-ce79-4027-bdc4-af51ed970eb5",
-      "password": "testpassword",
+      "guid": "9ebb4d4f-f36e-40d6-9a3e-5a3cca5f83d6",
+      "password": "mypassword",
       "iterations": 10,
       "mode": "CBC",
       "padding": "Iso10126",
-      "sharedKey": "f9af4f4f-9587-4a11-9ccc-51f0215c8662",
+      "sharedKey": "41cf823f-2dcd-4967-88d1-ef9af8689fc6",
       "version": 1,
       "double_encryption": false
     },
     {
-      "guid": "6253e902-ce79-4027-bdc4-af51ed970eb5",
-      "password": "testpassword",
-      "iterations": 1,
-      "mode": "OFB",
-      "padding": "NoPadding",
-      "sharedKey": "f9af4f4f-9587-4a11-9ccc-51f0215c8662",
+      "guid": "2ca9b0e4-6b82-4dae-9fef-e8b300c72aa2",
+      "password": "mypassword",
+      "iterations": 10,
+      "mode": "CBC",
+      "padding": "Iso10126",
+      "sharedKey": "e8553981-b196-47cc-8858-5b0d16284f61",
       "version": 1,
       "double_encryption": false
     },
     {
-      "guid": "6253e902-ce79-4027-bdc4-af51ed970eb5",
-      "password": "testpassword",
+      "guid": "4077b6d9-73b3-4d22-96d4-9f8810fec435",
+      "password": "mypassword",
+      "secondpassword": "mysecondpassword",
       "iterations": 1,
       "mode": "CBC",
       "padding": "Iso10126",
-      "sharedKey": "f9af4f4f-9587-4a11-9ccc-51f0215c8662",
+      "sharedKey": "fa1beb37-5836-41d1-9f73-09f292076eb9",
       "version": 1,
-      "double_encryption": false
+      "double_encryption": true
     }
   ],
 
@@ -305,95 +304,8 @@
     }
   ],
   "v1_payload":[
-    {
-      "guid": "6253e902-ce79-4027-bdc4-af51ed970eb5",
-      "sharedKey": "f9af4f4f-9587-4a11-9ccc-51f0215c8662",
-      "options": {
-        "pbkdf2_iterations": 5000,
-        "fee_policy": 0,
-        "html5_notifications": false,
-        "logout_time": 600000,
-        "tx_display": 0,
-        "always_keep_local_backup": false,
-        "transactions_per_page": 30,
-        "additional_seeds": []
-      },
-      "keys": [
-        {
-          "addr": "1MKoTk9rPKCiYunb7i5URRsXCFCpc9wh3U",
-          "priv": "8NMD7QNHv8Rg3gqonZHNDzJxostHP9TBmw6T2mWpcvbP",
-          "created_time": 1424375705407,
-          "created_device_name": "javascript_web",
-          "created_device_version": "1.0"
-        },
-        {
-          "addr": "1AeLHuqqy69115XHpKbmxzfaxJQ3mcZCsS",
-          "priv": "28TJYi8hitu57271yoNHvG5Z2Qyq2iSmg9EpaA2ouydK",
-          "created_time": 0,
-          "created_device_name": "javascript_iphone_app",
-          "created_device_version": "3.0"
-        }
-      ]
-    },
-    {
-      "guid": "6253e902-ce79-4027-bdc4-af51ed970eb5",
-      "sharedKey": "f9af4f4f-9587-4a11-9ccc-51f0215c8662",
-      "options": {
-        "pbkdf2_iterations": 5000,
-        "fee_policy": 0,
-        "html5_notifications": false,
-        "logout_time": 600000,
-        "tx_display": 0,
-        "always_keep_local_backup": false,
-        "transactions_per_page": 30,
-        "additional_seeds": []
-      },
-      "keys": [
-        {
-          "addr": "1MKoTk9rPKCiYunb7i5URRsXCFCpc9wh3U",
-          "priv": "8NMD7QNHv8Rg3gqonZHNDzJxostHP9TBmw6T2mWpcvbP",
-          "created_time": 1424375705407,
-          "created_device_name": "javascript_web",
-          "created_device_version": "1.0"
-        },
-        {
-          "addr": "1AeLHuqqy69115XHpKbmxzfaxJQ3mcZCsS",
-          "priv": "28TJYi8hitu57271yoNHvG5Z2Qyq2iSmg9EpaA2ouydK",
-          "created_time": 0,
-          "created_device_name": "javascript_iphone_app",
-          "created_device_version": "3.0"
-        }
-      ]
-    },
-    {
-      "guid": "6253e902-ce79-4027-bdc4-af51ed970eb5",
-      "sharedKey": "f9af4f4f-9587-4a11-9ccc-51f0215c8662",
-      "options": {
-        "pbkdf2_iterations": 5000,
-        "fee_policy": 0,
-        "html5_notifications": false,
-        "logout_time": 600000,
-        "tx_display": 0,
-        "always_keep_local_backup": false,
-        "transactions_per_page": 30,
-        "additional_seeds": []
-      },
-      "keys": [
-        {
-          "addr": "1MKoTk9rPKCiYunb7i5URRsXCFCpc9wh3U",
-          "priv": "8NMD7QNHv8Rg3gqonZHNDzJxostHP9TBmw6T2mWpcvbP",
-          "created_time": 1424375705407,
-          "created_device_name": "javascript_web",
-          "created_device_version": "1.0"
-        },
-        {
-          "addr": "1AeLHuqqy69115XHpKbmxzfaxJQ3mcZCsS",
-          "priv": "28TJYi8hitu57271yoNHvG5Z2Qyq2iSmg9EpaA2ouydK",
-          "created_time": 0,
-          "created_device_name": "javascript_iphone_app",
-          "created_device_version": "3.0"
-        }
-      ]
-    }
+    {"guid":"9ebb4d4f-f36e-40d6-9a3e-5a3cca5f83d6","sharedKey":"41cf823f-2dcd-4967-88d1-ef9af8689fc6","double_encryption":false,"options":{"fee_per_kb":10000,"html5_notifications":false,"logout_time":600000},"address_book":[],"tx_notes":{},"tx_names":[],"keys":[{"addr":"1AN6WAdSrXATk7mcosqhK7vvPusC3fmw8p","priv":"XxkpqJqs1449nLHX1WcCP5QbmyJhjrwTis9hyvqGKJc","tag":0},{"addr":"1Cp1xPTVdjePVcRAJHxesiLkNZbASgbkL","priv":"8uZW7qiz89NGtgwzdbqKZ9QDVPj1NeGV192RJUXdc946","tag":0},{"addr":"1MsA1JJhgNMkuke9uttaXQfFyNBvmCyeiR","priv":"BH2MMphxoWQkynoo7HM8ukLSw8aNKFT9sWV2nu9QmNqe","tag":0},{"addr":"13m3hC95Pp3ZWth6XCmhr9qUVNZGqMchia","priv":"4TE4wCgz1fcjSPsxSUUig36a9JpNfPn9c2KFcT94hWtk","tag":0},{"addr":"17thFxEzSsR3fn2CpQrAYrcsUve6VN8JuX","priv":"2YARBSUuHrsuuvtEHoeTXiDXGdiDuHtfdLvvYCKkADCm","tag":0}]},
+    {"guid":"2ca9b0e4-6b82-4dae-9fef-e8b300c72aa2","sharedKey":"e8553981-b196-47cc-8858-5b0d16284f61","double_encryption":false,"options":{"fee_per_kb":10000,"html5_notifications":false,"logout_time":600000},"address_book":[],"tx_notes":{},"tx_names":[],"keys":[{"addr":"18oiLmwwRmw25jK3Go72cieUaNsq5eZq2a","priv":"7nkCC1DvFBoWQd8EVUmSEMRawwnmMZVH6ZSmJM1Rog4r","tag":0},{"addr":"1PFf4ruwpU8LoNPyzFLNX7aLFtT3AhbQxW","priv":"dnuY1XXVPSL78Ths3q5vQwZWrmbsqr3yiuknAUWYVaX","tag":0},{"addr":"13JEiKew1Ee3H8K255RNuxd3yYMsqyXHtz","priv":"ExsEQwQpCsMunoBMReUzQ4kQFPKm4KTBnH9sym4wCCAT","tag":0},{"addr":"15bhQZEbL3815K93ceHYBf5rekd2GEThEK","priv":"8rGeLoELr8xLpuNHTA8XtYawY7QJGHQrzvjF9PKN581r","tag":0},{"addr":"1JNwKdMZJAeonq2uUFcV5NuU8tSpHXb3bD","priv":"Gsc8jrwa11pCuEzvhuABWC9XePQa44jz78ZZJkKyVUDu","tag":0}]},
+    {"guid":"4077b6d9-73b3-4d22-96d4-9f8810fec435","sharedKey":"fa1beb37-5836-41d1-9f73-09f292076eb9","double_encryption":true,"dpasswordhash":"015f7b18029812bc45f437a515a915e9ebec2b700181585c99074d79495a8746","options":{"fee_per_kb":10000,"html5_notifications":false,"logout_time":600000},"address_book":[],"tx_notes":{},"tx_names":[],"keys":[{"addr":"1BqsBxRsk7J4oEs4cnvTLHQ6eoDZwTsApT","priv":"UgHv/muoXWWxdEsnWQcTV93Pi/GG2W05sDq/mJVqtGCUOAbfjXNhBPkmjEeYxoDxNzOoGeWyQiZiA6oob9xRPQ==","tag":0},{"addr":"1MfHdTCHUX3f7aeFTgF4KhCC1yTZgDiDDt","priv":"s3pfJhVPWxNrkpLhrxXDCXGxvFDsu5kccI5SbBDkTK6dDJj1drFSfuiZe7iN3GTG7qEQUWh9b83Hr7zTck7EIA==","tag":0},{"addr":"16NjzqM9X8qzhHkdLLVZbCwWKqLK5UmdH4","priv":"32VZvkqH2CQxIAKntDZUaGUKBIa4YMqhti/uGa5FpXuqknaGxEJ1LsnkIwduTOBSvySW6IJgjT7u3FMm21NvzQ==","tag":0},{"addr":"1PQj2cst9Bnd5cXp84XQffCDZEmE6KczPf","priv":"Uwnoi10UxKURitflyokc3Zjz53FlXvfosuk8jEhNm12lzKzZgiosgBZRp+vMsfgz7xR+JnAknlsCSGF/VttHlQ==","tag":0},{"addr":"149aV6sNHGYSCreUmu7KVDdou5udyjC9rK","priv":"f5Y7nfO2noqxuYoxWvByNE25TFcGafjib+C49XCxH+DgmC3cEkvjtjODI5TcbVm9Ixv7b2OVJZJTDL0EEp/aVw==","tag":0}]}
   ]
 }

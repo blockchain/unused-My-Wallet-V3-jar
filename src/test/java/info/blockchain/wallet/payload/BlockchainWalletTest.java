@@ -77,14 +77,7 @@ public class BlockchainWalletTest {
 
         for (int i = 0; i < wallet.length(); i++) {
 
-            String walletString;
-
-            //v1 is string, v2/3 is json
-            try {
-                walletString = wallet.getJSONObject(i).toString();
-            } catch (Exception e) {
-                walletString = wallet.getString(i);
-            }
+            String walletString = wallet.getJSONObject(i).toString();
 
             JSONObject credentialsJson = walletCredentials.getJSONObject(i);
             JSONObject payloadJson = walletPayload.getJSONObject(i);
@@ -101,6 +94,14 @@ public class BlockchainWalletTest {
             assertThat(bciWallet.getPayload().getGuid(), is(credentialsJson.getString("guid")));
             assertThat(bciWallet.getPayload().getSharedKey(), is(credentialsJson.getString("sharedKey")));
 
+            JSONArray keys = payloadJson.getJSONArray("keys");
+
+            for (int j = 0; j < keys.length(); j++) {
+                JSONObject json = keys.getJSONObject(j);
+
+                assertThat(bciWallet.getPayload().getLegacyAddresses().get(j).getEncryptedKey(), is(json.getString("priv")));
+                assertThat(bciWallet.getPayload().getLegacyAddresses().get(j).getAddress(), is(json.getString("addr")));
+            }
         }
     }
 }
