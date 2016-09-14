@@ -112,28 +112,43 @@ public class BlockchainWallet {
             throw new PayloadException("No payload wrapper in json.");
 
         } else {
+
             //Payload wrapper contains version, iterations and encrypted payload
-            JSONObject payloadWrapper = new JSONObject(walletJson.getString(KEY_PAYLOAD));
+            String anyPayload = walletJson.getString(KEY_PAYLOAD);
 
-            version = payloadWrapper.getDouble(KEY_VERSION);
+            if (FormatsUtil.getInstance().isValidJson(anyPayload)) {
+                //V2+
+                JSONObject payloadWrapper = new JSONObject(anyPayload);
 
-            if (payloadWrapper.has(KEY_PBKDF2_ITERATIONS)) {
-                pbkdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
-            } else {
-                pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
-            }
+                version = payloadWrapper.getDouble(KEY_VERSION);
 
-            if (!payloadWrapper.has(KEY_PAYLOAD)) {
-                throw new PayloadException("No payload in payload wrapper.");
-
-            } else {
-                String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pbkdf2Iterations);
-
-                if (decryptedPayload != null && FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
-                    payload = new Payload(decryptedPayload, pbkdf2Iterations);
+                if (payloadWrapper.has(KEY_PBKDF2_ITERATIONS)) {
+                    pbkdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
                 } else {
-                    throw new DecryptionException("Payload null after decrypt.");
+                    pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
                 }
+
+                if (!payloadWrapper.has(KEY_PAYLOAD)) {
+                    throw new PayloadException("No payload in payload wrapper.");
+
+                } else {
+                    String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pbkdf2Iterations);
+
+                    if (decryptedPayload != null && FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
+                        payload = new Payload(decryptedPayload, pbkdf2Iterations);
+                    } else {
+                        throw new DecryptionException("Payload null after decrypt.");
+                    }
+                }
+            } else {
+                //V1
+                setVersion(1.0);
+
+                Pair pair = decryptV1Wallet(anyPayload, password);
+
+                String decyptedPayload = (String) pair.getLeft();
+                pbkdf2Iterations = (Integer) pair.getRight();
+                payload = new Payload(decyptedPayload, pbkdf2Iterations);
             }
         }
     }
