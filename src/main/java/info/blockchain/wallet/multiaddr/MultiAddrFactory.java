@@ -149,7 +149,7 @@ public class MultiAddrFactory   {
                     String hash = null;
                     String addr = null;
                     String mf_addr = null;
-                    String mt_addr = null;
+                    List<String> moveToAddrArray = new ArrayList<String>();
                     String o_addr = null;
                     boolean isMove = false;
 
@@ -204,7 +204,7 @@ public class MultiAddrFactory   {
                             path = (String)xpubObj.get("path");
                             if(path.startsWith("M/0/"))  {
                                 move_amount += outObj.getLong("value");
-                                mt_addr = addr;
+                                moveToAddrArray.add(addr);
                             }
                             if(outObj.has("addr") && !own_hd_addresses.contains(outObj.get("addr")))  {
                                 own_hd_addresses.add((String)outObj.get("addr"));
@@ -235,7 +235,7 @@ public class MultiAddrFactory   {
                             //If contained in our own legacy addresses (Sent from HD to Legacy)
                             if(ownLegacyAddresses.contains(o_addr)){
                                 isMove = true;
-                                mt_addr = o_addr;
+                                moveToAddrArray.add(o_addr);
                                 move_amount += outObj.getLong("value");
                             }
                         }
@@ -265,11 +265,12 @@ public class MultiAddrFactory   {
                             }
                             xpub_txs.get(mf_addr).add(tx);
 
-                            if(!xpub_txs.containsKey(mt_addr))  {
-                                xpub_txs.put(mt_addr, new ArrayList<Tx>());
+                            for (String moveToAddr : moveToAddrArray) {
+                                if(!xpub_txs.containsKey(moveToAddr))  {
+                                    xpub_txs.put(moveToAddr, new ArrayList<Tx>());
+                                }
+                                xpub_txs.get(moveToAddr).add(tx);
                             }
-                            xpub_txs.get(mt_addr).add(tx);
-
                         }
                         else  {
                             if(!xpub_txs.containsKey(addr))  {
