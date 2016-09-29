@@ -187,7 +187,6 @@ public class MultiAddrFactory   {
                             if(ownLegacyAddresses.contains(o_addr)){
                                 mf_addr = o_addr;
                                 isMove = true;
-                                move_amount = amount;
                             }
                         }
 
