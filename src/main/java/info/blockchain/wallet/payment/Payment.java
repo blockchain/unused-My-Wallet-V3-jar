@@ -84,15 +84,19 @@ public class Payment {
 
         SweepBundle sweepBundle = new SweepBundle();
 
-        //Use all coins for sweeping. Consume non worthy coins
+        Collections.sort(coins.getOutputs(), new UnspentOutputAmountComparator());
         ArrayList<MyTransactionOutPoint> allCoins = new ArrayList<MyTransactionOutPoint>();
         BigInteger sweepBalance = BigInteger.ZERO;
 
+        double inputCost = inputCost(feePerKb);
+
         for (MyTransactionOutPoint output : coins.getOutputs()) {
 
-            allCoins.add(output);
-            sweepBalance = sweepBalance.add(output.getValue());
-
+            //Filter usable coins
+            if (output.getValue().doubleValue() >= inputCost) {
+                allCoins.add(output);
+                sweepBalance = sweepBalance.add(output.getValue());
+            }
         }
 
         //All inputs, 1 output = no change
@@ -107,6 +111,11 @@ public class Payment {
         return sweepBundle;
     }
 
+    private double inputCost(BigInteger feePerKb){
+        double d = Math.ceil(feePerKb.doubleValue() * 0.148);
+        return Math.ceil(d);
+    }
+
     public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs coins, BigInteger spendAmount, BigInteger feePerKb){
 
         SpendableUnspentOutputs result = new SpendableUnspentOutputs();
@@ -116,10 +125,16 @@ public class Payment {
         List<MyTransactionOutPoint> minimumUnspentOutputsList = new ArrayList<MyTransactionOutPoint>();
         BigInteger totalValue = BigInteger.ZERO;
         BigInteger consumedBalance = BigInteger.ZERO;
+        double inputCost = inputCost(feePerKb);
 
         int outputCount = 2;//initially assume change
 
         for (MyTransactionOutPoint output : coins.getOutputs()) {
+
+            //Filter usable coins
+            if (output.getValue().doubleValue() < inputCost) {
+                continue;
+            }
 
             totalValue = totalValue.add(output.getValue());
             minimumUnspentOutputsList.add(output);
