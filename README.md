@@ -4,26 +4,35 @@
 
 Encapsulation of basic Blockchain HD Wallet utilities.
 
-## Build Process
+## Getting started
 
 Install Maven 3.2 or higher.
 
-### Build:
+## Clean
 
+Clean generated files:
+
+```sh
 mvn clean
+```
 
+## Build
+
+```sh
 mvn package
+```
 
 The build process will create MyWalletHD.jar in ./target : Can be included in any Java project 'as is' but requires inclusion of dependencies.
 
-## Classes
+## Tests
 
-### crypto : standard AES support
+```sh
+mvn test
+```
 
-### multiaddr : multiaddr API support
+## Security
 
-### payload : JSON payload classes
-
-### send : creating, signing, and pushing transactions to network
-
-### util : support classes
+Security issues can be reported to us in the following venues:
+ * Email: security@blockchain.info
+ * Bug Bounty: https://www.crowdcurity.com/blockchain-info
+ 
