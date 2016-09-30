@@ -8,14 +8,22 @@ import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 public class PayloadManagerTest {
 
+    @Mock
+    private PayloadManager mockPayloadManager;
+
+    // TODO: 30/09/16 Investigate changing integration tests to unit tests
     PayloadManager payloadManager;
     String password = "password";
     String label = "Account 1";
@@ -23,6 +31,9 @@ public class PayloadManagerTest {
 
     @Before
     public void setUp() throws Exception {
+
+        MockitoAnnotations.initMocks(this);
+
         payloadManager = PayloadManager.getInstance();
         payload = payloadManager.createHDWallet(password,label);
     }
@@ -343,5 +354,27 @@ public class PayloadManagerTest {
         assertThat(payloadManager.getReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
 
         PayloadManager.getInstance().wipe();
+    }
+
+    @Test
+    public void generateNewLegacyAddress_withWrongSecondPassword_shouldFail() throws Exception{
+
+        when(mockPayloadManager.validateSecondPassword(anyString()))
+                .thenReturn(false);
+
+        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar","1.0","second_password");
+
+        assertThat("Address should be null", legacyAddress == null);
+    }
+
+    @Test
+    public void generateNewLegacyAddress_withFailedRandomECKey_shouldFail() throws Exception{
+
+        when(mockPayloadManager.getRandomECKey())
+                .thenReturn(null);
+
+        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar","1.0","second_password");
+
+        assertThat("Address should be null", legacyAddress == null);
     }
 }

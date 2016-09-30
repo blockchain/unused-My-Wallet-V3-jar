@@ -671,7 +671,7 @@ public class PayloadManager {
         return savePayloadToServer();
     }
 
-    private ECKey getRandomECKey() {
+    ECKey getRandomECKey() {
 
         byte[] data = null;
         try {
