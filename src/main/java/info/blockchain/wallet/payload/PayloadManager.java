@@ -4,11 +4,11 @@ import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
+import info.blockchain.bip44.Wallet;
 import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +54,7 @@ public class PayloadManager {
 
     private static HDPayloadBridge hdPayloadBridge;
     private static info.blockchain.bip44.Wallet wallet;
-//    private static info.blockchain.bip44.Wallet watchOnlyWallet;
+    private static info.blockchain.bip44.Wallet watchOnlyWallet;
 
     private PayloadManager() {
         ;
@@ -321,34 +321,37 @@ public class PayloadManager {
         }
     }
 
-    public String[] getMnemonicForDoubleEncryptedWallet(String secondPassword) {
+    public Wallet getDecryptedWallet(String secondPassword) throws Exception{
 
         if (validateSecondPassword(secondPassword)) {
-            // Decrypt seedHex (which is double encrypted in this case)
+
+            String encrypted_hex = payload.getHdWallet().getSeedHex();
             String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                    payload.getHdWallet().getSeedHex(),
+                    encrypted_hex,
                     payload.getSharedKey(),
                     secondPassword,
                     payload.getDoubleEncryptionPbkdf2Iterations());
 
-            String mnemonic = null;
+            return hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
 
-            try {
-                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-                mnemonic = watchOnlyWallet.getMnemonic();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (mnemonic != null && mnemonic.length() > 0) {
-
-                    return mnemonic.split("\\s+");
-
-                } else {
-                    return null;
-                }
-            }
         } else {
+            return null;
+        }
+    }
+
+    public String[] getMnemonicForDoubleEncryptedWallet(String secondPassword) {
+
+        try {
+            Wallet wallet = getDecryptedWallet(secondPassword);
+            String mnemonic = wallet.getMnemonic();
+
+            if (mnemonic != null && mnemonic.length() > 0) {
+                return mnemonic.split("\\s+");
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
             return null;
         }
     }
