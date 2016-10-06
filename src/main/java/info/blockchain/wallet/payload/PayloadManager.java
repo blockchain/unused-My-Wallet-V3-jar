@@ -562,24 +562,14 @@ public class PayloadManager {
             xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xprvstr();
         } else {
 
-            if (DoubleEncryptionFactory.getInstance().validateSecondPassword(
-                    payload.getDoublePasswordHash(),
-                    payload.getSharedKey(),
-                    new CharSequenceX(secondPassword),
-                    payload.getOptions().getIterations())) {
+            Wallet wallet = getDecryptedWallet(secondPassword);
+            if (wallet != null) {
 
-                String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                        payload.getHdWallet().getSeedHex(),
-                        payload.getSharedKey(),
-                        secondPassword,
-                        payload.getDoubleEncryptionPbkdf2Iterations());
+                wallet.addAccount();
 
-                //Need to decrypt watch-only wallet before adding new xpub
-                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-                watchOnlyWallet.addAccount();
+                xpub = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xpubstr();
+                xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xprvstr();
 
-                xpub = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xpubstr();
-                xpriv = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xprvstr();
 
             } else {
                 listener.onSecondPasswordFail();
