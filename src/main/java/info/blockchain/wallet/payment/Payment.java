@@ -207,15 +207,7 @@ public class Payment {
         //Get keys
         HashMap<String, Address> keyMap = new HashMap<String, Address>();
         if (isHD) {
-
-            for(MyTransactionOutPoint a : unspentOutputBundle.getSpendableOutputs()){
-                String[] split = a.getPath().split("/");
-                int chain = Integer.parseInt(split[1]);
-                int addressIndex = Integer.parseInt(split[2]);
-
-                Address address = payloadManager.getAddressAt(account.getRealIdx(), chain, addressIndex);
-                keyMap.put(address.getAddressString(), address);
-            }
+            keyMap.putAll(payloadManager.getKeys(secondPassword, account, unspentOutputBundle));
         }
 
         final HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
