@@ -85,6 +85,28 @@ public class Account {
     }
 
     /**
+     * Constructor for watch-only account.
+     *
+     * @param params
+     * @param xpub XPUB for this account
+     *
+     */
+    public Account(NetworkParameters params, String xpub) throws AddressFormatException {
+
+        this.params = params;
+
+        // assign master key to account key
+        aKey = createMasterPubKeyFromXPub(xpub);
+
+        strXPUB = xpub;
+
+        chains = new ArrayList<Chain>();
+        chains.add(new Chain(params, aKey, true));
+        chains.add(new Chain(params, aKey, false));
+
+    }
+
+    /**
      * Restore watch-only account deterministic public key from XPUB.
      *
      * @return DeterministicKey

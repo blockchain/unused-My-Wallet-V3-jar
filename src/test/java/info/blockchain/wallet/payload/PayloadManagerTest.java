@@ -331,16 +331,16 @@ public class PayloadManagerTest {
         String mnemonic = "all all all all all all all all all all all all";
         payloadManager.restoreHDWallet("password",mnemonic, "");
 
-        assertThat(payloadManager.getReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
+        assertThat(payloadManager.getNextReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
 
         payloadManager.addAccount("",null, null);
-        assertThat(payloadManager.getReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
+        assertThat(payloadManager.getNextReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
 
         payloadManager.addAccount("",null, null);
-        assertThat(payloadManager.getReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
+        assertThat(payloadManager.getNextReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
 
         payloadManager.addAccount("",null, null);
-        assertThat(payloadManager.getReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
+        assertThat(payloadManager.getNextReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
 
         PayloadManager.getInstance().wipe();
     }

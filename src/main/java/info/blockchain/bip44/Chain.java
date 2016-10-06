@@ -24,6 +24,9 @@ public class Chain {
 
     private NetworkParameters params = null;
 
+    public static final int RECEIVE_CHAIN = 0;
+    public static final int CHANGE_CHAIN = 1;
+
     private Chain() { ; }
 
     /**
@@ -38,7 +41,7 @@ public class Chain {
 
         this.params = params;
         this.isReceive = isReceive;
-        int chain = isReceive ? 0 : 1;
+        int chain = isReceive ? RECEIVE_CHAIN : CHANGE_CHAIN;
         cKey = HDKeyDerivation.deriveChildKey(aKey, chain);
 
         strPath = cKey.getPathAsString();

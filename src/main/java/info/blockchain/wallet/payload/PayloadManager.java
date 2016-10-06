@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
+import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -39,7 +40,6 @@ public class PayloadManager {
     public static final double SUPPORTED_ENCRYPTION_VERSION = 3.0;
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
-    public static final int RECEIVE_CHAIN = 0;
 
     private static PayloadManager instance = null;
     // active payload:
@@ -420,39 +420,20 @@ public class PayloadManager {
 
     }
 
-    // TODO: 06/10/16  
-    public String getChangeAddress(int accountIndex) throws Exception {
-        int changeIdx = payload.getHdWallet().getAccounts().get(accountIndex).getIdxChangeAddresses();
+    public String getNextChangeAddress(int accountIndex) throws AddressFormatException {
 
-        if (!payload.isDoubleEncrypted()) {
-            return wallet.getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
-        } else {
-            Wallet wallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
-            return wallet.getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
-        }
+        int changeAddressIndex = payload.getHdWallet().getAccounts().get(accountIndex).getIdxChangeAddresses();
+
+        String xpub = getXpubFromAccountIndex(accountIndex);
+        return hdPayloadBridge.getAddressAt(xpub, Chain.CHANGE_CHAIN, changeAddressIndex).getAddressString();
     }
 
-    // TODO: 06/10/16  
-    public String getReceiveAddress(int accountIndex) {
+    public String getNextReceiveAddress(int accountIndex) throws AddressFormatException {
 
-        try {
-            Address addr = null;
-            int idx = payload.getHdWallet().getAccounts().get(accountIndex).getIdxReceiveAddresses();
-            if (!payload.isDoubleEncrypted()) {
-                addr = wallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
-            } else {
+        int receiveAddressIndex = payload.getHdWallet().getAccounts().get(accountIndex).getIdxReceiveAddresses();
 
-                Wallet wallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
-                addr = wallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
-            }
-
-            ReceiveAddress receiveAddress = new ReceiveAddress(addr.getAddressString(), idx);
-            return receiveAddress.getAddress();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        String xpub = getXpubFromAccountIndex(accountIndex);
+        return hdPayloadBridge.getAddressAt(xpub, Chain.RECEIVE_CHAIN, receiveAddressIndex).getAddressString();
     }
 
     public String getXpubFromAccountIndex(int accountIdx) {
@@ -666,23 +647,6 @@ public class PayloadManager {
 
     public String getHDPassphrase() throws IOException, MnemonicException.MnemonicLengthException {
         return wallet.getPassphrase();
-    }
-
-    // TODO: 06/10/16
-    public Address getAddressAt(int accountIndex, int chain, int addressIndex) {
-        Address hd_address = null;
-        if (!payload.isDoubleEncrypted()) {
-            hd_address = wallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
-        } else {
-            try {
-                Wallet wallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
-                hd_address = wallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return hd_address;
     }
 
     /**
