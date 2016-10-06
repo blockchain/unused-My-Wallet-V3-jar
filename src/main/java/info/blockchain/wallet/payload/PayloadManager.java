@@ -12,6 +12,7 @@ import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +30,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -657,9 +657,9 @@ public class PayloadManager {
         return bciWallet;
     }
 
-    public HashMap<String, Address> getKeys(String secondPassword, Account account, SpendableUnspentOutputs unspentOutputBundle) throws Exception {
+    public List<ECKey> getHDKeys(String secondPassword, Account account, SpendableUnspentOutputs unspentOutputBundle) throws Exception {
 
-        HashMap<String, Address> keyMap = new HashMap<String, Address>();
+        List<ECKey> keys = new ArrayList<ECKey>();
 
         for(MyTransactionOutPoint a : unspentOutputBundle.getSpendableOutputs()){
             String[] split = a.getPath().split("/");
@@ -673,11 +673,12 @@ public class PayloadManager {
             } else {
                 wallet = this.wallet;
             }
-            Address hd_address = wallet.getAccount(account.getRealIdx()).getChain(chain).getAddressAt(addressIndex);
 
-            keyMap.put(hd_address.getAddressString(), hd_address);
+            Address hd_address = wallet.getAccount(account.getRealIdx()).getChain(chain).getAddressAt(addressIndex);
+            ECKey walletKey =  PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+            keys.add(walletKey);
         }
 
-        return keyMap;
+        return keys;
     }
 }

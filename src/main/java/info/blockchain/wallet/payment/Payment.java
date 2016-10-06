@@ -1,22 +1,18 @@
 package info.blockchain.wallet.payment;
 
 import info.blockchain.api.PushTx;
-import info.blockchain.bip44.Address;
 import info.blockchain.util.FeeUtil;
-import info.blockchain.wallet.payload.Account;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
-import info.blockchain.wallet.send.BitcoinScript;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.send.SendCoins;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.Hash;
-import info.blockchain.wallet.util.PrivateKeyFactory;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bitcoinj.core.*;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.Wallet;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -187,28 +183,12 @@ public class Payment {
     }
 
     public void submitPayment(SpendableUnspentOutputs unspentOutputBundle,
-                                      Account account,
-                                      LegacyAddress legacyAddress,
-                                      String toAddress,
-                                      String changeAddress,
-                                      String note,
-                                      BigInteger bigIntFee,
-                                      BigInteger bigIntAmount,
-                                      boolean isWatchOnly,
-                                      String secondPassword,
-                                      SubmitPaymentListener listener) throws Exception {
-
-        //TODO - PayloadManager needs to be refactored out to make this method testable
-        //TODO - This method was pretty much just coppied out from android and modified slightly to retain stability
-        PayloadManager payloadManager = PayloadManager.getInstance();
-
-        final boolean isHD = account == null ? false : true;
-
-        //Get keys
-        HashMap<String, Address> keyMap = new HashMap<String, Address>();
-        if (isHD) {
-            keyMap.putAll(payloadManager.getKeys(secondPassword, account, unspentOutputBundle));
-        }
+                              List<ECKey> keys,
+                              String toAddress,
+                              String changeAddress,
+                              BigInteger bigIntFee,
+                              BigInteger bigIntAmount,
+                              SubmitPaymentListener listener) throws Exception {
 
         final HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
         receivers.put(toAddress, bigIntAmount);
@@ -228,52 +208,7 @@ public class Payment {
         Long priority = pair.getRight();
 
         Wallet wallet = new Wallet(MainNetParams.get());
-        for (TransactionInput input : tx.getInputs()) {
-            byte[] scriptBytes = input.getOutpoint().getConnectedPubKeyScript();
-            String address = new BitcoinScript(scriptBytes).getAddress().toString();
-            ECKey walletKey = null;
-            try {
-
-                if (isHD) {
-                    Address hd_address = keyMap.get(address);
-                    walletKey =  PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
-
-                } else {
-                    if (!isWatchOnly && payloadManager.getPayload().isDoubleEncrypted()) {
-                        walletKey = legacyAddress.getECKey(new CharSequenceX(secondPassword));
-                    } else {
-                        walletKey = legacyAddress.getECKey();
-                    }
-                }
-            } catch (AddressFormatException afe) {
-                // skip add Watch Only Bitcoin Address key because already accounted for later with tempKeys
-                afe.printStackTrace();
-                continue;
-            }
-
-            if (walletKey != null) {
-                wallet.addKey(walletKey);
-            } else {
-                throw new Exception("Wallet key error");
-            }
-
-        }
-
-        if (payloadManager.isNotUpgraded()) {
-            wallet = new Wallet(MainNetParams.get());
-            List<LegacyAddress> addrs = payloadManager.getPayload().getActiveLegacyAddresses();
-            for (LegacyAddress addr : addrs) {
-                ECKey ecKey = null;
-                if (!isWatchOnly && payloadManager.getPayload().isDoubleEncrypted()) {
-                    ecKey = addr.getECKey(new CharSequenceX(secondPassword));
-                } else {
-                    ecKey = addr.getECKey();
-                }
-                if (addr != null && ecKey != null && ecKey.hasPrivKey()) {
-                    wallet.addKey(ecKey);
-                }
-            }
-        }
+        wallet.importKeys(keys);
 
         SendCoins.getInstance().signTx(tx, wallet);
         String hexString = SendCoins.getInstance().encodeHex(tx);
@@ -290,18 +225,6 @@ public class Payment {
         if (response.contains("Transaction Submitted")) {
 
             listener.onSuccess(tx.getHashAsString());
-
-            if (note != null && note.length() > 0) {
-                Map<String, String> notes = payloadManager.getPayload().getNotes();
-                notes.put(tx.getHashAsString(), note);
-                payloadManager.getPayload().setNotes(notes);
-            }
-
-            if (account != null) {
-                // increment change address counter
-                account.incChange();
-            }
-
         } else {
             listener.onFail(response);
         }
