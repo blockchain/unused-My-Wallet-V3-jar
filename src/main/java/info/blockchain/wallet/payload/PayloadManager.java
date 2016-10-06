@@ -54,7 +54,7 @@ public class PayloadManager {
 
     private static HDPayloadBridge hdPayloadBridge;
     private static info.blockchain.bip44.Wallet wallet;
-    private static info.blockchain.bip44.Wallet watchOnlyWallet;
+//    private static info.blockchain.bip44.Wallet watchOnlyWallet;
 
     private PayloadManager() {
         ;
@@ -476,18 +476,6 @@ public class PayloadManager {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public ECKey getECKey(int accountIndex, String path) throws Exception {
-
-        String[] s = path.split("/");
-        Address hd_address = null;
-        if (!payload.isDoubleEncrypted()) {
-            hd_address = wallet.getAccount(accountIndex).getChain(Integer.parseInt(s[1])).getAddressAt(Integer.parseInt(s[2]));
-        } else {
-            hd_address = watchOnlyWallet.getAccount(accountIndex).getChain(Integer.parseInt(s[1])).getAddressAt(Integer.parseInt(s[2]));
-        }
-        return PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
     }
 
     public String getXpubFromAccountIndex(int accountIdx) {
