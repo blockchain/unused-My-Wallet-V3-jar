@@ -153,7 +153,7 @@ public class PayloadManagerTest {
                     String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
                     assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
                     try {
-                        assertThat(payloadManager.getHDMnemonic().split(" ").length, is(12));
+                        assertThat(payloadManager.getMnemonic().length, is(12));
                     } catch (Exception e) {
                         e.printStackTrace();
                         assertThat("upgradeV2PayloadToV3 failed", false);
@@ -206,7 +206,7 @@ public class PayloadManagerTest {
                     String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
                     assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
                     try {
-                        assertThat(payloadManager.getHDMnemonic().split(" ").length, is(12));
+                        assertThat(payloadManager.getMnemonic().length, is(12));
                     } catch (Exception e) {
                         e.printStackTrace();
                         assertThat("upgradeV2PayloadToV3 failed", false);

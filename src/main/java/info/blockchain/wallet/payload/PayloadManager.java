@@ -308,23 +308,6 @@ public class PayloadManager {
         }
     }
 
-    public String[] getMnemonicForDoubleEncryptedWallet(String secondPassword) {
-
-        try {
-            Wallet wallet = getDecryptedWallet(secondPassword);
-            String mnemonic = wallet.getMnemonic();
-
-            if (mnemonic != null && mnemonic.length() > 0) {
-                return mnemonic.split("\\s+");
-            } else {
-                return null;
-            }
-
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     public Payload createHDWallet(String payloadPassword, String defaultAccountName) throws Exception {
 
         setTempPassword(new CharSequenceX(payloadPassword));
@@ -641,8 +624,27 @@ public class PayloadManager {
         return wallet.getSeedHex();
     }
 
-    public String getHDMnemonic() throws IOException, MnemonicException.MnemonicLengthException {
-        return wallet.getMnemonic();
+    public String[] getMnemonic(String secondPassword) throws IOException, MnemonicException.MnemonicLengthException {
+        try {
+            Wallet wallet = getDecryptedWallet(secondPassword);
+
+            if(wallet != null) {
+                String mnemonic = wallet.getMnemonic();
+
+                if (mnemonic != null && mnemonic.length() > 0) {
+                    return mnemonic.split("\\s+");
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String[] getMnemonic() throws IOException, MnemonicException.MnemonicLengthException {
+        return wallet.getMnemonic().split("\\s+");
     }
 
     public String getHDPassphrase() throws IOException, MnemonicException.MnemonicLengthException {
