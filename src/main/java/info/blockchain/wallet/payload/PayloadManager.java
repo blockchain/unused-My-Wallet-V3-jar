@@ -457,7 +457,8 @@ public class PayloadManager {
         if (!payload.isDoubleEncrypted()) {
             return wallet.getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
         } else {
-            return watchOnlyWallet.getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
+            Wallet wallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
+            return wallet.getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
         }
     }
 
@@ -469,7 +470,9 @@ public class PayloadManager {
             if (!payload.isDoubleEncrypted()) {
                 addr = wallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
             } else {
-                addr = watchOnlyWallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
+
+                Wallet wallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
+                addr = wallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
             }
 
             ReceiveAddress receiveAddress = new ReceiveAddress(addr.getAddressString(), idx);
@@ -699,7 +702,12 @@ public class PayloadManager {
         if (!payload.isDoubleEncrypted()) {
             hd_address = wallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
         } else {
-            hd_address = watchOnlyWallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
+            try {
+                Wallet wallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
+                hd_address = wallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return hd_address;
