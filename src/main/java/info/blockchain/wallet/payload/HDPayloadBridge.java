@@ -1,11 +1,13 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.api.Balance;
+import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 
@@ -206,5 +208,11 @@ public class HDPayloadBridge {
         payload.getHdWallet().setAccounts(accounts);
 
         return true;
+    }
+
+    public Address getAddressAt(String xpub, int chain, int addressIndex) throws AddressFormatException {
+
+        info.blockchain.bip44.Account account = new info.blockchain.bip44.Account(MainNetParams.get(), xpub);
+        return account.getChain(chain).getAddressAt(addressIndex);
     }
 }

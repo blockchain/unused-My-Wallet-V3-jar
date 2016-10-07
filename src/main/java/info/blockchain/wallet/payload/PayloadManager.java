@@ -4,8 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
+import info.blockchain.bip44.Chain;
+import info.blockchain.bip44.Wallet;
 import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
+import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
+import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -36,7 +40,6 @@ public class PayloadManager {
     public static final double SUPPORTED_ENCRYPTION_VERSION = 3.0;
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
-    public static final int RECEIVE_CHAIN = 0;
 
     private static PayloadManager instance = null;
     // active payload:
@@ -54,7 +57,6 @@ public class PayloadManager {
 
     private static HDPayloadBridge hdPayloadBridge;
     private static info.blockchain.bip44.Wallet wallet;
-    private static info.blockchain.bip44.Wallet watchOnlyWallet;
 
     private PayloadManager() {
         ;
@@ -131,19 +133,11 @@ public class PayloadManager {
      * @throws HDWalletException
      */
     private void syncWallet() throws HDWalletException {
-        if (payload.getHdWallet() != null) {
-            if (payload.isDoubleEncrypted()) {
-                try {
-                    watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true));
-                } catch (Exception e) {
-                    throw new HDWalletException("Watch-only bip44 wallet error: " + e.getMessage());
-                }
-            } else {
-                try {
-                    wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
-                } catch (Exception e) {
-                    throw new HDWalletException("Bip44 wallet error: " + e.getMessage());
-                }
+        if (payload.getHdWallet() != null && !payload.isDoubleEncrypted()) {
+            try {
+                wallet = hdPayloadBridge.getHDWalletFromPayload(payload);
+            } catch (Exception e) {
+                throw new HDWalletException("Bip44 wallet error: " + e.getMessage());
             }
         } else {
             //V2 wallet - no need to keep in sync with bp44 wallet
@@ -296,7 +290,7 @@ public class PayloadManager {
                 payload.getDoubleEncryptionPbkdf2Iterations());
     }
 
-    public boolean decryptDoubleEncryptedWallet(String secondPassword) {
+    public Wallet getDecryptedWallet(String secondPassword) throws Exception{
 
         if (validateSecondPassword(secondPassword)) {
 
@@ -307,47 +301,8 @@ public class PayloadManager {
                     secondPassword,
                     payload.getDoubleEncryptionPbkdf2Iterations());
 
-            try {
-                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
+            return hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
 
-            return true;
-
-        } else {
-            return false;
-        }
-    }
-
-    public String[] getMnemonicForDoubleEncryptedWallet(String secondPassword) {
-
-        if (validateSecondPassword(secondPassword)) {
-            // Decrypt seedHex (which is double encrypted in this case)
-            String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                    payload.getHdWallet().getSeedHex(),
-                    payload.getSharedKey(),
-                    secondPassword,
-                    payload.getDoubleEncryptionPbkdf2Iterations());
-
-            String mnemonic = null;
-
-            try {
-                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-                mnemonic = watchOnlyWallet.getMnemonic();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (mnemonic != null && mnemonic.length() > 0) {
-
-                    return mnemonic.split("\\s+");
-
-                } else {
-                    return null;
-                }
-            }
         } else {
             return null;
         }
@@ -448,46 +403,20 @@ public class PayloadManager {
 
     }
 
-    public String getChangeAddress(int accountIndex) throws Exception {
-        int changeIdx = payload.getHdWallet().getAccounts().get(accountIndex).getIdxChangeAddresses();
+    public String getNextChangeAddress(int accountIndex) throws AddressFormatException {
 
-        if (!payload.isDoubleEncrypted()) {
-            return wallet.getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
-        } else {
-            return watchOnlyWallet.getAccount(accountIndex).getChange().getAddressAt(changeIdx).getAddressString();
-        }
+        int changeAddressIndex = payload.getHdWallet().getAccounts().get(accountIndex).getIdxChangeAddresses();
+
+        String xpub = getXpubFromAccountIndex(accountIndex);
+        return hdPayloadBridge.getAddressAt(xpub, Chain.CHANGE_CHAIN, changeAddressIndex).getAddressString();
     }
 
-    public String getReceiveAddress(int accountIndex) {
+    public String getNextReceiveAddress(int accountIndex) throws AddressFormatException {
 
-        try {
-            Address addr = null;
-            int idx = payload.getHdWallet().getAccounts().get(accountIndex).getIdxReceiveAddresses();
-            if (!payload.isDoubleEncrypted()) {
-                addr = wallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
-            } else {
-                addr = watchOnlyWallet.getAccount(accountIndex).getChain(RECEIVE_CHAIN).getAddressAt(idx);
-            }
+        int receiveAddressIndex = payload.getHdWallet().getAccounts().get(accountIndex).getIdxReceiveAddresses();
 
-            ReceiveAddress receiveAddress = new ReceiveAddress(addr.getAddressString(), idx);
-            return receiveAddress.getAddress();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public ECKey getECKey(int accountIndex, String path) throws Exception {
-
-        String[] s = path.split("/");
-        Address hd_address = null;
-        if (!payload.isDoubleEncrypted()) {
-            hd_address = wallet.getAccount(accountIndex).getChain(Integer.parseInt(s[1])).getAddressAt(Integer.parseInt(s[2]));
-        } else {
-            hd_address = watchOnlyWallet.getAccount(accountIndex).getChain(Integer.parseInt(s[1])).getAddressAt(Integer.parseInt(s[2]));
-        }
-        return PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+        String xpub = getXpubFromAccountIndex(accountIndex);
+        return hdPayloadBridge.getAddressAt(xpub, Chain.RECEIVE_CHAIN, receiveAddressIndex).getAddressString();
     }
 
     public String getXpubFromAccountIndex(int accountIdx) {
@@ -571,24 +500,14 @@ public class PayloadManager {
             xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xprvstr();
         } else {
 
-            if (DoubleEncryptionFactory.getInstance().validateSecondPassword(
-                    payload.getDoublePasswordHash(),
-                    payload.getSharedKey(),
-                    new CharSequenceX(secondPassword),
-                    payload.getOptions().getIterations())) {
+            Wallet wallet = getDecryptedWallet(secondPassword);
+            if (wallet != null) {
 
-                String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                        payload.getHdWallet().getSeedHex(),
-                        payload.getSharedKey(),
-                        secondPassword,
-                        payload.getDoubleEncryptionPbkdf2Iterations());
+                wallet.addAccount();
 
-                //Need to decrypt watch-only wallet before adding new xpub
-                watchOnlyWallet = hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
-                watchOnlyWallet.addAccount();
+                xpub = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xpubstr();
+                xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xprvstr();
 
-                xpub = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xpubstr();
-                xpriv = watchOnlyWallet.getAccounts().get(watchOnlyWallet.getAccounts().size() - 1).xprvstr();
 
             } else {
                 listener.onSecondPasswordFail();
@@ -705,23 +624,31 @@ public class PayloadManager {
         return wallet.getSeedHex();
     }
 
-    public String getHDMnemonic() throws IOException, MnemonicException.MnemonicLengthException {
-        return wallet.getMnemonic();
+    public String[] getMnemonic(String secondPassword) throws IOException, MnemonicException.MnemonicLengthException {
+        try {
+            Wallet wallet = getDecryptedWallet(secondPassword);
+
+            if(wallet != null) {
+                String mnemonic = wallet.getMnemonic();
+
+                if (mnemonic != null && mnemonic.length() > 0) {
+                    return mnemonic.split("\\s+");
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String[] getMnemonic() throws IOException, MnemonicException.MnemonicLengthException {
+        return wallet.getMnemonic().split("\\s+");
     }
 
     public String getHDPassphrase() throws IOException, MnemonicException.MnemonicLengthException {
         return wallet.getPassphrase();
-    }
-
-    public Address getAddressAt(int accountIndex, int chain, int addressIndex) {
-        Address hd_address = null;
-        if (!payload.isDoubleEncrypted()) {
-            hd_address = wallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
-        } else {
-            hd_address = watchOnlyWallet.getAccount(accountIndex).getChain(chain).getAddressAt(addressIndex);
-        }
-
-        return hd_address;
     }
 
     /**
@@ -730,5 +657,30 @@ public class PayloadManager {
      */
     public BlockchainWallet getBciWallet(){
         return bciWallet;
+    }
+
+    public List<ECKey> getHDKeys(String secondPassword, Account account, SpendableUnspentOutputs unspentOutputBundle) throws Exception {
+
+        List<ECKey> keys = new ArrayList<ECKey>();
+
+        for(MyTransactionOutPoint a : unspentOutputBundle.getSpendableOutputs()){
+            String[] split = a.getPath().split("/");
+            int chain = Integer.parseInt(split[1]);
+            int addressIndex = Integer.parseInt(split[2]);
+
+            Wallet wallet;
+
+            if (payload.isDoubleEncrypted()) {
+                wallet = getDecryptedWallet(secondPassword);
+            } else {
+                wallet = this.wallet;
+            }
+
+            Address hd_address = wallet.getAccount(account.getRealIdx()).getChain(chain).getAddressAt(addressIndex);
+            ECKey walletKey =  PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+            keys.add(walletKey);
+        }
+
+        return keys;
     }
 }
