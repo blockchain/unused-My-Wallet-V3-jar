@@ -1,6 +1,7 @@
 package info.blockchain.wallet.multiaddr;
 
 import info.blockchain.api.MultiAddress;
+import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.Tx;
 import info.blockchain.wallet.payload.TxMostRecentDateComparator;
@@ -126,7 +127,7 @@ public class MultiAddrFactory   {
                 }
             }
 
-            List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(PayloadManager.NORMAL_ADDRESS);
+            List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(LegacyAddress.NORMAL_ADDRESS);
 
             if(jsonObject.has("txs"))  {
 
@@ -373,7 +374,7 @@ public class MultiAddrFactory   {
                         ts = txObj.getLong("time");
                     }
 
-                    List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(PayloadManager.NORMAL_ADDRESS);
+                    List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(LegacyAddress.NORMAL_ADDRESS);
                     List<String> watchOnlyLegacyAddresses = PayloadManager.getInstance().getPayload().getWatchOnlyAddressStrings();
 
                     if(txObj.has("inputs"))  {
