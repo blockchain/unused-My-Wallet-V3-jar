@@ -19,11 +19,11 @@ public class ExchangeTicker implements BaseApi {
     /**
      * Returns the historic value of a number of Satoshi at a given time in a given currency
      *
-     * @param satoshis      The amount of Satoshi to be converted
-     * @param currency      The currency to be converted to as a 3 letter acronym, eg USD, GBP
-     * @param timeInMillis  The time at which to get the price, in milliseconds since epoch
-     * @return              A String with the value, eg "605"
-     * @throws Exception    Will be thrown if response is null or if there is an issue connecting
+     * @param satoshis     The amount of Satoshi to be converted
+     * @param currency     The currency to be converted to as a 3 letter acronym, eg USD, GBP
+     * @param timeInMillis The time at which to get the price, in milliseconds since epoch
+     * @return A String with the value, eg "605"
+     * @throws Exception Will be thrown if response is null or if there is an issue connecting
      */
     public String getHistoricPrice(long satoshis, String currency, long timeInMillis) throws Exception {
         String response = WebUtil.getInstance().getURL(

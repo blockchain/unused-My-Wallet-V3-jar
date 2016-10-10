@@ -2,6 +2,7 @@ package info.blockchain.api;
 
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -238,7 +239,7 @@ public class SettingsTest {
         settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_ALL, new Settings.ResultListener() {
             public void onSuccess() {
                 assertThat("notifications toggle", settingsApi.isNotificationsOn());
-                assertThat( settingsApi.getNotificationTypes(), CoreMatchers.hasItem(Settings.NOTIFICATION_TYPE_ALL));
+                assertThat(settingsApi.getNotificationTypes(), CoreMatchers.hasItem(Settings.NOTIFICATION_TYPE_ALL));
             }
 
             public void onFail() {
@@ -255,14 +256,24 @@ public class SettingsTest {
     public void testDisableNotifications() throws Exception {
 
         settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_EMAIL, new Settings.ResultListener() {
-            public void onSuccess() {}
-            public void onFail() {}
-            public void onBadRequest() {}
+            public void onSuccess() {
+            }
+
+            public void onFail() {
+            }
+
+            public void onBadRequest() {
+            }
         });
         settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_SMS, new Settings.ResultListener() {
-            public void onSuccess() {}
-            public void onFail() {}
-            public void onBadRequest() {}
+            public void onSuccess() {
+            }
+
+            public void onFail() {
+            }
+
+            public void onBadRequest() {
+            }
         });
 
         Thread.sleep(1000);

@@ -1,6 +1,7 @@
 package info.blockchain.api;
 
 import info.blockchain.wallet.util.WebUtil;
+
 import org.spongycastle.util.encoders.Hex;
 
 public class ExternalEntropy implements BaseApi {

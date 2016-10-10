@@ -13,9 +13,7 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 
 /**
- *
  * Address.java : an address in a BIP44 wallet account chain
- *
  */
 public class Address {
 
@@ -27,15 +25,15 @@ public class Address {
 
     private NetworkParameters params = null;
 
-    private Address() { ; }
+    private Address() {
+        ;
+    }
 
     /**
      * Constructor an HD address.
      *
-     * @param params
-     * @param cKey deterministic key for this address
+     * @param cKey  deterministic key for this address
      * @param child index of this address in its chain
-     *
      */
     public Address(NetworkParameters params, DeterministicKey cKey, int child) {
 
@@ -44,11 +42,10 @@ public class Address {
 
         DeterministicKey dk = HDKeyDerivation.deriveChildKey(cKey, new ChildNumber(childNum, false));
         // compressed WIF private key format
-        if(dk.hasPrivKey()) {
+        if (dk.hasPrivKey()) {
             byte[] prepended0Byte = ArrayUtils.addAll(new byte[1], dk.getPrivKeyBytes());
             ecKey = ECKey.fromPrivate(new BigInteger(prepended0Byte), true);
-        }
-        else {
+        } else {
             ecKey = ECKey.fromPublicOnly(dk.getPubKey());
         }
 
@@ -65,7 +62,6 @@ public class Address {
      * Get pubKey as byte array.
      *
      * @return byte[]
-     *
      */
     public byte[] getPubKey() {
         return pubKey;
@@ -75,7 +71,6 @@ public class Address {
      * Get pubKeyHash as byte array.
      *
      * @return byte[]
-     *
      */
     public byte[] getPubKeyHash() {
         return pubKeyHash;
@@ -85,7 +80,6 @@ public class Address {
      * Return public address for this instance.
      *
      * @return String
-     *
      */
     public String getAddressString() {
         return ecKey.toAddress(params).toString();
@@ -95,14 +89,12 @@ public class Address {
      * Return private key for this address (compressed WIF format).
      *
      * @return String
-     *
      */
     public String getPrivateKeyString() {
 
-        if(ecKey.hasPrivKey()) {
+        if (ecKey.hasPrivKey()) {
             return ecKey.getPrivateKeyEncoded(params).toString();
-        }
-        else    {
+        } else {
             return null;
         }
 
@@ -112,43 +104,39 @@ public class Address {
      * Return Bitcoinj address instance for this Address.
      *
      * @return org.bitcoinj.core.Address
-     *
      */
     public org.bitcoinj.core.Address getAddress() {
         return ecKey.toAddress(params);
     }
 
     /**
-     * Return BIP44 path for this address (m / purpose' / coin_type' / account' / chain / address_index).
+     * Return BIP44 path for this address (m / purpose' / coin_type' / account' / chain /
+     * address_index).
      *
      * @return String
-     *
      */
     public String getPath() {
         return strPath;
     }
 
     /**
-     * Write address to JSONObject.
-     * For debugging only.
+     * Write address to JSONObject. For debugging only.
      *
      * @return JSONObject
-     *
      */
     public JSONObject toJSON() {
         try {
             JSONObject obj = new JSONObject();
 
             obj.put("address", getAddressString());
-            if(ecKey.hasPrivKey()) {
+            if (ecKey.hasPrivKey()) {
                 obj.put("key", getPrivateKeyString());
             }
 
             obj.put("path", getPath());
 
             return obj;
-        }
-        catch(JSONException ex) {
+        } catch (JSONException ex) {
             throw new RuntimeException(ex);
         }
     }

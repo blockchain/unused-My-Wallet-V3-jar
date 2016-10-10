@@ -2,6 +2,7 @@ package info.blockchain.bip44;
 
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.util.CharSequenceX;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.bitcoinj.core.AddressFormatException;
@@ -14,7 +15,16 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -22,11 +32,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- *
  * WalletFactory.java : Class for creating/restoring/reading BIP44 HD wallet
  *
  * BIP44 extension of Bitcoinj
- *
  */
 public class WalletFactory {
 
@@ -34,55 +42,51 @@ public class WalletFactory {
 
     private Logger mLogger = LoggerFactory.getLogger(WalletFactory.class);
 
-  	private Locale locale = null;
+    private Locale locale = null;
 
     public String strJSONFilePath = null;
 
-    public WalletFactory()	{
+    public WalletFactory() {
         locale = new Locale("en", "US");
     }
 
-	public void setJSONFilePath(String path)	{
+    public void setJSONFilePath(String path) {
         strJSONFilePath = path;
-	}
+    }
 
     /**
      * Set Locale. Defaults to 'en_US'
      *
-     * @param  loc to be used.
-     *
+     * @param loc to be used.
      */
-	public void setLocale(Locale loc)	{
-		if(loc != null)	{
-	        locale = loc;
-		}
-		else	{
-			locale = new Locale("en", "US");
-		}
-	}
+    public void setLocale(Locale loc) {
+        if (loc != null) {
+            locale = loc;
+        } else {
+            locale = new Locale("en", "US");
+        }
+    }
 
     /**
      * Create new wallet.
      *
-     * @param  nbWords number of words in menmonic
-     * @param  passphrase optional BIP39 passphrase
-     * @param  nbAccounts create this number of accounts
-     *
+     * @param nbWords    number of words in menmonic
+     * @param passphrase optional BIP39 passphrase
+     * @param nbAccounts create this number of accounts
      * @return Wallet
-     *
      */
-    public Wallet newWallet(int nbWords, String passphrase, int nbAccounts) throws IOException, MnemonicException.MnemonicLengthException   {
+    public Wallet newWallet(int nbWords, String passphrase, int nbAccounts) throws IOException, MnemonicException.MnemonicLengthException {
 
         Wallet hdw = null;
 
-        if((nbWords % 3 != 0) || (nbWords < 12 || nbWords > 24)) {
+        if ((nbWords % 3 != 0) || (nbWords < 12 || nbWords > 24)) {
             nbWords = 12;
         }
 
         // len == 16 (12 words), len == 24 (18 words), len == 32 (24 words)
         int len = (nbWords / 3) * 4;
 
-        if(passphrase == null) {
+        if (passphrase == null) {
             passphrase = "";
         }
 
@@ -95,14 +99,13 @@ public class WalletFactory {
         InputStream wis = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream("wordlist/" + locale.toString() + ".txt");
-        if(wis != null) {
+        if (wis != null) {
             MnemonicCode mc = new MnemonicCode(wis, null);
             hdw = new Wallet(mc, params, seed, passphrase, nbAccounts);
             wis.close();
-        }
-        else {
+        } else {
             mLogger.info("cannot read BIP39 word list");
-			return null;
+            return null;
         }
 
         return hdw;
@@ -111,46 +114,41 @@ public class WalletFactory {
     /**
      * Restore wallet.
      *
-     * @param  data: either BIP39 mnemonic or hex seed
-     * @param  passphrase optional BIP39 passphrase
-     * @param  nbAccounts create this number of accounts
-     *
+     * @param data:      either BIP39 mnemonic or hex seed
+     * @param passphrase optional BIP39 passphrase
+     * @param nbAccounts create this number of accounts
      * @return Wallet
-     *
      */
-    public Wallet restoreWallet(String data, String passphrase, int nbAccounts) throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException  {
+    public Wallet restoreWallet(String data, String passphrase, int nbAccounts) throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
 
         Wallet hdw = null;
 
-        if(passphrase == null) {
+        if (passphrase == null) {
             passphrase = "";
         }
 
         NetworkParameters params = MainNetParams.get();
 
         InputStream wis = this.getClass().getClassLoader().getResourceAsStream("wordlist/" + locale.toString() + ".txt");
-        if(wis != null) {
+        if (wis != null) {
             List<String> words = null;
 
             MnemonicCode mc = null;
             mc = new MnemonicCode(wis, null);
 
             byte[] seed = null;
-            if(data.startsWith("xpub")) {
+            if (data.startsWith("xpub")) {
                 String[] xpub = data.split(":");
                 hdw = new Wallet(params, xpub);
-            }
-            else if(data.length() % 4 == 0 && !data.contains(" ")) {
+            } else if (data.length() % 4 == 0 && !data.contains(" ")) {
                 seed = Hex.decodeHex(data.toCharArray());
                 hdw = new Wallet(mc, params, seed, passphrase, nbAccounts);
-            }
-            else if(locale.toString().equals("en_US")) {
+            } else if (locale.toString().equals("en_US")) {
                 data = data.replaceAll("[^a-z]+", " ");             // only use for BIP39 English
                 words = Arrays.asList(data.trim().split("\\s+"));
                 seed = mc.toEntropy(words);
                 hdw = new Wallet(mc, params, seed, passphrase, nbAccounts);
-            }
-            else {
+            } else {
                 words = Arrays.asList(data.trim().split("\\s+"));
                 seed = mc.toEntropy(words);
                 hdw = new Wallet(mc, params, seed, passphrase, nbAccounts);
@@ -158,10 +156,9 @@ public class WalletFactory {
 
             wis.close();
 
-        }
-        else {
+        } else {
             mLogger.info("cannot read BIP39 word list");
-			return null;
+            return null;
         }
 
         return hdw;
@@ -180,14 +177,12 @@ public class WalletFactory {
         JSONObject obj = null;
         try {
             obj = deserialize(password);
-            if(obj != null) {
+            if (obj != null) {
                 hdw = new Wallet(obj, params, locale);
             }
-        }
-        catch(IOException ioe) {
+        } catch (IOException ioe) {
             ioe.printStackTrace();
-        }
-        catch(JSONException je) {
+        } catch (JSONException je) {
             je.printStackTrace();
         }
 
@@ -204,15 +199,14 @@ public class WalletFactory {
         byte[] cleartextBytes = jsonstr.getBytes(Charset.forName("UTF-8"));
 
         // prepare tmp file.
-        if(tmpfile.exists()) {
+        if (tmpfile.exists()) {
             tmpfile.delete();
         }
 
         String data = null;
-        if(password != null) {
+        if (password != null) {
             data = AESUtil.encrypt(jsonstr, new CharSequenceX(password), AESUtil.QR_CODE_PBKDF_2ITERATIONS);
-        }
-        else {
+        } else {
             data = jsonstr;
         }
 
@@ -224,10 +218,9 @@ public class WalletFactory {
         }
 
         // rename tmp file
-        if(tmpfile.renameTo(newfile)) {
+        if (tmpfile.renameTo(newfile)) {
             mLogger.info("file saved to  " + newfile.getPath());
-        }
-        else {
+        } else {
             mLogger.warn("rename to " + newfile.getPath() + " failed");
         }
     }
@@ -240,15 +233,14 @@ public class WalletFactory {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
         String str = null;
 
-        while((str = in.readLine()) != null) {
+        while ((str = in.readLine()) != null) {
             sb.append(str);
         }
 
         JSONObject node = null;
-        if(password == null) {
+        if (password == null) {
             node = new JSONObject(sb.toString());
-        }
-        else {
+        } else {
             node = new JSONObject(AESUtil.decrypt(sb.toString(), new CharSequenceX(password), AESUtil.QR_CODE_PBKDF_2ITERATIONS));
         }
 

@@ -2,6 +2,7 @@ package info.blockchain.api;
 
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,10 +76,7 @@ public class WalletPayload implements BaseApi {
     /**
      * Fetches wallet data from server
      *
-     * @param guid
-     * @param sharedKey
      * @return Either encrypted string (v1) or json (v2, v3)
-     * @throws Exception
      */
     public String fetchWalletData(String guid, String sharedKey) throws Exception {
 
@@ -150,7 +148,7 @@ public class WalletPayload implements BaseApi {
         args.append("&device=");
         args.append("android");
 
-        if(oldChecksum != null && oldChecksum.length() > 0) {
+        if (oldChecksum != null && oldChecksum.length() > 0) {
             args.append("&old_checksum=");
             args.append(oldChecksum);
         }

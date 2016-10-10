@@ -1,7 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class XPut {
 
@@ -10,7 +10,9 @@ public class XPut {
     private boolean multAddrs = false;
     private long amount = 0L;
 
-    public XPut() { ; }
+    public XPut() {
+        ;
+    }
 
     public XPut(int id, String addr, boolean multi, long amount) {
         this.accountId = id;

@@ -1,8 +1,13 @@
 package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.util.CharSequenceX;
+
 import org.apache.commons.codec.binary.Base64;
-import org.spongycastle.crypto.*;
+import org.spongycastle.crypto.BlockCipher;
+import org.spongycastle.crypto.BufferedBlockCipher;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.crypto.PBEParametersGenerator;
 import org.spongycastle.crypto.engines.AESEngine;
 import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.spongycastle.crypto.modes.CBCBlockCipher;
@@ -13,11 +18,12 @@ import org.spongycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.crypto.params.ParametersWithIV;
 
-import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
-public class AESUtil	{
+import javax.annotation.Nullable;
+
+public class AESUtil {
 
 //    private static Logger mLogger = LoggerFactory.getLogger(AESUtil.class);
 
@@ -35,7 +41,7 @@ public class AESUtil	{
 
     // AES 256 PBKDF2 CBC iso10126 decryption
     // 16 byte IV must be prepended to ciphertext - Compatible with crypto-js
-    public static String decrypt(String ciphertext, CharSequenceX password, int iterations)  {
+    public static String decrypt(String ciphertext, CharSequenceX password, int iterations) {
 
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
@@ -57,10 +63,10 @@ public class AESUtil	{
         CipherParameters params = new ParametersWithIV(keyParam, iv);
 
         BlockCipher cipherMode = null;
-        if (mode == MODE_CBC){
+        if (mode == MODE_CBC) {
             cipherMode = new CBCBlockCipher(new AESEngine());
 
-        }else if (mode == MODE_OFB){
+        } else if (mode == MODE_OFB) {
             cipherMode = new OFBBlockCipher(new AESEngine(), 128);
         }
 
@@ -101,16 +107,16 @@ public class AESUtil	{
     }
 
     // AES 256 PBKDF2 CBC iso10126 encryption
-    public static String encrypt(String cleartext, CharSequenceX password, int iterations)    {
+    public static String encrypt(String cleartext, CharSequenceX password, int iterations) {
 
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding)    {
+    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) {
 
         final int AESBlockSize = 4;
 
-        if(password == null)   {
+        if (password == null) {
             return null;
         }
 
@@ -120,25 +126,24 @@ public class AESUtil	{
         random.nextBytes(iv);
 
         byte[] clearbytes = null;
-        try    {
+        try {
             clearbytes = cleartext.getBytes("UTF-8");
-        }
-        catch(UnsupportedEncodingException uee)    {
+        } catch (UnsupportedEncodingException uee) {
             uee.printStackTrace();
             return null;
         }
 
         PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
         generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(password.toString().toCharArray()), iv, iterations);
-        KeyParameter keyParam = (KeyParameter)generator.generateDerivedParameters(256);
+        KeyParameter keyParam = (KeyParameter) generator.generateDerivedParameters(256);
 
         CipherParameters params = new ParametersWithIV(keyParam, iv);
 
         BlockCipher cipherMode = null;
-        if (mode == MODE_CBC){
+        if (mode == MODE_CBC) {
             cipherMode = new CBCBlockCipher(new AESEngine());
 
-        }else if (mode == MODE_OFB){
+        } else if (mode == MODE_OFB) {
             cipherMode = new OFBBlockCipher(new AESEngine(), 128);
         }
 
@@ -168,15 +173,14 @@ public class AESUtil	{
         return ret;
     }
 
-    private static byte[] cipherData(BufferedBlockCipher cipher, byte[] data)  {
+    private static byte[] cipherData(BufferedBlockCipher cipher, byte[] data) {
         int minSize = cipher.getOutputSize(data.length);
         byte[] outBuf = new byte[minSize];
         int len1 = cipher.processBytes(data, 0, data.length, outBuf, 0);
         int len2 = -1;
-        try    {
+        try {
             len2 = cipher.doFinal(outBuf, len1);
-        }
-        catch(InvalidCipherTextException icte)    {
+        } catch (InvalidCipherTextException icte) {
             icte.printStackTrace();
         }
 

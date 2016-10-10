@@ -1,6 +1,7 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
+
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;

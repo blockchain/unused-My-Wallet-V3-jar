@@ -2,8 +2,6 @@ package info.blockchain.wallet.payload;
 
 import java.util.Comparator;
 
-import info.blockchain.wallet.payload.Tx;
-
 public class TxMostRecentDateComparator implements Comparator<Tx> {
 
     public int compare(Tx t1, Tx t2) {
@@ -14,13 +12,11 @@ public class TxMostRecentDateComparator implements Comparator<Tx> {
 
         int ret = 0;
 
-        if(t1.getTS() > t2.getTS()) {
+        if (t1.getTS() > t2.getTS()) {
             ret = BEFORE;
-        }
-        else if(t1.getTS() < t2.getTS()) {
+        } else if (t1.getTS() < t2.getTS()) {
             ret = AFTER;
-        }
-        else    {
+        } else {
             ret = EQUAL;
         }
 

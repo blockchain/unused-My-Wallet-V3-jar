@@ -2,6 +2,7 @@ package info.blockchain.wallet.settings;
 
 import info.blockchain.api.Settings;
 import info.blockchain.test_data.SettingsTestData;
+
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;

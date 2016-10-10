@@ -1,9 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import org.json.JSONObject;
 import org.json.JSONException;
-
-import info.blockchain.wallet.util.WebUtil;
+import org.json.JSONObject;
 
 public class ReceiveAddress {
 
@@ -16,7 +14,9 @@ public class ReceiveAddress {
 
     private boolean useThis = true;
 
-    public ReceiveAddress() { ; }
+    public ReceiveAddress() {
+        ;
+    }
 
     public ReceiveAddress(int index, long amount, long paid, String label, int nbTx) {
         this.index = index;
@@ -32,13 +32,13 @@ public class ReceiveAddress {
     }
 
     public ReceiveAddress(String address, long amount, long paid) {
-    	this.strAddress = address;
+        this.strAddress = address;
         this.amount = amount;
         this.paid = paid;
     }
 
     public ReceiveAddress(String address, int index) {
-    	this.strAddress = address;
+        this.strAddress = address;
         this.index = index;
         this.amount = 0L;
         this.paid = 0L;
@@ -47,7 +47,7 @@ public class ReceiveAddress {
     }
 
     public ReceiveAddress(String address, int index, String json) {
-    	this.strAddress = address;
+        this.strAddress = address;
         this.index = index;
         this.amount = 0L;
         this.paid = 0L;
@@ -62,7 +62,9 @@ public class ReceiveAddress {
         return strAddress;
     }
 
-    public void setAddress(String address) { this.strAddress = address; }
+    public void setAddress(String address) {
+        this.strAddress = address;
+    }
 
     public long getAmount() {
         return amount;
@@ -73,11 +75,10 @@ public class ReceiveAddress {
     }
 
     public boolean isComplete() {
-        if(this.paid >= this.amount) {
+        if (this.paid >= this.amount) {
             return true;
-        }
-        else {
-        	return false;
+        } else {
+            return false;
         }
     }
 
@@ -93,7 +94,9 @@ public class ReceiveAddress {
         return strLabel;
     }
 
-    public void setLabel(String label) { this.strLabel = label; }
+    public void setLabel(String label) {
+        this.strLabel = label;
+    }
 
     public int getIndex() {
         return index;
@@ -116,11 +119,12 @@ public class ReceiveAddress {
         paid += amount;
 
     }
-/*
-    public void checkTX() {
-        new AddressInfo().execute("");
-    }
-*/
+
+    /*
+        public void checkTX() {
+            new AddressInfo().execute("");
+        }
+    */
     public JSONObject dumpJSON() throws JSONException {
 
         JSONObject obj = new JSONObject();
@@ -134,109 +138,107 @@ public class ReceiveAddress {
     }
 
     public boolean notPreviouslyUsed() {
-    	return useThis;
+        return useThis;
     }
-/*
-    private class AddressInfo extends AsyncTask<String, Void, String> {
 
-        @Override
-        protected String doInBackground(String... params) {
+    /*
+        private class AddressInfo extends AsyncTask<String, Void, String> {
 
-        	String result = null;
+            @Override
+            protected String doInBackground(String... params) {
 
-        	try {
-    			result = WebUtil.getInstance().getURL("https://blockchain.info/address/" + strAddress + "?format=json");
-        	}
-        	catch(Exception e) {
-				e.printStackTrace();
-        	}
+                String result = null;
 
-        	return result;
+                try {
+                    result = WebUtil.getInstance().getURL("https://blockchain.info/address/" + strAddress + "?format=json");
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
+
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+
+                if(result != null) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(result);
+
+                        if(jsonObject.has("n_tx")) {
+                            int val = (Integer)jsonObject.get("n_tx");
+                            nbTx = val;
+                        }
+                        else {
+                            nbTx = 0;
+                        }
+
+                        if(jsonObject.has("final_balance")) {
+                            long val = jsonObject.getLong("final_balance");
+                            amount = val;
+                        }
+                        else {
+                            amount = 0L;
+                        }
+
+                    } catch(JSONException je) {
+                        je.printStackTrace();
+                        nbTx = 0;
+                        amount = 0L;
+                    }
+                }
+
+    //			Log.i("ReceiveAddress", "Index:" + index + "/" + strAddress + "/" + nbTx + "/" + amount);
+
+                if(amount == 0L && nbTx == 0) {
+                    useThis = true;
+                }
+                else {
+                    useThis = false;
+                }
+
+            }
+
+            @Override
+            protected void onPreExecute() {}
+
+            @Override
+            protected void onProgressUpdate(Void... values) {}
+        }
+    */
+    private void initJSON(String json) {
+
+        if (json != null) {
+            try {
+                JSONObject jsonObject = new JSONObject(json);
+
+                if (jsonObject.has("n_tx")) {
+                    int val = (Integer) jsonObject.get("n_tx");
+                    nbTx = val;
+                } else {
+                    nbTx = 0;
+                }
+
+                if (jsonObject.has("final_balance")) {
+                    long val = jsonObject.getLong("final_balance");
+                    amount = val;
+                } else {
+                    amount = 0L;
+                }
+
+            } catch (JSONException je) {
+                je.printStackTrace();
+                nbTx = 0;
+                amount = 0L;
+            }
         }
 
-        @Override
-        protected void onPostExecute(String result) {
-
-        	if(result != null) {
-    			try {
-    	            JSONObject jsonObject = new JSONObject(result);
-
-    	            if(jsonObject.has("n_tx")) {
-    	            	int val = (Integer)jsonObject.get("n_tx");
-    	            	nbTx = val;
-    	            }
-    	            else {
-    	            	nbTx = 0;
-    	            }
-
-    	            if(jsonObject.has("final_balance")) {
-    	            	long val = jsonObject.getLong("final_balance");
-    	            	amount = val;
-    	            }
-    	            else {
-    	            	amount = 0L;
-    	            }
-
-    			} catch(JSONException je) {
-    				je.printStackTrace();
-                	nbTx = 0;
-                	amount = 0L;
-    			}
-        	}
-
-//			Log.i("ReceiveAddress", "Index:" + index + "/" + strAddress + "/" + nbTx + "/" + amount);
-
-			if(amount == 0L && nbTx == 0) {
-				useThis = true;
-			}
-			else {
-				useThis = false;
-			}
-
+        if (amount == 0L && nbTx == 0) {
+            useThis = true;
+        } else {
+            useThis = false;
         }
-
-        @Override
-        protected void onPreExecute() {}
-
-        @Override
-        protected void onProgressUpdate(Void... values) {}
-    }
-*/
-    private void initJSON(String json)	 {
-
-    	if(json != null) {
-			try {
-	            JSONObject jsonObject = new JSONObject(json);
-
-	            if(jsonObject.has("n_tx")) {
-	            	int val = (Integer)jsonObject.get("n_tx");
-	            	nbTx = val;
-	            }
-	            else {
-	            	nbTx = 0;
-	            }
-
-	            if(jsonObject.has("final_balance")) {
-	            	long val = jsonObject.getLong("final_balance");
-	            	amount = val;
-	            }
-	            else {
-	            	amount = 0L;
-	            }
-
-			} catch(JSONException je) {
-				je.printStackTrace();
-            	nbTx = 0;
-            	amount = 0L;
-			}
-    	}
-
-		if(amount == 0L && nbTx == 0) {
-			useThis = true;
-		}
-		else {
-			useThis = false;
-		}
 
     }
 

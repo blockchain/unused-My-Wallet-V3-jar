@@ -8,9 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *
  * Chain.java : a chain in a BIP44 wallet account
- *
  */
 public class Chain {
 
@@ -27,15 +25,15 @@ public class Chain {
     public static final int RECEIVE_CHAIN = 0;
     public static final int CHANGE_CHAIN = 1;
 
-    private Chain() { ; }
+    private Chain() {
+        ;
+    }
 
     /**
      * Constructor for a chain.
      *
-     * @param params
-     * @param aKey deterministic key for this chain
+     * @param aKey      deterministic key for this chain
      * @param isReceive this is the receive chain
-     *
      */
     public Chain(NetworkParameters params, DeterministicKey aKey, boolean isReceive) {
 
@@ -60,7 +58,6 @@ public class Chain {
      * Return Address at provided index into chain.
      *
      * @return Address
-	 *
      */
     public Address getAddressAt(int addrIdx) {
         return new Address(params, cKey, addrIdx);
@@ -70,18 +67,15 @@ public class Chain {
      * Return BIP44 path for this chain (m / purpose' / coin_type' / account' / chain).
      *
      * @return String
-     *
      */
     public String getPath() {
         return strPath;
     }
 
     /**
-     * Write chain to JSONObject.
-     * For debugging only.
+     * Write chain to JSONObject. For debugging only.
      *
      * @return JSONObject
-     *
      */
     public JSONObject toJSON() {
         try {
@@ -90,15 +84,14 @@ public class Chain {
             obj.put("path", getPath());
 
             JSONArray addresses = new JSONArray();
-            for(int i = 0; i < 2; i++) {
+            for (int i = 0; i < 2; i++) {
                 Address addr = new Address(params, cKey, i);
                 addresses.put(addr.toJSON());
             }
             obj.put("addresses", addresses);
 
             return obj;
-        }
-        catch(JSONException ex) {
+        } catch (JSONException ex) {
             throw new RuntimeException(ex);
         }
     }

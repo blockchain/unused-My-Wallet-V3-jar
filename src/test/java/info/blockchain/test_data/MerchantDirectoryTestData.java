@@ -26,27 +26,27 @@ public class MerchantDirectoryTestData {
 
     public static String testData = "[\n" +
             "    {\n" +
-            "        \"id\": "+id_0+",\n" +
-            "        \"name\": \""+name_0+"\",\n" +
-            "        \"address\": \""+address_0+"\",\n" +
-            "        \"city\": \""+city_0+"\",\n" +
-            "        \"postal_code\": \""+postal_code_0+"\",\n" +
-            "        \"phone\": \""+phone_0+"\",\n" +
-            "        \"website\": \""+website_0+"\",\n" +
-            "        \"latitude\": "+latitude_0+",\n" +
-            "        \"longitude\": "+longitude_0+",\n" +
-            "        \"description\": \""+description_0+"\",\n" +
-            "        \"blockchain_merchant\": "+blockchain_merchant_0+",\n" +
-            "        \"approved\": "+approved_0+",\n" +
-            "        \"category_id\": "+category_id_0+",\n" +
-            "        \"last_contacted\": \""+last_contacted_0+"\",\n" +
-            "        \"point_of_contact\": \""+point_of_contact_0+"\",\n" +
-            "        \"method_of_contact\": \""+method_of_contact_0+"\",\n" +
-            "        \"contact_details\": \""+contact_details_0+"\",\n" +
-            "        \"notes\": \""+notes_0+"\",\n" +
-            "        \"featured_merchant\": "+featured_merchant_0+",\n" +
-            "        \"created_on\": \""+created_on_0+"\",\n" +
-            "        \"last_updated\": \""+last_updated_0+"\"\n" +
+            "        \"id\": " + id_0 + ",\n" +
+            "        \"name\": \"" + name_0 + "\",\n" +
+            "        \"address\": \"" + address_0 + "\",\n" +
+            "        \"city\": \"" + city_0 + "\",\n" +
+            "        \"postal_code\": \"" + postal_code_0 + "\",\n" +
+            "        \"phone\": \"" + phone_0 + "\",\n" +
+            "        \"website\": \"" + website_0 + "\",\n" +
+            "        \"latitude\": " + latitude_0 + ",\n" +
+            "        \"longitude\": " + longitude_0 + ",\n" +
+            "        \"description\": \"" + description_0 + "\",\n" +
+            "        \"blockchain_merchant\": " + blockchain_merchant_0 + ",\n" +
+            "        \"approved\": " + approved_0 + ",\n" +
+            "        \"category_id\": " + category_id_0 + ",\n" +
+            "        \"last_contacted\": \"" + last_contacted_0 + "\",\n" +
+            "        \"point_of_contact\": \"" + point_of_contact_0 + "\",\n" +
+            "        \"method_of_contact\": \"" + method_of_contact_0 + "\",\n" +
+            "        \"contact_details\": \"" + contact_details_0 + "\",\n" +
+            "        \"notes\": \"" + notes_0 + "\",\n" +
+            "        \"featured_merchant\": " + featured_merchant_0 + ",\n" +
+            "        \"created_on\": \"" + created_on_0 + "\",\n" +
+            "        \"last_updated\": \"" + last_updated_0 + "\"\n" +
             "    },\n" +
             "    {\n" +
             "        \"id\": 2,\n" +

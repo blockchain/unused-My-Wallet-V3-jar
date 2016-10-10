@@ -26,13 +26,13 @@ public class FeeUtilTest {
         cases.add(new int[]{3, 3, 30000, 16680});
         cases.add(new int[]{5, 10, 30000, 32701});
 
-        for (int testCase = 0; testCase < cases.size(); testCase++){
+        for (int testCase = 0; testCase < cases.size(); testCase++) {
 
             int inputs = cases.get(testCase)[0];
             int outputs = cases.get(testCase)[1];
 
             BigInteger absoluteFee = FeeUtil.estimatedFee(inputs, outputs, BigInteger.valueOf(cases.get(testCase)[2]));
-            assert(cases.get(testCase)[3] == absoluteFee.longValue());
+            assert (cases.get(testCase)[3] == absoluteFee.longValue());
         }
 
     }

@@ -1,6 +1,7 @@
 package info.blockchain.api;
 
 import info.blockchain.wallet.payment.data.SuggestedFee;
+
 import org.junit.Test;
 
 import java.math.BigInteger;

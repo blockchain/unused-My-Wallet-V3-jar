@@ -16,7 +16,9 @@ public class Options {
     private boolean enable_multiple_accounts = true;
     private boolean html5_notifications = false;
 
-    public Options() { additionalSeeds = new ArrayList<String>(); }
+    public Options() {
+        additionalSeeds = new ArrayList<String>();
+    }
 
     public void setIterations(int iterations) {
         this.iterations = iterations;
@@ -57,6 +59,7 @@ public class Options {
     public void setEnablMultipleAccounts(boolean enable) {
         this.enable_multiple_accounts = enable;
     }
+
     public boolean isHtml5Notifications() {
         return html5_notifications;
     }
@@ -65,7 +68,7 @@ public class Options {
         this.html5_notifications = enable;
     }
 
-    public JSONObject dumpJSON() throws JSONException	 {
+    public JSONObject dumpJSON() throws JSONException {
 
         JSONObject obj = new JSONObject();
 
@@ -76,7 +79,7 @@ public class Options {
         obj.put("html5_notifications", html5_notifications);
 
         JSONArray seeds = new JSONArray();
-        for(String seed : additionalSeeds) {
+        for (String seed : additionalSeeds) {
             seeds.put(seed);
         }
 //        obj.put("additional_seeds", seeds);

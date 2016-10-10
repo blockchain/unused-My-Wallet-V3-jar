@@ -6,6 +6,7 @@ import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.crypto.MnemonicException;
@@ -28,7 +29,7 @@ public class HDPayloadBridge {
         this.bip44WalletFactory = new WalletFactory();
     }
 
-    public class HDWalletPayloadPair{
+    public class HDWalletPayloadPair {
         Payload payload;
         Wallet wallet;
     }
@@ -62,7 +63,7 @@ public class HDPayloadBridge {
         final int lookAheadTotal = 10;
         int lookAhead = lookAheadTotal;
 
-        while(lookAhead > 0) {
+        while (lookAhead > 0) {
 
             String xpub = result.wallet.getAccount(index).xpubstr();
 
@@ -93,7 +94,7 @@ public class HDPayloadBridge {
         return new Wallet(MainNetParams.get(), xpubs);
     }
 
-    public Wallet decryptWatchOnlyWallet(Payload payload, String decrypted_hex) throws Exception{
+    public Wallet decryptWatchOnlyWallet(Payload payload, String decrypted_hex) throws Exception {
         return bip44WalletFactory.restoreWallet(decrypted_hex, DEFAULT_PASSPHRASE, payload.getHdWallet().getAccounts().size());
     }
 
@@ -116,8 +117,8 @@ public class HDPayloadBridge {
         for (int i = 0; i < hdAccounts.size(); i++) {
 
             String label = defaultAccountName;
-            if(accountNumber > 1){
-                label = defaultAccountName +" "+accountNumber;
+            if (accountNumber > 1) {
+                label = defaultAccountName + " " + accountNumber;
             }
             info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account(label);
             accountNumber++;

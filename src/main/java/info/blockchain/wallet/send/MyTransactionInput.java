@@ -1,7 +1,5 @@
 package info.blockchain.wallet.send;
 
-import java.math.BigInteger;
-
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
@@ -9,6 +7,8 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutPoint;
+
+import java.math.BigInteger;
 
 public class MyTransactionInput extends TransactionInput {
 
