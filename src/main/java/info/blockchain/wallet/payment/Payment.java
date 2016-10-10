@@ -58,7 +58,7 @@ public class Payment {
 
             Hash hash = new Hash(hashBytes);
             hash.reverse();
-            Sha256Hash txHash = new Sha256Hash(hash.getBytes());
+            Sha256Hash txHash = Sha256Hash.wrap(hash.getBytes());
 
             // Construct the output
             MyTransactionOutPoint outPoint = new MyTransactionOutPoint(txHash, txOutputN, value, scriptBytes);

@@ -12,9 +12,7 @@ public class PushTx implements BaseApi {
 
         hexString += "&api_code=" + API_CODE;
 
-        String response = WebUtil.getInstance().postURL(PROD_SPEND_URL, "tx=" + hexString);
-
-        return response;
+        return WebUtil.getInstance().postURL(PROD_SPEND_URL, "tx=" + hexString);
     }
 
     public String submitTransaction(Transaction tx) throws Exception {
@@ -22,8 +20,6 @@ public class PushTx implements BaseApi {
         String encoded = SendCoins.getInstance().encodeHex(tx);
         encoded += "&api_code=" + API_CODE;
 
-        String response = WebUtil.getInstance().postURL(PROD_SPEND_URL, "tx=" + encoded);
-
-        return response;
+        return WebUtil.getInstance().postURL(PROD_SPEND_URL, "tx=" + encoded);
     }
 }

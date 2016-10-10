@@ -2,10 +2,10 @@ package info.blockchain.wallet.send;
 
 import info.blockchain.wallet.util.Hash;
 
+import org.bitcoinj.core.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.bitcoinj.core.Utils;
 
 public class BitcoinScript {
 
@@ -317,7 +317,7 @@ public class BitcoinScript {
 
 	public static void writeOpcode(List<Byte> bytes, int op0) {
 		bytes.add((byte) op0);
-	};
+	}
 
 	public static void writeBytes(List<Byte> bytes, byte[] data) {
 
@@ -341,7 +341,7 @@ public class BitcoinScript {
 		for (byte b : data) {
 			bytes.add(b);
 		}
-	};
+	}
 
 	public static BitcoinScript createSimpleOutBitcoinScript(
 			BitcoinAddress address) throws Exception {
@@ -434,7 +434,7 @@ public class BitcoinScript {
 		} else {
 			return ScriptInTypeStrange;
 		}
-	};
+	}
 
 	public BitcoinScript getP2SHScript() throws Exception {
 		return new BitcoinScript(this.chunks.get(0));
@@ -474,7 +474,7 @@ public class BitcoinScript {
 		} catch (Exception e) {
 			return ScriptOutTypeStrange;
 		}
-	};
+	}
 
 	public Hash getSimpleInPubKey() {
 		switch (this.getInType()) {
@@ -485,7 +485,7 @@ public class BitcoinScript {
 		default:
 			return null;
 		}
-	};
+	}
 
 	public BitcoinAddress getAddress() {
 		try {
@@ -508,7 +508,7 @@ public class BitcoinScript {
 		}
 
 		return null;
-	};
+	}
 
 	public int extractPubKeys(List<Hash> pubkeys) {
 		switch (this.getOutType()) {
@@ -525,13 +525,11 @@ public class BitcoinScript {
 						new Hash(this.chunks.get(this.chunks.size() - 3 - ii)));
 			}
 
-			int m = unsignedByteToInt(this.chunks.get(this.chunks.size() - 3
+			return unsignedByteToInt(this.chunks.get(this.chunks.size() - 3
 					- n)[0])
 					- OP_1 + 1;
-
-			return m;
 		}
 
 		return 0;
-	};
+	}
 }

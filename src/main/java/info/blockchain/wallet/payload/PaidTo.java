@@ -1,11 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import org.json.JSONObject;
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PaidTo {
 
@@ -14,7 +10,8 @@ public class PaidTo {
     private Integer strRedeemedAt = null;
     private String strAddress = null;
 
-    public PaidTo() { ; }
+    public PaidTo() {
+    }
 
     public PaidTo(String email, String mobile, Integer redeemed, String address) {
         this.strEmail = email;

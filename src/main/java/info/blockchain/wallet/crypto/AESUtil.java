@@ -1,8 +1,13 @@
 package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.util.CharSequenceX;
+
 import org.apache.commons.codec.binary.Base64;
-import org.spongycastle.crypto.*;
+import org.spongycastle.crypto.BlockCipher;
+import org.spongycastle.crypto.BufferedBlockCipher;
+import org.spongycastle.crypto.CipherParameters;
+import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.crypto.PBEParametersGenerator;
 import org.spongycastle.crypto.engines.AESEngine;
 import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.spongycastle.crypto.modes.CBCBlockCipher;
@@ -13,9 +18,10 @@ import org.spongycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.crypto.params.ParametersWithIV;
 
-import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
+
+import javax.annotation.Nullable;
 
 public class AESUtil	{
 
@@ -163,9 +169,7 @@ public class AESUtil	{
 
 //      String ret = Base64.encodeBase64String(ivAppended);
         byte[] raw = Base64.encodeBase64(ivAppended);
-        String ret = new String(raw);
-
-        return ret;
+        return new String(raw);
     }
 
     private static byte[] cipherData(BufferedBlockCipher cipher, byte[] data)  {

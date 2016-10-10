@@ -2,12 +2,14 @@ package info.blockchain.api;
 
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,7 +104,7 @@ public class WalletPayload implements BaseApi {
         StringBuilder args = new StringBuilder();
         try {
 
-            String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString());
+            String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString(), StandardCharsets.UTF_8.toString());
 
             args.append("guid=");
             args.append(URLEncoder.encode(guid, "utf-8"));

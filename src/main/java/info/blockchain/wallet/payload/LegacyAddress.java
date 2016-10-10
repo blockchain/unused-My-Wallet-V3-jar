@@ -22,7 +22,8 @@ public class LegacyAddress {
     private long tag = 0L;
     private boolean watchOnly = false;
 
-    public LegacyAddress() { ; }
+    public LegacyAddress() {
+    }
 
     public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version) {
         this.strEncryptedKey = encryptedKey;
@@ -161,14 +162,14 @@ public class LegacyAddress {
 		ECKey keyUnCompressed = null;
 		BigInteger priv = new BigInteger(privBytes);
 		if(priv.compareTo(BigInteger.ZERO) >= 0) {
-			keyCompressed = new ECKey(priv, null, true);
-			keyUnCompressed = new ECKey(priv, null, false);
+            keyCompressed = ECKey.fromPrivate(priv, true);
+			keyUnCompressed = ECKey.fromPrivate(priv, false);
 		}
 		else {
 			byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
 			BigInteger priv2 = new BigInteger(appendZeroByte);
-			keyCompressed = new ECKey(priv2, null, true);
-			keyUnCompressed = new ECKey(priv2, null, false);
+			keyCompressed = ECKey.fromPrivate(priv2, true);
+			keyUnCompressed = ECKey.fromPrivate(priv2, false);
 		}
 
 		if(keyCompressed != null && keyCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {

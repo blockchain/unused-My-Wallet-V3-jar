@@ -40,7 +40,7 @@ public class Wallet {
 
     private NetworkParameters params = null;
 
-    private Wallet() { ; }
+    private Wallet() {}
 
     /**
      * Constructor for wallet.

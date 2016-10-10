@@ -6,7 +6,6 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +17,8 @@ public class WebUtil{
 
     private static WebUtil instance = null;
 
-    private WebUtil() { ; }
+    private WebUtil() {
+    }
 
     public static WebUtil getInstance() {
 
@@ -154,13 +154,10 @@ public class WebUtil{
         Map<String, List<String>> headerFields = conn.getHeaderFields();
 
         Set<String> headerFieldsSet = headerFields.keySet();
-        Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
 
-        while(hearerFieldsIter.hasNext()) {
+        for (String headerFieldKey : headerFieldsSet) {
 
-            String headerFieldKey = hearerFieldsIter.next();
-
-            if("Set-Cookie".equalsIgnoreCase(headerFieldKey)) {
+            if ("Set-Cookie".equalsIgnoreCase(headerFieldKey)) {
 
                 List<String> headerFieldValue = headerFields.get(headerFieldKey);
 
@@ -176,25 +173,22 @@ public class WebUtil{
                     boolean secure = false;
 
                     // Parse each field
-                    for(int j = 1; j < fields.length; j++) {
-                        if("secure".equalsIgnoreCase(fields[j])) {
+                    for (int j = 1; j < fields.length; j++) {
+                        if ("secure".equalsIgnoreCase(fields[j])) {
                             secure = true;
-                        }
-                        else if(fields[j].indexOf('=') > 0) {
+                        } else if (fields[j].indexOf('=') > 0) {
                             String[] f = fields[j].split("=");
-                            if("expires".equalsIgnoreCase(f[0])) {
+                            if ("expires".equalsIgnoreCase(f[0])) {
                                 expires = f[1];
-                            }
-                            else if("domain".equalsIgnoreCase(f[0])) {
+                            } else if ("domain".equalsIgnoreCase(f[0])) {
                                 domain = f[1];
-                            }
-                            else if("path".equalsIgnoreCase(f[0])) {
+                            } else if ("path".equalsIgnoreCase(f[0])) {
                                 path = f[1];
                             }
                         }
                     }
 
-                    if(cookieValue.startsWith(cname + "=")) {
+                    if (cookieValue.startsWith(cname + "=")) {
                         ret = cookieValue.substring(cname.length() + 1);
                     }
 

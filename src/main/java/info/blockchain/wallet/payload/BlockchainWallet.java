@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class BlockchainWallet {
 
     public static final int DEFAULT_PBKDF2_ITERATIONS_V2 = 5000;

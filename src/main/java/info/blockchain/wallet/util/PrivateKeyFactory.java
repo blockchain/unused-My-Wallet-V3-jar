@@ -27,7 +27,8 @@ public class PrivateKeyFactory	{
 
     private static PrivateKeyFactory instance = null;
 
-    private PrivateKeyFactory()	 { ; }
+    private PrivateKeyFactory()	 {
+	}
 
     public static PrivateKeyFactory getInstance()	 {
 
@@ -129,24 +130,21 @@ public class PrivateKeyFactory	{
 		byte[] privBytes = Base58.decode(base58Priv);
 		// Prepend a zero byte to make the biginteger unsigned
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-		ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
-		return ecKey;
+		return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
 	}
 
 	private ECKey decodeBase64PK(String base64Priv) throws Exception {
 		byte[] privBytes = Base64.decodeBase64(base64Priv.getBytes());
 		// Prepend a zero byte to make the biginteger unsigned
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-		ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
-		return ecKey;
+		return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
 	}
 
     private ECKey decodeHexPK(String hex, boolean compressed) throws Exception {
         byte[] privBytes = Hex.decode(hex);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-        ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, compressed);
-        return ecKey;
+		return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
 	private String decryptPK(String base58Priv) throws Exception {

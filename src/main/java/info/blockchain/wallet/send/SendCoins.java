@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import info.blockchain.wallet.util.Hash;
@@ -38,7 +36,8 @@ public class SendCoins	{
 
     private static SendCoins instance = null;
 
-    private SendCoins () { ; }
+    private SendCoins () {
+    }
 
     public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.000005460").longValue());
 
@@ -88,17 +87,16 @@ public class SendCoins	{
         List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
         BigInteger outputValueSum = BigInteger.ZERO;
 
-        for(Iterator<Entry<String, BigInteger>> iterator = receivingAddresses.entrySet().iterator(); iterator.hasNext();)   {
-            Map.Entry<String, BigInteger> mapEntry = iterator.next();
+        for (Entry<String, BigInteger> mapEntry : receivingAddresses.entrySet()) {
             String toAddress = mapEntry.getKey();
             BigInteger amount = mapEntry.getValue();
 
-            if(amount == null || amount.compareTo(BigInteger.ZERO) <= 0) {
+            if (amount == null || amount.compareTo(BigInteger.ZERO) <= 0) {
                 throw new Exception("Invalid amount");
             }
 
-            if(amount.compareTo(bDust) < 1)    {
-              throw new Exception("Dust amount");
+            if (amount.compareTo(bDust) < 1) {
+                throw new Exception("Dust amount");
             }
 
             outputValueSum = outputValueSum.add(amount);

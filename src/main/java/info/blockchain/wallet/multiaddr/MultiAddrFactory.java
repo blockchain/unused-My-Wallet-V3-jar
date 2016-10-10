@@ -31,7 +31,8 @@ public class MultiAddrFactory   {
 
     private static MultiAddrFactory instance = null;
 
-    private MultiAddrFactory()  { ; }
+    private MultiAddrFactory()  {
+    }
 
     public static final String RECEIVED = "RECEIVED";
     public static final String SENT = "SENT";
@@ -216,7 +217,7 @@ public class MultiAddrFactory   {
                             // store path info in order to generate private key later on
                             //
                             if(outObj.has("spent"))  {
-                                if(outObj.getBoolean("spent") == false && outObj.has("addr"))  {
+                                if(!outObj.getBoolean("spent") && outObj.has("addr"))  {
                                     if(!haveUnspentOuts.containsKey(addr))  {
                                         List<String> addrs = new ArrayList<String>();
                                         haveUnspentOuts.put(addr, addrs);
@@ -343,7 +344,7 @@ public class MultiAddrFactory   {
                     txObj = (JSONObject)txArray.get(i);
                     long height = 0L;
                     long amount = 0L;
-                    long move_amount = 0l;
+                    long move_amount = 0L;
                     long ts = 0L;
                     String hash = null;
                     String inputAddr = null;
@@ -638,10 +639,7 @@ public class MultiAddrFactory   {
             List<Tx> txs = xpub_txs.get(key);
             for(Tx tx : txs)  {
                 if(tx.isMove())  {
-                    if(seen_moves.contains(tx.getHash()))  {
-                        continue;
-                    }
-                    else  {
+                    if(!seen_moves.contains(tx.getHash()))  {
                         ret.add(tx);
                         seen_moves.add(tx.getHash());
                     }

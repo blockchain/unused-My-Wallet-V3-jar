@@ -76,20 +76,15 @@ public class CharSequenceX implements CharSequence {
 
     @Override
     public boolean equals(Object o) {
-        if(o instanceof CharSequenceX) {
-            return Arrays.equals(chars, ((CharSequenceX) o).chars);
-        }
-        else {
-            return false;
-        }
+        return o instanceof CharSequenceX && Arrays.equals(chars, ((CharSequenceX) o).chars);
     }
 
     @Override
     public CharSequence subSequence(int start, int end) {
-        CharSequenceX s = new CharSequenceX(this, start, end);
-        return s;
+        return new CharSequenceX(this, start, end);
     }
 
+    @SuppressWarnings("FinalizeDoesntCallSuperFinalize")
     protected void finalize() {
         zap();
     }

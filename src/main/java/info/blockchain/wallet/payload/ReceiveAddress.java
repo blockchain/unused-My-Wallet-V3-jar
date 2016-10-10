@@ -1,9 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import org.json.JSONObject;
 import org.json.JSONException;
-
-import info.blockchain.wallet.util.WebUtil;
+import org.json.JSONObject;
 
 public class ReceiveAddress {
 
@@ -16,7 +14,8 @@ public class ReceiveAddress {
 
     private boolean useThis = true;
 
-    public ReceiveAddress() { ; }
+    public ReceiveAddress() {
+    }
 
     public ReceiveAddress(int index, long amount, long paid, String label, int nbTx) {
         this.index = index;
@@ -73,12 +72,7 @@ public class ReceiveAddress {
     }
 
     public boolean isComplete() {
-        if(this.paid >= this.amount) {
-            return true;
-        }
-        else {
-        	return false;
-        }
+        return this.paid >= this.amount;
     }
 
     public long getPaid() {
@@ -209,16 +203,14 @@ public class ReceiveAddress {
 	            JSONObject jsonObject = new JSONObject(json);
 
 	            if(jsonObject.has("n_tx")) {
-	            	int val = (Integer)jsonObject.get("n_tx");
-	            	nbTx = val;
+                    nbTx = (int) (Integer)jsonObject.get("n_tx");
 	            }
 	            else {
 	            	nbTx = 0;
 	            }
 
 	            if(jsonObject.has("final_balance")) {
-	            	long val = jsonObject.getLong("final_balance");
-	            	amount = val;
+                    amount = jsonObject.getLong("final_balance");
 	            }
 	            else {
 	            	amount = 0L;
@@ -231,12 +223,7 @@ public class ReceiveAddress {
 			}
     	}
 
-		if(amount == 0L && nbTx == 0) {
-			useThis = true;
-		}
-		else {
-			useThis = false;
-		}
+        useThis = amount == 0L && nbTx == 0;
 
     }
 

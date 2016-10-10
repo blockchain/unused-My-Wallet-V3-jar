@@ -30,7 +30,7 @@ public class Account {
 
     private NetworkParameters params = null;
 
-    private Account() { ; }
+    private Account() {}
 
     /**
      * Constructor for account.

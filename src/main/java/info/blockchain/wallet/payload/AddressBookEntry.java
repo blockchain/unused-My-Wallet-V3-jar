@@ -8,7 +8,8 @@ public class AddressBookEntry {
     private String strAddress = null;
     private String strLabel = null;
 
-    public AddressBookEntry() { ; }
+    public AddressBookEntry() {
+    }
 
     public AddressBookEntry(String address, String label) {
         this.strAddress = address;

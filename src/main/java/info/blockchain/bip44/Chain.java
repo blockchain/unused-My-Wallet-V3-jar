@@ -27,7 +27,7 @@ public class Chain {
     public static final int RECEIVE_CHAIN = 0;
     public static final int CHANGE_CHAIN = 1;
 
-    private Chain() { ; }
+    private Chain() {}
 
     /**
      * Constructor for a chain.

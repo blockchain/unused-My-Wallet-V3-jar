@@ -7,7 +7,8 @@ public class Util	{
 
     private static Util instance = null;
 
-    private Util() { ; }
+    private Util() {
+    }
 
     public static Util getInstance() {
 
@@ -37,6 +38,7 @@ public class Util	{
      * Calculates the SHA-256 hash of the given byte range, and then hashes the resulting hash again. This is
      * standard procedure in Bitcoin. The resulting hash is in big endian form.
      */
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public static byte[] doubleDigest(byte[] input, int offset, int length) {
 
         MessageDigest digest = null;

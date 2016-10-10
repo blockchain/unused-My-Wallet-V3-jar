@@ -10,7 +10,8 @@ public class XPut {
     private boolean multAddrs = false;
     private long amount = 0L;
 
-    public XPut() { ; }
+    public XPut() {
+    }
 
     public XPut(int id, String addr, boolean multi, long amount) {
         this.accountId = id;

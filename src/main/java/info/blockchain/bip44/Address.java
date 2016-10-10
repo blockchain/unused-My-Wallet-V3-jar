@@ -27,7 +27,8 @@ public class Address {
 
     private NetworkParameters params = null;
 
-    private Address() { ; }
+    private Address() {
+    }
 
     /**
      * Constructor an HD address.
@@ -126,6 +127,10 @@ public class Address {
      */
     public String getPath() {
         return strPath;
+    }
+
+    public int getChildNum() {
+        return childNum;
     }
 
     /**

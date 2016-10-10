@@ -1,12 +1,18 @@
 package info.blockchain.wallet.payload;
 
 import com.google.common.annotations.VisibleForTesting;
+
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
-import info.blockchain.wallet.exceptions.*;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
+import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
@@ -14,6 +20,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,12 +32,13 @@ import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * PayloadManager.java : singleton class for reading/writing/parsing Blockchain HD JSON payload
@@ -59,7 +67,6 @@ public class PayloadManager {
     private static info.blockchain.bip44.Wallet wallet;
 
     private PayloadManager() {
-        ;
     }
 
     /**
@@ -465,7 +472,6 @@ public class PayloadManager {
             for (int i = 0; i < nb_accounts; i++) {
                 boolean isArchived = payload.getHdWallet().getAccounts().get(i).isArchived();
                 if (isArchived && !includeArchives) {
-                    ;
                 } else {
                     String s = payload.getHdWallet().getAccounts().get(i).getXpub();
                     if (s != null && s.length() > 0) {

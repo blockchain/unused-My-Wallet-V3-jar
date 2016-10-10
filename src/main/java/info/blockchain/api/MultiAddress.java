@@ -42,8 +42,7 @@ public class MultiAddress implements BaseApi {
         url.append("&api_code=" + API_CODE);
 
         String response = WebUtil.getInstance().getURL(url.toString());
-        JSONObject jsonObject = new JSONObject(response);
 
-        return jsonObject;
+        return new JSONObject(response);
     }
 }

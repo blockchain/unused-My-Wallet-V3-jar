@@ -21,7 +21,8 @@ public class FormatsUtil {
 
 	private static FormatsUtil instance = null;
 
-	private FormatsUtil() { ; }
+	private FormatsUtil() {
+	}
 
 	public static FormatsUtil getInstance() {
 
@@ -139,21 +140,11 @@ public class FormatsUtil {
 	}
 
 	public boolean isValidEmailAddress(final String address) {
-		if(emailPattern.matcher(address).matches()) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return emailPattern.matcher(address).matches();
 	}
 
 	public boolean isValidMobileNumber(final String mobile) {
-		if(phonePattern.matcher(mobile).matches()) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return phonePattern.matcher(mobile).matches();
 	}
 
 	private String uri2BitcoinAddress(final String address) {

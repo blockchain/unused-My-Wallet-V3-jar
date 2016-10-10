@@ -197,11 +197,7 @@ public class HDPayloadBridge {
 
             } while (!no_tx && attempts < 3);
 
-            if (!no_tx && isNewlyCreated) {
-                return false;
-            } else {
-                return true;
-            }
+            return !(!no_tx && isNewlyCreated);
         }
 
         List<Account> accounts = payload.getHdWallet().getAccounts();

@@ -4,6 +4,7 @@ import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
@@ -11,12 +12,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -352,8 +360,9 @@ public class Payload implements Serializable{
         if(jsonObject.has("tx_notes"))  {
             JSONObject tx_notes = (JSONObject)jsonObject.get("tx_notes");
             Map<String,String> notes = new HashMap<String,String>();
-            for(Iterator<String> keys = tx_notes.keys(); keys.hasNext();)  {
-                String key = keys.next();
+
+            for(Iterator keys = tx_notes.keys(); keys.hasNext();)  {
+                String key = (String) keys.next();
                 String note = (String)tx_notes.get(key);
                 notes.put(key, note);
             }
@@ -363,8 +372,8 @@ public class Payload implements Serializable{
         if(jsonObject.has("tx_tags"))  {
             JSONObject tx_tags = (JSONObject)jsonObject.get("tx_tags");
             Map<String,List<Integer>> _tags = new HashMap<String,List<Integer>>();
-            for(Iterator<String> keys = tx_tags.keys(); keys.hasNext();)  {
-                String key = keys.next();
+            for(Iterator keys = tx_tags.keys(); keys.hasNext();)  {
+                String key = (String) keys.next();
                 JSONArray tagsObj = (JSONArray)tx_tags.get(key);
                 List<Integer> tags = new ArrayList<Integer>();
                 for(int i = 0; i < tagsObj.length(); i++)  {
@@ -388,8 +397,8 @@ public class Payload implements Serializable{
         if(jsonObject.has("paidTo"))  {
             JSONObject paid2 = (JSONObject)jsonObject.get("paidTo");
             Map<String,PaidTo> pto = new HashMap<String,PaidTo>();
-            for(Iterator<String> keys = paid2.keys(); keys.hasNext();)  {
-                String key = keys.next();
+            for(Iterator keys = paid2.keys(); keys.hasNext();)  {
+                String key = (String) keys.next();
                 PaidTo p = new PaidTo();
                 JSONObject t = (JSONObject)paid2.get(key);
                 p.setEmail(t.isNull("email") ? null : t.optString("email", null));

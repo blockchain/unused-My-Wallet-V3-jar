@@ -16,7 +16,7 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
 	private String path;
 
 	public MyTransactionOutPoint(Sha256Hash txHash, int txOutputN, BigInteger value, byte[] scriptBytes) throws ProtocolException {
-		super(MainNetParams.get(), txOutputN, new Sha256Hash(txHash.getBytes()));
+		super(MainNetParams.get(), txOutputN, Sha256Hash.wrap(txHash.getBytes()));
 		this.scriptBytes = scriptBytes;
 		this.value = value;
 		this.txOutputN = txOutputN;
