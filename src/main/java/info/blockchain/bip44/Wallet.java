@@ -51,7 +51,8 @@ public class Wallet {
      * @param passphrase optional BIP39 passphrase
      * @param nbAccounts number of accounts to create
      */
-    public Wallet(MnemonicCode mc, NetworkParameters params, byte[] seed, String passphrase, int nbAccounts) throws MnemonicException.MnemonicLengthException {
+    public Wallet(MnemonicCode mc, NetworkParameters params, byte[] seed, String passphrase,
+                  int nbAccounts) throws MnemonicException.MnemonicLengthException {
 
         this.params = params;
         this.seed = seed;
@@ -71,7 +72,8 @@ public class Wallet {
         strPath = dKey.getPathAsString();
     }
 
-    public Wallet(JSONObject jsonobj, NetworkParameters params, Locale locale) throws DecoderException, JSONException, IOException, MnemonicException.MnemonicLengthException {
+    public Wallet(JSONObject jsonobj, NetworkParameters params, Locale locale) throws DecoderException,
+            JSONException, IOException, MnemonicException.MnemonicLengthException {
 
         this.params = params;
         seed = Hex.decodeHex(((String) jsonobj.get("hex_seed")).toCharArray());

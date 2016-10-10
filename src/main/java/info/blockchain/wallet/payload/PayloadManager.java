@@ -101,7 +101,10 @@ public class PayloadManager {
     /**
      * Downloads payload from server, decrypts, and stores as local var {@link Payload}
      */
-    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException, ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
+    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid,
+                                @Nonnull CharSequenceX password,
+                                @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException,
+            ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
 
         String walletData = null;
         try {
@@ -374,7 +377,8 @@ public class PayloadManager {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
+    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated,
+                                     String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
 
         //Check if payload has 2nd password
         if (payload.isDoubleEncrypted()) {
@@ -457,7 +461,9 @@ public class PayloadManager {
         return payload != null && !payload.isUpgraded();
     }
 
-    public String[] getXPUBs(boolean includeArchives) throws IOException, DecoderException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {
+    public String[] getXPUBs(boolean includeArchives) throws IOException, DecoderException,
+            AddressFormatException, MnemonicException.MnemonicLengthException,
+            MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {
 
         ArrayList<String> xpubs = new ArrayList<String>();
 

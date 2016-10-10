@@ -95,7 +95,9 @@ public class WalletPayload implements BaseApi {
 
     }
 
-    public boolean savePayloadToServer(String method, String guid, String sharedKey, List<LegacyAddress> legacyAddresses, JSONObject encryptedPayload, boolean syncPubkeys, String newChecksum, String oldChecksum, String email) {
+    public boolean savePayloadToServer(String method, String guid, String sharedKey,
+                                       List<LegacyAddress> legacyAddresses, JSONObject encryptedPayload,
+                                       boolean syncPubkeys, String newChecksum, String oldChecksum, String email) {
 
         StringBuilder args = new StringBuilder();
         try {

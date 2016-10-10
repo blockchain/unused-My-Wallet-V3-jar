@@ -64,7 +64,9 @@ public class SendCoins {
      * @param String                      changeAddress Change address for this spend
      * @return Pair<Transaction, Long>
      */
-    public Pair<Transaction, Long> makeTransaction(boolean isSimpleSend, List<MyTransactionOutPoint> unspent, HashMap<String, BigInteger> receivingAddresses, BigInteger fee, final String changeAddress) throws Exception {
+    public Pair<Transaction, Long> makeTransaction(boolean isSimpleSend, List<MyTransactionOutPoint> unspent,
+                                                   HashMap<String, BigInteger> receivingAddresses,
+                                                   BigInteger fee, final String changeAddress) throws Exception {
 
         long priority = 0;
 
@@ -99,7 +101,8 @@ public class SendCoins {
             outputValueSum = outputValueSum.add(amount);
             // Add the output
             BitcoinScript toOutputScript = BitcoinScript.createSimpleOutBitcoinScript(new BitcoinAddress(toAddress));
-            TransactionOutput output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(amount.longValue()), toOutputScript.getProgram());
+            TransactionOutput output = new TransactionOutput(MainNetParams.get(), null,
+                    Coin.valueOf(amount.longValue()), toOutputScript.getProgram());
             outputs.add(output);
         }
 
@@ -126,7 +129,8 @@ public class SendCoins {
                 continue;
             }
 
-            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
+            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0],
+                    outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
             inputs.add(input);
             valueSelected = valueSelected.add(outPoint.getValue());
             priority += outPoint.getValue().longValue() * outPoint.getConfirmations();
@@ -161,7 +165,8 @@ public class SendCoins {
                 } else {
                     throw new Exception("Change address null");
                 }
-                TransactionOutput change_output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(change.longValue()), change_script.getProgram());
+                TransactionOutput change_output = new TransactionOutput(MainNetParams.get(),
+                        null, Coin.valueOf(change.longValue()), change_script.getProgram());
                 outputs.add(change_output);
             }
         }

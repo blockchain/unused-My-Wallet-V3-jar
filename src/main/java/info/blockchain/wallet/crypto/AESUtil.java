@@ -46,7 +46,8 @@ public class AESUtil {
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) {
+    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations,
+                                            int mode, @Nullable BlockCipherPadding padding) {
 
         final int AESBlockSize = 4;
 
@@ -112,7 +113,8 @@ public class AESUtil {
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) {
+    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations,
+                                            int mode, @Nullable BlockCipherPadding padding) {
 
         final int AESBlockSize = 4;
 

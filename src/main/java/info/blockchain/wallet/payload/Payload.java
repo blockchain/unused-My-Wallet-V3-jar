@@ -636,7 +636,8 @@ public class Payload implements Serializable {
                             created_device_version = "";
                         }
 
-                        legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
+                        legacyAddress = new LegacyAddress(priv, created_time, addr, label,
+                                tag, created_device_name, created_device_version, watchOnly);
                         legacyAddresses.add(legacyAddress);
                         seenAddrs.add(addr);
 
@@ -781,7 +782,8 @@ public class Payload implements Serializable {
         this.decryptedPayload = decryptedPayload;
     }
 
-    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public Pair encryptPayload(String payloadCleartext, CharSequenceX password,int iterations,
+                               double version) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
         String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
         JSONObject rootObj = new JSONObject();

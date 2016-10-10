@@ -21,14 +21,16 @@ public class MyTransactionInput extends TransactionInput {
     public String txHash;
     public int txPos;
 
-    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction, byte[] scriptBytes, TransactionOutPoint outpoint, String txHash, int txPos) {
+    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction,
+                              byte[] scriptBytes, TransactionOutPoint outpoint, String txHash, int txPos) {
         super(params, parentTransaction, scriptBytes, outpoint);
         this.params = params;
         this.txHash = txHash;
         this.txPos = txPos;
     }
 
-    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction, byte[] scriptBytes, TransactionOutPoint outpoint) {
+    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction,
+                              byte[] scriptBytes, TransactionOutPoint outpoint) {
         super(params, parentTransaction, scriptBytes, outpoint);
         this.params = params;
         this.txHash = "";

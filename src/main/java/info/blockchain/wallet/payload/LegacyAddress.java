@@ -27,7 +27,8 @@ public class LegacyAddress {
         ;
     }
 
-    public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version) {
+    public LegacyAddress(String encryptedKey, long created, String address, String label,
+                         long tag, String device_name, String device_version) {
         this.strEncryptedKey = encryptedKey;
         this.created = created;
         this.strAddress = address;
@@ -37,7 +38,8 @@ public class LegacyAddress {
         this.strCreatedDeviceVersion = device_version;
     }
 
-    public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version, boolean watchOnly) {
+    public LegacyAddress(String encryptedKey, long created, String address, String label,
+                         long tag, String device_name, String device_version, boolean watchOnly) {
         this.strEncryptedKey = encryptedKey;
         this.created = created;
         this.strAddress = address;

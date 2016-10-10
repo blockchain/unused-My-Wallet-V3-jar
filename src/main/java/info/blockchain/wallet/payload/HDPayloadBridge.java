@@ -98,7 +98,7 @@ public class HDPayloadBridge {
         return bip44WalletFactory.restoreWallet(decrypted_hex, DEFAULT_PASSPHRASE, payload.getHdWallet().getAccounts().size());
     }
 
-    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw) throws IOException, MnemonicException.MnemonicLengthException {
+    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw)throws IOException, MnemonicException.MnemonicLengthException {
 
         String guid = UUID.randomUUID().toString();
         String sharedKey = UUID.randomUUID().toString();
@@ -142,7 +142,8 @@ public class HDPayloadBridge {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public boolean upgradeV2PayloadToV3(Payload payload, CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName) throws Exception {
+    public boolean upgradeV2PayloadToV3(Payload payload, CharSequenceX secondPassword,
+                                        boolean isNewlyCreated, String defaultAccountName) throws Exception {
 
         //
         // create HD wallet and sync w/ payload
