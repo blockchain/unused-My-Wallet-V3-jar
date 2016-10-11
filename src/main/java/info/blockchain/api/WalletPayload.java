@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class WalletPayload implements BaseApi {
     public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
 
     private String sessionId;
-    public static String KEY_AUTH_REQUIRED = "Authorization Required";
+    public static final String KEY_AUTH_REQUIRED = "Authorization Required";
 
     private String payloadUrl = PROD_PAYLOAD_URL;
 
@@ -43,7 +44,7 @@ public class WalletPayload implements BaseApi {
     public String getPairingEncryptionPassword(final String guid) throws Exception {
         StringBuilder args = new StringBuilder();
 
-        args.append("guid=" + guid);
+        args.append("guid=").append(guid);
         args.append("&method=pairing-encryption-password");
 
         return WebUtil.getInstance().postURL(payloadUrl, args.toString());
@@ -102,7 +103,7 @@ public class WalletPayload implements BaseApi {
         StringBuilder args = new StringBuilder();
         try {
 
-            String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString());
+            String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString(), StandardCharsets.UTF_8.toString());
 
             args.append("guid=");
             args.append(URLEncoder.encode(guid, "utf-8"));

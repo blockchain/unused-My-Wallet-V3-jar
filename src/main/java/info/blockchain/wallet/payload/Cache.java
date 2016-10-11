@@ -9,7 +9,6 @@ public class Cache {
     protected String changeAccount = null;
 
     public Cache() {
-        ;
     }
 
     public String getReceiveAccount() {

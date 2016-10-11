@@ -19,7 +19,7 @@ public class MultiAddress implements BaseApi {
     public JSONObject getLegacy(String[] addresses, boolean simple) throws Exception {
 
 
-        JSONObject jsonObject = null;
+        JSONObject jsonObject;
 
         StringBuilder url = new StringBuilder(multiAddrressUrl);
         url.append(StringUtils.join(addresses, "|"));
@@ -43,8 +43,7 @@ public class MultiAddress implements BaseApi {
         url.append("&api_code=" + API_CODE);
 
         String response = WebUtil.getInstance().getURL(url.toString());
-        JSONObject jsonObject = new JSONObject(response);
 
-        return jsonObject;
+        return new JSONObject(response);
     }
 }

@@ -27,7 +27,6 @@ public class PrivateKeyFactory {
     private static PrivateKeyFactory instance = null;
 
     private PrivateKeyFactory() {
-        ;
     }
 
     public static PrivateKeyFactory getInstance() {
@@ -39,7 +38,7 @@ public class PrivateKeyFactory {
         return instance;
     }
 
-    public String getFormat(String key) throws Exception {
+    public String getFormat(String key) {
         // 51 characters base58, always starts with a '5'
         if (key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$")) {
             return WIF_UNCOMPRESSED;
@@ -62,7 +61,7 @@ public class PrivateKeyFactory {
                 key.matches("^S[1-9A-HJ-NP-Za-km-z]{29}$") ||
                 key.matches("^S[1-9A-HJ-NP-Za-km-z]{30}$")) {
 
-            byte[] testBytes = null;
+            byte[] testBytes;
             String data = key + "?";
             try {
                 Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
@@ -118,27 +117,24 @@ public class PrivateKeyFactory {
         byte[] privBytes = Base58.decode(base58Priv);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-        ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
-        return ecKey;
+        return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
     }
 
-    private ECKey decodeBase64PK(String base64Priv) throws Exception {
+    private ECKey decodeBase64PK(String base64Priv) {
         byte[] privBytes = Base64.decodeBase64(base64Priv.getBytes());
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-        ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, true);
-        return ecKey;
+        return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
     }
 
-    private ECKey decodeHexPK(String hex, boolean compressed) throws Exception {
+    private ECKey decodeHexPK(String hex, boolean compressed) {
         byte[] privBytes = Hex.decode(hex);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-        ECKey ecKey = new ECKey(new BigInteger(appendZeroByte), null, compressed);
-        return ecKey;
+        return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
-    private String decryptPK(String base58Priv) throws Exception {
+    private String decryptPK(String base58Priv) {
 
 		/*
         if (this.isDoubleEncrypted()) {

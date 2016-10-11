@@ -15,7 +15,6 @@ public class ReceiveAddress {
     private boolean useThis = true;
 
     public ReceiveAddress() {
-        ;
     }
 
     public ReceiveAddress(int index, long amount, long paid, String label, int nbTx) {
@@ -62,9 +61,7 @@ public class ReceiveAddress {
         return strAddress;
     }
 
-    public void setAddress(String address) {
-        this.strAddress = address;
-    }
+    public void setAddress(String address) { this.strAddress = address; }
 
     public long getAmount() {
         return amount;
@@ -75,11 +72,7 @@ public class ReceiveAddress {
     }
 
     public boolean isComplete() {
-        if (this.paid >= this.amount) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.paid >= this.amount;
     }
 
     public long getPaid() {
@@ -94,9 +87,7 @@ public class ReceiveAddress {
         return strLabel;
     }
 
-    public void setLabel(String label) {
-        this.strLabel = label;
-    }
+    public void setLabel(String label) { this.strLabel = label; }
 
     public int getIndex() {
         return index;
@@ -119,7 +110,6 @@ public class ReceiveAddress {
         paid += amount;
 
     }
-
     /*
         public void checkTX() {
             new AddressInfo().execute("");
@@ -140,7 +130,6 @@ public class ReceiveAddress {
     public boolean notPreviouslyUsed() {
         return useThis;
     }
-
     /*
         private class AddressInfo extends AsyncTask<String, Void, String> {
 
@@ -207,38 +196,34 @@ public class ReceiveAddress {
             protected void onProgressUpdate(Void... values) {}
         }
     */
-    private void initJSON(String json) {
+    private void initJSON(String json)	 {
 
-        if (json != null) {
+        if(json != null) {
             try {
                 JSONObject jsonObject = new JSONObject(json);
 
-                if (jsonObject.has("n_tx")) {
-                    int val = (Integer) jsonObject.get("n_tx");
-                    nbTx = val;
-                } else {
+                if(jsonObject.has("n_tx")) {
+                    nbTx = (int) (Integer)jsonObject.get("n_tx");
+                }
+                else {
                     nbTx = 0;
                 }
 
-                if (jsonObject.has("final_balance")) {
-                    long val = jsonObject.getLong("final_balance");
-                    amount = val;
-                } else {
+                if(jsonObject.has("final_balance")) {
+                    amount = jsonObject.getLong("final_balance");
+                }
+                else {
                     amount = 0L;
                 }
 
-            } catch (JSONException je) {
+            } catch(JSONException je) {
                 je.printStackTrace();
                 nbTx = 0;
                 amount = 0L;
             }
         }
 
-        if (amount == 0L && nbTx == 0) {
-            useThis = true;
-        } else {
-            useThis = false;
-        }
+        useThis = amount == 0L && nbTx == 0;
 
     }
 

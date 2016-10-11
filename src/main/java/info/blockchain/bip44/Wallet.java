@@ -40,7 +40,6 @@ public class Wallet {
     private NetworkParameters params = null;
 
     private Wallet() {
-        ;
     }
 
     /**
@@ -51,8 +50,7 @@ public class Wallet {
      * @param passphrase optional BIP39 passphrase
      * @param nbAccounts number of accounts to create
      */
-    public Wallet(MnemonicCode mc, NetworkParameters params, byte[] seed, String passphrase,
-                  int nbAccounts) throws MnemonicException.MnemonicLengthException {
+    public Wallet(MnemonicCode mc, NetworkParameters params, byte[] seed, String passphrase, int nbAccounts) throws MnemonicException.MnemonicLengthException {
 
         this.params = params;
         this.seed = seed;
@@ -72,12 +70,11 @@ public class Wallet {
         strPath = dKey.getPathAsString();
     }
 
-    public Wallet(JSONObject jsonobj, NetworkParameters params, Locale locale) throws DecoderException,
-            JSONException, IOException, MnemonicException.MnemonicLengthException {
+    public Wallet(JSONObject jsonobj, NetworkParameters params, Locale locale) throws DecoderException, JSONException, IOException, MnemonicException.MnemonicLengthException {
 
         this.params = params;
         seed = Hex.decodeHex(((String) jsonobj.get("hex_seed")).toCharArray());
-        strPassphrase = (String) jsonobj.getString("passphrase");
+        strPassphrase = jsonobj.getString("passphrase");
         int nbAccounts = jsonobj.getJSONArray("accounts").length();
 
         InputStream wis = this.getClass()
@@ -89,6 +86,7 @@ public class Wallet {
             wis.close();
         }
 
+        assert mc != null;
         wordList = mc.toMnemonic(seed);
         byte[] hd_seed = MnemonicCode.toSeed(wordList, strPassphrase);
         dkKey = HDKeyDerivation.createMasterPrivateKey(hd_seed);
@@ -111,7 +109,6 @@ public class Wallet {
     public Wallet(NetworkParameters params, String[] xpub) throws AddressFormatException {
 
         this.params = params;
-        DeterministicKey aKey = null;
         accounts = new ArrayList<Account>();
         for (int i = 0; i < xpub.length; i++) {
             accounts.add(new Account(params, xpub[i], i));

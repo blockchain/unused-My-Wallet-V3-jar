@@ -111,8 +111,6 @@ public class BitcoinAddress implements Serializable {
                 return false;
         } else if (!hash160.equals(other.hash160))
             return false;
-        if (version != other.version)
-            return false;
-        return true;
+        return version == other.version;
     }
 }

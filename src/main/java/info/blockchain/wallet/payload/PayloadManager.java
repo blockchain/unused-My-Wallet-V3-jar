@@ -21,18 +21,15 @@ import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
 
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,23 +46,25 @@ public class PayloadManager {
 
     private static PayloadManager instance = null;
     // active payload:
-    private static Payload payload = null;
+    private Payload payload = null;
     // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
-    private static String cached_payload = null;
+    private String cached_payload = null;
 
-    private static CharSequenceX strTempPassword = null;
-    private static boolean isNew = false;
-    private static String email = null;
+    private CharSequenceX strTempPassword = null;
+    private boolean isNew = false;
+    private String email = null;
 
-    private static double version = 2.0;
+    private double version = 2.0;
 
-    private static BlockchainWallet bciWallet;
+    private BlockchainWallet bciWallet;
 
-    private static HDPayloadBridge hdPayloadBridge;
-    private static info.blockchain.bip44.Wallet wallet;
+    private final HDPayloadBridge hdPayloadBridge;
+    private info.blockchain.bip44.Wallet wallet;
 
     private PayloadManager() {
-        ;
+        hdPayloadBridge = new HDPayloadBridge();
+        payload = new Payload();
+        cached_payload = "";
     }
 
     /**
@@ -77,9 +76,6 @@ public class PayloadManager {
 
         if (instance == null) {
             instance = new PayloadManager();
-            payload = new Payload();
-            cached_payload = "";
-            hdPayloadBridge = new HDPayloadBridge();
         }
 
         return instance;
@@ -99,12 +95,9 @@ public class PayloadManager {
     /**
      * Downloads payload from server, decrypts, and stores as local var {@link Payload}
      */
-    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid,
-                                @Nonnull CharSequenceX password,
-                                @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException,
-            ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
+    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException, ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
 
-        String walletData = null;
+        String walletData;
         try {
             walletData = new WalletPayload().fetchWalletData(guid, sharedKey);
         } catch (Exception e) {
@@ -142,8 +135,6 @@ public class PayloadManager {
             } catch (Exception e) {
                 throw new HDWalletException("Bip44 wallet error: " + e.getMessage());
             }
-        } else {
-            //V2 wallet - no need to keep in sync with bp44 wallet
         }
     }
 
@@ -188,6 +179,7 @@ public class PayloadManager {
     /**
      * Set if this payload is for a new Blockchain account.
      */
+    @SuppressWarnings("SameParameterValue")
     public void setNew(boolean isNew) {
         this.isNew = isNew;
     }
@@ -272,7 +264,7 @@ public class PayloadManager {
     }
 
     public void setEmail(String email) {
-        PayloadManager.email = email;
+        this.email = email;
     }
 
     public double getVersion() {
@@ -375,8 +367,7 @@ public class PayloadManager {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated,
-                                     String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
+    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
 
         //Check if payload has 2nd password
         if (payload.isDoubleEncrypted()) {
@@ -459,9 +450,8 @@ public class PayloadManager {
         return payload != null && !payload.isUpgraded();
     }
 
-    public String[] getXPUBs(boolean includeArchives) throws IOException, DecoderException,
-            AddressFormatException, MnemonicException.MnemonicLengthException,
-            MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {
+    @SuppressWarnings("SameParameterValue")
+    public String[] getXPUBs(boolean includeArchives) {
 
         ArrayList<String> xpubs = new ArrayList<String>();
 
@@ -470,7 +460,6 @@ public class PayloadManager {
             for (int i = 0; i < nb_accounts; i++) {
                 boolean isArchived = payload.getHdWallet().getAccounts().get(i).isArchived();
                 if (isArchived && !includeArchives) {
-                    ;
                 } else {
                     String s = payload.getHdWallet().getAccounts().get(i).getXpub();
                     if (s != null && s.length() > 0) {
@@ -494,8 +483,8 @@ public class PayloadManager {
     public void addAccount(String accountLabel, @Nullable String secondPassword, AccountAddListener listener) throws Exception {
 
         //Add account
-        String xpub = null;
-        String xpriv = null;
+        String xpub;
+        String xpriv;
 
         if (!payload.isDoubleEncrypted()) {
 
@@ -521,8 +510,7 @@ public class PayloadManager {
         }
 
         //Initialize newly created xpub's tx list and balance
-        List<Tx> txs = new ArrayList<Tx>();
-        MultiAddrFactory.getInstance().getXpubTxs().put(xpub, txs);
+        MultiAddrFactory.getInstance().getXpubTxs().put(xpub, new ArrayList<Tx>());
         MultiAddrFactory.getInstance().getXpubAmounts().put(xpub, 0L);
 
         //Get account list from payload (not in sync with wallet from WalletFactory)
@@ -570,7 +558,7 @@ public class PayloadManager {
 
         ECKey ecKey = getRandomECKey();
 
-        String encryptedKey = new String(Base58.encode(ecKey.getPrivKeyBytes()));
+        String encryptedKey = Base58.encode(ecKey.getPrivKeyBytes());
         if (payload.isDoubleEncrypted()) {
             encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
                     payload.getSharedKey(),
@@ -597,14 +585,14 @@ public class PayloadManager {
 
     ECKey getRandomECKey() {
 
-        byte[] data = null;
+        byte[] data;
         try {
             data = new ExternalEntropy().getRandomBytes();
         } catch (Exception e) {
             return null;
         }
 
-        ECKey ecKey = null;
+        ECKey ecKey;
         if (data != null) {
             byte[] rdata = new byte[32];
             SecureRandom random = new SecureRandom();
@@ -625,11 +613,11 @@ public class PayloadManager {
         return ecKey;
     }
 
-    public String getHDSeed() throws IOException, MnemonicException.MnemonicLengthException {
+    public String getHDSeed() {
         return wallet.getSeedHex();
     }
 
-    public String[] getMnemonic(String secondPassword) throws IOException, MnemonicException.MnemonicLengthException {
+    public String[] getMnemonic(String secondPassword) {
         try {
             Wallet wallet = getDecryptedWallet(secondPassword);
 
@@ -648,11 +636,11 @@ public class PayloadManager {
         return null;
     }
 
-    public String[] getMnemonic() throws IOException, MnemonicException.MnemonicLengthException {
+    public String[] getMnemonic() {
         return wallet.getMnemonic().split("\\s+");
     }
 
-    public String getHDPassphrase() throws IOException, MnemonicException.MnemonicLengthException {
+    public String getHDPassphrase() {
         return wallet.getPassphrase();
     }
 

@@ -159,7 +159,7 @@ public class BitcoinScript {
     public static final int OP_PUBKEY = 254;
     public static final int OP_INVALIDOPCODE = 255;
 
-    public static String[] op_names = new String[256];
+    public static final String[] op_names = new String[256];
 
     static {
         op_names[OP_0] = "OP_0";
@@ -319,8 +319,6 @@ public class BitcoinScript {
         bytes.add((byte) op0);
     }
 
-    ;
-
     public static void writeBytes(List<Byte> bytes, byte[] data) {
 
         if (data.length < OP_PUSHDATA1) {
@@ -344,8 +342,6 @@ public class BitcoinScript {
             bytes.add(b);
         }
     }
-
-    ;
 
     public static BitcoinScript createSimpleOutBitcoinScript(
             BitcoinAddress address) throws Exception {
@@ -440,8 +436,6 @@ public class BitcoinScript {
         }
     }
 
-    ;
-
     public BitcoinScript getP2SHScript() throws Exception {
         return new BitcoinScript(this.chunks.get(0));
     }
@@ -482,8 +476,6 @@ public class BitcoinScript {
         }
     }
 
-    ;
-
     public Hash getSimpleInPubKey() {
         switch (this.getInType()) {
             case ScriptInTypePubKey:
@@ -494,8 +486,6 @@ public class BitcoinScript {
                 return null;
         }
     }
-
-    ;
 
     public BitcoinAddress getAddress() {
         try {
@@ -520,8 +510,6 @@ public class BitcoinScript {
         return null;
     }
 
-    ;
-
     public int extractPubKeys(List<Hash> pubkeys) {
         switch (this.getOutType()) {
             case ScriptOutTypePubKey:
@@ -537,15 +525,11 @@ public class BitcoinScript {
                             new Hash(this.chunks.get(this.chunks.size() - 3 - ii)));
                 }
 
-                int m = unsignedByteToInt(this.chunks.get(this.chunks.size() - 3
+                return unsignedByteToInt(this.chunks.get(this.chunks.size() - 3
                         - n)[0])
                         - OP_1 + 1;
-
-                return m;
         }
 
         return 0;
     }
-
-    ;
 }

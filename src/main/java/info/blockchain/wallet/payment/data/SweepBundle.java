@@ -2,9 +2,6 @@ package info.blockchain.wallet.payment.data;
 
 import java.math.BigInteger;
 
-/**
- * Created by riaanvos on 03/08/16.
- */
 public class SweepBundle {
 
     private BigInteger sweepAmount;

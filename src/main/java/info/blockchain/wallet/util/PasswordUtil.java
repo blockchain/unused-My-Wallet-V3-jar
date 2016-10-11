@@ -21,7 +21,6 @@ public class PasswordUtil {
     private static final double QUALITY_STRONG = 31;
 
     private PasswordUtil() {
-        ;
     }
 
     public static PasswordUtil getInstance() {

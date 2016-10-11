@@ -153,9 +153,9 @@ public class Payload implements Serializable {
     public List<LegacyAddress> getActiveLegacyAddresses() {
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
 
-        for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS &&
-               !legacyAddress.isWatchOnly()) {
+        for (LegacyAddress legacyAddress : legacyAddresses) {
+            if (legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS &&
+                    !legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress);
             }
         }
@@ -200,9 +200,9 @@ public class Payload implements Serializable {
     public List<String> getActiveLegacyAddressStrings() {
         List<String> addrs = new ArrayList<String>();
 
-        for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS) {
-              addrs.add(legacyAddress.getAddress());
+        for (LegacyAddress legacyAddress : legacyAddresses) {
+            if (legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS) {
+                addrs.add(legacyAddress.getAddress());
             }
         }
 
@@ -366,8 +366,9 @@ public class Payload implements Serializable {
         if (jsonObject.has("tx_notes")) {
             JSONObject tx_notes = (JSONObject) jsonObject.get("tx_notes");
             Map<String, String> notes = new HashMap<String, String>();
-            for (Iterator<String> keys = tx_notes.keys(); keys.hasNext(); ) {
-                String key = keys.next();
+
+            for (Iterator keys = tx_notes.keys(); keys.hasNext(); ) {
+                String key = (String) keys.next();
                 String note = (String) tx_notes.get(key);
                 notes.put(key, note);
             }
@@ -377,8 +378,8 @@ public class Payload implements Serializable {
         if (jsonObject.has("tx_tags")) {
             JSONObject tx_tags = (JSONObject) jsonObject.get("tx_tags");
             Map<String, List<Integer>> _tags = new HashMap<String, List<Integer>>();
-            for (Iterator<String> keys = tx_tags.keys(); keys.hasNext(); ) {
-                String key = keys.next();
+            for (Iterator keys = tx_tags.keys(); keys.hasNext(); ) {
+                String key = (String) keys.next();
                 JSONArray tagsObj = (JSONArray) tx_tags.get(key);
                 List<Integer> tags = new ArrayList<Integer>();
                 for (int i = 0; i < tagsObj.length(); i++) {
@@ -402,8 +403,8 @@ public class Payload implements Serializable {
         if (jsonObject.has("paidTo")) {
             JSONObject paid2 = (JSONObject) jsonObject.get("paidTo");
             Map<String, PaidTo> pto = new HashMap<String, PaidTo>();
-            for (Iterator<String> keys = paid2.keys(); keys.hasNext(); ) {
-                String key = keys.next();
+            for (Iterator keys = paid2.keys(); keys.hasNext(); ) {
+                String key = (String) keys.next();
                 PaidTo p = new PaidTo();
                 JSONObject t = (JSONObject) paid2.get(key);
                 p.setEmail(t.isNull("email") ? null : t.optString("email", null));
@@ -432,7 +433,7 @@ public class Payload implements Serializable {
                 hdw.mnemonic_verified(wallet.getBoolean("mnemonic_verified"));
             }
             if (wallet.has("default_account_idx")) {
-                int i = 0;
+                int i;
                 try {
                     String val = (String) wallet.get("default_account_idx");
                     i = Integer.parseInt(val);
@@ -459,14 +460,14 @@ public class Payload implements Serializable {
                             account.setArchived(false);
                         }
                         account.setLabel(accountObj.has("label") ? (String) accountObj.get("label") : "");
-                        if (accountObj.has("xpub") && ((String) accountObj.get("xpub")) != null && ((String) accountObj.get("xpub")).length() > 0) {
+                        if (accountObj.has("xpub") && (accountObj.getString("xpub")) != null && (accountObj.getString("xpub")).length() > 0) {
                             account.setXpub((String) accountObj.get("xpub"));
                             xpub2Account.put((String) accountObj.get("xpub"), i);
                             account2Xpub.put(i, (String) accountObj.get("xpub"));
                         } else {
                             continue;
                         }
-                        if (accountObj.has("xpriv") && ((String) accountObj.get("xpriv")) != null && ((String) accountObj.get("xpriv")).length() > 0) {
+                        if (accountObj.has("xpriv") && (accountObj.getString("xpriv")) != null && (accountObj.getString("xpriv")).length() > 0) {
                             account.setXpriv((String) accountObj.get("xpriv"));
                         } else {
                             continue;
@@ -483,8 +484,8 @@ public class Payload implements Serializable {
                                     receiveAddress.setIndex(val);
                                 }
                                 receiveAddress.setLabel(receiveObj.has("label") ? (String) receiveObj.get("label") : "");
-                                receiveAddress.setAmount(receiveObj.has("amount") ? (Long) receiveObj.getLong("amount") : 0L);
-                                receiveAddress.setPaid(receiveObj.has("paid") ? (Long) receiveObj.getLong("paid") : 0L);
+                                receiveAddress.setAmount(receiveObj.has("amount") ? receiveObj.getLong("amount") : 0L);
+                                receiveAddress.setPaid(receiveObj.has("paid") ? receiveObj.getLong("paid") : 0L);
 //                                    receiveAddress.setCancelled(receiveObj.has("cancelled") ? (Boolean)receiveObj.get("cancelled") : false);
 //                                    receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
                                 receiveAddresses.add(receiveAddress);
@@ -550,9 +551,9 @@ public class Payload implements Serializable {
             JSONArray keys = (JSONArray) jsonObject.get("keys");
             if (keys != null && keys.length() > 0) {
                 List<String> seenAddrs = new ArrayList<String>();
-                String addr = null;
-                JSONObject key = null;
-                LegacyAddress legacyAddress = null;
+                String addr;
+                JSONObject key;
+                LegacyAddress legacyAddress;
                 for (int i = 0; i < keys.length(); i++) {
                     key = (JSONObject) keys.get(i);
 
@@ -561,9 +562,9 @@ public class Payload implements Serializable {
                     if (addr != null && !addr.equals("null") && !seenAddrs.contains(addr)) {
 
                         String priv = null;
-                        long created_time = 0L;
+                        long created_time;
                         String label = null;
-                        long tag = 0L;
+                        long tag;
                         String created_device_name = null;
                         String created_device_version = null;
                         boolean watchOnly = false;
@@ -608,15 +609,10 @@ public class Payload implements Serializable {
                             try {
                                 tag = key.getLong("tag");
                             } catch (Exception e) {
-                                tag = LegacyAddress.NORMAL_ADDRESS;
+                                tag = 0L;
                             }
                         } else {
-                            tag = LegacyAddress.NORMAL_ADDRESS;
-                        }
-
-                        if (watchOnly) {
-                            //Watch-only addresses, although possible, should never be archived.
-                            tag = LegacyAddress.NORMAL_ADDRESS;
+                            tag = 0L;
                         }
 
                         try {
@@ -641,8 +637,7 @@ public class Payload implements Serializable {
                             created_device_version = "";
                         }
 
-                        legacyAddress = new LegacyAddress(priv, created_time, addr, label,
-                                tag, created_device_name, created_device_version, watchOnly);
+                        legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
                         legacyAddresses.add(legacyAddress);
                         seenAddrs.add(addr);
 
@@ -656,8 +651,8 @@ public class Payload implements Serializable {
             JSONArray address_book = (JSONArray) jsonObject.get("address_book");
 
             if (address_book != null && address_book.length() > 0) {
-                JSONObject addr = null;
-                AddressBookEntry addr_entry = null;
+                JSONObject addr;
+                AddressBookEntry addr_entry;
                 for (int i = 0; i < address_book.length(); i++) {
                     addr = (JSONObject) address_book.get(i);
 
@@ -723,7 +718,7 @@ public class Payload implements Serializable {
         }
         obj.put("keys", keys);
 
-        JSONObject optionsObj = (JSONObject) options.dumpJSON();
+        JSONObject optionsObj = options.dumpJSON();
         obj.put("options", optionsObj);
 
         JSONArray address_book = new JSONArray();
@@ -787,8 +782,7 @@ public class Payload implements Serializable {
         this.decryptedPayload = decryptedPayload;
     }
 
-    public Pair encryptPayload(String payloadCleartext, CharSequenceX password,int iterations,
-                               double version) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
         String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
         JSONObject rootObj = new JSONObject();

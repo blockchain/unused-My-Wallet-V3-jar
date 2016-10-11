@@ -40,7 +40,7 @@ public class WalletFactory {
 
     public static final String BIP39_ENGLISH_SHA256 = "ad90bf3beb7b0eb7e5acd74727dc0da96e0a280a258354e7293fb7e211ac03db";
 
-    private Logger mLogger = LoggerFactory.getLogger(WalletFactory.class);
+    private final Logger mLogger = LoggerFactory.getLogger(WalletFactory.class);
 
     private Locale locale = null;
 
@@ -77,7 +77,7 @@ public class WalletFactory {
      */
     public Wallet newWallet(int nbWords, String passphrase, int nbAccounts) throws IOException, MnemonicException.MnemonicLengthException {
 
-        Wallet hdw = null;
+        Wallet hdw;
 
         if ((nbWords % 3 != 0) || (nbWords < 12 || nbWords > 24)) {
             nbWords = 12;
@@ -121,7 +121,7 @@ public class WalletFactory {
      */
     public Wallet restoreWallet(String data, String passphrase, int nbAccounts) throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
 
-        Wallet hdw = null;
+        Wallet hdw;
 
         if (passphrase == null) {
             passphrase = "";
@@ -131,12 +131,12 @@ public class WalletFactory {
 
         InputStream wis = this.getClass().getClassLoader().getResourceAsStream("wordlist/" + locale.toString() + ".txt");
         if (wis != null) {
-            List<String> words = null;
+            List<String> words;
 
-            MnemonicCode mc = null;
+            MnemonicCode mc;
             mc = new MnemonicCode(wis, null);
 
-            byte[] seed = null;
+            byte[] seed;
             if (data.startsWith("xpub")) {
                 String[] xpub = data.split(":");
                 hdw = new Wallet(params, xpub);
@@ -164,7 +164,7 @@ public class WalletFactory {
         return hdw;
     }
 
-    public void saveWalletToJSON(Wallet wallet, String password) throws MnemonicException.MnemonicLengthException, IOException, JSONException {
+    public void saveWalletToJSON(Wallet wallet, String password) throws IOException, JSONException {
         serialize(wallet.toJSON(), password);
     }
 
@@ -174,7 +174,7 @@ public class WalletFactory {
 
         NetworkParameters params = MainNetParams.get();
 
-        JSONObject obj = null;
+        JSONObject obj;
         try {
             obj = deserialize(password);
             if (obj != null) {
@@ -200,10 +200,11 @@ public class WalletFactory {
 
         // prepare tmp file.
         if (tmpfile.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             tmpfile.delete();
         }
 
-        String data = null;
+        String data;
         if (password != null) {
             data = AESUtil.encrypt(jsonstr, new CharSequenceX(password), AESUtil.QR_CODE_PBKDF_2ITERATIONS);
         } else {
@@ -231,13 +232,13 @@ public class WalletFactory {
         StringBuilder sb = new StringBuilder();
 
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
-        String str = null;
+        String str;
 
         while ((str = in.readLine()) != null) {
             sb.append(str);
         }
 
-        JSONObject node = null;
+        JSONObject node;
         if (password == null) {
             node = new JSONObject(sb.toString());
         } else {

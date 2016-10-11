@@ -1,7 +1,5 @@
 package info.blockchain.wallet.send;
 
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
@@ -16,37 +14,23 @@ public class MyTransactionInput extends TransactionInput {
 
     public String address;
     public BigInteger value;
-    public NetworkParameters params;
+    public final NetworkParameters params;
 
     public String txHash;
     public int txPos;
 
-    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction,
-                              byte[] scriptBytes, TransactionOutPoint outpoint, String txHash, int txPos) {
+    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction, byte[] scriptBytes, TransactionOutPoint outpoint, String txHash, int txPos) {
         super(params, parentTransaction, scriptBytes, outpoint);
         this.params = params;
         this.txHash = txHash;
         this.txPos = txPos;
     }
 
-    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction,
-                              byte[] scriptBytes, TransactionOutPoint outpoint) {
+    public MyTransactionInput(NetworkParameters params, Transaction parentTransaction, byte[] scriptBytes, TransactionOutPoint outpoint) {
         super(params, parentTransaction, scriptBytes, outpoint);
         this.params = params;
         this.txHash = "";
         this.txPos = -1;
-    }
-
-    @Override
-    public Address getFromAddress() {
-
-        try {
-            return new Address(params, address);
-        } catch (AddressFormatException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     public Coin getValue() {
@@ -61,7 +45,7 @@ public class MyTransactionInput extends TransactionInput {
         return txHash;
     }
 
-    public void setTxHash(String sortKey) {
+    public void setTxHash(String txHash) {
         this.txHash = txHash;
     }
 

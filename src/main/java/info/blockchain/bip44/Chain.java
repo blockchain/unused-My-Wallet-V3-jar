@@ -26,12 +26,12 @@ public class Chain {
     public static final int CHANGE_CHAIN = 1;
 
     private Chain() {
-        ;
     }
 
     /**
      * Constructor for a chain.
      *
+     * @param params    NetworkParameters
      * @param aKey      deterministic key for this chain
      * @param isReceive this is the receive chain
      */

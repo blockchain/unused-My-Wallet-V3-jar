@@ -11,7 +11,6 @@ public class XPut {
     private long amount = 0L;
 
     public XPut() {
-        ;
     }
 
     public XPut(int id, String addr, boolean multi, long amount) {

@@ -29,7 +29,6 @@ public class Account {
     private NetworkParameters params = null;
 
     private Account() {
-        ;
     }
 
     /**
@@ -62,8 +61,9 @@ public class Account {
     /**
      * Constructor for watch-only account.
      *
-     * @param xpub  XPUB for this account
-     * @param child id within the wallet for this account
+     * @param params NetworkParameters
+     * @param xpub   XPUB for this account
+     * @param child  id within the wallet for this account
      */
     public Account(NetworkParameters params, String xpub, int child) throws AddressFormatException {
 
@@ -84,7 +84,8 @@ public class Account {
     /**
      * Constructor for watch-only account.
      *
-     * @param xpub XPUB for this account
+     * @param params NetworkParameters
+     * @param xpub   XPUB for this account
      */
     public Account(NetworkParameters params, String xpub) throws AddressFormatException {
 
@@ -201,7 +202,7 @@ public class Account {
      *
      * @return String
      */
-    public String getPath() {
+    private String getPath() {
         return strPath;
     }
 

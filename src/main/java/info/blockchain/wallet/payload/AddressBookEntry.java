@@ -9,7 +9,6 @@ public class AddressBookEntry {
     private String strLabel = null;
 
     public AddressBookEntry() {
-        ;
     }
 
     public AddressBookEntry(String address, String label) {

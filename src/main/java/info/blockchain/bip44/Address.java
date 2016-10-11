@@ -26,14 +26,14 @@ public class Address {
     private NetworkParameters params = null;
 
     private Address() {
-        ;
     }
 
     /**
      * Constructor an HD address.
      *
-     * @param cKey  deterministic key for this address
-     * @param child index of this address in its chain
+     * @param params NetworkParameters
+     * @param cKey   deterministic key for this address
+     * @param child  index of this address in its chain
      */
     public Address(NetworkParameters params, DeterministicKey cKey, int child) {
 
@@ -117,6 +117,10 @@ public class Address {
      */
     public String getPath() {
         return strPath;
+    }
+
+    public int getChildNum() {
+        return childNum;
     }
 
     /**

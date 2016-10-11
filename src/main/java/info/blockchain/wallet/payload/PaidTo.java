@@ -11,7 +11,6 @@ public class PaidTo {
     private String strAddress = null;
 
     public PaidTo() {
-        ;
     }
 
     public PaidTo(String email, String mobile, Integer redeemed, String address) {
@@ -67,7 +66,7 @@ public class PaidTo {
         } else {
             obj.put("mobile", JSONObject.NULL);
         }
-        if ((strRedeemedAt != null) && !"".equals(strRedeemedAt)) {
+        if ((strRedeemedAt != null)) {
             obj.put("redeemedAt", strRedeemedAt);
         } else {
             obj.put("redeemedAt", JSONObject.NULL);

@@ -93,11 +93,11 @@ public class Settings implements BaseApi {
     private String sharedKey;
 
     public interface ResultListener {
-        public void onSuccess();
+        void onSuccess();
 
-        public void onFail();
+        void onFail();
 
-        public void onBadRequest();
+        void onBadRequest();
     }
 
     public Settings(String guid, String sharedKey) {
@@ -127,21 +127,20 @@ public class Settings implements BaseApi {
         settingsPayload = settingsPayload.trim();
 
         StringBuilder args = new StringBuilder();
-        if (settingsPayload != null && !settingsPayload.isEmpty()) {
-            args.append("length=" + settingsPayload.length());
-            args.append("&payload=" + URLEncoder.encode(settingsPayload, "utf-8"));
-            args.append("&method=" + method);
+        if (!settingsPayload.isEmpty()) {
+            args.append("length=").append(settingsPayload.length());
+            args.append("&payload=").append(URLEncoder.encode(settingsPayload, "utf-8"));
+            args.append("&method=").append(method);
         } else {
-            args.append("method=" + method);
+            args.append("method=").append(method);
         }
 
-        args.append("&guid=" + URLEncoder.encode(this.guid, "utf-8"));
-        args.append("&sharedKey=" + URLEncoder.encode(this.sharedKey, "utf-8"));
+        args.append("&guid=").append(URLEncoder.encode(this.guid, "utf-8"));
+        args.append("&sharedKey=").append(URLEncoder.encode(this.sharedKey, "utf-8"));
         args.append("&api_code=" + API_CODE);
         args.append("&format=plain");
 
-        String response = WebUtil.getInstance().postURL(settingsUrl, args.toString());
-        return response;
+        return WebUtil.getInstance().postURL(settingsUrl, args.toString());
     }
 
     public String getInfo() throws Exception {
@@ -256,11 +255,7 @@ public class Settings implements BaseApi {
     }
 
     private boolean isBadPasswordHint(String hint) {
-        if (hint == null || hint.isEmpty() || hint.length() > 255) {
-            return true;
-        } else {
-            return false;
-        }
+        return hint == null || hint.isEmpty() || hint.length() > 255;
     }
 
     public String getSms() {
@@ -269,6 +264,38 @@ public class Settings implements BaseApi {
 
     public ArrayList<Integer> getNotificationTypes() {
         return notificationType;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public boolean isIpLockOn() {
+        return ipLockOn;
+    }
+
+    public int getNotificationsConfirmations() {
+        return notificationsConfirmations;
+    }
+
+    public boolean isAutoEmailBackup() {
+        return autoEmailBackup;
+    }
+
+    public boolean isNeverSaveAuthType() {
+        return neverSaveAuthType;
+    }
+
+    public String getMyIp() {
+        return myIp;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public int getLoggingLevel() {
+        return loggingLevel;
     }
 
     public void setEmail(String email, ResultListener listener) {
@@ -379,8 +406,8 @@ public class Settings implements BaseApi {
      */
     public void enableNotification(int type, ResultListener listener) {
 
-        if ((type == NOTIFICATION_TYPE_EMAIL && notificationType.contains((Integer) NOTIFICATION_TYPE_SMS)) ||
-                (type == NOTIFICATION_TYPE_SMS && notificationType.contains((Integer) NOTIFICATION_TYPE_EMAIL))) {
+        if ((type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS)) ||
+                (type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL))) {
             type = NOTIFICATION_TYPE_ALL;
         }
 

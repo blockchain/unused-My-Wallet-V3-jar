@@ -26,9 +26,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by riaanvos on 26/04/2016.
- */
 public class Payment {
 
     /**
@@ -62,7 +59,7 @@ public class Payment {
 
             Hash hash = new Hash(hashBytes);
             hash.reverse();
-            Sha256Hash txHash = new Sha256Hash(hash.getBytes());
+            Sha256Hash txHash = Sha256Hash.wrap(hash.getBytes());
 
             // Construct the output
             MyTransactionOutPoint outPoint = new MyTransactionOutPoint(txHash, txOutputN, value, scriptBytes);
@@ -181,7 +178,7 @@ public class Payment {
             final int EQUAL = 0;
             final int AFTER = 1;
 
-            int ret = 0;
+            int ret;
 
             if (o1.getValue().compareTo(o2.getValue()) > 0) {
                 ret = BEFORE;
@@ -213,7 +210,7 @@ public class Payment {
         final HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
         receivers.put(toAddress, bigIntAmount);
 
-        Pair<Transaction, Long> pair = null;
+        Pair<Transaction, Long> pair;
         pair = SendCoins.getInstance().makeTransaction(true,
                 unspentOutputBundle.getSpendableOutputs(),
                 receivers,

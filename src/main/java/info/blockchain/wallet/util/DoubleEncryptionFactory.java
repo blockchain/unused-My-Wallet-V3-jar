@@ -11,7 +11,6 @@ public class DoubleEncryptionFactory {
     private static DoubleEncryptionFactory instance = null;
 
     private DoubleEncryptionFactory() {
-        ;
     }
 
     public static DoubleEncryptionFactory getInstance() {
@@ -24,13 +23,11 @@ public class DoubleEncryptionFactory {
     }
 
     public String encrypt(String encrypted, String sharedKey, String password2, int iterations) {
-        String encrypted2 = AESUtil.encrypt(encrypted, new CharSequenceX(sharedKey + password2), iterations);
-        return encrypted2;
+        return AESUtil.encrypt(encrypted, new CharSequenceX(sharedKey + password2), iterations);
     }
 
     public String decrypt(String encrypted2, String sharedKey, String password2, int iterations) {
-        String decrypted = AESUtil.decrypt(encrypted2, new CharSequenceX(sharedKey + password2), iterations);
-        return decrypted;
+        return AESUtil.decrypt(encrypted2, new CharSequenceX(sharedKey + password2), iterations);
     }
 
     public String getHash(String sharedKey, String password2, int iterations) {

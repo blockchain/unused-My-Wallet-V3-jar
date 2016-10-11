@@ -27,11 +27,9 @@ public class LegacyAddress {
     private boolean watchOnly = false;
 
     public LegacyAddress() {
-        ;
     }
 
-    public LegacyAddress(String encryptedKey, long created, String address, String label,
-                         long tag, String device_name, String device_version) {
+    public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version) {
         this.strEncryptedKey = encryptedKey;
         this.created = created;
         this.strAddress = address;
@@ -41,8 +39,7 @@ public class LegacyAddress {
         this.strCreatedDeviceVersion = device_version;
     }
 
-    public LegacyAddress(String encryptedKey, long created, String address, String label,
-                         long tag, String device_name, String device_version, boolean watchOnly) {
+    public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version, boolean watchOnly) {
         this.strEncryptedKey = encryptedKey;
         this.created = created;
         this.strAddress = address;
@@ -70,7 +67,7 @@ public class LegacyAddress {
     }
 
     public void setEncryptedKey(byte[] privKeyBytes) {
-        strEncryptedKey = new String(Base58.encode(privKeyBytes));
+        strEncryptedKey = Base58.encode(privKeyBytes);
     }
 
     public long getCreated() {
@@ -170,24 +167,24 @@ public class LegacyAddress {
             return null;
 
         byte[] privBytes = Base58.decode(strEncryptedKey);
-        ECKey ecKey = null;
+        ECKey ecKey;
 
-        ECKey keyCompressed = null;
-        ECKey keyUnCompressed = null;
+        ECKey keyCompressed;
+        ECKey keyUnCompressed;
         BigInteger priv = new BigInteger(privBytes);
         if (priv.compareTo(BigInteger.ZERO) >= 0) {
-            keyCompressed = new ECKey(priv, null, true);
-            keyUnCompressed = new ECKey(priv, null, false);
+            keyCompressed = ECKey.fromPrivate(priv, true);
+            keyUnCompressed = ECKey.fromPrivate(priv, false);
         } else {
             byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
             BigInteger priv2 = new BigInteger(appendZeroByte);
-            keyCompressed = new ECKey(priv2, null, true);
-            keyUnCompressed = new ECKey(priv2, null, false);
+            keyCompressed = ECKey.fromPrivate(priv2, true);
+            keyUnCompressed = ECKey.fromPrivate(priv2, false);
         }
 
-        if (keyCompressed != null && keyCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
+        if (keyCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
             ecKey = keyCompressed;
-        } else if (keyUnCompressed != null && keyUnCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
+        } else if (keyUnCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
             ecKey = keyUnCompressed;
         } else {
             ecKey = null;

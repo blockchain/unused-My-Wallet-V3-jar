@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class CharSequenceX implements CharSequence {
 
-    private char[] chars;
+    private final char[] chars;
     private int rounds = 100;
 
     private CharSequenceX(CharSequence charSequence, int start, int end) {
@@ -30,7 +30,7 @@ public class CharSequenceX implements CharSequence {
         this.chars = chars;
     }
 
-    public void zap() {
+    private void zap() {
         if (chars != null) {
             for (int i = 0; i < rounds; i++) {
                 fill('0');
@@ -48,8 +48,8 @@ public class CharSequenceX implements CharSequence {
         }
     }
 
-    @Override
     public char charAt(int index) {
+        System.out.println(1);
         if (chars != null) {
             return chars[index];
         } else {
@@ -57,7 +57,6 @@ public class CharSequenceX implements CharSequence {
         }
     }
 
-    @Override
     public int length() {
         if (chars != null) {
             return chars.length;
@@ -66,26 +65,20 @@ public class CharSequenceX implements CharSequence {
         }
     }
 
-    @Override
     public String toString() {
         return new String(chars);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof CharSequenceX) {
-            return Arrays.equals(chars, ((CharSequenceX) o).chars);
-        } else {
-            return false;
-        }
+        return o instanceof CharSequenceX && Arrays.equals(chars, ((CharSequenceX) o).chars);
     }
 
-    @Override
     public CharSequence subSequence(int start, int end) {
-        CharSequenceX s = new CharSequenceX(this, start, end);
-        return s;
+        return new CharSequenceX(this, start, end);
     }
 
+    @SuppressWarnings("FinalizeDoesntCallSuperFinalize")
     protected void finalize() {
         zap();
     }

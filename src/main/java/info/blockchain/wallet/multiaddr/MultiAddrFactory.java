@@ -34,7 +34,6 @@ public class MultiAddrFactory {
     private static MultiAddrFactory instance = null;
 
     private MultiAddrFactory() {
-        ;
     }
 
     public static final String RECEIVED = "RECEIVED";
@@ -115,7 +114,7 @@ public class MultiAddrFactory {
                 xpub_amounts = new HashMap<String, Long>();
 
                 JSONArray addressesArray = (JSONArray) jsonObject.get("addresses");
-                JSONObject addrObj = null;
+                JSONObject addrObj;
                 for (int i = 0; i < addressesArray.length(); i++) {
                     addrObj = (JSONObject) addressesArray.get(i);
                     if (addrObj.has("final_balance") && addrObj.has("address")) {
@@ -140,21 +139,21 @@ public class MultiAddrFactory {
                 haveUnspentOuts = new HashMap<String, List<String>>();
 
                 JSONArray txArray = (JSONArray) jsonObject.get("txs");
-                JSONObject txObj = null;
+                JSONObject txObj;
                 for (int i = 0; i < txArray.length(); i++) {
 
                     txObj = (JSONObject) txArray.get(i);
-                    long height = 0L;
-                    long amount = 0L;
+                    long height;
+                    long amount;
                     long inputs_amount = 0L;
                     long outputs_amount = 0L;
                     long move_amount = 0L;
-                    long ts = 0L;
-                    String hash = null;
+                    long ts;
+                    String hash;
                     String addr = null;
                     String mf_addr = null;
                     List<String> moveToAddrArray = new ArrayList<String>();
-                    String o_addr = null;
+                    String o_addr;
                     boolean isMove = false;
 
                     if (txObj.has("block_height")) {
@@ -168,7 +167,7 @@ public class MultiAddrFactory {
                     ts = txObj.getLong("time");
 
                     JSONArray inputArray = (JSONArray) txObj.get("inputs");
-                    JSONObject inputObj = null;
+                    JSONObject inputObj;
                     for (int j = 0; j < inputArray.length(); j++) {
                         inputObj = (JSONObject) inputArray.get(j);
                         JSONObject prevOutObj = (JSONObject) inputObj.get("prev_out");
@@ -196,8 +195,8 @@ public class MultiAddrFactory {
                     }
 
                     JSONArray outArray = (JSONArray) txObj.get("out");
-                    JSONObject outObj = null;
-                    String path = null;
+                    JSONObject outObj;
+                    String path;
                     for (int j = 0; j < outArray.length(); j++) {
                         outObj = (JSONObject) outArray.get(j);
                         if (outObj.has("xpub")) {
@@ -218,12 +217,11 @@ public class MultiAddrFactory {
                             // store path info in order to generate private key later on
                             //
                             if (outObj.has("spent")) {
-                                if (outObj.getBoolean("spent") == false && outObj.has("addr")) {
+                                if (!outObj.getBoolean("spent") && outObj.has("addr")) {
                                     if (!haveUnspentOuts.containsKey(addr)) {
-                                        List<String> addrs = new ArrayList<String>();
-                                        haveUnspentOuts.put(addr, addrs);
+                                        haveUnspentOuts.put(addr, new ArrayList<String>());
                                     }
-                                    String data = path + "," + (String) outObj.get("addr");
+                                    String data = path + "," + outObj.getString("addr");
                                     if (!haveUnspentOuts.get(addr).contains(data)) {
                                         haveUnspentOuts.get(addr).add(data);
                                     }
@@ -249,7 +247,7 @@ public class MultiAddrFactory {
                     }
 
                     if (addr != null) {
-                        Tx tx = null;
+                        Tx tx;
                         if (isMove) {
                             tx = new Tx(hash, "", MOVED, move_amount, ts, new HashMap<Integer, String>());
                             tx.setIsMove(true);
@@ -313,7 +311,7 @@ public class MultiAddrFactory {
 
             if (jsonObject.has("addresses")) {
                 JSONArray addressArray = (JSONArray) jsonObject.get("addresses");
-                JSONObject addrObj = null;
+                JSONObject addrObj;
                 for (int i = 0; i < addressArray.length(); i++) {
                     addrObj = (JSONObject) addressArray.get(i);
                     long amount = 0L;
@@ -336,17 +334,17 @@ public class MultiAddrFactory {
                 address_legacy_txs = new HashMap<String, List<Tx>>();
 
                 JSONArray txArray = (JSONArray) jsonObject.get("txs");
-                JSONObject txObj = null;
+                JSONObject txObj;
                 for (int i = 0; i < txArray.length(); i++) {
 
                     txObj = (JSONObject) txArray.get(i);
-                    long height = 0L;
+                    long height;
                     long amount = 0L;
-                    long move_amount = 0l;
+                    long move_amount = 0L;
                     long ts = 0L;
                     String hash = null;
                     String inputAddr = null;
-                    String outputAddr = null;
+                    String outputAddr;
                     boolean isMove = false;
                     boolean isWatchOnly = false;
                     ArrayList<String> ownInput = new ArrayList<String>();
@@ -376,7 +374,7 @@ public class MultiAddrFactory {
 
                     if (txObj.has("inputs")) {
                         JSONArray inputArray = (JSONArray) txObj.get("inputs");
-                        JSONObject inputObj = null;
+                        JSONObject inputObj;
                         for (int j = 0; j < inputArray.length(); j++) {
                             inputObj = (JSONObject) inputArray.get(j);
                             if (inputObj.has("prev_out")) {
@@ -406,7 +404,7 @@ public class MultiAddrFactory {
 
                     if (txObj.has("out")) {
                         JSONArray outArray = (JSONArray) txObj.get("out");
-                        JSONObject outObj = null;
+                        JSONObject outObj;
                         for (int j = 0; j < outArray.length(); j++) {
                             outObj = (JSONObject) outArray.get(j);
                             outputAddr = (String) outObj.get("addr");
@@ -440,7 +438,7 @@ public class MultiAddrFactory {
 
                     //Check back all the transactions where one of our addresses is listed as output
                     //If that address is also listed as an input, we get the output back as change
-                    Tx tx = null;
+                    Tx tx;
                     for (String address : ownOutput) {
 
                         int index = ownOutput.indexOf(address);
@@ -633,9 +631,7 @@ public class MultiAddrFactory {
             List<Tx> txs = xpub_txs.get(key);
             for (Tx tx : txs) {
                 if (tx.isMove()) {
-                    if (seen_moves.contains(tx.getHash())) {
-                        continue;
-                    } else {
+                    if (!seen_moves.contains(tx.getHash())) {
                         ret.add(tx);
                         seen_moves.add(tx.getHash());
                     }

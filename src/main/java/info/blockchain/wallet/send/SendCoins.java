@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -35,7 +33,6 @@ public class SendCoins {
     private static SendCoins instance = null;
 
     private SendCoins() {
-        ;
     }
 
     public static final BigInteger bDust = BigInteger.valueOf(Coin.parseCoin("0.000005460").longValue());
@@ -64,9 +61,7 @@ public class SendCoins {
      * @param String                      changeAddress Change address for this spend
      * @return Pair<Transaction, Long>
      */
-    public Pair<Transaction, Long> makeTransaction(boolean isSimpleSend, List<MyTransactionOutPoint> unspent,
-                                                   HashMap<String, BigInteger> receivingAddresses,
-                                                   BigInteger fee, final String changeAddress) throws Exception {
+    public Pair<Transaction, Long> makeTransaction(boolean isSimpleSend, List<MyTransactionOutPoint> unspent, HashMap<String, BigInteger> receivingAddresses, BigInteger fee, final String changeAddress) throws Exception {
 
         long priority = 0;
 
@@ -85,8 +80,7 @@ public class SendCoins {
         List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
         BigInteger outputValueSum = BigInteger.ZERO;
 
-        for (Iterator<Entry<String, BigInteger>> iterator = receivingAddresses.entrySet().iterator(); iterator.hasNext(); ) {
-            Map.Entry<String, BigInteger> mapEntry = iterator.next();
+        for (Entry<String, BigInteger> mapEntry : receivingAddresses.entrySet()) {
             String toAddress = mapEntry.getKey();
             BigInteger amount = mapEntry.getValue();
 
@@ -101,8 +95,7 @@ public class SendCoins {
             outputValueSum = outputValueSum.add(amount);
             // Add the output
             BitcoinScript toOutputScript = BitcoinScript.createSimpleOutBitcoinScript(new BitcoinAddress(toAddress));
-            TransactionOutput output = new TransactionOutput(MainNetParams.get(), null,
-                    Coin.valueOf(amount.longValue()), toOutputScript.getProgram());
+            TransactionOutput output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(amount.longValue()), toOutputScript.getProgram());
             outputs.add(output);
         }
 
@@ -110,8 +103,6 @@ public class SendCoins {
         BigInteger valueSelected = BigInteger.ZERO;
         BigInteger valueNeeded = outputValueSum.add(fee);
         BigInteger minFreeOutputSize = BigInteger.valueOf(1000000);
-
-        MyTransactionOutPoint changeOutPoint = null;
 
         for (MyTransactionOutPoint outPoint : unspent) {
 
@@ -129,15 +120,10 @@ public class SendCoins {
                 continue;
             }
 
-            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0],
-                    outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
+            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
             inputs.add(input);
             valueSelected = valueSelected.add(outPoint.getValue());
             priority += outPoint.getValue().longValue() * outPoint.getConfirmations();
-
-            if (changeAddress == null) {
-                changeOutPoint = outPoint;
-            }
 
             if (valueSelected.compareTo(valueNeeded) == 0 || valueSelected.compareTo(valueNeeded.add(minFreeOutputSize)) >= 0) {
                 break;
@@ -165,8 +151,7 @@ public class SendCoins {
                 } else {
                     throw new Exception("Change address null");
                 }
-                TransactionOutput change_output = new TransactionOutput(MainNetParams.get(),
-                        null, Coin.valueOf(change.longValue()), change_script.getProgram());
+                TransactionOutput change_output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(change.longValue()), change_script.getProgram());
                 outputs.add(change_output);
             }
         }
@@ -212,6 +197,7 @@ public class SendCoins {
             // Keep key for script creation step below
             keys[i] = key;
             byte[] connectedPubKeyScript = input.getOutpoint().getConnectedPubKeyScript();
+            assert key != null;
             if (key.hasPrivKey() || key.isEncrypted()) {
                 sigs[i] = transaction.calculateSignature(i, key, connectedPubKeyScript, SigHash.ALL, false);
             } else {
@@ -225,6 +211,7 @@ public class SendCoins {
             }
             TransactionInput input = inputs.get(i);
             final TransactionOutput connectedOutput = input.getOutpoint().getConnectedOutput();
+            assert connectedOutput != null;
             Script scriptPubKey = connectedOutput.getScriptPubKey();
             if (scriptPubKey.isSentToAddress()) {
                 input.setScriptSig(ScriptBuilder.createInputScript(sigs[i], keys[i]));

@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class BlockchainWallet {
 
     public static final int DEFAULT_PBKDF2_ITERATIONS_V2 = 5000;
@@ -52,7 +53,7 @@ public class BlockchainWallet {
 
     /**
      *
-     * @param payload
+     * @param payload Payload
      * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException
      */
@@ -125,6 +126,7 @@ public class BlockchainWallet {
                 JSONObject payloadWrapper = new JSONObject(anyPayload);
 
                 version = payloadWrapper.getDouble(KEY_VERSION);
+                setVersion(version);
 
                 if (payloadWrapper.has(KEY_PBKDF2_ITERATIONS)) {
                     pbkdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
@@ -231,8 +233,8 @@ public class BlockchainWallet {
 
     public Pair decryptV1Wallet(String encryptedPayload, CharSequenceX password) throws DecryptionException {
 
-        String decrypted = null;
-        int succeededIterations = 1;
+        String decrypted;
+        int succeededIterations;
 
         int iterations[] = {DEFAULT_PBKDF2_ITERATIONS_V1_A, DEFAULT_PBKDF2_ITERATIONS_V1_B};
         int modes[] = {AESUtil.MODE_CBC, AESUtil.MODE_OFB};
@@ -258,7 +260,7 @@ public class BlockchainWallet {
                         return Pair.of(decrypted, succeededIterations);
 
                     } catch (Exception e) {
-                        decrypted = null;
+                        e.printStackTrace();
                     }
                 }
             }

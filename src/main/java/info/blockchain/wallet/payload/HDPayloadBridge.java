@@ -9,10 +9,8 @@ import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +21,7 @@ public class HDPayloadBridge {
     private final int DEFAULT_NEW_WALLET_SIZE = 1;
     private final String DEFAULT_PASSPHRASE = "";
 
-    private WalletFactory bip44WalletFactory;
+    private final WalletFactory bip44WalletFactory;
 
     public HDPayloadBridge() {
         this.bip44WalletFactory = new WalletFactory();
@@ -98,7 +96,7 @@ public class HDPayloadBridge {
         return bip44WalletFactory.restoreWallet(decrypted_hex, DEFAULT_PASSPHRASE, payload.getHdWallet().getAccounts().size());
     }
 
-    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw)throws IOException, MnemonicException.MnemonicLengthException {
+    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw) {
 
         String guid = UUID.randomUUID().toString();
         String sharedKey = UUID.randomUUID().toString();
@@ -142,15 +140,14 @@ public class HDPayloadBridge {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public boolean upgradeV2PayloadToV3(Payload payload, CharSequenceX secondPassword,
-                                        boolean isNewlyCreated, String defaultAccountName) throws Exception {
+    public boolean upgradeV2PayloadToV3(Payload payload, CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName) throws Exception {
 
         //
         // create HD wallet and sync w/ payload
         //
         if (payload.getHdWallets() == null || payload.getHdWallets().size() == 0) {
 
-            String xpub = null;
+            String xpub;
             int attempts = 0;
             boolean no_tx = false;
 
@@ -199,11 +196,7 @@ public class HDPayloadBridge {
 
             } while (!no_tx && attempts < 3);
 
-            if (!no_tx && isNewlyCreated) {
-                return false;
-            } else {
-                return true;
-            }
+            return !(!no_tx && isNewlyCreated);
         }
 
         List<Account> accounts = payload.getHdWallet().getAccounts();
