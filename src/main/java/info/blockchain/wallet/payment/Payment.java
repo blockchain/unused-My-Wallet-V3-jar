@@ -21,9 +21,6 @@ import org.spongycastle.util.encoders.Hex;
 import java.math.BigInteger;
 import java.util.*;
 
-/**
- * Created by riaanvos on 26/04/2016.
- */
 public class Payment {
 
     /**

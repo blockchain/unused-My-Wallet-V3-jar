@@ -49,7 +49,7 @@ public class BlockchainWallet {
 
     /**
      *
-     * @param payload
+     * @param payload Payload
      * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException
      */

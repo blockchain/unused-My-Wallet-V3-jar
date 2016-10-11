@@ -63,7 +63,7 @@ public class LegacyAddress {
     }
 
     public void setEncryptedKey(byte[] privKeyBytes) {
-    	strEncryptedKey = new String(Base58.encode(privKeyBytes));
+    	strEncryptedKey = Base58.encode(privKeyBytes);
     }
 
     public long getCreated() {

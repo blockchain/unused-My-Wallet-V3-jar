@@ -127,15 +127,15 @@ public class Settings implements BaseApi {
 
         StringBuilder args = new StringBuilder();
         if (settingsPayload != null && !settingsPayload.isEmpty()) {
-            args.append("length=" + settingsPayload.length());
-            args.append("&payload=" + URLEncoder.encode(settingsPayload, "utf-8"));
-            args.append("&method=" + method);
+            args.append("length=").append(settingsPayload.length());
+            args.append("&payload=").append(URLEncoder.encode(settingsPayload, "utf-8"));
+            args.append("&method=").append(method);
         } else {
-            args.append("method=" + method);
+            args.append("method=").append(method);
         }
 
-        args.append("&guid=" + URLEncoder.encode(this.guid, "utf-8"));
-        args.append("&sharedKey=" + URLEncoder.encode(this.sharedKey, "utf-8"));
+        args.append("&guid=").append(URLEncoder.encode(this.guid, "utf-8"));
+        args.append("&sharedKey=").append(URLEncoder.encode(this.sharedKey, "utf-8"));
         args.append("&api_code=" + API_CODE);
         args.append("&format=plain");
 

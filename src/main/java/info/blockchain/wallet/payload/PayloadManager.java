@@ -571,7 +571,7 @@ public class PayloadManager {
 
         ECKey ecKey = getRandomECKey();
 
-        String encryptedKey = new String(Base58.encode(ecKey.getPrivKeyBytes()));
+        String encryptedKey = Base58.encode(ecKey.getPrivKeyBytes());
         if (payload.isDoubleEncrypted()) {
             encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
                     payload.getSharedKey(),

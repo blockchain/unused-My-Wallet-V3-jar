@@ -3,9 +3,6 @@ package info.blockchain.wallet.payment.data;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-/**
- * Created by riaanvos on 01/08/16.
- */
 public class SuggestedFee {
 
     public BigInteger defaultFeePerKb;

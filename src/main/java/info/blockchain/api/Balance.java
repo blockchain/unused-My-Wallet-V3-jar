@@ -35,7 +35,7 @@ public class Balance implements BaseApi {
 
         StringBuilder url = new StringBuilder(balanceUrl);
         url.append(StringUtils.join(addresses, "|"));
-        if (filter > 0) url.append("&filter=" + filter);
+        if (filter > 0) url.append("&filter=").append(filter);
         url.append("&api_code=" + API_CODE);
 
         String response = WebUtil.getInstance().getURL(url.toString());

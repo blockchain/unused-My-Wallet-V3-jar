@@ -18,8 +18,8 @@ public class PinStore implements BaseApi {
 
         StringBuilder args = new StringBuilder();
 
-        args.append("key=" + key);
-        args.append("&pin=" + pin);
+        args.append("key=").append(key);
+        args.append("&pin=").append(pin);
         args.append("&method=get");
         args.append("&api_code=" + API_CODE);
 
@@ -35,9 +35,9 @@ public class PinStore implements BaseApi {
 
         StringBuilder args = new StringBuilder();
 
-        args.append("key=" + key);
-        args.append("&value=" + value);
-        args.append("&pin=" + pin);
+        args.append("key=").append(key);
+        args.append("&value=").append(value);
+        args.append("&pin=").append(pin);
         args.append("&method=put");
         args.append("&api_code=" + API_CODE);
 

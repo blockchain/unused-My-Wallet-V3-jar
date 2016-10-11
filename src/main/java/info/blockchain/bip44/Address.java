@@ -33,7 +33,7 @@ public class Address {
     /**
      * Constructor an HD address.
      *
-     * @param params
+     * @param params NetworkParameters
      * @param cKey deterministic key for this address
      * @param child index of this address in its chain
      *

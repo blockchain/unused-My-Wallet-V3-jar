@@ -63,7 +63,7 @@ public class Account {
     /**
      * Constructor for watch-only account.
      *
-     * @param params
+     * @param params NetworkParameters
      * @param xpub XPUB for this account
      * @param child id within the wallet for this account
      *
@@ -87,7 +87,7 @@ public class Account {
     /**
      * Constructor for watch-only account.
      *
-     * @param params
+     * @param params NetworkParameters
      * @param xpub XPUB for this account
      *
      */

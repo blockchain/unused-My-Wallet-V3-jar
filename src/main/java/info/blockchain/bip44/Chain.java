@@ -32,7 +32,7 @@ public class Chain {
     /**
      * Constructor for a chain.
      *
-     * @param params
+     * @param params NetworkParameters
      * @param aKey deterministic key for this chain
      * @param isReceive this is the receive chain
      *
