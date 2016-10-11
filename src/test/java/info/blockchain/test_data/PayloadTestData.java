@@ -45,85 +45,85 @@ public class PayloadTestData {
     public static final String ADDRESSBOOK_1_ADDRESS = "13Pakdsv68ias6dka8a6dGpmUFdw1SksX";
 
     public static String jsonObject = "{\n" +
-            "    \"sharedKey\": \""+SHARED_KEY+"\",\n" +
-            "    \"pbkdf2_iterations\": "+PDKDF2_ITERATIONS+",\n" +
+            "    \"sharedKey\": \"" + SHARED_KEY + "\",\n" +
+            "    \"pbkdf2_iterations\": " + PDKDF2_ITERATIONS + ",\n" +
             "    \"paidTo\": {\n" +
             "        \n" +
             "    },\n" +
             "    \"hd_wallets\": [\n" +
             "        {\n" +
-            "            \"default_account_idx\": "+DEFAULT_ACCOUNT_INDEX+",\n" +
+            "            \"default_account_idx\": " + DEFAULT_ACCOUNT_INDEX + ",\n" +
             "            \"passphrase\": \"\",\n" +
-            "            \"mnemonic_verified\": "+MNEMONIC_VERIFIED+",\n" +
+            "            \"mnemonic_verified\": " + MNEMONIC_VERIFIED + ",\n" +
             "            \"accounts\": [\n" +
             "                {\n" +
-            "                    \"archived\": "+ACCOUNT_1_ARCHIVED+",\n" +
+            "                    \"archived\": " + ACCOUNT_1_ARCHIVED + ",\n" +
             "                    \"cache\": {\n" +
             "                        \"changeAccount\": \"xpub6EBxAYdVUZnnj1NHhvKr2EKMm6iUderniUiRhECMcZebSLJWHffpZ7hXsXqc1dLfygotLCf9Mj8o9MFjN7E93aMLDf5Zj9j7uDzg6nn5e2t\",\n" +
             "                        \"receiveAccount\": \"xpub6EBxAYdVUZnnfPrjjpH9YwD11WQLRu7Eg5UKvUAkU6HyTzYmWm4gGc5ZZW5HdH7SEvvu5oXRYf36jX5iT6twCDt9gdmicHSRReumho45jKr\"\n" +
             "                    },\n" +
-            "                    \"xpriv\": \""+ACCOUNT_1_XPRIV+"\",\n" +
+            "                    \"xpriv\": \"" + ACCOUNT_1_XPRIV + "\",\n" +
             "                    \"address_labels\": [\n" +
             "                        \n" +
             "                    ],\n" +
-            "                    \"label\": \""+ACCOUNT_1_LABEL+"\",\n" +
-            "                    \"xpub\": \""+ACCOUNT_1_XPUB+"\"\n" +
+            "                    \"label\": \"" + ACCOUNT_1_LABEL + "\",\n" +
+            "                    \"xpub\": \"" + ACCOUNT_1_XPUB + "\"\n" +
             "                },\n" +
             "                {\n" +
-            "                    \"archived\": "+ACCOUNT_2_ARCHIVED+",\n" +
+            "                    \"archived\": " + ACCOUNT_2_ARCHIVED + ",\n" +
             "                    \"cache\": {\n" +
             "                        \"changeAccount\": \"xpub6EcLdGfU3ohNd4fUWaWVeKX4HagZoAVHbLkpRoJKcRtsXtwzDwp7KLCQsXfSUznbd17xC4iaaPzvZePLWp6bCsjsTWAGrPdVdGhsoPMVL6Z\",\n" +
             "                        \"receiveAccount\": \"xpub6EcLdGfU3ohNa59ixebeKN5rEHSwMJuNjj4QRLLdsbK3NJyK9Yxkz8AtT4CGYbXRZFr63N8gMrt4fja7E6UE5cjMnJzdfqGoeWyN7HTjARi\"\n" +
             "                    },\n" +
-            "                    \"xpriv\": \""+ACCOUNT_2_XPRIV+"\",\n" +
+            "                    \"xpriv\": \"" + ACCOUNT_2_XPRIV + "\",\n" +
             "                    \"address_labels\": [\n" +
             "                        \n" +
             "                    ],\n" +
-            "                    \"label\": \""+ACCOUNT_2_LABEL+"\",\n" +
-            "                    \"xpub\": \""+ACCOUNT_2_XPUB+"\"\n" +
+            "                    \"label\": \"" + ACCOUNT_2_LABEL + "\",\n" +
+            "                    \"xpub\": \"" + ACCOUNT_2_XPUB + "\"\n" +
             "                },\n" +
             "                {\n" +
-            "                    \"archived\": "+ACCOUNT_3_ARCHIVED+",\n" +
+            "                    \"archived\": " + ACCOUNT_3_ARCHIVED + ",\n" +
             "                    \"cache\": {\n" +
             "                        \"changeAccount\": \"xpub6F1W47aKNe3fAHU38uwDH5nWy4YvjTARoeXwnoSQZVcyYY2KiJ3wSEVpzPiZQCpYYKqEviNvU9XXHJryxeA77njbpP4L8GBcLXMXVuZt6T5\",\n" +
             "                        \"receiveAccount\": \"xpub6F1W47aKNe3f7btFQvdvLAZdWJfzDAX3GBmNBsRTs3Uo32s3tj1pWVbXhnJTqs4tz2jsUkSRR3fW3nxcLVoyf8PRswLJc8WsB1VFbSDYbj3\"\n" +
             "                    },\n" +
-            "                    \"xpriv\": \""+ACCOUNT_3_XPRIV+"\",\n" +
+            "                    \"xpriv\": \"" + ACCOUNT_3_XPRIV + "\",\n" +
             "                    \"address_labels\": [\n" +
             "                        \n" +
             "                    ],\n" +
-            "                    \"label\": \""+ACCOUNT_3_LABEL+"\",\n" +
-            "                    \"xpub\": \""+ACCOUNT_3_XPUB+"\"\n" +
+            "                    \"label\": \"" + ACCOUNT_3_LABEL + "\",\n" +
+            "                    \"xpub\": \"" + ACCOUNT_3_XPUB + "\"\n" +
             "                }\n" +
             "            ],\n" +
-            "            \"seed_hex\": \""+HD_WALLET_SEED_HEX+"\"\n" +
+            "            \"seed_hex\": \"" + HD_WALLET_SEED_HEX + "\"\n" +
             "        }\n" +
             "    ],\n" +
             "    \"keys\": [\n" +
             "        {\n" +
             "            \"created_time\": 1427898445750,\n" +
             "            \"created_device_version\": \"1.0\",\n" +
-            "            \"priv\": \""+ADDRESS_1_KEY+"\",\n" +
+            "            \"priv\": \"" + ADDRESS_1_KEY + "\",\n" +
             "            \"tag\": 0,\n" +
-            "            \"label\": \""+ADDRESS_1_LABEL+"\",\n" +
-            "            \"addr\": \""+ADDRESS_1_ADDRESS+"\",\n" +
+            "            \"label\": \"" + ADDRESS_1_LABEL + "\",\n" +
+            "            \"addr\": \"" + ADDRESS_1_ADDRESS + "\",\n" +
             "            \"created_device_name\": \"javascript_web\"\n" +
             "        },\n" +
             "        {\n" +
             "            \"created_time\": 1430992239,\n" +
             "            \"created_device_version\": null,\n" +
-            "            \"priv\": \""+ADDRESS_2_KEY+"\",\n" +
+            "            \"priv\": \"" + ADDRESS_2_KEY + "\",\n" +
             "            \"tag\": 0,\n" +
-            "            \"addr\": \""+ADDRESS_2_ADDRESS+"\",\n" +
+            "            \"addr\": \"" + ADDRESS_2_ADDRESS + "\",\n" +
             "            \"created_device_name\": \"android\"\n" +
             "        }\n" +
             "    ],\n" +
-            "    \"dpasswordhash\": \""+DPASSWORD_HASH+"\",\n" +
-            "    \"double_encryption\": "+DOUBLE_ENCRYPTED+",\n" +
+            "    \"dpasswordhash\": \"" + DPASSWORD_HASH + "\",\n" +
+            "    \"double_encryption\": " + DOUBLE_ENCRYPTED + ",\n" +
             "    \"address_book\": [\n" +
             "        {\n" +
-            "            \"label\": \""+ADDRESSBOOK_1_LABEL+"\",\n" +
-            "            \"addr\": \""+ADDRESSBOOK_1_ADDRESS+"\"\n" +
+            "            \"label\": \"" + ADDRESSBOOK_1_LABEL + "\",\n" +
+            "            \"addr\": \"" + ADDRESSBOOK_1_ADDRESS + "\"\n" +
             "        }\n" +
             "    ],\n" +
             "    \"tag_names\": [\n" +
@@ -133,13 +133,13 @@ public class PayloadTestData {
             "        \n" +
             "    },\n" +
             "    \"options\": {\n" +
-            "        \"pbkdf2_iterations\": "+PDKDF2_ITERATIONS+",\n" +
-            "        \"html5_notifications\": "+HTML_NOTIFICATIONS+",\n" +
+            "        \"pbkdf2_iterations\": " + PDKDF2_ITERATIONS + ",\n" +
+            "        \"html5_notifications\": " + HTML_NOTIFICATIONS + ",\n" +
             "        \"logout_time\": 600000,\n" +
             "        \"enable_multiple_accounts\": true,\n" +
             "        \"fee_per_kb\": 10000\n" +
             "    },\n" +
-            "    \"guid\": \""+GUID+"\",\n" +
+            "    \"guid\": \"" + GUID + "\",\n" +
             "    \"tx_tags\": {\n" +
             "        \n" +
             "    }\n" +
@@ -156,12 +156,12 @@ public class PayloadTestData {
     No iterations
      */
     public static String jsonObject_minimal = "{\n" +
-            "    \"sharedKey\": \""+SHARED_KEY+"\",\n" +
+            "    \"sharedKey\": \"" + SHARED_KEY + "\",\n" +
             "    \"hd_wallets\": [\n" +
             "        {\n" +
-            "            \"default_account_idx\": "+DEFAULT_ACCOUNT_INDEX+",\n" +
+            "            \"default_account_idx\": " + DEFAULT_ACCOUNT_INDEX + ",\n" +
             "            \"passphrase\": \"\",\n" +
-            "            \"mnemonic_verified\": "+MNEMONIC_VERIFIED+",\n" +
+            "            \"mnemonic_verified\": " + MNEMONIC_VERIFIED + ",\n" +
             "            \"accounts\": [\n" +
             "                {\n" +
             "                    \"archived\": false,\n" +
@@ -191,6 +191,6 @@ public class PayloadTestData {
             "            \"created_device_name\": \"javascript_web\"\n" +
             "        }\n" +
             "    ],\n" +
-            "    \"guid\": \""+GUID+"\"\n" +
+            "    \"guid\": \"" + GUID + "\"\n" +
             "}";
 }

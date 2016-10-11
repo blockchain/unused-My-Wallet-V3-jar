@@ -2,6 +2,7 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -25,9 +26,12 @@ public class LegacyAddress {
     private long tag = 0L;
     private boolean watchOnly = false;
 
-    public LegacyAddress() { ; }
+    public LegacyAddress() {
+        ;
+    }
 
-    public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version) {
+    public LegacyAddress(String encryptedKey, long created, String address, String label,
+                         long tag, String device_name, String device_version) {
         this.strEncryptedKey = encryptedKey;
         this.created = created;
         this.strAddress = address;
@@ -37,7 +41,8 @@ public class LegacyAddress {
         this.strCreatedDeviceVersion = device_version;
     }
 
-    public LegacyAddress(String encryptedKey, long created, String address, String label, long tag, String device_name, String device_version, boolean watchOnly) {
+    public LegacyAddress(String encryptedKey, long created, String address, String label,
+                         long tag, String device_name, String device_version, boolean watchOnly) {
         this.strEncryptedKey = encryptedKey;
         this.created = created;
         this.strAddress = address;
@@ -65,7 +70,7 @@ public class LegacyAddress {
     }
 
     public void setEncryptedKey(byte[] privKeyBytes) {
-    	strEncryptedKey = new String(Base58.encode(privKeyBytes));
+        strEncryptedKey = new String(Base58.encode(privKeyBytes));
     }
 
     public long getCreated() {
@@ -108,27 +113,34 @@ public class LegacyAddress {
         this.watchOnly = watchOnly;
     }
 
-    public String getCreatedDeviceName() { return strCreatedDeviceName; }
+    public String getCreatedDeviceName() {
+        return strCreatedDeviceName;
+    }
 
-    public void setCreatedDeviceName(String device_name) { this.strCreatedDeviceName = device_name; }
+    public void setCreatedDeviceName(String device_name) {
+        this.strCreatedDeviceName = device_name;
+    }
 
-    public String getCreatedDeviceVersion() { return strCreatedDeviceVersion; }
+    public String getCreatedDeviceVersion() {
+        return strCreatedDeviceVersion;
+    }
 
-    public void setCreatedDeviceVersion(String device_version) { this.strCreatedDeviceVersion = device_version; }
+    public void setCreatedDeviceVersion(String device_version) {
+        this.strCreatedDeviceVersion = device_version;
+    }
 
     public String getPrivateKey(String secondPassword) throws AddressFormatException {
 
         ECKey ecKey = getECKey(secondPassword);
 
-        if(ecKey != null) {
+        if (ecKey != null) {
             return ecKey.getPrivateKeyEncoded(MainNetParams.get()).toString();
-        }
-        else {
+        } else {
             return null;
         }
     }
 
-    public ECKey getECKey(CharSequenceX secondPassword)  throws AddressFormatException{
+    public ECKey getECKey(CharSequenceX secondPassword) throws AddressFormatException {
 
         /*
         Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);
@@ -148,43 +160,40 @@ public class LegacyAddress {
         return getECKey(encryptedKey);
     }
 
-    public ECKey getECKey()  throws AddressFormatException{
+    public ECKey getECKey() throws AddressFormatException {
         return getECKey(strEncryptedKey);
     }
 
     private ECKey getECKey(String strEncryptedKey) throws AddressFormatException {
 
-        if(strEncryptedKey == null || strEncryptedKey.isEmpty())
+        if (strEncryptedKey == null || strEncryptedKey.isEmpty())
             return null;
 
         byte[] privBytes = Base58.decode(strEncryptedKey);
-    	ECKey ecKey = null;
+        ECKey ecKey = null;
 
-    	ECKey keyCompressed = null;
-		ECKey keyUnCompressed = null;
-		BigInteger priv = new BigInteger(privBytes);
-		if(priv.compareTo(BigInteger.ZERO) >= 0) {
-			keyCompressed = new ECKey(priv, null, true);
-			keyUnCompressed = new ECKey(priv, null, false);
-		}
-		else {
-			byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
-			BigInteger priv2 = new BigInteger(appendZeroByte);
-			keyCompressed = new ECKey(priv2, null, true);
-			keyUnCompressed = new ECKey(priv2, null, false);
-		}
+        ECKey keyCompressed = null;
+        ECKey keyUnCompressed = null;
+        BigInteger priv = new BigInteger(privBytes);
+        if (priv.compareTo(BigInteger.ZERO) >= 0) {
+            keyCompressed = new ECKey(priv, null, true);
+            keyUnCompressed = new ECKey(priv, null, false);
+        } else {
+            byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
+            BigInteger priv2 = new BigInteger(appendZeroByte);
+            keyCompressed = new ECKey(priv2, null, true);
+            keyUnCompressed = new ECKey(priv2, null, false);
+        }
 
-		if(keyCompressed != null && keyCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
-			ecKey = keyCompressed;
-		}
-		else if(keyUnCompressed != null && keyUnCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
-			ecKey = keyUnCompressed;
-		}
-		else {
-			ecKey = null;
-		}
+        if (keyCompressed != null && keyCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
+            ecKey = keyCompressed;
+        } else if (keyUnCompressed != null && keyUnCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
+            ecKey = keyUnCompressed;
+        } else {
+            ecKey = null;
+        }
 
-		return ecKey;
+        return ecKey;
     }
 
     public JSONObject dumpJSON() {
@@ -200,7 +209,7 @@ public class LegacyAddress {
 
         if (!"".equals(strEncryptedKey)) {
             obj.put("priv", strEncryptedKey);
-        }else{
+        } else {
             obj.put("priv", JSONObject.NULL);
         }
 
@@ -211,20 +220,20 @@ public class LegacyAddress {
         }
 
         if (created >= 0L) {
-          obj.put("created_time", created);
-        }else{
-          obj.put("created_time", 0L);
+            obj.put("created_time", created);
+        } else {
+            obj.put("created_time", 0L);
         }
 
         if (!"".equals(strCreatedDeviceName)) {
             obj.put("created_device_name", strCreatedDeviceName);
-        }else{
+        } else {
             obj.put("created_device_name", JSONObject.NULL);
         }
 
         if (!"".equals(strCreatedDeviceVersion)) {
             obj.put("created_device_version", strCreatedDeviceVersion);
-        }else{
+        } else {
             obj.put("created_device_version", JSONObject.NULL);
         }
 

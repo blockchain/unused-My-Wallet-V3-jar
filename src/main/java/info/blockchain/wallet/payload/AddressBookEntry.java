@@ -1,14 +1,16 @@
 package info.blockchain.wallet.payload;
 
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AddressBookEntry {
 
     private String strAddress = null;
     private String strLabel = null;
 
-    public AddressBookEntry() { ; }
+    public AddressBookEntry() {
+        ;
+    }
 
     public AddressBookEntry(String address, String label) {
         this.strAddress = address;

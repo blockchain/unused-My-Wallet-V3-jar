@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 public class Pairing {
 
-    public PairingQRComponents getQRComponentsFromRawString(String rawString) throws Exception{
+    public PairingQRComponents getQRComponentsFromRawString(String rawString) throws Exception {
 
         PairingQRComponents result = new PairingQRComponents();
 
@@ -21,7 +21,7 @@ public class Pairing {
             throw new Exception("QR string does not have 3 components.");
         }
 
-        result.guid =components[1];
+        result.guid = components[1];
         if (result.guid.length() != 36) {
             throw new Exception("GUID should be 36 characters in length.");
         }
@@ -31,7 +31,7 @@ public class Pairing {
         return result;
     }
 
-    public String[] getSharedKeyAndPassword(String encryptedPairingCode, String encryptionPassword) throws Exception{
+    public String[] getSharedKeyAndPassword(String encryptedPairingCode, String encryptionPassword) throws Exception {
 
         String decryptedPairingCode = AESUtil.decrypt(encryptedPairingCode, new CharSequenceX(encryptionPassword), AESUtil.QR_CODE_PBKDF_2ITERATIONS);
 

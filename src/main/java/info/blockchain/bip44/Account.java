@@ -15,14 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * Account.java : an account in a BIP44 wallet
- *
  */
 public class Account {
 
     private DeterministicKey aKey = null;
-    private int	aID;
+    private int aID;
     private List<Chain> chains = null;
 
     private String strXPUB = null;
@@ -30,15 +28,16 @@ public class Account {
 
     private NetworkParameters params = null;
 
-    private Account() { ; }
+    private Account() {
+        ;
+    }
 
     /**
      * Constructor for account.
      *
      * @param params Example MainNetParams, RegTestParams, TestNet2Params
-     * @param wKey deterministic key for this account
-     * @param child id within the wallet for this account
-     *
+     * @param wKey   deterministic key for this account
+     * @param child  id within the wallet for this account
      */
     public Account(NetworkParameters params, DeterministicKey wKey, int child) {
 
@@ -63,10 +62,8 @@ public class Account {
     /**
      * Constructor for watch-only account.
      *
-     * @param params
-     * @param xpub XPUB for this account
+     * @param xpub  XPUB for this account
      * @param child id within the wallet for this account
-     *
      */
     public Account(NetworkParameters params, String xpub, int child) throws AddressFormatException {
 
@@ -87,9 +84,7 @@ public class Account {
     /**
      * Constructor for watch-only account.
      *
-     * @param params
      * @param xpub XPUB for this account
-     *
      */
     public Account(NetworkParameters params, String xpub) throws AddressFormatException {
 
@@ -110,14 +105,13 @@ public class Account {
      * Restore watch-only account deterministic public key from XPUB.
      *
      * @return DeterministicKey
-     *
      */
     private DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
 
         byte[] xpubBytes = Base58.decodeChecked(xpubstr);
 
         ByteBuffer bb = ByteBuffer.wrap(xpubBytes);
-        if(bb.getInt() != 0x0488B21E)   {
+        if (bb.getInt() != 0x0488B21E) {
             throw new AddressFormatException("invalid xpub version");
         }
 
@@ -139,7 +133,6 @@ public class Account {
      * Return XPUB string for this account.
      *
      * @return String
-     *
      */
     public String xpubstr() {
 
@@ -151,14 +144,12 @@ public class Account {
      * Return xprv string for this account.
      *
      * @return String
-     *
      */
     public String xprvstr() {
 
-        if(aKey.hasPrivKey()) {
+        if (aKey.hasPrivKey()) {
             return aKey.serializePrivB58(params);
-        }
-        else {
+        } else {
             return null;
         }
 
@@ -168,7 +159,6 @@ public class Account {
      * Return id for this account.
      *
      * @return int
-     *
      */
     public int getId() {
         return aID;
@@ -178,7 +168,6 @@ public class Account {
      * Return receive chain this account.
      *
      * @return HD_Chain
-     *
      */
     public Chain getReceive() {
         return chains.get(0);
@@ -188,7 +177,6 @@ public class Account {
      * Return change chain this account.
      *
      * @return HD_Chain
-     *
      */
     public Chain getChange() {
         return chains.get(1);
@@ -198,45 +186,41 @@ public class Account {
      * Return chain for this account as indicated by index: 0 = receive, 1 = change.
      *
      * @return HD_Chain
-     *
      */
     public Chain getChain(int idx) {
 
-        if(idx < 0 || idx > 1)  {
+        if (idx < 0 || idx > 1) {
             return null;
         }
 
         return chains.get(idx);
     }
-	
+
     /**
      * Return BIP44 path for this account (m / purpose' / coin_type' / account').
      *
      * @return String
-     *
      */
     public String getPath() {
         return strPath;
     }
 
     /**
-     * Write account to JSONObject.
-     * For debugging only.
+     * Write account to JSONObject. For debugging only.
      *
      * @return JSONObject
-     *
      */
     public JSONObject toJSON() {
         try {
             JSONObject obj = new JSONObject();
 
             obj.put("xpub", xpubstr());
-            if(aKey.hasPrivKey()) {
+            if (aKey.hasPrivKey()) {
                 obj.put("xprv", xprvstr());
             }
 
             JSONArray _chains = new JSONArray();
-            for(Chain chain : chains)   {
+            for (Chain chain : chains) {
                 _chains.put(chain.toJSON());
             }
             obj.put("chains", _chains);
@@ -244,8 +228,7 @@ public class Account {
             obj.put("path", getPath());
 
             return obj;
-        }
-        catch(JSONException ex) {
+        } catch (JSONException ex) {
             throw new RuntimeException(ex);
         }
     }

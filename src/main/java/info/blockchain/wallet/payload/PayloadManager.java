@@ -1,12 +1,18 @@
 package info.blockchain.wallet.payload;
 
 import com.google.common.annotations.VisibleForTesting;
+
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
-import info.blockchain.wallet.exceptions.*;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
+import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
@@ -14,6 +20,7 @@ import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,12 +32,13 @@ import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * PayloadManager.java : singleton class for reading/writing/parsing Blockchain HD JSON payload
@@ -90,13 +98,11 @@ public class PayloadManager {
 
     /**
      * Downloads payload from server, decrypts, and stores as local var {@link Payload}
-     *
-     * @param sharedKey
-     * @param guid
-     * @param password
-     * @param listener
      */
-    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException, ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
+    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid,
+                                @Nonnull CharSequenceX password,
+                                @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException,
+            ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
 
         String walletData = null;
         try {
@@ -118,7 +124,7 @@ public class PayloadManager {
         if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
 
             payload = null;
-            throw new UnsupportedVersionException(getVersion()+"");
+            throw new UnsupportedVersionException(getVersion() + "");
         }
 
         syncWallet();
@@ -128,7 +134,6 @@ public class PayloadManager {
 
     /**
      * Syncs payload wallet and bip44 wallet
-     * @throws HDWalletException
      */
     private void syncWallet() throws HDWalletException {
         if (payload.getHdWallet() != null && !payload.isDoubleEncrypted()) {
@@ -152,7 +157,8 @@ public class PayloadManager {
     }
 
     /**
-     * Set temporary password for user once it has been validated. Read password from here rather than reprompting user.
+     * Set temporary password for user once it has been validated. Read password from here rather
+     * than reprompting user.
      *
      * @param temp_password Validated user password
      */
@@ -181,8 +187,6 @@ public class PayloadManager {
 
     /**
      * Set if this payload is for a new Blockchain account.
-     *
-     * @param isNew
      */
     public void setNew(boolean isNew) {
         this.isNew = isNew;
@@ -220,7 +224,7 @@ public class PayloadManager {
             Pair pair = payload.encryptPayload(payload.dumpJSON().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
-            String newPayloadChecksum = (String)pair.getLeft();
+            String newPayloadChecksum = (String) pair.getLeft();
             String oldPayloadChecksum = bciWallet.getPayloadChecksum();
 
             boolean success = new WalletPayload().savePayloadToServer(method,
@@ -235,7 +239,7 @@ public class PayloadManager {
 
             bciWallet.setPayloadChecksum(newPayloadChecksum);
 
-            if (success){
+            if (success) {
                 isNew = false;
                 cachePayload();
                 return true;
@@ -288,7 +292,7 @@ public class PayloadManager {
                 payload.getDoubleEncryptionPbkdf2Iterations());
     }
 
-    public Wallet getDecryptedWallet(String secondPassword) throws Exception{
+    public Wallet getDecryptedWallet(String secondPassword) throws Exception {
 
         if (validateSecondPassword(secondPassword)) {
 
@@ -371,7 +375,8 @@ public class PayloadManager {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
+    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated,
+                                     String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
 
         //Check if payload has 2nd password
         if (payload.isDoubleEncrypted()) {
@@ -454,7 +459,9 @@ public class PayloadManager {
         return payload != null && !payload.isUpgraded();
     }
 
-    public String[] getXPUBs(boolean includeArchives) throws IOException, DecoderException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {
+    public String[] getXPUBs(boolean includeArchives) throws IOException, DecoderException,
+            AddressFormatException, MnemonicException.MnemonicLengthException,
+            MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {
 
         ArrayList<String> xpubs = new ArrayList<String>();
 
@@ -626,7 +633,7 @@ public class PayloadManager {
         try {
             Wallet wallet = getDecryptedWallet(secondPassword);
 
-            if(wallet != null) {
+            if (wallet != null) {
                 String mnemonic = wallet.getMnemonic();
 
                 if (mnemonic != null && mnemonic.length() > 0) {
@@ -651,9 +658,8 @@ public class PayloadManager {
 
     /**
      * Debugging purposes
-     * @return
      */
-    public BlockchainWallet getBciWallet(){
+    public BlockchainWallet getBciWallet() {
         return bciWallet;
     }
 
@@ -661,7 +667,7 @@ public class PayloadManager {
 
         List<ECKey> keys = new ArrayList<ECKey>();
 
-        for(MyTransactionOutPoint a : unspentOutputBundle.getSpendableOutputs()){
+        for (MyTransactionOutPoint a : unspentOutputBundle.getSpendableOutputs()) {
             String[] split = a.getPath().split("/");
             int chain = Integer.parseInt(split[1]);
             int addressIndex = Integer.parseInt(split[2]);
@@ -675,7 +681,7 @@ public class PayloadManager {
             }
 
             Address hd_address = wallet.getAccount(account.getRealIdx()).getChain(chain).getAddressAt(addressIndex);
-            ECKey walletKey =  PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+            ECKey walletKey = PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
             keys.add(walletKey);
         }
 

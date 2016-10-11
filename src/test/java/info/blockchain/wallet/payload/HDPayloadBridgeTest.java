@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.bip44.Wallet;
+
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.crypto.MnemonicException;

@@ -1,10 +1,12 @@
 package info.blockchain.wallet.payload;
 
-import java.util.*;
-
-import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class HDWallet {
 
@@ -24,7 +26,7 @@ public class HDWallet {
         this.strPassphrase = passphrase;
     }
 
-    public HDWallet(String seed, List<Account> accounts, String passphrase, HashMap<String,PaidTo> paidTo) {
+    public HDWallet(String seed, List<Account> accounts, String passphrase, HashMap<String, PaidTo> paidTo) {
         this.strSeedHex = seed;
         this.accounts = accounts;
         this.strPassphrase = passphrase;
@@ -80,10 +82,10 @@ public class HDWallet {
         obj.put("mnemonic_verified", mnemonic_verified);
 
         JSONArray accs = new JSONArray();
-        for(Account account : accounts) {
-        	if(!(account instanceof ImportedAccount)) {
+        for (Account account : accounts) {
+            if (!(account instanceof ImportedAccount)) {
                 accs.put(account.dumpJSON());
-        	}
+            }
         }
         obj.put("accounts", accs);
 

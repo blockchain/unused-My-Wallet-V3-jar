@@ -8,6 +8,7 @@ import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.Hash;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
@@ -19,7 +20,11 @@ import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by riaanvos on 26/04/2016.
@@ -29,7 +34,6 @@ public class Payment {
     /**
      * Parses Blockchain's unspent api json and return all unspent data
      *
-     * @param unspentsOutputJson
      * @return UnspentOutputs result of api response
      */
     public UnspentOutputs getCoins(JSONObject unspentsOutputJson) {
@@ -64,7 +68,7 @@ public class Payment {
             MyTransactionOutPoint outPoint = new MyTransactionOutPoint(txHash, txOutputN, value, scriptBytes);
             outPoint.setConfirmations(confirmations);
 
-            if(unspentJson.has("xpub")){
+            if (unspentJson.has("xpub")) {
                 JSONObject xpubJsonObject = unspentJson.getJSONObject("xpub");
                 outPoint.setPath(xpubJsonObject.getString("path"));
             }
@@ -98,21 +102,21 @@ public class Payment {
         //All inputs, 1 output = no change
         BigInteger feeForAll = FeeUtil.estimatedFee(allCoins.size(), 1, feePerKb);
         BigInteger balanceAfterFee = sweepBalance.subtract(feeForAll);
-        if(balanceAfterFee.compareTo(BigInteger.ZERO) == -1) {
+        if (balanceAfterFee.compareTo(BigInteger.ZERO) == -1) {
             sweepBundle.setSweepAmount(BigInteger.ZERO);
-        }else{
+        } else {
             sweepBundle.setSweepAmount(balanceAfterFee);
         }
         sweepBundle.setSweepFee(feeForAll);
         return sweepBundle;
     }
 
-    private double inputCost(BigInteger feePerKb){
+    private double inputCost(BigInteger feePerKb) {
         double d = Math.ceil(feePerKb.doubleValue() * 0.148);
         return Math.ceil(d);
     }
 
-    public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs coins, BigInteger spendAmount, BigInteger feePerKb){
+    public SpendableUnspentOutputs getSpendableCoins(UnspentOutputs coins, BigInteger spendAmount, BigInteger feePerKb) {
 
         SpendableUnspentOutputs result = new SpendableUnspentOutputs();
 
@@ -194,6 +198,7 @@ public class Payment {
 
     public interface SubmitPaymentListener {
         void onSuccess(String hash);
+
         void onFail(String error);
     }
 

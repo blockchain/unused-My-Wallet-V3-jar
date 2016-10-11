@@ -11,18 +11,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class WebUtil{
+public class WebUtil {
 
     private static final int DefaultRequestRetry = 2;
     private static final int DefaultRequestTimeout = 60000;
 
     private static WebUtil instance = null;
 
-    private WebUtil() { ; }
+    private WebUtil() {
+        ;
+    }
 
     public static WebUtil getInstance() {
 
-        if(instance == null) {
+        if (instance == null) {
             instance = new WebUtil();
         }
 
@@ -41,7 +43,7 @@ public class WebUtil{
         return this.postURLCall(request, urlParameters, 2, "application/json");
     }
 
-    private  String postURLCall(String request, String urlParameters, int requestRetry, String contentType) throws Exception {
+    private String postURLCall(String request, String urlParameters, int requestRetry, String contentType) throws Exception {
 
         String error = null;
 
@@ -66,7 +68,7 @@ public class WebUtil{
 
                 connection.connect();
 
-                DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
                 wr.writeBytes(urlParameters);
                 wr.flush();
                 wr.close();
@@ -76,18 +78,15 @@ public class WebUtil{
                 if (connection.getResponseCode() == 200) {
 //					Log.d("postURL", "return code 200");
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
-                }
-                else {
+                } else {
                     error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
 //					Log.d("postURL", "return code " + error);
                 }
 
                 Thread.sleep(5000);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 throw new Exception("Network error" + e.getMessage());
-            }
-            finally {
+            } finally {
                 connection.disconnect();
             }
         }
@@ -122,7 +121,7 @@ public class WebUtil{
 
                 connection.setConnectTimeout(DefaultRequestTimeout);
                 connection.setReadTimeout(DefaultRequestTimeout);
-                if(cookie!=null)connection.setRequestProperty("cookie",cookie);
+                if (cookie != null) connection.setRequestProperty("cookie", cookie);
                 connection.setInstanceFollowRedirects(false);
 
                 connection.connect();
@@ -133,11 +132,9 @@ public class WebUtil{
                     error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
 
                 Thread.sleep(5000);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 throw new Exception("Network error" + e.getMessage());
-            }
-            finally {
+            } finally {
                 connection.disconnect();
             }
         }
@@ -156,11 +153,11 @@ public class WebUtil{
         Set<String> headerFieldsSet = headerFields.keySet();
         Iterator<String> hearerFieldsIter = headerFieldsSet.iterator();
 
-        while(hearerFieldsIter.hasNext()) {
+        while (hearerFieldsIter.hasNext()) {
 
             String headerFieldKey = hearerFieldsIter.next();
 
-            if("Set-Cookie".equalsIgnoreCase(headerFieldKey)) {
+            if ("Set-Cookie".equalsIgnoreCase(headerFieldKey)) {
 
                 List<String> headerFieldValue = headerFields.get(headerFieldKey);
 
@@ -176,25 +173,22 @@ public class WebUtil{
                     boolean secure = false;
 
                     // Parse each field
-                    for(int j = 1; j < fields.length; j++) {
-                        if("secure".equalsIgnoreCase(fields[j])) {
+                    for (int j = 1; j < fields.length; j++) {
+                        if ("secure".equalsIgnoreCase(fields[j])) {
                             secure = true;
-                        }
-                        else if(fields[j].indexOf('=') > 0) {
+                        } else if (fields[j].indexOf('=') > 0) {
                             String[] f = fields[j].split("=");
-                            if("expires".equalsIgnoreCase(f[0])) {
+                            if ("expires".equalsIgnoreCase(f[0])) {
                                 expires = f[1];
-                            }
-                            else if("domain".equalsIgnoreCase(f[0])) {
+                            } else if ("domain".equalsIgnoreCase(f[0])) {
                                 domain = f[1];
-                            }
-                            else if("path".equalsIgnoreCase(f[0])) {
+                            } else if ("path".equalsIgnoreCase(f[0])) {
                                 path = f[1];
                             }
                         }
                     }
 
-                    if(cookieValue.startsWith(cname + "=")) {
+                    if (cookieValue.startsWith(cname + "=")) {
                         ret = cookieValue.substring(cname.length() + 1);
                     }
 

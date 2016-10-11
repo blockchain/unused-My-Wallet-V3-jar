@@ -5,10 +5,14 @@ import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
-import org.spongycastle.crypto.paddings.*;
+import org.spongycastle.crypto.paddings.BlockCipherPadding;
+import org.spongycastle.crypto.paddings.ISO10126d2Padding;
+import org.spongycastle.crypto.paddings.ISO7816d4Padding;
+import org.spongycastle.crypto.paddings.ZeroBytePadding;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.UnsupportedEncodingException;
@@ -268,7 +272,7 @@ public class BlockchainWallet {
         return AESUtil.decrypt(encryptedPayload, password, pdfdf2Iterations);
     }
 
-    public String getUnparsedWalletData(){
+    public String getUnparsedWalletData() {
         return unparsedWalletData;
     }
 

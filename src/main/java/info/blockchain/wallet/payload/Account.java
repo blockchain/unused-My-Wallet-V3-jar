@@ -19,7 +19,7 @@ public class Account {
     protected long amount = 0L;
     protected String strXpub = null;
     protected String strXpriv = null;
-    protected TreeMap<Integer,String> addressLabels = null;
+    protected TreeMap<Integer, String> addressLabels = null;
     protected Cache cache = null;
     protected int realIdx = -1;
 
@@ -28,7 +28,7 @@ public class Account {
         tags = new ArrayList<String>();
         strXpub = "";
         strXpriv = "";
-        addressLabels = new TreeMap<Integer,String>();
+        addressLabels = new TreeMap<Integer, String>();
         cache = new Cache();
     }
 
@@ -53,7 +53,7 @@ public class Account {
         tags = new ArrayList<String>();
         strXpub = "";
         strXpriv = "";
-        addressLabels = new TreeMap<Integer,String>();
+        addressLabels = new TreeMap<Integer, String>();
         cache = new Cache();
     }
 
@@ -66,7 +66,7 @@ public class Account {
         tags = new ArrayList<String>();
         strXpub = "";
         strXpriv = "";
-        addressLabels = new TreeMap<Integer,String>();
+        addressLabels = new TreeMap<Integer, String>();
         cache = new Cache();
     }
 
@@ -103,24 +103,21 @@ public class Account {
     }
 
     public String getLabel() {
-    	if(strLabel == null) {
+        if (strLabel == null) {
             return "";
-    	}
-    	else if(strLabel.length() > 32) {
+        } else if (strLabel.length() > 32) {
             return strLabel.replaceAll("\n", " ").substring(0, 32) + "...";
-    	}
-    	else {
+        } else {
             return strLabel.replaceAll("\n", " ");
-    	}
+        }
     }
 
     public String getFullLabel() {
-    	if(strLabel == null) {
-    		return "";
-    	}
-    	else {
+        if (strLabel == null) {
+            return "";
+        } else {
             return strLabel;
-    	}
+        }
     }
 
     public void setLabel(String strLabel) {
@@ -142,7 +139,7 @@ public class Account {
     public void setTags(List<String> tags) {
         this.tags = tags;
     }
-    
+
     public long getAmount() {
         return amount;
     }
@@ -167,11 +164,11 @@ public class Account {
         this.strXpriv = strXpriv;
     }
 
-    public TreeMap<Integer,String> getAddressLabels() {
+    public TreeMap<Integer, String> getAddressLabels() {
         return addressLabels;
     }
 
-    public void setAddressLabels(TreeMap<Integer,String> addressLabels) {
+    public void setAddressLabels(TreeMap<Integer, String> addressLabels) {
         this.addressLabels = addressLabels;
     }
 
@@ -211,7 +208,7 @@ public class Account {
         obj.put("xpriv", strXpriv == null ? "" : strXpriv);
 
         JSONArray receives = new JSONArray();
-        for(ReceiveAddress receiveAddress : receiveAddresses) {
+        for (ReceiveAddress receiveAddress : receiveAddresses) {
             receives.put(receiveAddress.dumpJSON());
         }
         /*
@@ -230,7 +227,7 @@ public class Account {
         */
 
         JSONArray labels = new JSONArray();
-        for(Integer key : addressLabels.keySet()) {
+        for (Integer key : addressLabels.keySet()) {
             JSONObject labelObj = new JSONObject();
 
             labelObj.put("index", key);

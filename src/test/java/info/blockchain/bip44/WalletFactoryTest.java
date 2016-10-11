@@ -58,7 +58,7 @@ public class WalletFactoryTest {
             wallet = walletFactory.restoreWallet("all all all all all all all all all all all all bogus", "", 1);
         } catch (Exception e) {
             ;
-        }finally {
+        } finally {
             assertThat("Bad mnemonic should not restore wallet", wallet == null);
         }
     }

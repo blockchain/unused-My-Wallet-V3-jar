@@ -2,6 +2,7 @@ package info.blockchain.api;
 
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.WebUtil;
+
 import org.json.JSONObject;
 
 public class TransactionDetails implements BaseApi {

@@ -1,6 +1,7 @@
 package info.blockchain.api;
 
 import info.blockchain.test_data.MerchantDirectoryTestData;
+
 import org.junit.Test;
 
 import java.util.ArrayList;

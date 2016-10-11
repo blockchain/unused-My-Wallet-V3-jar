@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.test_data.PayloadTestData;
+
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,7 +60,6 @@ public class PayloadTest {
 
     /**
      * Test should still pass even if certain optional json parts have been left out
-     * @throws Exception
      */
     @Test
     public void parsePayload_withMinimalValues_shouldPass() throws Exception {

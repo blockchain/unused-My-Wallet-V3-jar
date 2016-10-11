@@ -20,7 +20,7 @@ public class SuggestedFee {
                 '}';
     }
 
-    public static class Estimates{
+    public static class Estimates {
 
         public Estimates(BigInteger fee, boolean surge, boolean ok) {
             this.fee = fee;
