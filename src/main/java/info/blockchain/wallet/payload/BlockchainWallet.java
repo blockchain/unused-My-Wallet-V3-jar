@@ -249,7 +249,6 @@ public class BlockchainWallet {
                     try {
                         decrypted = AESUtil.decryptWithSetMode(encryptedPayload, password, iteration, mode, padding);
                         //Ensure it's parsable
-                        assert decrypted != null;
                         new JSONObject(decrypted);
 
                         succeededIterations = iteration;
