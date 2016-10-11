@@ -132,9 +132,6 @@ public class SendCoins	{
             valueSelected = valueSelected.add(outPoint.getValue());
             priority += outPoint.getValue().longValue() * outPoint.getConfirmations();
 
-            if(changeAddress == null) {
-            }
-
             if(valueSelected.compareTo(valueNeeded) == 0 || valueSelected.compareTo(valueNeeded.add(minFreeOutputSize)) >= 0) {
                 break;
             }
@@ -209,7 +206,7 @@ public class SendCoins	{
             keys[i] = key;
             byte[] connectedPubKeyScript = input.getOutpoint().getConnectedPubKeyScript();
             assert key != null;
-            if(key != null && key.hasPrivKey() || key.isEncrypted()) {
+            if(key.hasPrivKey() || key.isEncrypted()) {
                 sigs[i] = transaction.calculateSignature(i, key, connectedPubKeyScript, SigHash.ALL, false);
             }
             else {

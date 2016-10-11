@@ -400,8 +400,8 @@ public class Settings implements BaseApi {
      */
     public void enableNotification(int type, ResultListener listener) {
 
-        if ((type == NOTIFICATION_TYPE_EMAIL && notificationType.contains((Integer) NOTIFICATION_TYPE_SMS)) ||
-                (type == NOTIFICATION_TYPE_SMS && notificationType.contains((Integer) NOTIFICATION_TYPE_EMAIL))) {
+        if ((type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS)) ||
+                (type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL))) {
             type = NOTIFICATION_TYPE_ALL;
         }
 

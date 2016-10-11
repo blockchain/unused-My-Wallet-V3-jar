@@ -456,7 +456,7 @@ public class Payload implements Serializable{
                             account.setArchived(false);
                         }
                         account.setLabel(accountObj.has("label") ? (String)accountObj.get("label") : "");
-                        if(accountObj.has("xpub") && ((String)accountObj.get("xpub")) != null && ((String)accountObj.get("xpub")).length() > 0)  {
+                        if(accountObj.has("xpub") && (accountObj.getString("xpub")) != null && (accountObj.getString("xpub")).length() > 0)  {
                             account.setXpub((String)accountObj.get("xpub"));
                             xpub2Account.put((String)accountObj.get("xpub"), i);
                             account2Xpub.put(i, (String)accountObj.get("xpub"));
@@ -464,7 +464,7 @@ public class Payload implements Serializable{
                         else  {
                             continue;
                         }
-                        if(accountObj.has("xpriv") && ((String)accountObj.get("xpriv")) != null && ((String)accountObj.get("xpriv")).length() > 0)  {
+                        if(accountObj.has("xpriv") && (accountObj.getString("xpriv")) != null && (accountObj.getString("xpriv")).length() > 0)  {
                             account.setXpriv((String)accountObj.get("xpriv"));
                         }
                         else  {
@@ -482,8 +482,8 @@ public class Payload implements Serializable{
                                     receiveAddress.setIndex(val);
                                 }
                                 receiveAddress.setLabel(receiveObj.has("label") ? (String)receiveObj.get("label") : "");
-                                receiveAddress.setAmount(receiveObj.has("amount") ? (Long)receiveObj.getLong("amount") : 0L);
-                                receiveAddress.setPaid(receiveObj.has("paid") ? (Long)receiveObj.getLong("paid") : 0L);
+                                receiveAddress.setAmount(receiveObj.has("amount") ? receiveObj.getLong("amount") : 0L);
+                                receiveAddress.setPaid(receiveObj.has("paid") ? receiveObj.getLong("paid") : 0L);
 //                                    receiveAddress.setCancelled(receiveObj.has("cancelled") ? (Boolean)receiveObj.get("cancelled") : false);
 //                                    receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
                                 receiveAddresses.add(receiveAddress);
@@ -727,7 +727,7 @@ public class Payload implements Serializable{
         }
         obj.put("keys", keys);
 
-        JSONObject optionsObj = (JSONObject)options.dumpJSON();
+        JSONObject optionsObj = options.dumpJSON();
         obj.put("options", optionsObj);
 
         JSONArray address_book = new JSONArray();

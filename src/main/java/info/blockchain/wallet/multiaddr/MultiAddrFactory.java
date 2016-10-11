@@ -221,7 +221,7 @@ public class MultiAddrFactory   {
                                     if(!haveUnspentOuts.containsKey(addr))  {
                                         haveUnspentOuts.put(addr, new ArrayList<String>());
                                     }
-                                    String data = path + "," + (String)outObj.get("addr");
+                                    String data = path + "," + outObj.getString("addr");
                                     if(!haveUnspentOuts.get(addr).contains(data))  {
                                         haveUnspentOuts.get(addr).add(data);
                                     }

@@ -76,7 +76,7 @@ public class Wallet {
 
         this.params = params;
         seed = Hex.decodeHex(((String)jsonobj.get("hex_seed")).toCharArray());
-        strPassphrase = (String)jsonobj.getString("passphrase");
+        strPassphrase = jsonobj.getString("passphrase");
         int nbAccounts = jsonobj.getJSONArray("accounts").length();
 
         InputStream wis = this.getClass()
