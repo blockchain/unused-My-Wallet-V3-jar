@@ -153,9 +153,9 @@ public class Payload implements Serializable {
     public List<LegacyAddress> getActiveLegacyAddresses() {
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
 
-        for (LegacyAddress legacyAddress : legacyAddresses) {
-            if (legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS &&
-                    !legacyAddress.isWatchOnly()) {
+        for(LegacyAddress legacyAddress : legacyAddresses) {
+            if(legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS &&
+               !legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress);
             }
         }
@@ -200,9 +200,9 @@ public class Payload implements Serializable {
     public List<String> getActiveLegacyAddressStrings() {
         List<String> addrs = new ArrayList<String>();
 
-        for (LegacyAddress legacyAddress : legacyAddresses) {
-            if (legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS) {
-                addrs.add(legacyAddress.getAddress());
+        for(LegacyAddress legacyAddress : legacyAddresses) {
+            if(legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS) {
+              addrs.add(legacyAddress.getAddress());
             }
         }
 
@@ -608,10 +608,15 @@ public class Payload implements Serializable {
                             try {
                                 tag = key.getLong("tag");
                             } catch (Exception e) {
-                                tag = 0L;
+                                tag = LegacyAddress.NORMAL_ADDRESS;
                             }
                         } else {
-                            tag = 0L;
+                            tag = LegacyAddress.NORMAL_ADDRESS;
+                        }
+
+                        if (watchOnly) {
+                            //Watch-only addresses, although possible, should never be archived.
+                            tag = LegacyAddress.NORMAL_ADDRESS;
                         }
 
                         try {
