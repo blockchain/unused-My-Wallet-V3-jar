@@ -40,14 +40,14 @@ public class WalletTest {
         InputStream wis = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream("wordlist/" + locale.toString() + ".txt");
-        if(wis != null) {
+        if (wis != null) {
             MnemonicCode mc = new MnemonicCode(wis, null);
 
             //Create bip44 wallet
             bip44Wallet = new Wallet(mc, params, seed, passphrase, accountCount);
 
             wis.close();
-        }else {
+        } else {
             throw new Exception("Cannot read BIP39 word list");
         }
 
@@ -79,13 +79,13 @@ public class WalletTest {
         JSONObject json = new JSONObject();
         String seedHex = "0660cc198330660cc198330660cc1983";
         String passphrase = "myPassPhrase";
-        json.put("hex_seed",seedHex);
-        json.put("passphrase",passphrase);
+        json.put("hex_seed", seedHex);
+        json.put("passphrase", passphrase);
 
         ArrayList<String> acc = new ArrayList<String>();
         acc.add("1");
         acc.add("2");
-        json.put("accounts",new JSONArray(acc));
+        json.put("accounts", new JSONArray(acc));
 
         Wallet wallet = new Wallet(json, MainNetParams.get(), new Locale("en", "US"));
         assertThat(wallet.getAccounts().size(), is(2));

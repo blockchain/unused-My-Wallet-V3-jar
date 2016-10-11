@@ -1,6 +1,7 @@
 package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.util.CharSequenceX;
+
 import org.junit.Test;
 import org.spongycastle.crypto.paddings.ISO10126d2Padding;
 import org.spongycastle.crypto.paddings.ISO7816d4Padding;
@@ -39,7 +40,7 @@ public class AESUtilTest {
         String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
         String decrypted = AESUtil.decrypt(encrypted, new CharSequenceX("bogus"), iterations);
 
-        assertThat("Decryption (cleartext 'test data') successful with incorrect password as : "+decrypted, decrypted == null || !decrypted.equals(cleartext));
+        assertThat("Decryption (cleartext 'test data') successful with incorrect password as : " + decrypted, decrypted == null || !decrypted.equals(cleartext));
     }
 
     @Test
@@ -47,8 +48,8 @@ public class AESUtilTest {
 
         String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
         String decrypted = AESUtil.decrypt(encrypted, pw, iterations + 1);
-        System.out.println("decrypted: "+decrypted);
-        assertThat("Decryption (cleartext 'test data') successful with incorrect iterations as : "+decrypted, decrypted == null || !decrypted.equals(cleartext));
+        System.out.println("decrypted: " + decrypted);
+        assertThat("Decryption (cleartext 'test data') successful with incorrect iterations as : " + decrypted, decrypted == null || !decrypted.equals(cleartext));
     }
 
     @Test

@@ -1,18 +1,18 @@
 package info.blockchain.wallet.payload;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImportedAccount extends Account {
 
     private List<LegacyAddress> legacyAddresses = null;
 
     public ImportedAccount() {
-    	super();
+        super();
         this.legacyAddresses = new ArrayList<LegacyAddress>();
     }
 
@@ -27,11 +27,11 @@ public class ImportedAccount extends Account {
         this.amount = amount;
     }
 
-    public List<LegacyAddress> getLegacyAddresses()	{
+    public List<LegacyAddress> getLegacyAddresses() {
         return this.legacyAddresses;
     }
 
-    public void setLegacyAddresses(List<LegacyAddress> addrs)	{
+    public void setLegacyAddresses(List<LegacyAddress> addrs) {
         this.legacyAddresses = addrs;
     }
 
@@ -44,13 +44,13 @@ public class ImportedAccount extends Account {
         obj.put("label", strLabel == null ? "" : strLabel);
 
         JSONArray receives = new JSONArray();
-        for(ReceiveAddress receiveAddress : receiveAddresses) {
+        for (ReceiveAddress receiveAddress : receiveAddresses) {
             receives.put(receiveAddress.dumpJSON());
         }
         obj.put("receive_addresses", receives);
 
         JSONArray _tags = new JSONArray();
-        for(String tag : tags) {
+        for (String tag : tags) {
             _tags.put(tag);
         }
         obj.put("tags", _tags);

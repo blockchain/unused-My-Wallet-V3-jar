@@ -3,7 +3,7 @@ package info.blockchain.wallet.send;
 import java.math.BigInteger;
 import java.util.List;
 
-public class UnspentOutputsBundle	{
+public class UnspentOutputsBundle {
 
     private List<MyTransactionOutPoint> outputs = null;
     private BigInteger totalAmount = BigInteger.ZERO;//Selected coin total

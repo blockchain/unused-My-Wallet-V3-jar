@@ -3,6 +3,7 @@ package info.blockchain.api;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SuggestedFee;
 import info.blockchain.wallet.util.WebUtil;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 

@@ -12,7 +12,7 @@ public class CharSequenceX implements CharSequence {
         zap();
         int len = end - start;
         chars = new char[len];
-        for(int i = start; i < end; i++) {
+        for (int i = start; i < end; i++) {
             chars[i - start] = charSequence.charAt(i);
         }
     }
@@ -31,8 +31,8 @@ public class CharSequenceX implements CharSequence {
     }
 
     private void zap() {
-        if(chars != null) {
-            for(int i = 0; i < rounds; i++) {
+        if (chars != null) {
+            for (int i = 0; i < rounds; i++) {
                 fill('0');
                 rfill();
                 fill('0');
@@ -41,29 +41,26 @@ public class CharSequenceX implements CharSequence {
     }
 
     public void setRounds(int rounds) {
-        if(rounds < 100) {
+        if (rounds < 100) {
             this.rounds = 100;
-        }
-        else {
+        } else {
             this.rounds = rounds;
         }
     }
 
     public char charAt(int index) {
         System.out.println(1);
-        if(chars != null) {
+        if (chars != null) {
             return chars[index];
-        }
-        else {
+        } else {
             return 0;
         }
     }
 
     public int length() {
-        if(chars != null) {
+        if (chars != null) {
             return chars.length;
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -87,7 +84,7 @@ public class CharSequenceX implements CharSequence {
     }
 
     private void fill(char c) {
-        for(int i = 0; i < chars.length; i++) {
+        for (int i = 0; i < chars.length; i++) {
             chars[i] = c;
         }
     }
@@ -96,8 +93,8 @@ public class CharSequenceX implements CharSequence {
         SecureRandom r = new SecureRandom();
         byte[] b = new byte[chars.length];
         r.nextBytes(b);
-        for(int i = 0; i < chars.length; i++) {
-            chars[i] = (char)b[i];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) b[i];
         }
     }
 

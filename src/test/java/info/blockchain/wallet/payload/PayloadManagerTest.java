@@ -5,6 +5,7 @@ import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,27 +36,30 @@ public class PayloadManagerTest {
         MockitoAnnotations.initMocks(this);
 
         payloadManager = PayloadManager.getInstance();
-        payload = payloadManager.createHDWallet(password,label);
+        payload = payloadManager.createHDWallet(password, label);
     }
 
     @After
-    public void tearDown() throws Exception{
+    public void tearDown() throws Exception {
         PayloadManager.getInstance().wipe();
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withValidVars_shouldPass() throws Exception{
+    public void getPayloadFromServerAndDecrypt_withValidVars_shouldPass() throws Exception {
 
         payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
             public void onSuccess() {
                 assertThat("Payload successfully fetch and decrypted", true);
             }
         });
-        try{Thread.sleep(500);}catch (Exception e){}
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+        }
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldThrow_AuthenticationException(){
+    public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldThrow_AuthenticationException() {
 
         try {
             payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid() + "addSomeTextToFail", new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
@@ -70,11 +74,14 @@ public class PayloadManagerTest {
                 assertThat("Auth should not pass with invalid guid", false);
             }
         }
-        try{Thread.sleep(500);}catch (Exception e){}
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+        }
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidPassword_shouldThrow_DecryptionException(){
+    public void getPayloadFromServerAndDecrypt_withInvalidPassword_shouldThrow_DecryptionException() {
 
         try {
             payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password + "addSomeTextToFail"), new PayloadManager.InitiatePayloadListener() {
@@ -89,11 +96,14 @@ public class PayloadManagerTest {
                 assertThat("Auth should not pass with invalid guid", false);
             }
         }
-        try{Thread.sleep(500);}catch (Exception e){}
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+        }
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidSharedKey_shouldThrow_AuthenticationException(){
+    public void getPayloadFromServerAndDecrypt_withInvalidSharedKey_shouldThrow_AuthenticationException() {
 
         try {
             payloadManager.initiatePayload(payload.getSharedKey() + "addSomeTextToFail", payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
@@ -101,14 +111,17 @@ public class PayloadManagerTest {
                     assertThat("onSuccess", false);
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             if (e instanceof InvalidCredentialsException) {
                 assertThat("Invalid shared key successfully detected", true);
             } else {
                 assertThat("Auth should not pass with invalid shared key", false);
             }
         }
-        try{Thread.sleep(500);}catch (Exception e){}
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+        }
     }
 
     @Test
@@ -118,23 +131,27 @@ public class PayloadManagerTest {
 
         payloadManager.savePayloadToServer();
 
-        try{
-        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
-            public void onSuccess() {
-                assertThat("Incompatible version should not pass", false);
-            }
-        });}catch (Exception e){
+        try {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+                public void onSuccess() {
+                    assertThat("Incompatible version should not pass", false);
+                }
+            });
+        } catch (Exception e) {
             if (e instanceof UnsupportedVersionException) {
                 assertThat("Unsupported version detected", true);
             } else {
                 assertThat("Unsupported version should not pass", false);
             }
-        }finally {
+        } finally {
             payloadManager.setVersion(3.0);
         }
-        try{Thread.sleep(500);}catch (Exception e){}
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+        }
     }
-    
+
     @Test
     public void upgradeV2PayloadToV3_shouldPass() throws Exception {
 
@@ -142,12 +159,12 @@ public class PayloadManagerTest {
 
         //Create HD
         String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password",label);
+        Payload payload = payloadManager.createHDWallet("password", label);
         payload.setHdWallets(new ArrayList<HDWallet>());//remove hd
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android","6.6", null);
-        if(payloadManager.addLegacyAddress(legacyAddress)) {
+        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", null);
+        if (payloadManager.addLegacyAddress(legacyAddress)) {
             final String guidOriginal = payloadManager.getPayload().getGuid();
 
             //Now we have legacy wallet (only addresses)
@@ -175,7 +192,7 @@ public class PayloadManagerTest {
                     assertThat("upgradeV2PayloadToV3 failed", false);
                 }
             });
-        }else{
+        } else {
             assertThat("adding new Legacy address failed failed", false);
         }
 
@@ -190,7 +207,7 @@ public class PayloadManagerTest {
 
         //Create HD
         String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password",label);
+        Payload payload = payloadManager.createHDWallet("password", label);
         payload.setHdWallets(new ArrayList<HDWallet>());//remove hd
 
         //Set second password
@@ -199,8 +216,8 @@ public class PayloadManagerTest {
         payload.setDoubleEncrypted(true);
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android","6.6", secondPassword);
-        if(payloadManager.addLegacyAddress(legacyAddress)) {
+        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", secondPassword);
+        if (payloadManager.addLegacyAddress(legacyAddress)) {
             final String guidOriginal = payloadManager.getPayload().getGuid();
 
             //Now we have legacy wallet (only addresses)
@@ -228,7 +245,7 @@ public class PayloadManagerTest {
                     assertThat("upgradeV2PayloadToV3 failed", false);
                 }
             });
-        }else{
+        } else {
             assertThat("adding new Legacy address failed failed", false);
         }
 
@@ -241,7 +258,7 @@ public class PayloadManagerTest {
         PayloadManager payloadManager = PayloadManager.getInstance();
 
         String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password",label);
+        Payload payload = payloadManager.createHDWallet("password", label);
 
         assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
         assertThat(payload.getHdWallet().getAccounts().get(0).getLabel(), is(label));
@@ -273,19 +290,19 @@ public class PayloadManagerTest {
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9xj9UhHNKHr6kJKJBVj82ZxFrbfhczBDUHyVj7kHGAiZqAeUenz2JhrphnMMYVKcWcVPFJESngtKsVa4FYEvFfWUTtZThCoZdwDeS9qQnqm"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9xj9UhHNKHr6nkRg3ZpSBp2i3MgSazXa3LGet5MsVY3nTeE1zvnwVrjpnsJGEtEvvcm8fwoUBVpnHcioJfFqRUaZ6ijXEuwUuv2Q5RM6dGR"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9xj9UhHNKHr6rUDptMDdQhw5ccX8mzVQBopwYejpRt1NHpFvQMSG1a8RGRJjZRE8rRJJ6N9g1GcB6yWEgkXCzGBweq934jS9LfBuViQRxRw"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9xj9UhHNKHr6tdLP1UdrAJKKRUiGd92aBbsqkW28vtdmCzXTvns1aNKwh5uM1nSbdD8Y4x9VBnTLrDDEbREnu9KYnDyvt8QRPtPWQ78UgAG"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9xj9UhHNKHr6vLRGPDajPuoc2futBwhu93ZLCUuoGBya3uD4X5kDfMuUiEHz7HPWPpkgCHiwNbLWjxa6QrqfjmPmVr146GUt8D5shiXkQpC"));
 
@@ -315,19 +332,19 @@ public class PayloadManagerTest {
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF"));
 
@@ -335,45 +352,45 @@ public class PayloadManagerTest {
     }
 
     @Test
-    public void restoreWallet_withMnemonic_shouldContainCorrectReceiveAddresses() throws Exception{
+    public void restoreWallet_withMnemonic_shouldContainCorrectReceiveAddresses() throws Exception {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
 
         String mnemonic = "all all all all all all all all all all all all";
-        payloadManager.restoreHDWallet("password",mnemonic, "");
+        payloadManager.restoreHDWallet("password", mnemonic, "");
 
         assertThat(payloadManager.getNextReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payloadManager.getNextReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payloadManager.getNextReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
 
-        payloadManager.addAccount("",null, null);
+        payloadManager.addAccount("", null, null);
         assertThat(payloadManager.getNextReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
 
         PayloadManager.getInstance().wipe();
     }
 
     @Test
-    public void generateNewLegacyAddress_withWrongSecondPassword_shouldFail() throws Exception{
+    public void generateNewLegacyAddress_withWrongSecondPassword_shouldFail() throws Exception {
 
         when(mockPayloadManager.validateSecondPassword(anyString()))
                 .thenReturn(false);
 
-        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar","1.0","second_password");
+        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar", "1.0", "second_password");
 
         assertThat("Address should be null", legacyAddress == null);
     }
 
     @Test
-    public void generateNewLegacyAddress_withFailedRandomECKey_shouldFail() throws Exception{
+    public void generateNewLegacyAddress_withFailedRandomECKey_shouldFail() throws Exception {
 
         when(mockPayloadManager.getRandomECKey())
                 .thenReturn(null);
 
-        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar","1.0","second_password");
+        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar", "1.0", "second_password");
 
         assertThat("Address should be null", legacyAddress == null);
     }

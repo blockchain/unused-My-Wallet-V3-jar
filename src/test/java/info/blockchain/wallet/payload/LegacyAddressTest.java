@@ -18,7 +18,7 @@ public class LegacyAddressTest {
         String device = "device";
         String version = "version";
 
-        LegacyAddress legacyAddress = PayloadManager.getInstance().generateLegacyAddress(device,version, null);
+        LegacyAddress legacyAddress = PayloadManager.getInstance().generateLegacyAddress(device, version, null);
 
         assertThat(legacyAddress.getCreatedDeviceName(), is(device));
         assertThat(legacyAddress.getCreatedDeviceVersion(), is(version));

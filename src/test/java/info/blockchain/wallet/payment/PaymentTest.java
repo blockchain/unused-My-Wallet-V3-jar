@@ -6,6 +6,7 @@ import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.send.SendCoins;
+
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -16,11 +17,11 @@ import static org.hamcrest.core.Is.is;
 
 public class PaymentTest {
 
-    private long calculateFee(int outputs, int inputs, BigInteger feePerKb){
+    private long calculateFee(int outputs, int inputs, BigInteger feePerKb) {
         //Manually calculated fee
         long size = (outputs * 34) + (inputs * 148) + 10;//36840L
-        double txBytes = ((double)size / 1000.0);
-        return (long)Math.ceil(feePerKb.doubleValue() * txBytes);
+        double txBytes = ((double) size / 1000.0);
+        return (long) Math.ceil(feePerKb.doubleValue() * txBytes);
     }
 
     @Test

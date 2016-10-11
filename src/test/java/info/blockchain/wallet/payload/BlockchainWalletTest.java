@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.wallet.util.CharSequenceX;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;

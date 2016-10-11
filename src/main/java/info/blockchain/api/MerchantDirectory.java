@@ -2,6 +2,7 @@ package info.blockchain.api;
 
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.WebUtil;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,7 +74,7 @@ public class MerchantDirectory implements BaseApi {
                         merchant.description = jsonObj.optString("description", "");
                     }
                     if (jsonObj.has("category_id")) {
-                        merchant.category_id = jsonObj.optInt("category_id", Merchant. HEADING_CAFE);
+                        merchant.category_id = jsonObj.optInt("category_id", Merchant.HEADING_CAFE);
                     }
 
                     merchantList.add(merchant);

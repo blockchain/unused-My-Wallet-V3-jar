@@ -31,13 +31,13 @@ public class ReceiveAddress {
     }
 
     public ReceiveAddress(String address, long amount, long paid) {
-    	this.strAddress = address;
+        this.strAddress = address;
         this.amount = amount;
         this.paid = paid;
     }
 
     public ReceiveAddress(String address, int index) {
-    	this.strAddress = address;
+        this.strAddress = address;
         this.index = index;
         this.amount = 0L;
         this.paid = 0L;
@@ -46,7 +46,7 @@ public class ReceiveAddress {
     }
 
     public ReceiveAddress(String address, int index, String json) {
-    	this.strAddress = address;
+        this.strAddress = address;
         this.index = index;
         this.amount = 0L;
         this.paid = 0L;
@@ -110,11 +110,11 @@ public class ReceiveAddress {
         paid += amount;
 
     }
-/*
-    public void checkTX() {
-        new AddressInfo().execute("");
-    }
-*/
+    /*
+        public void checkTX() {
+            new AddressInfo().execute("");
+        }
+    */
     public JSONObject dumpJSON() throws JSONException {
 
         JSONObject obj = new JSONObject();
@@ -128,100 +128,100 @@ public class ReceiveAddress {
     }
 
     public boolean notPreviouslyUsed() {
-    	return useThis;
+        return useThis;
     }
-/*
-    private class AddressInfo extends AsyncTask<String, Void, String> {
+    /*
+        private class AddressInfo extends AsyncTask<String, Void, String> {
 
-        @Override
-        protected String doInBackground(String... params) {
+            @Override
+            protected String doInBackground(String... params) {
 
-        	String result = null;
+                String result = null;
 
-        	try {
-    			result = WebUtil.getInstance().getURL("https://blockchain.info/address/" + strAddress + "?format=json");
-        	}
-        	catch(Exception e) {
-				e.printStackTrace();
-        	}
+                try {
+                    result = WebUtil.getInstance().getURL("https://blockchain.info/address/" + strAddress + "?format=json");
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
 
-        	return result;
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+
+                if(result != null) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(result);
+
+                        if(jsonObject.has("n_tx")) {
+                            int val = (Integer)jsonObject.get("n_tx");
+                            nbTx = val;
+                        }
+                        else {
+                            nbTx = 0;
+                        }
+
+                        if(jsonObject.has("final_balance")) {
+                            long val = jsonObject.getLong("final_balance");
+                            amount = val;
+                        }
+                        else {
+                            amount = 0L;
+                        }
+
+                    } catch(JSONException je) {
+                        je.printStackTrace();
+                        nbTx = 0;
+                        amount = 0L;
+                    }
+                }
+
+    //			Log.i("ReceiveAddress", "Index:" + index + "/" + strAddress + "/" + nbTx + "/" + amount);
+
+                if(amount == 0L && nbTx == 0) {
+                    useThis = true;
+                }
+                else {
+                    useThis = false;
+                }
+
+            }
+
+            @Override
+            protected void onPreExecute() {}
+
+            @Override
+            protected void onProgressUpdate(Void... values) {}
         }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-        	if(result != null) {
-    			try {
-    	            JSONObject jsonObject = new JSONObject(result);
-
-    	            if(jsonObject.has("n_tx")) {
-    	            	int val = (Integer)jsonObject.get("n_tx");
-    	            	nbTx = val;
-    	            }
-    	            else {
-    	            	nbTx = 0;
-    	            }
-
-    	            if(jsonObject.has("final_balance")) {
-    	            	long val = jsonObject.getLong("final_balance");
-    	            	amount = val;
-    	            }
-    	            else {
-    	            	amount = 0L;
-    	            }
-
-    			} catch(JSONException je) {
-    				je.printStackTrace();
-                	nbTx = 0;
-                	amount = 0L;
-    			}
-        	}
-
-//			Log.i("ReceiveAddress", "Index:" + index + "/" + strAddress + "/" + nbTx + "/" + amount);
-
-			if(amount == 0L && nbTx == 0) {
-				useThis = true;
-			}
-			else {
-				useThis = false;
-			}
-
-        }
-
-        @Override
-        protected void onPreExecute() {}
-
-        @Override
-        protected void onProgressUpdate(Void... values) {}
-    }
-*/
+    */
     private void initJSON(String json)	 {
 
-    	if(json != null) {
-			try {
-	            JSONObject jsonObject = new JSONObject(json);
+        if(json != null) {
+            try {
+                JSONObject jsonObject = new JSONObject(json);
 
-	            if(jsonObject.has("n_tx")) {
+                if(jsonObject.has("n_tx")) {
                     nbTx = (int) (Integer)jsonObject.get("n_tx");
-	            }
-	            else {
-	            	nbTx = 0;
-	            }
+                }
+                else {
+                    nbTx = 0;
+                }
 
-	            if(jsonObject.has("final_balance")) {
+                if(jsonObject.has("final_balance")) {
                     amount = jsonObject.getLong("final_balance");
-	            }
-	            else {
-	            	amount = 0L;
-	            }
+                }
+                else {
+                    amount = 0L;
+                }
 
-			} catch(JSONException je) {
-				je.printStackTrace();
-            	nbTx = 0;
-            	amount = 0L;
-			}
-    	}
+            } catch(JSONException je) {
+                je.printStackTrace();
+                nbTx = 0;
+                amount = 0L;
+            }
+        }
 
         useThis = amount == 0L && nbTx == 0;
 

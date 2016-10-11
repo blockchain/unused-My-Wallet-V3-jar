@@ -9,12 +9,12 @@ public class Tx {
     private String strDirection = null;
     private double amount = 0.0;
     private long ts = 0L;
-    private Map<Integer,String> tags = null;
+    private Map<Integer, String> tags = null;
     private boolean isMove = false;
     private long confirmations = 0L;
     private boolean isWatchOnly = false;
 
-    public Tx(String hash, String note, String direction, double amount, long date, Map<Integer,String> tags) {
+    public Tx(String hash, String note, String direction, double amount, long date, Map<Integer, String> tags) {
         strHash = hash;
         strNote = note;
         strDirection = direction;
@@ -23,7 +23,7 @@ public class Tx {
         this.tags = tags;
     }
 
-    public Tx(String note, String direction, double amount, long date, Map<Integer,String> tags) {
+    public Tx(String note, String direction, double amount, long date, Map<Integer, String> tags) {
         strNote = note;
         strDirection = direction;
         this.amount = amount;
@@ -79,11 +79,11 @@ public class Tx {
         this.isMove = isMove;
     }
 
-    public Map<Integer,String> getTags() {
+    public Map<Integer, String> getTags() {
         return this.tags;
     }
 
-    public void setTags(Map<Integer,String> tags) {
+    public void setTags(Map<Integer, String> tags) {
         this.tags = tags;
     }
 

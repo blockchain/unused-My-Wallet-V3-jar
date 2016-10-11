@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class WebUtil{
+public class WebUtil {
 
     private static final int DefaultRequestRetry = 2;
     private static final int DefaultRequestTimeout = 60000;
@@ -22,7 +22,7 @@ public class WebUtil{
 
     public static WebUtil getInstance() {
 
-        if(instance == null) {
+        if (instance == null) {
             instance = new WebUtil();
         }
 
@@ -41,7 +41,7 @@ public class WebUtil{
         return this.postURLCall(request, urlParameters, 2, "application/json");
     }
 
-    private  String postURLCall(String request, String urlParameters, int requestRetry, String contentType) throws Exception {
+    private String postURLCall(String request, String urlParameters, int requestRetry, String contentType) throws Exception {
 
         String error = null;
 
@@ -66,7 +66,7 @@ public class WebUtil{
 
                 connection.connect();
 
-                DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
                 wr.writeBytes(urlParameters);
                 wr.flush();
                 wr.close();
@@ -76,18 +76,15 @@ public class WebUtil{
                 if (connection.getResponseCode() == 200) {
 //					Log.d("postURL", "return code 200");
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
-                }
-                else {
+                } else {
                     error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
 //					Log.d("postURL", "return code " + error);
                 }
 
                 Thread.sleep(5000);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 throw new Exception("Network error" + e.getMessage());
-            }
-            finally {
+            } finally {
                 connection.disconnect();
             }
         }
@@ -122,7 +119,7 @@ public class WebUtil{
 
                 connection.setConnectTimeout(DefaultRequestTimeout);
                 connection.setReadTimeout(DefaultRequestTimeout);
-                if(cookie!=null)connection.setRequestProperty("cookie",cookie);
+                if (cookie != null) connection.setRequestProperty("cookie", cookie);
                 connection.setInstanceFollowRedirects(false);
 
                 connection.connect();
@@ -133,11 +130,9 @@ public class WebUtil{
                     error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
 
                 Thread.sleep(5000);
-            }
-            catch(Exception e) {
+            } catch (Exception e) {
                 throw new Exception("Network error" + e.getMessage());
-            }
-            finally {
+            } finally {
                 connection.disconnect();
             }
         }

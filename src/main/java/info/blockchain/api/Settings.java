@@ -1,6 +1,7 @@
 package info.blockchain.api;
 
 import info.blockchain.wallet.util.WebUtil;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -167,24 +168,30 @@ public class Settings implements BaseApi {
             notificationType.add(notificationTypeJsonArray.getInt(i));
         }
         if (jsonObject.has("language")) language = jsonObject.getString("language");
-        if (jsonObject.has("notifications_on")) notificationsOn = toBoolean(jsonObject.getInt("notifications_on"));
+        if (jsonObject.has("notifications_on"))
+            notificationsOn = toBoolean(jsonObject.getInt("notifications_on"));
         if (jsonObject.has("ip_lock_on")) ipLockOn = toBoolean(jsonObject.getInt("ip_lock_on"));
         if (jsonObject.has("dial_code")) dialCode = jsonObject.getString("dial_code");
-        if (jsonObject.has("block_tor_ips")) blockTorIps = toBoolean(jsonObject.getInt("block_tor_ips"));
+        if (jsonObject.has("block_tor_ips"))
+            blockTorIps = toBoolean(jsonObject.getInt("block_tor_ips"));
         if (jsonObject.has("currency")) currency = jsonObject.getString("currency");
         if (jsonObject.has("notifications_confirmations"))
             notificationsConfirmations = jsonObject.getInt("notifications_confirmations");
-        if (jsonObject.has("auto_email_backup")) autoEmailBackup = toBoolean(jsonObject.getInt("auto_email_backup"));
+        if (jsonObject.has("auto_email_backup"))
+            autoEmailBackup = toBoolean(jsonObject.getInt("auto_email_backup"));
         if (jsonObject.has("never_save_auth_type"))
             neverSaveAuthType = toBoolean(jsonObject.getInt("never_save_auth_type"));
         if (jsonObject.has("email")) email = jsonObject.getString("email");
-        if (jsonObject.has("sms_verified")) smsVerified = toBoolean(jsonObject.getInt("sms_verified"));
+        if (jsonObject.has("sms_verified"))
+            smsVerified = toBoolean(jsonObject.getInt("sms_verified"));
         if (jsonObject.has("is_api_access_enabled"))
             isApiAccessEnabled = toBoolean(jsonObject.getInt("is_api_access_enabled"));
         if (jsonObject.has("auth_type")) authType = jsonObject.getInt("auth_type");
         if (jsonObject.has("my_ip")) myIp = jsonObject.getString("my_ip");
-        if (jsonObject.has("email_verified")) emailVerified = toBoolean(jsonObject.getInt("email_verified"));
-        if (jsonObject.has("password_hint1")) passwordHint1 = jsonObject.getString("password_hint1");
+        if (jsonObject.has("email_verified"))
+            emailVerified = toBoolean(jsonObject.getInt("email_verified"));
+        if (jsonObject.has("password_hint1"))
+            passwordHint1 = jsonObject.getString("password_hint1");
         if (jsonObject.has("country_code")) countryCode = jsonObject.getString("country_code");
         if (jsonObject.has("logging_level")) loggingLevel = jsonObject.getInt("logging_level");
         if (jsonObject.has("guid")) guid = jsonObject.getString("guid");
@@ -395,8 +402,7 @@ public class Settings implements BaseApi {
     }
 
     /**
-     * @param type     NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL, NOTIFICATION_TYPE_ALL
-     * @param listener
+     * @param type NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL, NOTIFICATION_TYPE_ALL
      */
     public void enableNotification(int type, ResultListener listener) {
 

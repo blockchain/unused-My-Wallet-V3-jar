@@ -58,22 +58,22 @@ public class PaidTo {
 
         if ((strEmail != null) && !"".equals(strEmail)) {
             obj.put("email", strEmail);
-        }else{
+        } else {
             obj.put("email", JSONObject.NULL);
         }
         if ((strMobile != null) && !"".equals(strMobile)) {
             obj.put("mobile", strMobile);
-        }else{
+        } else {
             obj.put("mobile", JSONObject.NULL);
         }
         if ((strRedeemedAt != null)) {
             obj.put("redeemedAt", strRedeemedAt);
-        }else{
+        } else {
             obj.put("redeemedAt", JSONObject.NULL);
         }
         if ((strAddress != null) && !"".equals(strAddress)) {
             obj.put("address", strAddress);
-        }else{
+        } else {
             obj.put("address", JSONObject.NULL);
         }
         return obj;
