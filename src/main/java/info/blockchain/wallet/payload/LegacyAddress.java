@@ -13,6 +13,9 @@ import java.math.BigInteger;
 
 public class LegacyAddress {
 
+    public static final long NORMAL_ADDRESS = 0L;
+    public static final long ARCHIVED_ADDRESS = 2L;
+
     private String strEncryptedKey = null;
     private long created = 0L;
     private String strAddress = null;

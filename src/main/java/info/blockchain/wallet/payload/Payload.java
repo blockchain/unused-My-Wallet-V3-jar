@@ -154,7 +154,7 @@ public class Payload implements Serializable{
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
 
         for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS &&
+            if(legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS &&
                !legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress);
             }
@@ -201,7 +201,7 @@ public class Payload implements Serializable{
         List<String> addrs = new ArrayList<String>();
 
         for(LegacyAddress legacyAddress : legacyAddresses) {
-            if(legacyAddress.getTag() == PayloadManager.NORMAL_ADDRESS) {
+            if(legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS) {
               addrs.add(legacyAddress.getAddress());
             }
         }
