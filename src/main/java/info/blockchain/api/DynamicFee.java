@@ -22,7 +22,7 @@ public class DynamicFee implements BaseApi {
 
     public SuggestedFee getDynamicFee() {
 
-        String response = null;
+        String response;
         try {
             response = WebUtil.getInstance().getURL(dynamicFeeUrl);
         } catch (Exception e) {
@@ -33,27 +33,25 @@ public class DynamicFee implements BaseApi {
         if (response != null) {
 
             JSONObject dynamicFeeJson = new JSONObject(response);
-            if (dynamicFeeJson != null) {
 
-                SuggestedFee suggestedFee = new SuggestedFee();
-                JSONObject defaultJson = dynamicFeeJson.getJSONObject("default");
-                suggestedFee.defaultFeePerKb = BigInteger.valueOf(defaultJson.getLong("fee"));
-                suggestedFee.isSurge = defaultJson.getBoolean("surge");
+            SuggestedFee suggestedFee = new SuggestedFee();
+            JSONObject defaultJson = dynamicFeeJson.getJSONObject("default");
+            suggestedFee.defaultFeePerKb = BigInteger.valueOf(defaultJson.getLong("fee"));
+            suggestedFee.isSurge = defaultJson.getBoolean("surge");
 
-                JSONArray estimateArray = dynamicFeeJson.getJSONArray("estimate");
-                suggestedFee.estimateList = new ArrayList<SuggestedFee.Estimates>();
-                for (int i = 0; i < estimateArray.length(); i++) {
+            JSONArray estimateArray = dynamicFeeJson.getJSONArray("estimate");
+            suggestedFee.estimateList = new ArrayList<SuggestedFee.Estimates>();
+            for (int i = 0; i < estimateArray.length(); i++) {
 
-                    JSONObject estimateJson = estimateArray.getJSONObject(i);
+                JSONObject estimateJson = estimateArray.getJSONObject(i);
 
-                    BigInteger fee = BigInteger.valueOf(estimateJson.getLong("fee"));
-                    boolean surge = estimateJson.getBoolean("surge");
-                    boolean ok = estimateJson.getBoolean("ok");
+                BigInteger fee = BigInteger.valueOf(estimateJson.getLong("fee"));
+                boolean surge = estimateJson.getBoolean("surge");
+                boolean ok = estimateJson.getBoolean("ok");
 
-                    suggestedFee.estimateList.add(new SuggestedFee.Estimates(fee, surge, ok));
-                }
-                return suggestedFee;
+                suggestedFee.estimateList.add(new SuggestedFee.Estimates(fee, surge, ok));
             }
+            return suggestedFee;
 
         }
 

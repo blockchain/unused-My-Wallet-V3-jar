@@ -228,8 +228,8 @@ public class BlockchainWallet {
 
     public Pair decryptV1Wallet(String encryptedPayload, CharSequenceX password) throws DecryptionException {
 
-        String decrypted = null;
-        int succeededIterations = 1;
+        String decrypted;
+        int succeededIterations;
 
         int iterations[] = {DEFAULT_PBKDF2_ITERATIONS_V1_A, DEFAULT_PBKDF2_ITERATIONS_V1_B};
         int modes[] = {AESUtil.MODE_CBC, AESUtil.MODE_OFB};
@@ -248,6 +248,7 @@ public class BlockchainWallet {
                     try {
                         decrypted = AESUtil.decryptWithSetMode(encryptedPayload, password, iteration, mode, padding);
                         //Ensure it's parsable
+                        assert decrypted != null;
                         new JSONObject(decrypted);
 
                         succeededIterations = iteration;
@@ -255,7 +256,6 @@ public class BlockchainWallet {
                         return Pair.of(decrypted, succeededIterations);
 
                     } catch (Exception e) {
-                        decrypted = null;
                     }
                 }
             }

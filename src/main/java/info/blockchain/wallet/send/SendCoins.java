@@ -111,8 +111,6 @@ public class SendCoins	{
         BigInteger valueNeeded =  outputValueSum.add(fee);
         BigInteger minFreeOutputSize = BigInteger.valueOf(1000000);
 
-        MyTransactionOutPoint changeOutPoint = null;
-
         for(MyTransactionOutPoint outPoint : unspent) {
 
             BitcoinScript script = new BitcoinScript(outPoint.getScriptBytes());
@@ -135,7 +133,6 @@ public class SendCoins	{
             priority += outPoint.getValue().longValue() * outPoint.getConfirmations();
 
             if(changeAddress == null) {
-                changeOutPoint = outPoint;
             }
 
             if(valueSelected.compareTo(valueNeeded) == 0 || valueSelected.compareTo(valueNeeded.add(minFreeOutputSize)) >= 0) {
@@ -211,7 +208,8 @@ public class SendCoins	{
             // Keep key for script creation step below
             keys[i] = key;
             byte[] connectedPubKeyScript = input.getOutpoint().getConnectedPubKeyScript();
-            if(key.hasPrivKey() || key.isEncrypted()) {
+            assert key != null;
+            if(key != null && key.hasPrivKey() || key.isEncrypted()) {
                 sigs[i] = transaction.calculateSignature(i, key, connectedPubKeyScript, SigHash.ALL, false);
             }
             else {
@@ -225,6 +223,7 @@ public class SendCoins	{
             }
             TransactionInput input = inputs.get(i);
             final TransactionOutput connectedOutput = input.getOutpoint().getConnectedOutput();
+            assert connectedOutput != null;
             Script scriptPubKey = connectedOutput.getScriptPubKey();
             if(scriptPubKey.isSentToAddress()) {
                 input.setScriptSig(ScriptBuilder.createInputScript(sigs[i], keys[i]));

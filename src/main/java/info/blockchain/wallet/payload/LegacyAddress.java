@@ -156,10 +156,10 @@ public class LegacyAddress {
             return null;
 
         byte[] privBytes = Base58.decode(strEncryptedKey);
-    	ECKey ecKey = null;
+    	ECKey ecKey;
 
-    	ECKey keyCompressed = null;
-		ECKey keyUnCompressed = null;
+    	ECKey keyCompressed;
+		ECKey keyUnCompressed;
 		BigInteger priv = new BigInteger(privBytes);
 		if(priv.compareTo(BigInteger.ZERO) >= 0) {
             keyCompressed = ECKey.fromPrivate(priv, true);
@@ -172,10 +172,10 @@ public class LegacyAddress {
 			keyUnCompressed = ECKey.fromPrivate(priv2, false);
 		}
 
-		if(keyCompressed != null && keyCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
+		if(keyCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
 			ecKey = keyCompressed;
 		}
-		else if(keyUnCompressed != null && keyUnCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
+		else if(keyUnCompressed.toAddress(MainNetParams.get()).toString().equals(this.strAddress)) {
 			ecKey = keyUnCompressed;
 		}
 		else {

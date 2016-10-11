@@ -16,7 +16,7 @@ public class AddressInfo implements BaseApi {
 
     public JSONObject getAddressInfo(String address, String parameter) {
 
-        JSONObject jsonObject = null;
+        JSONObject jsonObject;
 
         try {
             StringBuilder url = new StringBuilder(addressInfoUrl);

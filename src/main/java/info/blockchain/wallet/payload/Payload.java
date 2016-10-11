@@ -427,7 +427,7 @@ public class Payload implements Serializable{
                 hdw.mnemonic_verified(wallet.getBoolean("mnemonic_verified"));
             }
             if(wallet.has("default_account_idx"))  {
-                int i = 0;
+                int i;
                 try  {
                     String val = (String)wallet.get("default_account_idx");
                     i = Integer.parseInt(val);
@@ -550,9 +550,9 @@ public class Payload implements Serializable{
             JSONArray keys = (JSONArray)jsonObject.get("keys");
             if(keys != null && keys.length() > 0)  {
                 List<String> seenAddrs = new ArrayList<String>();
-                String addr = null;
-                JSONObject key = null;
-                LegacyAddress legacyAddress = null;
+                String addr;
+                JSONObject key;
+                LegacyAddress legacyAddress;
                 for(int i = 0; i < keys.length(); i++)  {
                     key = (JSONObject)keys.get(i);
 
@@ -561,9 +561,9 @@ public class Payload implements Serializable{
                     if(addr != null && !addr.equals("null") && !seenAddrs.contains(addr))  {
 
                         String priv = null;
-                        long created_time = 0L;
+                        long created_time;
                         String label = null;
-                        long tag = 0L;
+                        long tag;
                         String created_device_name = null;
                         String created_device_version = null;
                         boolean watchOnly = false;
@@ -658,8 +658,8 @@ public class Payload implements Serializable{
             JSONArray address_book = (JSONArray)jsonObject.get("address_book");
 
             if(address_book != null && address_book.length() > 0)  {
-                JSONObject addr = null;
-                AddressBookEntry addr_entry = null;
+                JSONObject addr;
+                AddressBookEntry addr_entry;
                 for(int i = 0; i < address_book.length(); i++)  {
                     addr = (JSONObject)address_book.get(i);
 

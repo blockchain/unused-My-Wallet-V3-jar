@@ -174,7 +174,7 @@ public class Payment {
             final int EQUAL = 0;
             final int AFTER = 1;
 
-            int ret = 0;
+            int ret;
 
             if (o1.getValue().compareTo(o2.getValue()) > 0) {
                 ret = BEFORE;
@@ -205,7 +205,7 @@ public class Payment {
         final HashMap<String, BigInteger> receivers = new HashMap<String, BigInteger>();
         receivers.put(toAddress, bigIntAmount);
 
-        Pair<Transaction, Long> pair = null;
+        Pair<Transaction, Long> pair;
         pair = SendCoins.getInstance().makeTransaction(true,
                 unspentOutputBundle.getSpendableOutputs(),
                 receivers,

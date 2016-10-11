@@ -62,15 +62,16 @@ public class AESUtil	{
 
         CipherParameters params = new ParametersWithIV(keyParam, iv);
 
-        BlockCipher cipherMode = null;
+        BlockCipher cipherMode;
         if (mode == MODE_CBC){
             cipherMode = new CBCBlockCipher(new AESEngine());
 
-        }else if (mode == MODE_OFB){
+        }else {
+            //mode == MODE_OFB
             cipherMode = new OFBBlockCipher(new AESEngine(), 128);
         }
 
-        BufferedBlockCipher cipher = null;
+        BufferedBlockCipher cipher;
         if (padding != null) {
             cipher = new PaddedBufferedBlockCipher(cipherMode, padding);
         } else {
@@ -95,7 +96,7 @@ public class AESUtil	{
         System.arraycopy(buf, 0, out, 0, len);
 
         // return string representation of decoded bytes
-        String ret = null;
+        String ret;
         try {
             ret = new String(out, "UTF-8");
         } catch (UnsupportedEncodingException uee) {
@@ -125,7 +126,7 @@ public class AESUtil	{
         byte iv[] = new byte[AESBlockSize * 4];
         random.nextBytes(iv);
 
-        byte[] clearbytes = null;
+        byte[] clearbytes;
         try    {
             clearbytes = cleartext.getBytes("UTF-8");
         }
@@ -140,15 +141,16 @@ public class AESUtil	{
 
         CipherParameters params = new ParametersWithIV(keyParam, iv);
 
-        BlockCipher cipherMode = null;
+        BlockCipher cipherMode;
         if (mode == MODE_CBC){
             cipherMode = new CBCBlockCipher(new AESEngine());
 
-        }else if (mode == MODE_OFB){
+        }else {
+            //mode == MODE_OFB
             cipherMode = new OFBBlockCipher(new AESEngine(), 128);
         }
 
-        BufferedBlockCipher cipher = null;
+        BufferedBlockCipher cipher;
         if (padding != null) {
             cipher = new PaddedBufferedBlockCipher(cipherMode, padding);
         } else {

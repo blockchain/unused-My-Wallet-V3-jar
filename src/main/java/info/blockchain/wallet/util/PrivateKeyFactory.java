@@ -66,7 +66,7 @@ public class PrivateKeyFactory	{
 				key.matches("^S[1-9A-HJ-NP-Za-km-z]{29}$") ||
 				key.matches("^S[1-9A-HJ-NP-Za-km-z]{30}$")) {
 
-			byte[] testBytes = null;
+			byte[] testBytes;
 			String data = key + "?";
 			try {
 				Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));

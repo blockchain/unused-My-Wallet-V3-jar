@@ -88,6 +88,7 @@ public class Wallet {
             wis.close();
         }
 
+        assert mc != null;
         wordList = mc.toMnemonic(seed);
         byte[] hd_seed = MnemonicCode.toSeed(wordList, strPassphrase);
         dkKey = HDKeyDerivation.createMasterPrivateKey(hd_seed);
@@ -112,7 +113,6 @@ public class Wallet {
     public Wallet(NetworkParameters params, String[] xpub) throws AddressFormatException {
 
         this.params = params;
-        DeterministicKey aKey = null;
         accounts = new ArrayList<Account>();
         for(int i = 0; i < xpub.length; i++) {
             accounts.add(new Account(params, xpub[i], i));

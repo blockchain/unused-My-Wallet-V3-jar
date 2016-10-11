@@ -126,7 +126,7 @@ public class Settings implements BaseApi {
         settingsPayload = settingsPayload.trim();
 
         StringBuilder args = new StringBuilder();
-        if (settingsPayload != null && !settingsPayload.isEmpty()) {
+        if (!settingsPayload.isEmpty()) {
             args.append("length=").append(settingsPayload.length());
             args.append("&payload=").append(URLEncoder.encode(settingsPayload, "utf-8"));
             args.append("&method=").append(method);

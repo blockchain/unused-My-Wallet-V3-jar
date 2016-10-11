@@ -51,11 +51,10 @@ public class FormatsUtil {
 
 	public boolean isBitcoinUri(final String s) {
 
-		boolean ret = false;
-		BitcoinURI uri = null;
+		boolean ret;
 
 		try {
-			uri = new BitcoinURI(s);
+			new BitcoinURI(s);
 			ret = true;
 		}
 		catch(BitcoinURIParseException bupe) {
@@ -67,8 +66,8 @@ public class FormatsUtil {
 
 	public String getBitcoinUri(final String s) {
 
-		String ret = null;
-		BitcoinURI uri = null;
+		String ret;
+		BitcoinURI uri;
 
 		try {
 			uri = new BitcoinURI(s);
@@ -83,12 +82,14 @@ public class FormatsUtil {
 
 	public String getBitcoinAddress(final String s) {
 
-		String ret = null;
-		BitcoinURI uri = null;
+		String ret;
+		BitcoinURI uri;
 
 		try {
 			uri = new BitcoinURI(s);
-			ret = uri.getAddress().toString();
+			Address address = uri.getAddress();
+			assert address != null;
+			ret = address.toString();
 		}
 		catch(BitcoinURIParseException bupe) {
 			ret = null;
@@ -99,8 +100,8 @@ public class FormatsUtil {
 
 	public String getBitcoinAmount(final String s) {
 
-		String ret = null;
-		BitcoinURI uri = null;
+		String ret;
+		BitcoinURI uri;
 
 		try {
 			uri = new BitcoinURI(s);
@@ -120,14 +121,11 @@ public class FormatsUtil {
 
 	public boolean isValidBitcoinAddress(final String address) {
 
-		boolean ret = false;
-		Address addr = null;
+		boolean ret;
 
 		try {
-			addr = new Address(MainNetParams.get(), address);
-			if(addr != null) {
-				ret = true;
-			}
+			new Address(MainNetParams.get(), address);
+			ret = true;
 		}
 		catch(WrongNetworkException wne) {
 			ret = false;
@@ -149,12 +147,14 @@ public class FormatsUtil {
 
 	private String uri2BitcoinAddress(final String address) {
 
-		String ret = null;
-		BitcoinURI uri = null;
+		String ret;
+		BitcoinURI uri;
 
 		try {
 			uri = new BitcoinURI(address);
-			ret = uri.getAddress().toString();
+			Address address1 = uri.getAddress();
+			assert address1 != null;
+			ret = address1.toString();
 		}
 		catch(BitcoinURIParseException bupe) {
 			ret = null;

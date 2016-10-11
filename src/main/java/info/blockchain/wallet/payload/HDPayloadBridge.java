@@ -148,7 +148,7 @@ public class HDPayloadBridge {
         //
         if (payload.getHdWallets() == null || payload.getHdWallets().size() == 0) {
 
-            String xpub = null;
+            String xpub;
             int attempts = 0;
             boolean no_tx = false;
 

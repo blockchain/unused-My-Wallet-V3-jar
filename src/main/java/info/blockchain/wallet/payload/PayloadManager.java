@@ -107,7 +107,7 @@ public class PayloadManager {
      */
     public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException, ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
 
-        String walletData = null;
+        String walletData;
         try {
             walletData = new WalletPayload().fetchWalletData(guid, sharedKey);
         } catch (Exception e) {
@@ -146,8 +146,6 @@ public class PayloadManager {
             } catch (Exception e) {
                 throw new HDWalletException("Bip44 wallet error: " + e.getMessage());
             }
-        } else {
-            //V2 wallet - no need to keep in sync with bp44 wallet
         }
     }
 
@@ -495,8 +493,8 @@ public class PayloadManager {
     public void addAccount(String accountLabel, @Nullable String secondPassword, AccountAddListener listener) throws Exception {
 
         //Add account
-        String xpub = null;
-        String xpriv = null;
+        String xpub;
+        String xpriv;
 
         if (!payload.isDoubleEncrypted()) {
 
@@ -522,8 +520,7 @@ public class PayloadManager {
         }
 
         //Initialize newly created xpub's tx list and balance
-        List<Tx> txs = new ArrayList<Tx>();
-        MultiAddrFactory.getInstance().getXpubTxs().put(xpub, txs);
+        MultiAddrFactory.getInstance().getXpubTxs().put(xpub, new ArrayList<Tx>());
         MultiAddrFactory.getInstance().getXpubAmounts().put(xpub, 0L);
 
         //Get account list from payload (not in sync with wallet from WalletFactory)
@@ -598,14 +595,14 @@ public class PayloadManager {
 
     ECKey getRandomECKey() {
 
-        byte[] data = null;
+        byte[] data;
         try {
             data = new ExternalEntropy().getRandomBytes();
         } catch (Exception e) {
             return null;
         }
 
-        ECKey ecKey = null;
+        ECKey ecKey;
         if (data != null) {
             byte[] rdata = new byte[32];
             SecureRandom random = new SecureRandom();

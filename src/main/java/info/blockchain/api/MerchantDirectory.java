@@ -32,7 +32,7 @@ public class MerchantDirectory implements BaseApi {
         try {
             JSONArray jsonArray = new JSONArray(data);
 
-            if (jsonArray != null && jsonArray.length() > 0) {
+            if (jsonArray.length() > 0) {
 
                 for (int i = 0; i < jsonArray.length(); i++) {
 

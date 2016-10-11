@@ -167,23 +167,14 @@ public class WebUtil{
 
                     String cookieValue = fields[0];
 
-                    String expires = null;
-                    String path = null;
-                    String domain = null;
-                    boolean secure = false;
-
                     // Parse each field
                     for (int j = 1; j < fields.length; j++) {
                         if ("secure".equalsIgnoreCase(fields[j])) {
-                            secure = true;
                         } else if (fields[j].indexOf('=') > 0) {
                             String[] f = fields[j].split("=");
                             if ("expires".equalsIgnoreCase(f[0])) {
-                                expires = f[1];
                             } else if ("domain".equalsIgnoreCase(f[0])) {
-                                domain = f[1];
                             } else if ("path".equalsIgnoreCase(f[0])) {
-                                path = f[1];
                             }
                         }
                     }

@@ -41,7 +41,7 @@ public class Util	{
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public static byte[] doubleDigest(byte[] input, int offset, int length) {
 
-        MessageDigest digest = null;
+        MessageDigest digest;
 
         try {
             digest = MessageDigest.getInstance("SHA-256");
