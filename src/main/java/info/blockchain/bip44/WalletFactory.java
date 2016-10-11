@@ -32,7 +32,7 @@ public class WalletFactory {
 
     public static final String BIP39_ENGLISH_SHA256 = "ad90bf3beb7b0eb7e5acd74727dc0da96e0a280a258354e7293fb7e211ac03db";
 
-    private Logger mLogger = LoggerFactory.getLogger(WalletFactory.class);
+    private final Logger mLogger = LoggerFactory.getLogger(WalletFactory.class);
 
   	private Locale locale = null;
 
@@ -167,7 +167,7 @@ public class WalletFactory {
         return hdw;
     }
 
-    public void saveWalletToJSON(Wallet wallet, String password) throws MnemonicException.MnemonicLengthException, IOException, JSONException {
+    public void saveWalletToJSON(Wallet wallet, String password) throws IOException, JSONException {
         serialize(wallet.toJSON(), password);
     }
 

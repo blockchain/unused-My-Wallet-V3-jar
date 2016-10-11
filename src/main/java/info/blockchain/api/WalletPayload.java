@@ -19,7 +19,7 @@ public class WalletPayload implements BaseApi {
     public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
 
     private String sessionId;
-    public static String KEY_AUTH_REQUIRED = "Authorization Required";
+    public static final String KEY_AUTH_REQUIRED = "Authorization Required";
 
     private String payloadUrl = PROD_PAYLOAD_URL;
 

@@ -21,18 +21,15 @@ import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
 
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,22 +48,25 @@ public class PayloadManager {
 
     private static PayloadManager instance = null;
     // active payload:
-    private static Payload payload = null;
+    private Payload payload = null;
     // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
-    private static String cached_payload = null;
+    private String cached_payload = null;
 
-    private static CharSequenceX strTempPassword = null;
-    private static boolean isNew = false;
-    private static String email = null;
+    private CharSequenceX strTempPassword = null;
+    private boolean isNew = false;
+    private String email = null;
 
-    private static double version = 2.0;
+    private double version = 2.0;
 
-    private static BlockchainWallet bciWallet;
+    private BlockchainWallet bciWallet;
 
-    private static HDPayloadBridge hdPayloadBridge;
-    private static info.blockchain.bip44.Wallet wallet;
+    private final HDPayloadBridge hdPayloadBridge;
+    private info.blockchain.bip44.Wallet wallet;
 
     private PayloadManager() {
+        hdPayloadBridge = new HDPayloadBridge();
+        payload = new Payload();
+        cached_payload = "";
     }
 
     /**
@@ -78,9 +78,6 @@ public class PayloadManager {
 
         if (instance == null) {
             instance = new PayloadManager();
-            payload = new Payload();
-            cached_payload = "";
-            hdPayloadBridge = new HDPayloadBridge();
         }
 
         return instance;
@@ -191,6 +188,7 @@ public class PayloadManager {
      *
      * @param isNew
      */
+    @SuppressWarnings("SameParameterValue")
     public void setNew(boolean isNew) {
         this.isNew = isNew;
     }
@@ -275,7 +273,7 @@ public class PayloadManager {
     }
 
     public void setEmail(String email) {
-        PayloadManager.email = email;
+        this.email = email;
     }
 
     public double getVersion() {
@@ -461,7 +459,8 @@ public class PayloadManager {
         return payload != null && !payload.isUpgraded();
     }
 
-    public String[] getXPUBs(boolean includeArchives) throws IOException, DecoderException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {
+    @SuppressWarnings("SameParameterValue")
+    public String[] getXPUBs(boolean includeArchives) {
 
         ArrayList<String> xpubs = new ArrayList<String>();
 
@@ -623,11 +622,11 @@ public class PayloadManager {
         return ecKey;
     }
 
-    public String getHDSeed() throws IOException, MnemonicException.MnemonicLengthException {
+    public String getHDSeed() {
         return wallet.getSeedHex();
     }
 
-    public String[] getMnemonic(String secondPassword) throws IOException, MnemonicException.MnemonicLengthException {
+    public String[] getMnemonic(String secondPassword) {
         try {
             Wallet wallet = getDecryptedWallet(secondPassword);
 
@@ -646,11 +645,11 @@ public class PayloadManager {
         return null;
     }
 
-    public String[] getMnemonic() throws IOException, MnemonicException.MnemonicLengthException {
+    public String[] getMnemonic() {
         return wallet.getMnemonic().split("\\s+");
     }
 
-    public String getHDPassphrase() throws IOException, MnemonicException.MnemonicLengthException {
+    public String getHDPassphrase() {
         return wallet.getPassphrase();
     }
 

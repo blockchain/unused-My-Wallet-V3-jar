@@ -39,7 +39,7 @@ public class PrivateKeyFactory	{
     	return instance;
     }
 
-	public String getFormat(String key) throws Exception {
+	public String getFormat(String key) {
 		// 51 characters base58, always starts with a '5'
 		if(key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$")) {
 			return WIF_UNCOMPRESSED;
@@ -133,21 +133,21 @@ public class PrivateKeyFactory	{
 		return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
 	}
 
-	private ECKey decodeBase64PK(String base64Priv) throws Exception {
+	private ECKey decodeBase64PK(String base64Priv) {
 		byte[] privBytes = Base64.decodeBase64(base64Priv.getBytes());
 		// Prepend a zero byte to make the biginteger unsigned
 		byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
 		return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
 	}
 
-    private ECKey decodeHexPK(String hex, boolean compressed) throws Exception {
+    private ECKey decodeHexPK(String hex, boolean compressed) {
         byte[] privBytes = Hex.decode(hex);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
 		return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
-	private String decryptPK(String base58Priv) throws Exception {
+	private String decryptPK(String base58Priv) {
 
 		/*
 		if (this.isDoubleEncrypted()) {

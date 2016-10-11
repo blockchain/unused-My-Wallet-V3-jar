@@ -8,10 +8,10 @@ import java.math.BigInteger;
 public class MyTransactionOutPoint extends TransactionOutPoint {
 
 	private static final long serialVersionUID = 1L;
-	private byte[] scriptBytes;
-	private int txOutputN;
-	private Sha256Hash txHash;
-	private BigInteger value;
+	private final byte[] scriptBytes;
+	private final int txOutputN;
+	private final Sha256Hash txHash;
+	private final BigInteger value;
 	private int confirmations;
 	private String path;
 

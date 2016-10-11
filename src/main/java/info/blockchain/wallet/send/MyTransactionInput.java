@@ -14,7 +14,7 @@ public class MyTransactionInput extends TransactionInput {
 
     public String address;
     public BigInteger value;
-    public NetworkParameters params;
+    public final NetworkParameters params;
 
     public String txHash;
     public int txPos;
@@ -45,7 +45,7 @@ public class MyTransactionInput extends TransactionInput {
         return txHash;
     }
 
-    public void setTxHash(String sortKey) {
+    public void setTxHash(String txHash) {
         this.txHash = txHash;
     }
 

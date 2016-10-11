@@ -6,12 +6,11 @@ import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +21,7 @@ public class HDPayloadBridge {
     private final int DEFAULT_NEW_WALLET_SIZE = 1;
     private final String DEFAULT_PASSPHRASE = "";
 
-    private WalletFactory bip44WalletFactory;
+    private final WalletFactory bip44WalletFactory;
 
     public HDPayloadBridge() {
         this.bip44WalletFactory = new WalletFactory();
@@ -97,7 +96,7 @@ public class HDPayloadBridge {
         return bip44WalletFactory.restoreWallet(decrypted_hex, DEFAULT_PASSPHRASE, payload.getHdWallet().getAccounts().size());
     }
 
-    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw) throws IOException, MnemonicException.MnemonicLengthException {
+    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw) {
 
         String guid = UUID.randomUUID().toString();
         String sharedKey = UUID.randomUUID().toString();

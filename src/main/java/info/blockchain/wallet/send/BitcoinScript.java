@@ -159,7 +159,7 @@ public class BitcoinScript {
 	public static final int OP_PUBKEY = 254;
 	public static final int OP_INVALIDOPCODE = 255;
 
-	public static String[] op_names = new String[256];
+	public static final String[] op_names = new String[256];
 
 	static {
 		op_names[OP_0] = "OP_0";

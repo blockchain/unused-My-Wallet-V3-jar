@@ -25,8 +25,8 @@ public class SuggestedFee {
             this.ok = ok;
         }
 
-        public BigInteger fee;
-        public boolean surge;
-        public boolean ok;
+        public final BigInteger fee;
+        public final boolean surge;
+        public final boolean ok;
     }
 }

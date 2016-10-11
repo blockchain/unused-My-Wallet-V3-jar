@@ -122,6 +122,7 @@ public class BlockchainWallet {
                 JSONObject payloadWrapper = new JSONObject(anyPayload);
 
                 version = payloadWrapper.getDouble(KEY_VERSION);
+                setVersion(version);
 
                 if (payloadWrapper.has(KEY_PBKDF2_ITERATIONS)) {
                     pbkdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
@@ -256,6 +257,7 @@ public class BlockchainWallet {
                         return Pair.of(decrypted, succeededIterations);
 
                     } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }

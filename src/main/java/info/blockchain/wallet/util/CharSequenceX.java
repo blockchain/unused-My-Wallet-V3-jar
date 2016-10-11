@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class CharSequenceX implements CharSequence {
 
-    private char[] chars;
+    private final char[] chars;
     private int rounds = 100;
 
     private CharSequenceX(CharSequence charSequence, int start, int end) {

@@ -215,7 +215,7 @@ public class Account {
      * @return String
      *
      */
-    public String getPath() {
+    private String getPath() {
         return strPath;
     }
 
