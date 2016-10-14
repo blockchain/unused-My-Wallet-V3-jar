@@ -83,10 +83,6 @@ public class PrivateKeyFactory {
     }
 
     public ECKey getKey(String format, String data) throws Exception {
-        return getKey(format, data, null);
-    }
-
-    public ECKey getKey(String format, String data, CharSequenceX password) throws Exception {
         if (format.equals(WIF_UNCOMPRESSED) || format.equals(WIF_COMPRESSED)) {
             DumpedPrivateKey pk = new DumpedPrivateKey(MainNetParams.get(), data);
             return pk.getKey();
@@ -100,16 +96,11 @@ public class PrivateKeyFactory {
             return decodeHexPK(data, true);
         } else if (format.equals(MINI)) {
 
-            try {
-                Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
-                return decodeHexPK(hash.toString(), false);    // assume uncompressed
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+            Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
+            return decodeHexPK(hash.toString(), false);    // assume uncompressed
 
         } else {
-            return null;
+            throw new Exception("Unknown key format: "+format);
         }
     }
 

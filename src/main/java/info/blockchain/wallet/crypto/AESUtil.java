@@ -1,5 +1,6 @@
 package info.blockchain.wallet.crypto;
 
+import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.util.CharSequenceX;
 
 import org.apache.commons.codec.binary.Base64;
@@ -41,13 +42,12 @@ public class AESUtil {
 
     // AES 256 PBKDF2 CBC iso10126 decryption
     // 16 byte IV must be prepended to ciphertext - Compatible with crypto-js
-    public static String decrypt(String ciphertext, CharSequenceX password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException {
+    public static String decrypt(String ciphertext, CharSequenceX password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException, DecryptionException {
 
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException {
-
+    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
         final int AESBlockSize = 4;
 
         byte[] cipherdata = Base64.decodeBase64(ciphertext.getBytes());
@@ -91,7 +91,12 @@ public class AESUtil {
         System.arraycopy(buf, 0, out, 0, len);
 
         // return string representation of decoded bytes
-        return new String(out, "UTF-8");
+        String result = new String(out, "UTF-8");
+        if (result.isEmpty()) {
+            throw new DecryptionException("Decrypted string is empty.");
+        }
+
+        return result;
     }
 
     // AES 256 PBKDF2 CBC iso10126 encryption

@@ -169,7 +169,7 @@ public class WalletFactory {
         serialize(wallet.toJSON(), password);
     }
 
-    public Wallet restoreWalletfromJSON(String password) throws DecoderException, MnemonicException.MnemonicLengthException {
+    public Wallet restoreWalletfromJSON(String password) throws Exception {
 
         Wallet hdw = null;
 
@@ -229,7 +229,7 @@ public class WalletFactory {
         }
     }
 
-    private JSONObject deserialize(String password) throws IOException, JSONException, InvalidCipherTextException {
+    private JSONObject deserialize(String password) throws Exception {
 
         File file = new File(strJSONFilePath + "bip44_wallet.dat");
         StringBuilder sb = new StringBuilder();

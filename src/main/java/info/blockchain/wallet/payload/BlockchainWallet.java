@@ -269,7 +269,7 @@ public class BlockchainWallet {
         throw new DecryptionException("Failed to decrypt");
     }
 
-    public String decryptWallet(String encryptedPayload, CharSequenceX password, int pdfdf2Iterations) throws UnsupportedEncodingException, InvalidCipherTextException {
+    public String decryptWallet(String encryptedPayload, CharSequenceX password, int pdfdf2Iterations) throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
 
         return AESUtil.decrypt(encryptedPayload, password, pdfdf2Iterations);
     }

@@ -9,9 +9,7 @@ import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
-import org.spongycastle.crypto.InvalidCipherTextException;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 
 public class LegacyAddress {
@@ -139,7 +137,7 @@ public class LegacyAddress {
         }
     }
 
-    public ECKey getECKey(CharSequenceX secondPassword) throws AddressFormatException, UnsupportedEncodingException, InvalidCipherTextException {
+    public ECKey getECKey(CharSequenceX secondPassword) throws Exception {
 
         /*
         Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);
