@@ -21,15 +21,9 @@ public class DynamicFee implements BaseApi {
         dynamicFeeUrl = PersistentUrls.getInstance().getDynamicFeeUrl();
     }
 
-    public SuggestedFee getDynamicFee() {
+    public SuggestedFee getDynamicFee() throws Exception {
 
-        String response;
-        try {
-            response = WebUtil.getInstance().getURL(dynamicFeeUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return getDefaultFee();
-        }
+        String response = WebUtil.getInstance().getURL(dynamicFeeUrl);
 
         if (response != null) {
 

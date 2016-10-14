@@ -125,7 +125,7 @@ public class PayloadManagerTest {
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withIncompatibleVersion_shouldThrow_UnsupportedVersionException() {
+    public void getPayloadFromServerAndDecrypt_withIncompatibleVersion_shouldThrow_UnsupportedVersionException() throws Exception {
 
         payloadManager.setVersion(4.0);
 
@@ -164,37 +164,36 @@ public class PayloadManagerTest {
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
         LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", null);
-        if (payloadManager.addLegacyAddress(legacyAddress)) {
-            final String guidOriginal = payloadManager.getPayload().getGuid();
 
-            //Now we have legacy wallet (only addresses)
-            payloadManager.upgradeV2PayloadToV3(new CharSequenceX(""), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
-                public void onDoubleEncryptionPasswordError() {
+        payloadManager.addLegacyAddress(legacyAddress);
+
+        final String guidOriginal = payloadManager.getPayload().getGuid();
+
+        //Now we have legacy wallet (only addresses)
+        payloadManager.upgradeV2PayloadToV3(new CharSequenceX(""), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
+            public void onDoubleEncryptionPasswordError() {
+                assertThat("upgradeV2PayloadToV3 failed", false);
+            }
+
+            public void onUpgradeSuccess() {
+
+                assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
+                assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
+
+                String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
+                assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
+                try {
+                    assertThat(payloadManager.getMnemonic().length, is(12));
+                } catch (Exception e) {
+                    e.printStackTrace();
                     assertThat("upgradeV2PayloadToV3 failed", false);
                 }
+            }
 
-                public void onUpgradeSuccess() {
-
-                    assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
-                    assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
-
-                    String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                    assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
-                    try {
-                        assertThat(payloadManager.getMnemonic().length, is(12));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        assertThat("upgradeV2PayloadToV3 failed", false);
-                    }
-                }
-
-                public void onUpgradeFail() {
-                    assertThat("upgradeV2PayloadToV3 failed", false);
-                }
-            });
-        } else {
-            assertThat("adding new Legacy address failed failed", false);
-        }
+            public void onUpgradeFail() {
+                assertThat("upgradeV2PayloadToV3 failed", false);
+            }
+        });
 
         PayloadManager.getInstance().wipe();
     }
@@ -217,37 +216,35 @@ public class PayloadManagerTest {
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
         LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", secondPassword);
-        if (payloadManager.addLegacyAddress(legacyAddress)) {
-            final String guidOriginal = payloadManager.getPayload().getGuid();
+        payloadManager.addLegacyAddress(legacyAddress);
 
-            //Now we have legacy wallet (only addresses)
-            payloadManager.upgradeV2PayloadToV3(new CharSequenceX(secondPassword), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
-                public void onDoubleEncryptionPasswordError() {
+        final String guidOriginal = payloadManager.getPayload().getGuid();
+
+        //Now we have legacy wallet (only addresses)
+        payloadManager.upgradeV2PayloadToV3(new CharSequenceX(secondPassword), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
+            public void onDoubleEncryptionPasswordError() {
+                assertThat("upgradeV2PayloadToV3 failed", false);
+            }
+
+            public void onUpgradeSuccess() {
+
+                assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
+                assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
+
+                String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
+                assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
+                try {
+                    assertThat(payloadManager.getMnemonic().length, is(12));
+                } catch (Exception e) {
+                    e.printStackTrace();
                     assertThat("upgradeV2PayloadToV3 failed", false);
                 }
+            }
 
-                public void onUpgradeSuccess() {
-
-                    assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
-                    assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
-
-                    String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                    assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
-                    try {
-                        assertThat(payloadManager.getMnemonic().length, is(12));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        assertThat("upgradeV2PayloadToV3 failed", false);
-                    }
-                }
-
-                public void onUpgradeFail() {
-                    assertThat("upgradeV2PayloadToV3 failed", false);
-                }
-            });
-        } else {
-            assertThat("adding new Legacy address failed failed", false);
-        }
+            public void onUpgradeFail() {
+                assertThat("upgradeV2PayloadToV3 failed", false);
+            }
+        });
 
         PayloadManager.getInstance().wipe();
     }
@@ -290,19 +287,19 @@ public class PayloadManagerTest {
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9xj9UhHNKHr6kJKJBVj82ZxFrbfhczBDUHyVj7kHGAiZqAeUenz2JhrphnMMYVKcWcVPFJESngtKsVa4FYEvFfWUTtZThCoZdwDeS9qQnqm"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9xj9UhHNKHr6nkRg3ZpSBp2i3MgSazXa3LGet5MsVY3nTeE1zvnwVrjpnsJGEtEvvcm8fwoUBVpnHcioJfFqRUaZ6ijXEuwUuv2Q5RM6dGR"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9xj9UhHNKHr6rUDptMDdQhw5ccX8mzVQBopwYejpRt1NHpFvQMSG1a8RGRJjZRE8rRJJ6N9g1GcB6yWEgkXCzGBweq934jS9LfBuViQRxRw"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9xj9UhHNKHr6tdLP1UdrAJKKRUiGd92aBbsqkW28vtdmCzXTvns1aNKwh5uM1nSbdD8Y4x9VBnTLrDDEbREnu9KYnDyvt8QRPtPWQ78UgAG"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9xj9UhHNKHr6vLRGPDajPuoc2futBwhu93ZLCUuoGBya3uD4X5kDfMuUiEHz7HPWPpkgCHiwNbLWjxa6QrqfjmPmVr146GUt8D5shiXkQpC"));
 
@@ -332,19 +329,19 @@ public class PayloadManagerTest {
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
         assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
         assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
         assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
         assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
         assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF"));
 
@@ -361,13 +358,13 @@ public class PayloadManagerTest {
 
         assertThat(payloadManager.getNextReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payloadManager.getNextReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payloadManager.getNextReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
 
-        payloadManager.addAccount("", null, null);
+        payloadManager.addAccount("", null);
         assertThat(payloadManager.getNextReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
 
         PayloadManager.getInstance().wipe();

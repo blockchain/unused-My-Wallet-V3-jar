@@ -15,24 +15,15 @@ public class AddressInfo implements BaseApi {
         addressInfoUrl = PersistentUrls.getInstance().getAddressInfoUrl();
     }
 
-    public JSONObject getAddressInfo(String address, String parameter) {
+    public JSONObject getAddressInfo(String address, String parameter) throws Exception {
 
-        JSONObject jsonObject;
+        StringBuilder url = new StringBuilder(addressInfoUrl);
+        url.append(address);
+        url.append("?format=json");
+        if (parameter != null && !parameter.isEmpty())
+            url.append(parameter);
 
-        try {
-            StringBuilder url = new StringBuilder(addressInfoUrl);
-            url.append(address);
-            url.append("?format=json");
-            if (parameter != null && !parameter.isEmpty())
-                url.append(parameter);
-
-            String response = WebUtil.getInstance().getURL(url.toString());
-            jsonObject = new JSONObject(response);
-        } catch (Exception e) {
-            jsonObject = null;
-            e.printStackTrace();
-        }
-
-        return jsonObject;
+        String response = WebUtil.getInstance().getURL(url.toString());
+        return new JSONObject(response);
     }
 }

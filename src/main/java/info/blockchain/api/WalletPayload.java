@@ -4,10 +4,8 @@ import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -96,35 +94,26 @@ public class WalletPayload implements BaseApi {
 
     }
 
-    public boolean savePayloadToServer(String method, String guid, String sharedKey,
+    public void savePayloadToServer(String method, String guid, String sharedKey,
                                        List<LegacyAddress> legacyAddresses, JSONObject encryptedPayload,
-                                       boolean syncPubkeys, String newChecksum, String oldChecksum, String email) {
+                                       boolean syncPubkeys, String newChecksum, String oldChecksum, String email) throws Exception{
 
         StringBuilder args = new StringBuilder();
-        try {
 
-            String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString(), StandardCharsets.UTF_8.toString());
+        String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString(), StandardCharsets.UTF_8.toString());
 
-            args.append("guid=");
-            args.append(URLEncoder.encode(guid, "utf-8"));
-            args.append("&sharedKey=");
-            args.append(URLEncoder.encode(sharedKey, "utf-8"));
-            args.append("&payload=");
-            args.append(urlEncodedPayload);
-            args.append("&method=");
-            args.append(method);
-            args.append("&length=");
-            args.append(encryptedPayload.toString().length());
-            args.append("&checksum=");
-            args.append(URLEncoder.encode(newChecksum, "utf-8"));
-
-        } catch (UnsupportedEncodingException uee) {
-            uee.printStackTrace();
-            return false;
-        } catch (JSONException je) {
-            je.printStackTrace();
-            return false;
-        }
+        args.append("guid=");
+        args.append(URLEncoder.encode(guid, "utf-8"));
+        args.append("&sharedKey=");
+        args.append(URLEncoder.encode(sharedKey, "utf-8"));
+        args.append("&payload=");
+        args.append(urlEncodedPayload);
+        args.append("&method=");
+        args.append(method);
+        args.append("&length=");
+        args.append(encryptedPayload.toString().length());
+        args.append("&checksum=");
+        args.append(URLEncoder.encode(newChecksum, "utf-8"));
 
         if (legacyAddresses != null && syncPubkeys) {
             args.append("&active=");
@@ -140,12 +129,8 @@ public class WalletPayload implements BaseApi {
         }
 
         if (email != null && email.length() > 0) {
-            try {
-                args.append("&email=");
-                args.append(URLEncoder.encode(email, "utf-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            args.append("&email=");
+            args.append(URLEncoder.encode(email, "utf-8"));
         }
 
         args.append("&device=");
@@ -158,16 +143,6 @@ public class WalletPayload implements BaseApi {
 
         args.append("&api_code=" + API_CODE);
 
-        try {
-            String response = WebUtil.getInstance().postURL(payloadUrl, args.toString());
-            if (response.contains("Wallet successfully synced")) {
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        return true;
+        WebUtil.getInstance().postURL(payloadUrl, args.toString());
     }
 }

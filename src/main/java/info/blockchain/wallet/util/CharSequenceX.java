@@ -49,7 +49,6 @@ public class CharSequenceX implements CharSequence {
     }
 
     public char charAt(int index) {
-        System.out.println(1);
         if (chars != null) {
             return chars[index];
         } else {
