@@ -9,6 +9,7 @@ import info.blockchain.wallet.util.FormatsUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.crypto.paddings.BlockCipherPadding;
 import org.spongycastle.crypto.paddings.ISO10126d2Padding;
 import org.spongycastle.crypto.paddings.ISO7816d4Padding;
@@ -65,7 +66,7 @@ public class BlockchainWallet {
         this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.dumpJSON().toString().getBytes("UTF-8"))));
     }
 
-    public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException {
+    public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
 
         this.unparsedWalletData = walletData;
 
@@ -87,8 +88,7 @@ public class BlockchainWallet {
         payload = new Payload(decyptedPayload, pbkdf2Iterations);
     }
 
-    private void parseWallet(JSONObject walletJson, CharSequenceX password) throws PayloadException, DecryptionException {
-
+    private void parseWallet(JSONObject walletJson, CharSequenceX password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
         if (walletJson.has(KEY_EXTRA_SEED)) {
             extraSeed = walletJson.getString(KEY_EXTRA_SEED);
         }
@@ -269,7 +269,7 @@ public class BlockchainWallet {
         throw new DecryptionException("Failed to decrypt");
     }
 
-    public String decryptWallet(String encryptedPayload, CharSequenceX password, int pdfdf2Iterations) {
+    public String decryptWallet(String encryptedPayload, CharSequenceX password, int pdfdf2Iterations) throws UnsupportedEncodingException, InvalidCipherTextException {
 
         return AESUtil.decrypt(encryptedPayload, password, pdfdf2Iterations);
     }

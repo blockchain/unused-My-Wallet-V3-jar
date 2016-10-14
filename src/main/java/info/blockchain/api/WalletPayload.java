@@ -143,6 +143,6 @@ public class WalletPayload implements BaseApi {
 
         args.append("&api_code=" + API_CODE);
 
-        WebUtil.getInstance().postURL(payloadUrl, args.toString());
+        String response = WebUtil.getInstance().postURL(payloadUrl, args.toString());
     }
 }

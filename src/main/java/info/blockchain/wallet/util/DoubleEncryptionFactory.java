@@ -2,8 +2,10 @@ package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
 
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 public class DoubleEncryptionFactory {
@@ -22,11 +24,11 @@ public class DoubleEncryptionFactory {
         return instance;
     }
 
-    public String encrypt(String encrypted, String sharedKey, String password2, int iterations) {
+    public String encrypt(String encrypted, String sharedKey, String password2, int iterations) throws Exception {
         return AESUtil.encrypt(encrypted, new CharSequenceX(sharedKey + password2), iterations);
     }
 
-    public String decrypt(String encrypted2, String sharedKey, String password2, int iterations) {
+    public String decrypt(String encrypted2, String sharedKey, String password2, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException {
         return AESUtil.decrypt(encrypted2, new CharSequenceX(sharedKey + password2), iterations);
     }
 

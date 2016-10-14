@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -164,7 +165,7 @@ public class WalletFactory {
         return hdw;
     }
 
-    public void saveWalletToJSON(Wallet wallet, String password) throws IOException, JSONException {
+    public void saveWalletToJSON(Wallet wallet, String password) throws Exception {
         serialize(wallet.toJSON(), password);
     }
 
@@ -184,12 +185,14 @@ public class WalletFactory {
             ioe.printStackTrace();
         } catch (JSONException je) {
             je.printStackTrace();
+        } catch (InvalidCipherTextException e) {
+            e.printStackTrace();
         }
 
         return hdw;
     }
 
-    private void serialize(JSONObject jsonobj, String password) throws IOException, JSONException {
+    private void serialize(JSONObject jsonobj, String password) throws Exception {
 
         File newfile = new File(strJSONFilePath + "bip44_wallet.dat");
         File tmpfile = new File(strJSONFilePath + "bip44_wallet.tmp");
@@ -226,7 +229,7 @@ public class WalletFactory {
         }
     }
 
-    private JSONObject deserialize(String password) throws IOException, JSONException {
+    private JSONObject deserialize(String password) throws IOException, JSONException, InvalidCipherTextException {
 
         File file = new File(strJSONFilePath + "bip44_wallet.dat");
         StringBuilder sb = new StringBuilder();

@@ -13,9 +13,7 @@ import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -782,7 +780,7 @@ public class Payload implements Serializable {
         this.decryptedPayload = decryptedPayload;
     }
 
-    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws Exception {
 
         String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
         JSONObject rootObj = new JSONObject();

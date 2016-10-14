@@ -92,12 +92,25 @@ public class Settings implements BaseApi {
     private String guid;
     private String sharedKey;
 
-    public Settings(String guid, String sharedKey) throws Exception {
+    public interface ResultListener {
+        void onSuccess();
+
+        void onFail();
+
+        void onBadRequest();
+    }
+
+    public Settings(String guid, String sharedKey) {
 
         this.guid = guid;
         this.sharedKey = sharedKey;
 
-        String jsonString = getInfo();
+        String jsonString = null;
+        try {
+            jsonString = getInfo();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (jsonString != null)
             parseJson(jsonString);
@@ -134,8 +147,14 @@ public class Settings implements BaseApi {
         return updateSettings(METHOD_GET_INFO, "");
     }
 
-    private void updateValue(String method, String value) throws Exception {
-        updateSettings(method, value);
+    private boolean updateValue(String method, String value) {
+        try {
+            updateSettings(method, value);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void parseJson(String jsonString) {
@@ -235,6 +254,10 @@ public class Settings implements BaseApi {
         return blockTorIps;
     }
 
+    private boolean isBadPasswordHint(String hint) {
+        return hint == null || hint.isEmpty() || hint.length() > 255;
+    }
+
     public String getSms() {
         return sms;
     }
@@ -275,77 +298,134 @@ public class Settings implements BaseApi {
         return loggingLevel;
     }
 
-    public void setEmail(String email) throws Exception {
+    public void setEmail(String email, ResultListener listener) {
 
-        updateValue(METHOD_UPDATE_EMAIL, email);
-        this.email = email;
-        this.emailVerified = false;
+        if (email == null || email.isEmpty()) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_EMAIL, email)) {
+            this.email = email;
+            this.emailVerified = false;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void setSms(String sms) throws Exception {
-        updateValue(METHOD_UPDATE_SMS, sms);
-        this.sms = sms;
-        this.smsVerified = false;
+    public void setSms(String sms, ResultListener listener) {
+        if (sms == null || sms.isEmpty()) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_SMS, sms)) {
+            this.sms = sms;
+            this.smsVerified = false;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void verifyEmail(String code) throws Exception {
-        updateValue(METHOD_VERIFY_EMAIL, code);
-        this.emailVerified = true;
+    public void verifyEmail(String code, ResultListener listener) {
+        if (code == null || code.isEmpty()) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_VERIFY_EMAIL, code)) {
+            this.emailVerified = true;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void verifySms(String code) throws Exception {
-        updateValue(METHOD_VERIFY_SMS, code);
-        this.smsVerified = true;
+    public void verifySms(String code, ResultListener listener) {
+        if (code == null || code.isEmpty()) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_VERIFY_SMS, code)) {
+            this.smsVerified = true;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void setPasswordHint1(String hint) throws Exception {
-        updateValue(METHOD_UPDATE_PASSWORD_HINT_1, hint);
-        this.passwordHint1 = hint;
+    public void setPasswordHint1(String hint, ResultListener listener) {
+        if (hint == null || hint.isEmpty() || isBadPasswordHint(hint)) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_PASSWORD_HINT_1, hint)) {
+            this.passwordHint1 = hint;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void setPasswordHint2(String hint) throws Exception {
-        updateValue(METHOD_UPDATE_PASSWORD_HINT_2, hint);
-        this.passwordHint2 = hint;
+    public void setPasswordHint2(String hint, ResultListener listener) {
+        if (hint == null || hint.isEmpty() || isBadPasswordHint(hint)) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_PASSWORD_HINT_2, hint)) {
+            this.passwordHint2 = hint;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void setBtcCurrency(String btcCurrency) throws Exception {
-        updateValue(METHOD_UPDATE_BTC_CURRENCY, btcCurrency);
-        this.btcCurrency = btcCurrency;
+    public void setBtcCurrency(String btcCurrency, ResultListener listener) {
+        if (btcCurrency == null || btcCurrency.isEmpty()) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_BTC_CURRENCY, btcCurrency)) {
+            this.btcCurrency = btcCurrency;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void setFiatCurrency(String currency) throws Exception {
-        updateValue(METHOD_UPDATE_CURRENCY, currency);
-        this.currency = currency;
+    public void setFiatCurrency(String currency, ResultListener listener) {
+        if (currency == null || currency.isEmpty()) {
+            listener.onBadRequest();
+        } else if (updateValue(METHOD_UPDATE_CURRENCY, currency)) {
+            this.currency = currency;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void setTorBlocked(boolean block) throws Exception {
+    public void setTorBlocked(boolean block, ResultListener listener) {
         int value = 0;
         if (block) value = 1;
-        updateValue(METHOD_UPDATE_BLOCK_TOR_IPS, value + "");
-        this.blockTorIps = block;
+        boolean success = updateValue(METHOD_UPDATE_BLOCK_TOR_IPS, value + "");
+        if (success) {
+            this.blockTorIps = block;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
     /**
      * @param type NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL, NOTIFICATION_TYPE_ALL
      */
-    public void enableNotification(int type) throws Exception {
+    public void enableNotification(int type, ResultListener listener) {
+
         if ((type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS)) ||
                 (type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL))) {
             type = NOTIFICATION_TYPE_ALL;
         }
-        updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, type + "");
-        if (!notificationType.contains(type)) {
-            notificationType.add(type);
-        }
 
-        enableNotifications(true);
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, type + "");
+        if (success) {
+            if (!notificationType.contains(type)) {
+                notificationType.add(type);
+            }
+
+            enableNotifications(true, listener);
+
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void disableNotification(int type) throws Exception {
-
-        if (notificationType.contains(NOTIFICATION_TYPE_ALL)) {
-            notificationType.remove(notificationType.indexOf(NOTIFICATION_TYPE_ALL));
-        }
+    public void disableNotification(int type, ResultListener listener) {
 
         if (notificationType.contains(type)) {
             notificationType.remove((Integer) type);
@@ -354,51 +434,86 @@ public class Settings implements BaseApi {
 
                 //SMS removed. Email type still active
                 if (type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL)) {
-                    updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_EMAIL + "");
+                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_EMAIL + "");
+                    if (success) {
+                        listener.onSuccess();
+                    } else {
+                        listener.onFail();
+                    }
                 }
 
                 //Email removed. Sms type still active
                 if (type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS)) {
-                    updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_SMS + "");
+                    boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_SMS + "");
+                    if (success) {
+                        listener.onSuccess();
+                    } else {
+                        listener.onFail();
+                    }
                 }
 
             } else {
                 //No more notifications left - disable all
-                disableAllNotifications();
+                disableAllNotifications(listener);
             }
 
+        } else {
+            listener.onSuccess();
         }
     }
 
-    public void enableAllNotifications() throws Exception {
+    public void enableAllNotifications(ResultListener listener) {
 
-        updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_ALL + "");
-        if (!notificationType.contains(NOTIFICATION_TYPE_ALL)) {
-            notificationType.add(NOTIFICATION_TYPE_ALL);
-            enableNotifications(true);
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_ALL + "");
+        if (success) {
+            if (!notificationType.contains(NOTIFICATION_TYPE_ALL)) {
+                notificationType.add(NOTIFICATION_TYPE_ALL);
+                enableNotifications(true, listener);
+            }
+
+            listener.onSuccess();
+        } else {
+            listener.onFail();
         }
     }
 
-    public void disableAllNotifications() throws Exception {
+    public void disableAllNotifications(ResultListener listener) {
 
-        updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_NONE + "");
-        notificationType = new ArrayList<Integer>();
-        enableNotifications(false);
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_NONE + "");
+        if (success) {
+            notificationType = new ArrayList<Integer>();
+
+            enableNotifications(false, listener);
+
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    private void enableNotifications(boolean enable) throws Exception {
+    private void enableNotifications(boolean enable, ResultListener listener) {
         int value;
         if (enable) {
             value = NOTIFICATION_ON;
         } else {
             value = NOTIFICATION_OFF;
         }
-        updateValue(METHOD_UPDATE_NOTIFICATION_ON, value + "");
-        this.notificationsOn = enable;
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_ON, value + "");
+        if (success) {
+            this.notificationsOn = enable;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 
-    public void setAuthType(int type) throws Exception {
-        updateValue(METHOD_UPDATE_AUTH_TYPE, type + "");
-        authType = type;
+    public void setAuthType(int type, ResultListener listener) {
+        boolean success = updateValue(METHOD_UPDATE_AUTH_TYPE, type + "");
+        if (success) {
+            authType = type;
+            listener.onSuccess();
+        } else {
+            listener.onFail();
+        }
     }
 }

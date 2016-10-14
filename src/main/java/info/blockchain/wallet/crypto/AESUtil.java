@@ -41,12 +41,12 @@ public class AESUtil {
 
     // AES 256 PBKDF2 CBC iso10126 decryption
     // 16 byte IV must be prepended to ciphertext - Compatible with crypto-js
-    public static String decrypt(String ciphertext, CharSequenceX password, int iterations) {
+    public static String decrypt(String ciphertext, CharSequenceX password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException {
 
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) {
+    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException {
 
         final int AESBlockSize = 4;
 
@@ -84,41 +84,28 @@ public class AESUtil {
         // create a temporary buffer to decode into (includes padding)
         byte[] buf = new byte[cipher.getOutputSize(input.length)];
         int len = cipher.processBytes(input, 0, input.length, buf, 0);
-        try {
-            len += cipher.doFinal(buf, len);
-        } catch (InvalidCipherTextException icte) {
-            icte.printStackTrace();
-            return null;
-        }
+        len += cipher.doFinal(buf, len);
 
         // remove padding
         byte[] out = new byte[len];
         System.arraycopy(buf, 0, out, 0, len);
 
         // return string representation of decoded bytes
-        String ret;
-        try {
-            ret = new String(out, "UTF-8");
-        } catch (UnsupportedEncodingException uee) {
-            uee.printStackTrace();
-            return null;
-        }
-
-        return ret;
+        return new String(out, "UTF-8");
     }
 
     // AES 256 PBKDF2 CBC iso10126 encryption
-    public static String encrypt(String cleartext, CharSequenceX password, int iterations) {
+    public static String encrypt(String cleartext, CharSequenceX password, int iterations) throws Exception {
 
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) {
+    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws Exception {
 
         final int AESBlockSize = 4;
 
         if (password == null) {
-            return null;
+            throw  new Exception("Password null");
         }
 
         // Use secure random to generate a 16 byte iv
@@ -126,13 +113,7 @@ public class AESUtil {
         byte iv[] = new byte[AESBlockSize * 4];
         random.nextBytes(iv);
 
-        byte[] clearbytes;
-        try {
-            clearbytes = cleartext.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException uee) {
-            uee.printStackTrace();
-            return null;
-        }
+        byte[] clearbytes = cleartext.getBytes("UTF-8");
 
         PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
         generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(password.toString().toCharArray()), iv, iterations);

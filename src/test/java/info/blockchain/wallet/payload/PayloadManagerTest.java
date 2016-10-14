@@ -1,6 +1,5 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.CharSequenceX;
@@ -90,11 +89,7 @@ public class PayloadManagerTest {
                 }
             });
         } catch (Exception e) {
-            if (e instanceof DecryptionException) {
-                assertThat("Decryption failed as expected", true);
-            } else {
-                assertThat("Auth should not pass with invalid guid", false);
-            }
+            assertThat("InitiatePayload failed as expected", true);
         }
         try {
             Thread.sleep(500);
