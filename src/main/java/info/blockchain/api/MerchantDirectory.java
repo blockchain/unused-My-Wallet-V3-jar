@@ -26,62 +26,58 @@ public class MerchantDirectory implements BaseApi {
         }
     }
 
-    public ArrayList<Merchant> parse(String data) {
+    public ArrayList<Merchant> parse(String data) throws JSONException{
 
         ArrayList<Merchant> merchantList = new ArrayList<Merchant>();
 
-        try {
-            JSONArray jsonArray = new JSONArray(data);
+        JSONArray jsonArray = new JSONArray(data);
 
-            if (jsonArray.length() > 0) {
+        if (jsonArray.length() > 0) {
 
-                for (int i = 0; i < jsonArray.length(); i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
 
-                    Merchant merchant = new Merchant();
-                    JSONObject jsonObj = jsonArray.getJSONObject(i);
+                Merchant merchant = new Merchant();
+                JSONObject jsonObj = jsonArray.getJSONObject(i);
 
-                    if (jsonObj.has("id")) {
-                        merchant.id = jsonObj.optInt("id", 0);
-                    }
-                    if (jsonObj.has("name")) {
-                        merchant.name = jsonObj.optString("name", "");
-                    }
-                    if (jsonObj.has("address")) {
-                        merchant.address = jsonObj.optString("address", "");
-                    }
-                    if (jsonObj.has("city")) {
-                        merchant.city = jsonObj.optString("city", "");
-                    }
-                    if (jsonObj.has("postal_code")) {
-                        merchant.postal_code = jsonObj.optString("postal_code", "");
-                    }
-                    if (jsonObj.has("phone")) {
-                        merchant.phone = jsonObj.optString("phone", "");
-                    }
-                    if (jsonObj.has("website")) {
-                        merchant.website = jsonObj.optString("website", "");
-                    }
-                    if (jsonObj.has("latitude")) {
-                        merchant.latitude = jsonObj.optDouble("latitude", 0.0);
-                    }
-                    if (jsonObj.has("longitude")) {
-                        merchant.longitude = jsonObj.optDouble("longitude", 0.0);
-                    }
-                    if (jsonObj.has("featured_merchant")) {
-                        merchant.featured_merchant = jsonObj.optBoolean("featured_merchant", false);
-                    }
-                    if (jsonObj.has("description")) {
-                        merchant.description = jsonObj.optString("description", "");
-                    }
-                    if (jsonObj.has("category_id")) {
-                        merchant.category_id = jsonObj.optInt("category_id", Merchant.HEADING_CAFE);
-                    }
-
-                    merchantList.add(merchant);
+                if (jsonObj.has("id")) {
+                    merchant.id = jsonObj.optInt("id", 0);
                 }
+                if (jsonObj.has("name")) {
+                    merchant.name = jsonObj.optString("name", "");
+                }
+                if (jsonObj.has("address")) {
+                    merchant.address = jsonObj.optString("address", "");
+                }
+                if (jsonObj.has("city")) {
+                    merchant.city = jsonObj.optString("city", "");
+                }
+                if (jsonObj.has("postal_code")) {
+                    merchant.postal_code = jsonObj.optString("postal_code", "");
+                }
+                if (jsonObj.has("phone")) {
+                    merchant.phone = jsonObj.optString("phone", "");
+                }
+                if (jsonObj.has("website")) {
+                    merchant.website = jsonObj.optString("website", "");
+                }
+                if (jsonObj.has("latitude")) {
+                    merchant.latitude = jsonObj.optDouble("latitude", 0.0);
+                }
+                if (jsonObj.has("longitude")) {
+                    merchant.longitude = jsonObj.optDouble("longitude", 0.0);
+                }
+                if (jsonObj.has("featured_merchant")) {
+                    merchant.featured_merchant = jsonObj.optBoolean("featured_merchant", false);
+                }
+                if (jsonObj.has("description")) {
+                    merchant.description = jsonObj.optString("description", "");
+                }
+                if (jsonObj.has("category_id")) {
+                    merchant.category_id = jsonObj.optInt("category_id", Merchant.HEADING_CAFE);
+                }
+
+                merchantList.add(merchant);
             }
-        } catch (JSONException je) {
-            je.printStackTrace();
         }
 
         return merchantList;

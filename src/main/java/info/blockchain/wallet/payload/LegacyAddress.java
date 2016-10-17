@@ -137,7 +137,7 @@ public class LegacyAddress {
         }
     }
 
-    public ECKey getECKey(CharSequenceX secondPassword) throws AddressFormatException {
+    public ECKey getECKey(CharSequenceX secondPassword) throws Exception {
 
         /*
         Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);

@@ -10,7 +10,6 @@ import info.blockchain.bip44.Wallet;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
@@ -95,7 +94,7 @@ public class PayloadManager {
     /**
      * Downloads payload from server, decrypts, and stores as local var {@link Payload}
      */
-    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws InvalidCredentialsException, ServerConnectionException, UnsupportedVersionException, PayloadException, DecryptionException, HDWalletException {
+    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws Exception {
 
         String walletData;
         try {
@@ -110,8 +109,9 @@ public class PayloadManager {
                 throw new ServerConnectionException();
             }
         }
-
+        System.out.println(1);
         bciWallet = new BlockchainWallet(walletData, password);
+        System.out.println(2);
         payload = bciWallet.getPayload();
 
         if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
@@ -219,7 +219,7 @@ public class PayloadManager {
             String newPayloadChecksum = (String) pair.getLeft();
             String oldPayloadChecksum = bciWallet.getPayloadChecksum();
 
-            boolean success = new WalletPayload().savePayloadToServer(method,
+            new WalletPayload().savePayloadToServer(method,
                     payload.getGuid(),
                     payload.getSharedKey(),
                     payload.getLegacyAddresses(),
@@ -231,28 +231,21 @@ public class PayloadManager {
 
             bciWallet.setPayloadChecksum(newPayloadChecksum);
 
-            if (success) {
-                isNew = false;
-                cachePayload();
-                return true;
-            }
+            isNew = false;
+            cachePayload(payload);
+            return true;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
     /**
      * Write to current client payload to cache.
      */
-    public void cachePayload() {
-        try {
-            cached_payload = payload.dumpJSON().toString();
-        } catch (JSONException je) {
-            je.printStackTrace();
-        }
+    public void cachePayload(Payload payload) throws JSONException{
+        cached_payload = payload.dumpJSON().toString();
     }
 
     private void clearCachedPayload() {
@@ -284,21 +277,25 @@ public class PayloadManager {
                 payload.getDoubleEncryptionPbkdf2Iterations());
     }
 
-    public Wallet getDecryptedWallet(String secondPassword) throws Exception {
+    public Wallet getDecryptedWallet(String secondPassword) throws DecryptionException {
 
         if (validateSecondPassword(secondPassword)) {
 
-            String encrypted_hex = payload.getHdWallet().getSeedHex();
-            String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
-                    encrypted_hex,
-                    payload.getSharedKey(),
-                    secondPassword,
-                    payload.getDoubleEncryptionPbkdf2Iterations());
+            try {
+                String encrypted_hex = payload.getHdWallet().getSeedHex();
+                String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                        encrypted_hex,
+                        payload.getSharedKey(),
+                        secondPassword,
+                        payload.getDoubleEncryptionPbkdf2Iterations());
 
-            return hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
+                return hdPayloadBridge.decryptWatchOnlyWallet(payload, decrypted_hex);
+            }catch (Exception e){
+                throw new DecryptionException(e.getMessage());
+            }
 
         } else {
-            return null;
+            throw new DecryptionException("Second password validation error.");
         }
     }
 
@@ -312,10 +309,7 @@ public class PayloadManager {
 
         bciWallet = new BlockchainWallet(payload);
 
-        if (!savePayloadToServer()) {
-            //if save failed don't return payload
-            payload = null;
-        }
+        savePayloadToServer();
 
         return payload;
     }
@@ -330,10 +324,7 @@ public class PayloadManager {
 
         bciWallet = new BlockchainWallet(payload);
 
-        if (!savePayloadToServer()) {
-            //if save failed don't return payload
-            payload = null;
-        }
+        savePayloadToServer();
 
         return payload;
     }
@@ -348,10 +339,7 @@ public class PayloadManager {
 
         bciWallet = new BlockchainWallet(payload);
 
-        if (!savePayloadToServer()) {
-            //if save failed don't return payload
-            payload = null;
-        }
+        savePayloadToServer();
 
         return payload;
     }
@@ -382,13 +370,16 @@ public class PayloadManager {
         boolean isUpgradeSuccessful = hdPayloadBridge.upgradeV2PayloadToV3(payload, secondPassword, isNewlyCreated, defaultAccountName);
         if (isUpgradeSuccessful) {
 
-            if (savePayloadToServer()) {
+            try {
+                savePayloadToServer();
 
                 syncWallet();
                 updateBalancesAndTransactions();
-                cachePayload();
+                cachePayload(payload);
                 listener.onUpgradeSuccess();
-            } else {
+
+            } catch (Exception e) {
+                e.printStackTrace();
                 listener.onUpgradeFail();//failed to save
             }
         } else {
@@ -472,15 +463,7 @@ public class PayloadManager {
         return xpubs.toArray(new String[xpubs.size()]);
     }
 
-    public interface AccountAddListener {
-        void onAccountAddSuccess(Account account);
-
-        void onSecondPasswordFail();
-
-        void onPayloadSaveFail();
-    }
-
-    public void addAccount(String accountLabel, @Nullable String secondPassword, AccountAddListener listener) throws Exception {
+    public Account addAccount(String accountLabel, @Nullable String secondPassword) throws Exception {
 
         //Add account
         String xpub;
@@ -504,8 +487,7 @@ public class PayloadManager {
 
 
             } else {
-                listener.onSecondPasswordFail();
-                return;
+                throw new DecryptionException();
             }
         }
 
@@ -539,18 +521,16 @@ public class PayloadManager {
         payload.getHdWallet().setAccounts(accounts);
 
         //Save payload
-        if (savePayloadToServer()) {
-            if (listener != null) listener.onAccountAddSuccess(account);
-        } else {
-            if (listener != null) listener.onPayloadSaveFail();
-        }
+        savePayloadToServer();
+
+        return account;
     }
 
     /*
     Generate V2 legacy address
     When called from Android - First apply PRNGFixes
      */
-    public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion, String secondPassword) {
+    public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion, String secondPassword) throws Exception {
 
         if (payload.isDoubleEncrypted() && !validateSecondPassword(secondPassword)) {
             return null;//second password validation failed
@@ -576,39 +556,31 @@ public class PayloadManager {
         return legacyAddress;
     }
 
-    public boolean addLegacyAddress(LegacyAddress legacyAddress) {
+    public boolean addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
         List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddresses();
         updatedLegacyAddresses.add(legacyAddress);
         payload.setLegacyAddresses(updatedLegacyAddresses);
         return savePayloadToServer();
     }
 
-    ECKey getRandomECKey() {
+    ECKey getRandomECKey() throws Exception{
 
-        byte[] data;
-        try {
-            data = new ExternalEntropy().getRandomBytes();
-        } catch (Exception e) {
+        byte[] data = new ExternalEntropy().getRandomBytes();
+
+        if (data == null)throw new Exception("ExternalEntropy.getRandomBytes failed.");
+
+        byte[] rdata = new byte[32];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(rdata);
+        byte[] privbytes = Util.getInstance().xor(data, rdata);
+        if (privbytes == null) {
             return null;
         }
-
-        ECKey ecKey;
-        if (data != null) {
-            byte[] rdata = new byte[32];
-            SecureRandom random = new SecureRandom();
-            random.nextBytes(rdata);
-            byte[] privbytes = Util.getInstance().xor(data, rdata);
-            if (privbytes == null) {
-                return null;
-            }
-            ecKey = ECKey.fromPrivate(privbytes, true);
-            // erase all byte arrays:
-            random.nextBytes(privbytes);
-            random.nextBytes(rdata);
-            random.nextBytes(data);
-        } else {
-            return null;
-        }
+        ECKey ecKey = ECKey.fromPrivate(privbytes, true);
+        // erase all byte arrays:
+        random.nextBytes(privbytes);
+        random.nextBytes(rdata);
+        random.nextBytes(data);
 
         return ecKey;
     }
@@ -617,23 +589,19 @@ public class PayloadManager {
         return wallet.getSeedHex();
     }
 
-    public String[] getMnemonic(String secondPassword) {
-        try {
-            Wallet wallet = getDecryptedWallet(secondPassword);
+    public String[] getMnemonic(String secondPassword) throws Exception {
 
-            if (wallet != null) {
-                String mnemonic = wallet.getMnemonic();
+        Wallet wallet = getDecryptedWallet(secondPassword);
 
-                if (mnemonic != null && mnemonic.length() > 0) {
-                    return mnemonic.split("\\s+");
-                }
-            }
+        if (wallet == null)throw new Exception("getDecryptedWallet returned null.");
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        String mnemonic = wallet.getMnemonic();
+
+        if (mnemonic != null && mnemonic.length() > 0) {
+            return mnemonic.split("\\s+");
+        } else {
+            throw new Exception("Invalid mnemonic.");
         }
-
-        return null;
     }
 
     public String[] getMnemonic() {

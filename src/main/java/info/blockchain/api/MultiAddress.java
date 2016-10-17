@@ -18,7 +18,6 @@ public class MultiAddress implements BaseApi {
 
     public JSONObject getLegacy(String[] addresses, boolean simple) throws Exception {
 
-
         JSONObject jsonObject;
 
         StringBuilder url = new StringBuilder(multiAddrressUrl);
