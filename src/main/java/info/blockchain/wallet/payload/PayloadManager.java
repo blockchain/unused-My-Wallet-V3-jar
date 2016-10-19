@@ -109,9 +109,7 @@ public class PayloadManager {
                 throw new ServerConnectionException();
             }
         }
-        System.out.println(1);
         bciWallet = new BlockchainWallet(walletData, password);
-        System.out.println(2);
         payload = bciWallet.getPayload();
 
         if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
