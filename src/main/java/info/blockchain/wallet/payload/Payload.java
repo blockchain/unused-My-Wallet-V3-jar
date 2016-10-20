@@ -384,58 +384,21 @@ public class Payload implements PayloadJsonKeys, Serializable {
         if (payloadJson.has(KEY_PAYLOAD__HD_WALLET)) {
             isUpgraded = true;
 
-            JSONArray wallets = (JSONArray) payloadJson.get(KEY_PAYLOAD__HD_WALLET);
-            JSONObject wallet = (JSONObject) wallets.get(0);
-            HDWallet hdw = new HDWallet();
+            //Json accommodates multiple wallets. Use single wallet untill further notice
+            JSONArray walletJsonArray = (JSONArray) payloadJson.get(KEY_PAYLOAD__HD_WALLET);
+            JSONObject walletJsonObject = walletJsonArray.getJSONObject(0);
 
-            if (wallet.has(KEY_HD_WALLET__SEED_HEX)) {
-                hdw.setSeedHex((String) wallet.get(KEY_HD_WALLET__SEED_HEX));
-            }
-            if (wallet.has(KEY_HD_WALLET__PASSPHRASE)) {
-                hdw.setPassphrase((String) wallet.get(KEY_HD_WALLET__PASSPHRASE));
-            }
-            if (wallet.has(KEY_HD_WALLET__MNEMONIC_VERIFIED)) {
-                hdw.mnemonic_verified(wallet.getBoolean(KEY_HD_WALLET__MNEMONIC_VERIFIED));
-            }
-            if (wallet.has(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX)) {
-                int i;
-                try {
-                    String val = (String) wallet.get(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX);
-                    i = Integer.parseInt(val);
-                } catch (java.lang.ClassCastException cce) {
-                    i = (Integer) wallet.get(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX);
-                }
-                hdw.setDefaultIndex(i);
-            }
+            HDWallet hdw = new HDWallet(walletJsonObject);
 
-            if (((JSONObject) wallets.get(0)).has(KEY_PAYLOAD__ACCOUNTS)) {
-
-                JSONArray accounts = (JSONArray) ((JSONObject) wallets.get(0)).get(KEY_PAYLOAD__ACCOUNTS);
-                if (accounts != null && accounts.length() > 0) {
-                    List<Account> walletAccounts = new ArrayList<Account>();
-                    for (int i = 0; i < accounts.length(); i++) {
-
-                        JSONObject accountJsonObj = accounts.getJSONObject(i);
-
-                        Account account = null;
-                        try {
-                            account = new Account(accountJsonObj, i);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        walletAccounts.add(account);
-
-                        xpubToAccountIndexMap.put(account.getXpub(), i);
-                        accountIndexToXpubMap.put(i, account.getXpub());
-                    }
-
-                    hdw.setAccounts(walletAccounts);
-
-                }
+            // TODO: 20/10/16 This is weird. Try to move/get rid of this part
+            List<Account> accountList = hdw.getAccounts();
+            for (Account account : accountList) {
+                xpubToAccountIndexMap.put(account.getXpub(), account.getRealIdx());
+                accountIndexToXpubMap.put(account.getRealIdx(), account.getXpub());
             }
 
             hdWalletList.add(hdw);
+
         } else {
             isUpgraded = false;
         }

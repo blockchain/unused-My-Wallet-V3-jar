@@ -19,14 +19,10 @@ public interface PayloadJsonKeys {
     String KEY_PAYLOAD__OPTION = "options";
     String KEY_PAYLOAD__WALLET_OPTIONS = "wallet_options";//some wallets might have this key in stead of 'options'
     String KEY_PAYLOAD__PAIDTO = "paidTo";
+
     String KEY_PAYLOAD__HD_WALLET = "hd_wallets";
+
     String KEY_PAYLOAD__LEGACY_KEYS = "keys";
     String KEY_PAYLOAD__ADDRESS_BOOK = "address_book";
-    String KEY_PAYLOAD__ACCOUNTS = "accounts";
 
-    //HD wallet
-    String KEY_HD_WALLET__SEED_HEX = "seed_hex";
-    String KEY_HD_WALLET__PASSPHRASE = "passphrase";
-    String KEY_HD_WALLET__MNEMONIC_VERIFIED = "mnemonic_verified";
-    String KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX = "default_account_idx";
 }
