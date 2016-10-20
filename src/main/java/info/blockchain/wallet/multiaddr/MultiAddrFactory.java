@@ -3,8 +3,8 @@ package info.blockchain.wallet.multiaddr;
 import info.blockchain.api.MultiAddress;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.payload.Tx;
-import info.blockchain.wallet.payload.TxMostRecentDateComparator;
+import info.blockchain.wallet.transaction.Tx;
+import info.blockchain.wallet.transaction.TxMostRecentDateComparator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
