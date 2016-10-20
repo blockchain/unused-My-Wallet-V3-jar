@@ -24,10 +24,6 @@ public class Account {
     final String KEY_HD_WALLET__ADDRESS_LABELS = "address_labels";
     final String KEY_HD_WALLET__CACHE = "cache";
 
-    // TODO: 20/10/16 Belongs to cache
-    String KEY_HD_WALLET__RECEIVE_ACCOUNT = "receiveAccount";
-    String KEY_HD_WALLET__CHANGE_ACCOUNT = "changeAccount";
-
     protected boolean isArchived = false;
     protected int idxChangeAddresses = 0;
     protected int idxReceiveAddresses = 0;
@@ -89,6 +85,11 @@ public class Account {
     }
 
     public Account(JSONObject accountJsonObj, int index) throws Exception {
+
+        parseJson(accountJsonObj, index);
+    }
+
+    private void parseJson(JSONObject accountJsonObj, int index) throws Exception{
 
         setRealIdx(index);
         setArchived(accountJsonObj.has(KEY_HD_WALLET__ARCHIVED) ? (Boolean) accountJsonObj.get(KEY_HD_WALLET__ARCHIVED) : false);
@@ -156,16 +157,7 @@ public class Account {
 
             JSONObject cacheObj = (JSONObject) accountJsonObj.get(KEY_HD_WALLET__CACHE);
 
-            Cache cache = new Cache();
-            // TODO: 20/10/16 Parse in cache
-            if (cacheObj.has(KEY_HD_WALLET__RECEIVE_ACCOUNT)) {
-                cache.setReceiveAccount((String) cacheObj.get(KEY_HD_WALLET__RECEIVE_ACCOUNT));
-            }
-
-            if (cacheObj.has(KEY_HD_WALLET__CHANGE_ACCOUNT)) {
-                cache.setChangeAccount((String) cacheObj.get(KEY_HD_WALLET__CHANGE_ACCOUNT));
-            }
-
+            Cache cache = new Cache(cacheObj);
             setCache(cache);
 
         }

@@ -12,7 +12,24 @@ public class Cache {
     protected String receiveAccount = null;
     protected String changeAccount = null;
 
-    public Cache() {
+    public Cache(){
+
+    }
+
+    public Cache(JSONObject cacheObj) {
+
+        parseJson(cacheObj);
+    }
+
+    private void parseJson(JSONObject cacheObj){
+
+        if (cacheObj.has(KEY_HD_WALLET__RECEIVE_ACCOUNT)) {
+            setReceiveAccount((String) cacheObj.get(KEY_HD_WALLET__RECEIVE_ACCOUNT));
+        }
+
+        if (cacheObj.has(KEY_HD_WALLET__CHANGE_ACCOUNT)) {
+            setChangeAccount((String) cacheObj.get(KEY_HD_WALLET__CHANGE_ACCOUNT));
+        }
     }
 
     public String getReceiveAccount() {
