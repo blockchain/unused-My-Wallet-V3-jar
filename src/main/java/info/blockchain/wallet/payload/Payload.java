@@ -36,20 +36,20 @@ import javax.annotation.Nonnull;
  */
 public class Payload implements Serializable {
 
-    final String KEY_PAYLOAD__GUID = "guid";
-    final String KEY_PAYLOAD__SHAREDKEY = "sharedKey";
-    final String KEY_PAYLOAD__DOUBLE_ENCRYPTION = "double_encryption";
-    final String KEY_PAYLOAD__DPASSWORDHASH = "dpasswordhash";
-    final String KEY_PAYLOAD__PBKDF2_ITERATIONS = "pbkdf2_iterations";
-    final String KEY_PAYLOAD__TX_NOTES = "tx_notes";
-    final String KEY_PAYLOAD__TX_TAGS = "tx_tags";
-    final String KEY_PAYLOAD__TAG_NAMES = "tag_names";
-    final String KEY_PAYLOAD__OPTION = "options";
-    final String KEY_PAYLOAD__WALLET_OPTIONS = "wallet_options";//some wallets might have this key in stead of 'options'
-    final String KEY_PAYLOAD__PAIDTO = "paidTo";
-    final String KEY_PAYLOAD__HD_WALLET = "hd_wallets";
-    final String KEY_PAYLOAD__LEGACY_KEYS = "keys";
-    final String KEY_PAYLOAD__ADDRESS_BOOK = "address_book";
+    private final String KEY_GUID = "guid";
+    private final String KEY_SHAREDKEY = "sharedKey";
+    private final String KEY_DOUBLE_ENCRYPTION = "double_encryption";
+    private final String KEY_DPASSWORDHASH = "dpasswordhash";
+    private final String KEY_PBKDF2_ITERATIONS = "pbkdf2_iterations";
+    private final String KEY_TX_NOTES = "tx_notes";
+    private final String KEY_TX_TAGS = "tx_tags";
+    private final String KEY_TAG_NAMES = "tag_names";
+    private final String KEY_OPTION = "options";
+    private final String KEY_WALLET_OPTIONS = "wallet_options";//some wallets might have this key in stead of 'options'
+    private final String KEY_PAIDTO = "paidTo";
+    private final String KEY_HD_WALLET = "hd_wallets";
+    private final String KEY_LEGACY_KEYS = "keys";
+    private final String KEY_ADDRESS_BOOK = "address_book";
 
     private String guid = null;
     private String sharedKey = null;
@@ -323,33 +323,33 @@ public class Payload implements Serializable {
      */
     public void parsePayload(@Nonnull JSONObject payloadJson) throws PayloadException {
 
-        guid = payloadJson.getString(KEY_PAYLOAD__GUID);
+        guid = payloadJson.getString(KEY_GUID);
 
-        if (!payloadJson.has(KEY_PAYLOAD__SHAREDKEY)) {
+        if (!payloadJson.has(KEY_SHAREDKEY)) {
             throw new PayloadException("Payload contains no shared key!");
         }
 
-        sharedKey = payloadJson.getString(KEY_PAYLOAD__SHAREDKEY);
-        isDoubleEncrypted = payloadJson.has(KEY_PAYLOAD__DOUBLE_ENCRYPTION) ? payloadJson.getBoolean(KEY_PAYLOAD__DOUBLE_ENCRYPTION) : false;
-        secondPasswordHash = payloadJson.has(KEY_PAYLOAD__DPASSWORDHASH) ? payloadJson.getString(KEY_PAYLOAD__DPASSWORDHASH) : "";
+        sharedKey = payloadJson.getString(KEY_SHAREDKEY);
+        isDoubleEncrypted = payloadJson.has(KEY_DOUBLE_ENCRYPTION) ? payloadJson.getBoolean(KEY_DOUBLE_ENCRYPTION) : false;
+        secondPasswordHash = payloadJson.has(KEY_DPASSWORDHASH) ? payloadJson.getString(KEY_DPASSWORDHASH) : "";
 
         //
         // "options" or "wallet_options" ?
         //
         JSONObject optionsJson = null;
         options = new Options();
-        if (payloadJson.has(KEY_PAYLOAD__OPTION)) {
-            optionsJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__OPTION);
+        if (payloadJson.has(KEY_OPTION)) {
+            optionsJson = (JSONObject) payloadJson.get(KEY_OPTION);
         }
-        if (optionsJson == null && payloadJson.has(KEY_PAYLOAD__WALLET_OPTIONS)) {
-            optionsJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__WALLET_OPTIONS);
+        if (optionsJson == null && payloadJson.has(KEY_WALLET_OPTIONS)) {
+            optionsJson = (JSONObject) payloadJson.get(KEY_WALLET_OPTIONS);
         }
         if (optionsJson != null) {
             options = new Options(optionsJson);
         }
 
-        if (payloadJson.has(KEY_PAYLOAD__TX_NOTES)) {
-            JSONObject txNotesJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__TX_NOTES);
+        if (payloadJson.has(KEY_TX_NOTES)) {
+            JSONObject txNotesJson = (JSONObject) payloadJson.get(KEY_TX_NOTES);
             transactionNotesMap = new HashMap<String, String>();
 
             for (Iterator keys = txNotesJson.keys(); keys.hasNext(); ) {
@@ -359,8 +359,8 @@ public class Payload implements Serializable {
             }
         }
 
-        if (payloadJson.has(KEY_PAYLOAD__TX_TAGS)) {
-            JSONObject txTagsJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__TX_TAGS);
+        if (payloadJson.has(KEY_TX_TAGS)) {
+            JSONObject txTagsJson = (JSONObject) payloadJson.get(KEY_TX_TAGS);
             transactionTagsMap = new HashMap<String, List<Integer>>();
             for (Iterator keys = txTagsJson.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
@@ -374,16 +374,16 @@ public class Payload implements Serializable {
             }
         }
 
-        if (payloadJson.has(KEY_PAYLOAD__TAG_NAMES)) {
-            JSONArray tagNamesJsonArray = (JSONArray) payloadJson.get(KEY_PAYLOAD__TAG_NAMES);
+        if (payloadJson.has(KEY_TAG_NAMES)) {
+            JSONArray tagNamesJsonArray = (JSONArray) payloadJson.get(KEY_TAG_NAMES);
             tagNamesMap = new HashMap<Integer, String>();
             for (int i = 0; i < tagNamesJsonArray.length(); i++) {
                 tagNamesMap.put(i, (String) tagNamesJsonArray.get(i));
             }
         }
 
-        if (payloadJson.has(KEY_PAYLOAD__PAIDTO)) {
-            JSONObject paidTo = (JSONObject) payloadJson.get(KEY_PAYLOAD__PAIDTO);
+        if (payloadJson.has(KEY_PAIDTO)) {
+            JSONObject paidTo = (JSONObject) payloadJson.get(KEY_PAIDTO);
             paidToMap = new HashMap<String, PaidTo>();
             for (Iterator keys = paidTo.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
@@ -391,11 +391,11 @@ public class Payload implements Serializable {
             }
         }
 
-        if (payloadJson.has(KEY_PAYLOAD__HD_WALLET)) {
+        if (payloadJson.has(KEY_HD_WALLET)) {
             isUpgraded = true;
 
             //Json accommodates multiple wallets. Use single wallet untill further notice
-            JSONArray walletJsonArray = (JSONArray) payloadJson.get(KEY_PAYLOAD__HD_WALLET);
+            JSONArray walletJsonArray = (JSONArray) payloadJson.get(KEY_HD_WALLET);
             JSONObject walletJsonObject = walletJsonArray.getJSONObject(0);
 
             HDWallet hdw = new HDWallet(walletJsonObject);
@@ -413,10 +413,10 @@ public class Payload implements Serializable {
             isUpgraded = false;
         }
 
-        if (payloadJson.has(KEY_PAYLOAD__LEGACY_KEYS)) {
+        if (payloadJson.has(KEY_LEGACY_KEYS)) {
 
             List<String> seenAddrs = new ArrayList<String>();
-            JSONArray keys = payloadJson.getJSONArray(KEY_PAYLOAD__LEGACY_KEYS);
+            JSONArray keys = payloadJson.getJSONArray(KEY_LEGACY_KEYS);
 
             if (keys != null && keys.length() > 0) {
 
@@ -432,9 +432,9 @@ public class Payload implements Serializable {
             }
         }
 
-        if (payloadJson.has(KEY_PAYLOAD__ADDRESS_BOOK)) {
+        if (payloadJson.has(KEY_ADDRESS_BOOK)) {
 
-            JSONArray address_book = payloadJson.getJSONArray(KEY_PAYLOAD__ADDRESS_BOOK);
+            JSONArray address_book = payloadJson.getJSONArray(KEY_ADDRESS_BOOK);
 
             if (address_book != null && address_book.length() > 0) {
 
@@ -473,13 +473,13 @@ public class Payload implements Serializable {
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_PAYLOAD__GUID, getGuid());
-        obj.put(KEY_PAYLOAD__SHAREDKEY, getSharedKey());
-        obj.put(KEY_PAYLOAD__PBKDF2_ITERATIONS, this.getDoubleEncryptionPbkdf2Iterations());
+        obj.put(KEY_GUID, getGuid());
+        obj.put(KEY_SHAREDKEY, getSharedKey());
+        obj.put(KEY_PBKDF2_ITERATIONS, this.getDoubleEncryptionPbkdf2Iterations());
 
         if (isDoubleEncrypted) {
-            obj.put(KEY_PAYLOAD__DOUBLE_ENCRYPTION, true);
-            obj.put(KEY_PAYLOAD__DPASSWORDHASH, secondPasswordHash);
+            obj.put(KEY_DOUBLE_ENCRYPTION, true);
+            obj.put(KEY_DPASSWORDHASH, secondPasswordHash);
         }
 
         if (isUpgraded) {
@@ -487,7 +487,7 @@ public class Payload implements Serializable {
             for (HDWallet wallet : hdWalletList) {
                 wallets.put(wallet.dumpJSON());
             }
-            obj.put(KEY_PAYLOAD__HD_WALLET, wallets);
+            obj.put(KEY_HD_WALLET, wallets);
         }
 
         JSONArray keys = new JSONArray();
@@ -495,23 +495,23 @@ public class Payload implements Serializable {
             JSONObject key = addr.dumpJSON();
             keys.put(key);
         }
-        obj.put(KEY_PAYLOAD__LEGACY_KEYS, keys);
+        obj.put(KEY_LEGACY_KEYS, keys);
 
         JSONObject optionsObj = options.dumpJSON();
-        obj.put(KEY_PAYLOAD__OPTION, optionsObj);
+        obj.put(KEY_OPTION, optionsObj);
 
         JSONArray address_book = new JSONArray();
         for (AddressBookEntry addr : addressBookEntryList) {
             address_book.put(addr.dumpJSON());
         }
-        obj.put(KEY_PAYLOAD__ADDRESS_BOOK, address_book);
+        obj.put(KEY_ADDRESS_BOOK, address_book);
 
         JSONObject notesObj = new JSONObject();
         Set<String> nkeys = transactionNotesMap.keySet();
         for (String key : nkeys) {
             notesObj.put(key, transactionNotesMap.get(key));
         }
-        obj.put(KEY_PAYLOAD__TX_NOTES, notesObj);
+        obj.put(KEY_TX_NOTES, notesObj);
 
         JSONObject tagsObj = new JSONObject();
         Set<String> tkeys = transactionTagsMap.keySet();
@@ -523,14 +523,14 @@ public class Payload implements Serializable {
             }
             tagsObj.put(key, tints);
         }
-        obj.put(KEY_PAYLOAD__TX_TAGS, tagsObj);
+        obj.put(KEY_TX_TAGS, tagsObj);
 
         JSONArray tnames = new JSONArray();
         Set<Integer> skeys = tagNamesMap.keySet();
         for (Integer key : skeys) {
             tnames.put(key, tagNamesMap.get(key));
         }
-        obj.put(KEY_PAYLOAD__TAG_NAMES, tnames);
+        obj.put(KEY_TAG_NAMES, tnames);
 
         JSONObject paidToObj = new JSONObject();
         Set<String> pkeys = paidToMap.keySet();
@@ -538,7 +538,7 @@ public class Payload implements Serializable {
             PaidTo pto = paidToMap.get(key);
             paidToObj.put(key, pto.dumpJSON());
         }
-        obj.put(KEY_PAYLOAD__PAIDTO, paidToObj);
+        obj.put(KEY_PAIDTO, paidToObj);
 
         return obj;
     }

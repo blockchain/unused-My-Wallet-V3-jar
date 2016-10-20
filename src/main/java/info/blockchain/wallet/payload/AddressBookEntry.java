@@ -5,9 +5,8 @@ import org.json.JSONObject;
 
 public class AddressBookEntry {
 
-    // TODO: 20/10/16 Simplify these keys again after refactor
-    final String KEY_ADDRESS_BOOK__LABEL = "label";
-    final String KEY_ADDRESS_BOOK__ADDR = "addr";
+    private final String KEY_LABEL = "label";
+    private final String KEY_ADDR = "addr";
 
     private String strAddress = null;
     private String strLabel = null;
@@ -16,8 +15,12 @@ public class AddressBookEntry {
     }
 
     public AddressBookEntry(JSONObject addressObject) {
-        this.strAddress = addressObject.has(KEY_ADDRESS_BOOK__ADDR) ? (String) addressObject.get(KEY_ADDRESS_BOOK__ADDR) : null;
-        this.strLabel = addressObject.has(KEY_ADDRESS_BOOK__LABEL) ? (String) addressObject.get(KEY_ADDRESS_BOOK__LABEL) : null;
+        parseJson(addressObject);
+    }
+
+    private void parseJson(JSONObject addressObject) {
+        this.strAddress = addressObject.has(KEY_ADDR) ? addressObject.getString(KEY_ADDR) : null;
+        this.strLabel = addressObject.has(KEY_LABEL) ? addressObject.getString(KEY_LABEL) : null;
     }
 
     public String getAddress() {
@@ -40,8 +43,8 @@ public class AddressBookEntry {
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_ADDRESS_BOOK__ADDR, strAddress);
-        obj.put(KEY_ADDRESS_BOOK__LABEL, strLabel == null ? "" : strLabel);
+        obj.put(KEY_ADDR, strAddress);
+        obj.put(KEY_LABEL, strLabel == null ? "" : strLabel);
 
         return obj;
     }

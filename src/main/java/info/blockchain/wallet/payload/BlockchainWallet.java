@@ -27,16 +27,16 @@ public class BlockchainWallet {
     private static final int DEFAULT_PBKDF2_ITERATIONS_V1_A = 1;
     private static final int DEFAULT_PBKDF2_ITERATIONS_V1_B = 10;
 
-    final String KEY_WALLET_VERSION = "version";
-    final String KEY_WALLET_PAYLOAD = "payload";//encrypted payload
-    final String KEY_WALLET_PBKDF2_ITERATIONS = "pbkdf2_iterations";
+    private final String KEY_VERSION = "version";
+    private final String KEY_PAYLOAD = "payload";//encrypted payload
+    private final String KEY_PBKDF2_ITERATIONS = "pbkdf2_iterations";
 
-    final String KEY_EXTRA_SEED = "extra_seed";
-    final String KEY_PAYLOAD_CHECKSUM = "payload_checksum";
-    final String KEY_WAR_CHECKSUM = "war_checksum";
-    final String KEY_LANGUAGE = "language";
-    final String KEY_STORAGE_TOKEN = "storage_token";
-    final String KEY_SYNC_PUBKEYS = "sync_pubkeys";
+    private final String KEY_EXTRA_SEED = "extra_seed";
+    private final String KEY_PAYLOAD_CHECKSUM = "payload_checksum";
+    private final String KEY_WAR_CHECKSUM = "war_checksum";
+    private final String KEY_LANGUAGE = "language";
+    private final String KEY_STORAGE_TOKEN = "storage_token";
+    private final String KEY_SYNC_PUBKEYS = "sync_pubkeys";
 
     private String extraSeed;
     private String payloadChecksum;
@@ -113,32 +113,32 @@ public class BlockchainWallet {
             syncPubkeys = walletJson.getBoolean(KEY_SYNC_PUBKEYS);
         }
 
-        if (!walletJson.has(KEY_WALLET_PAYLOAD)) {
+        if (!walletJson.has(KEY_PAYLOAD)) {
             throw new PayloadException("No payload wrapper in json.");
 
         } else {
 
             //Payload wrapper contains version, iterations and encrypted payload
-            String anyPayload = walletJson.getString(KEY_WALLET_PAYLOAD);
+            String anyPayload = walletJson.getString(KEY_PAYLOAD);
 
             if (FormatsUtil.getInstance().isValidJson(anyPayload)) {
                 //V2+
                 JSONObject payloadWrapper = new JSONObject(anyPayload);
 
-                version = payloadWrapper.getDouble(KEY_WALLET_VERSION);
+                version = payloadWrapper.getDouble(KEY_VERSION);
                 setVersion(version);
 
-                if (payloadWrapper.has(KEY_WALLET_PBKDF2_ITERATIONS)) {
-                    pbkdf2Iterations = payloadWrapper.getInt(KEY_WALLET_PBKDF2_ITERATIONS);
+                if (payloadWrapper.has(KEY_PBKDF2_ITERATIONS)) {
+                    pbkdf2Iterations = payloadWrapper.getInt(KEY_PBKDF2_ITERATIONS);
                 } else {
                     pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
                 }
 
-                if (!payloadWrapper.has(KEY_WALLET_PAYLOAD)) {
+                if (!payloadWrapper.has(KEY_PAYLOAD)) {
                     throw new PayloadException("No payload in payload wrapper.");
 
                 } else {
-                    String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_WALLET_PAYLOAD), password, pbkdf2Iterations);
+                    String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pbkdf2Iterations);
 
                     if (decryptedPayload != null && FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
                         payload = new Payload(decryptedPayload, pbkdf2Iterations);
@@ -282,9 +282,9 @@ public class BlockchainWallet {
 
         String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
         JSONObject rootObj = new JSONObject();
-        rootObj.put(KEY_WALLET_VERSION, version);
-        rootObj.put(KEY_WALLET_PBKDF2_ITERATIONS, iterations);
-        rootObj.put(KEY_WALLET_PAYLOAD, payloadEncrypted);
+        rootObj.put(KEY_VERSION, version);
+        rootObj.put(KEY_PBKDF2_ITERATIONS, iterations);
+        rootObj.put(KEY_PAYLOAD, payloadEncrypted);
 
         String checkSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
 

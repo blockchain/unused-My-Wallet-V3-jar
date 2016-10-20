@@ -10,11 +10,11 @@ import java.util.List;
 
 public class HDWallet {
 
-    final String KEY_PAYLOAD__ACCOUNTS = "accounts";
-    final String KEY_HD_WALLET__SEED_HEX = "seed_hex";
-    final String KEY_HD_WALLET__PASSPHRASE = "passphrase";
-    final String KEY_HD_WALLET__MNEMONIC_VERIFIED = "mnemonic_verified";
-    final String KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX = "default_account_idx";
+    private final String KEY_ACCOUNTS = "accounts";
+    private final String KEY_SEED_HEX = "seed_hex";
+    private final String KEY_PASSPHRASE = "passphrase";
+    private final String KEY_MNEMONIC_VERIFIED = "mnemonic_verified";
+    private final String KEY_DEFAULT_ACCOUNT_INDEX = "default_account_idx";
 
     private String strSeedHex = null;
     private List<Account> accounts = null;
@@ -44,29 +44,29 @@ public class HDWallet {
 
     private void parseJson(JSONObject walletJsonObject){
 
-        if (walletJsonObject.has(KEY_HD_WALLET__SEED_HEX)) {
-            setSeedHex((String) walletJsonObject.get(KEY_HD_WALLET__SEED_HEX));
+        if (walletJsonObject.has(KEY_SEED_HEX)) {
+            setSeedHex((String) walletJsonObject.get(KEY_SEED_HEX));
         }
-        if (walletJsonObject.has(KEY_HD_WALLET__PASSPHRASE)) {
-            setPassphrase((String) walletJsonObject.get(KEY_HD_WALLET__PASSPHRASE));
+        if (walletJsonObject.has(KEY_PASSPHRASE)) {
+            setPassphrase((String) walletJsonObject.get(KEY_PASSPHRASE));
         }
-        if (walletJsonObject.has(KEY_HD_WALLET__MNEMONIC_VERIFIED)) {
-            mnemonic_verified(walletJsonObject.getBoolean(KEY_HD_WALLET__MNEMONIC_VERIFIED));
+        if (walletJsonObject.has(KEY_MNEMONIC_VERIFIED)) {
+            mnemonic_verified(walletJsonObject.getBoolean(KEY_MNEMONIC_VERIFIED));
         }
-        if (walletJsonObject.has(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX)) {
+        if (walletJsonObject.has(KEY_DEFAULT_ACCOUNT_INDEX)) {
             int i;
             try {
-                String val = (String) walletJsonObject.get(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX);
+                String val = (String) walletJsonObject.get(KEY_DEFAULT_ACCOUNT_INDEX);
                 i = Integer.parseInt(val);
             } catch (java.lang.ClassCastException cce) {
-                i = (Integer) walletJsonObject.get(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX);
+                i = (Integer) walletJsonObject.get(KEY_DEFAULT_ACCOUNT_INDEX);
             }
             setDefaultIndex(i);
         }
 
-        if (walletJsonObject.has(KEY_PAYLOAD__ACCOUNTS)) {
+        if (walletJsonObject.has(KEY_ACCOUNTS)) {
 
-            JSONArray accountsJsonArray = walletJsonObject.getJSONArray(KEY_PAYLOAD__ACCOUNTS);
+            JSONArray accountsJsonArray = walletJsonObject.getJSONArray(KEY_ACCOUNTS);
             if (accountsJsonArray != null && accountsJsonArray.length() > 0) {
                 List<Account> walletAccounts = new ArrayList<Account>();
                 for (int i = 0; i < accountsJsonArray.length(); i++) {
@@ -133,18 +133,18 @@ public class HDWallet {
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_HD_WALLET__SEED_HEX, strSeedHex);
-        obj.put(KEY_HD_WALLET__PASSPHRASE, strPassphrase);
-        obj.put(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX, default_account_idx);
-        obj.put(KEY_HD_WALLET__MNEMONIC_VERIFIED, mnemonic_verified);
+        obj.put(KEY_SEED_HEX, strSeedHex);
+        obj.put(KEY_PASSPHRASE, strPassphrase);
+        obj.put(KEY_DEFAULT_ACCOUNT_INDEX, default_account_idx);
+        obj.put(KEY_MNEMONIC_VERIFIED, mnemonic_verified);
 
         JSONArray accs = new JSONArray();
         for (Account account : accounts) {
-            if (!(account instanceof ImportedAccount)) {
+            if (!(account instanceof ImportedAddress)) {
                 accs.put(account.dumpJSON());
             }
         }
-        obj.put(KEY_PAYLOAD__ACCOUNTS, accs);
+        obj.put(KEY_ACCOUNTS, accs);
 
         return obj;
     }

@@ -5,9 +5,8 @@ import org.json.JSONObject;
 
 public class Cache {
 
-    // TODO: 20/10/16 Simplify these keys again after refactor
-    final String KEY_HD_WALLET__RECEIVE_ACCOUNT = "receiveAccount";
-    final String KEY_HD_WALLET__CHANGE_ACCOUNT = "changeAccount";
+    private final String KEY_RECEIVE_ACCOUNT = "receiveAccount";
+    private final String KEY_CHANGE_ACCOUNT = "changeAccount";
 
     protected String receiveAccount = null;
     protected String changeAccount = null;
@@ -23,12 +22,12 @@ public class Cache {
 
     private void parseJson(JSONObject cacheObj){
 
-        if (cacheObj.has(KEY_HD_WALLET__RECEIVE_ACCOUNT)) {
-            setReceiveAccount((String) cacheObj.get(KEY_HD_WALLET__RECEIVE_ACCOUNT));
+        if (cacheObj.has(KEY_RECEIVE_ACCOUNT)) {
+            setReceiveAccount(cacheObj.getString(KEY_RECEIVE_ACCOUNT));
         }
 
-        if (cacheObj.has(KEY_HD_WALLET__CHANGE_ACCOUNT)) {
-            setChangeAccount((String) cacheObj.get(KEY_HD_WALLET__CHANGE_ACCOUNT));
+        if (cacheObj.has(KEY_CHANGE_ACCOUNT)) {
+            setChangeAccount(cacheObj.getString(KEY_CHANGE_ACCOUNT));
         }
     }
 
@@ -52,8 +51,8 @@ public class Cache {
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_HD_WALLET__RECEIVE_ACCOUNT, receiveAccount == null ? "" : receiveAccount);
-        obj.put(KEY_HD_WALLET__CHANGE_ACCOUNT, changeAccount == null ? "" : changeAccount);
+        obj.put(KEY_RECEIVE_ACCOUNT, receiveAccount == null ? "" : receiveAccount);
+        obj.put(KEY_CHANGE_ACCOUNT, changeAccount == null ? "" : changeAccount);
 
         return obj;
     }

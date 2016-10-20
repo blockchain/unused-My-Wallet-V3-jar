@@ -6,11 +6,10 @@ import org.json.JSONObject;
 // TODO: 20/10/16 This class doesn't seem to be used - We parse the data but never do anything with it
 public class PaidTo {
 
-    // TODO: 20/10/16 Simplify these keys again after refactor
-    final String KEY_PAIDTO__EMAIL = "email";
-    final String KEY_PAIDTO__MOBILE = "mobile";
-    final String KEY_PAIDTO__REDEEMED_AT = "redeemedAt";
-    final String KEY_PAIDTO__ADDRESS = "address";
+    private final String KEY_EMAIL = "email";
+    private final String KEY_MOBILE = "mobile";
+    private final String KEY_REDEEMED_AT = "redeemedAt";
+    private final String KEY_ADDRESS = "address";
 
     private String strEmail = null;
     private String strMobile = null;
@@ -19,10 +18,10 @@ public class PaidTo {
 
     public PaidTo(JSONObject t) {
 
-        setEmail(t.isNull(KEY_PAIDTO__EMAIL) ? null : t.optString(KEY_PAIDTO__EMAIL, null));
-        setMobile(t.isNull(KEY_PAIDTO__MOBILE) ? null : t.optString(KEY_PAIDTO__MOBILE, null));
-        setRedeemedAt(t.isNull(KEY_PAIDTO__REDEEMED_AT) ? null : (Integer) t.get(KEY_PAIDTO__REDEEMED_AT));
-        setAddress(t.isNull(KEY_PAIDTO__ADDRESS) ? null : t.optString(KEY_PAIDTO__ADDRESS, null));
+        setEmail(t.isNull(KEY_EMAIL) ? null : t.optString(KEY_EMAIL, null));
+        setMobile(t.isNull(KEY_MOBILE) ? null : t.optString(KEY_MOBILE, null));
+        setRedeemedAt(t.isNull(KEY_REDEEMED_AT) ? null : (Integer) t.get(KEY_REDEEMED_AT));
+        setAddress(t.isNull(KEY_ADDRESS) ? null : t.optString(KEY_ADDRESS, null));
     }
 
     public PaidTo(String email, String mobile, Integer redeemed, String address) {
@@ -69,24 +68,24 @@ public class PaidTo {
         JSONObject obj = new JSONObject();
 
         if ((strEmail != null) && !"".equals(strEmail)) {
-            obj.put(KEY_PAIDTO__EMAIL, strEmail);
+            obj.put(KEY_EMAIL, strEmail);
         } else {
-            obj.put(KEY_PAIDTO__EMAIL, JSONObject.NULL);
+            obj.put(KEY_EMAIL, JSONObject.NULL);
         }
         if ((strMobile != null) && !"".equals(strMobile)) {
-            obj.put(KEY_PAIDTO__MOBILE, strMobile);
+            obj.put(KEY_MOBILE, strMobile);
         } else {
-            obj.put(KEY_PAIDTO__MOBILE, JSONObject.NULL);
+            obj.put(KEY_MOBILE, JSONObject.NULL);
         }
         if ((strRedeemedAt != null)) {
-            obj.put(KEY_PAIDTO__REDEEMED_AT, strRedeemedAt);
+            obj.put(KEY_REDEEMED_AT, strRedeemedAt);
         } else {
-            obj.put(KEY_PAIDTO__REDEEMED_AT, JSONObject.NULL);
+            obj.put(KEY_REDEEMED_AT, JSONObject.NULL);
         }
         if ((strAddress != null) && !"".equals(strAddress)) {
-            obj.put(KEY_PAIDTO__ADDRESS, strAddress);
+            obj.put(KEY_ADDRESS, strAddress);
         } else {
-            obj.put(KEY_PAIDTO__ADDRESS, JSONObject.NULL);
+            obj.put(KEY_ADDRESS, JSONObject.NULL);
         }
         return obj;
     }

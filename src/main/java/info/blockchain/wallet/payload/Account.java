@@ -10,19 +10,18 @@ import java.util.TreeMap;
 
 public class Account {
 
-    // TODO: 20/10/16 Simplify these keys again after refactor
-    final String KEY_HD_WALLET__ARCHIVED = "archived";
-    final String KEY_HD_WALLET__LABEL = "label";
-    final String KEY_HD_WALLET__XPUB = "xpub";
-    final String KEY_HD_WALLET__XPRIV = "xpriv";
-    final String KEY_HD_WALLET__RECEIVE_ADDRESSES = "receive_addresses";
-    final String KEY_HD_WALLET__INDEX = "index";
-    final String KEY_HD_WALLET__AMOUNT = "amount";
-    final String KEY_HD_WALLET__PAID = "paid";
-    final String KEY_HD_WALLET__CANCELLED = "cancelled";
-    final String KEY_HD_WALLET__TAGS = "tags";
-    final String KEY_HD_WALLET__ADDRESS_LABELS = "address_labels";
-    final String KEY_HD_WALLET__CACHE = "cache";
+    private final String KEY_ARCHIVED = "archived";
+    private final String KEY_LABEL = "label";
+    private final String KEY_XPUB = "xpub";
+    private final String KEY_XPRIV = "xpriv";
+    private final String KEY_RECEIVE_ADDRESSES = "receive_addresses";
+    private final String KEY_INDEX = "index";
+    private final String KEY_AMOUNT = "amount";
+    private final String KEY_PAID = "paid";
+    private final String KEY_CANCELLED = "cancelled";
+    private final String KEY_TAGS = "tags";
+    private final String KEY_ADDRESS_LABELS = "address_labels";
+    private final String KEY_CACHE = "cache";
 
     protected boolean isArchived = false;
     protected int idxChangeAddresses = 0;
@@ -45,18 +44,6 @@ public class Account {
         addressLabels = new TreeMap<Integer, String>();
         cache = new Cache();
     }
-
-    /*
-    public Account(boolean isArchived, int change, int receive, String label, List<ReceiveAddress> receiveAddresses, List<String> tags, long amount) {
-        this.isArchived = isArchived;
-        this.nbChangeAddresses = change;
-        this.nbReceiveAddresses = receive;
-        this.strLabel = label;
-        this.receiveAddresses = receiveAddresses;
-        this.tags = tags;
-        this.amount = amount;
-    }
-    */
 
     public Account(boolean isArchived, int change, int receive, String label) {
         this.isArchived = isArchived;
@@ -92,37 +79,37 @@ public class Account {
     private void parseJson(JSONObject accountJsonObj, int index) throws Exception{
 
         setRealIdx(index);
-        setArchived(accountJsonObj.has(KEY_HD_WALLET__ARCHIVED) ? (Boolean) accountJsonObj.get(KEY_HD_WALLET__ARCHIVED) : false);
-        if (accountJsonObj.has(KEY_HD_WALLET__ARCHIVED) && (Boolean) accountJsonObj.get(KEY_HD_WALLET__ARCHIVED)) {
+        setArchived(accountJsonObj.has(KEY_ARCHIVED) ? (Boolean) accountJsonObj.get(KEY_ARCHIVED) : false);
+        if (accountJsonObj.has(KEY_ARCHIVED) && (Boolean) accountJsonObj.get(KEY_ARCHIVED)) {
             setArchived(true);
         } else {
             setArchived(false);
         }
-        setLabel(accountJsonObj.has(KEY_HD_WALLET__LABEL) ? (String) accountJsonObj.get(KEY_HD_WALLET__LABEL) : "");// TODO: 20/10/16 Don't treat as blank
-        if (accountJsonObj.has(KEY_HD_WALLET__XPUB) && (accountJsonObj.getString(KEY_HD_WALLET__XPUB)) != null && (accountJsonObj.getString(KEY_HD_WALLET__XPUB)).length() > 0) {
-            setXpub((String) accountJsonObj.get(KEY_HD_WALLET__XPUB));
+        setLabel(accountJsonObj.has(KEY_LABEL) ? (String) accountJsonObj.get(KEY_LABEL) : "");// TODO: 20/10/16 Don't treat as blank
+        if (accountJsonObj.has(KEY_XPUB) && (accountJsonObj.getString(KEY_XPUB)) != null && (accountJsonObj.getString(KEY_XPUB)).length() > 0) {
+            setXpub((String) accountJsonObj.get(KEY_XPUB));
         } else {
             throw new Exception("Account contains no xpub");
         }
-        if (accountJsonObj.has(KEY_HD_WALLET__XPRIV) && (accountJsonObj.getString(KEY_HD_WALLET__XPRIV)) != null && (accountJsonObj.getString(KEY_HD_WALLET__XPRIV)).length() > 0) {
-            setXpriv((String) accountJsonObj.get(KEY_HD_WALLET__XPRIV));
+        if (accountJsonObj.has(KEY_XPRIV) && (accountJsonObj.getString(KEY_XPRIV)) != null && (accountJsonObj.getString(KEY_XPRIV)).length() > 0) {
+            setXpriv((String) accountJsonObj.get(KEY_XPRIV));
         } else {
             throw new Exception("Account contains no private key");
         }
 
-        if (accountJsonObj.has(KEY_HD_WALLET__RECEIVE_ADDRESSES)) {
-            JSONArray receives = (JSONArray) accountJsonObj.get(KEY_HD_WALLET__RECEIVE_ADDRESSES);
+        if (accountJsonObj.has(KEY_RECEIVE_ADDRESSES)) {
+            JSONArray receives = (JSONArray) accountJsonObj.get(KEY_RECEIVE_ADDRESSES);
             List<ReceiveAddress> receiveAddresses = new ArrayList<ReceiveAddress>();
             for (int j = 0; j < receives.length(); j++) {
                 JSONObject receiveObj = (JSONObject) receives.get(j);
                 ReceiveAddress receiveAddress = new ReceiveAddress();
-                if (receiveObj.has(KEY_HD_WALLET__INDEX)) {
-                    int val = (Integer) receiveObj.get(KEY_HD_WALLET__INDEX);
+                if (receiveObj.has(KEY_INDEX)) {
+                    int val = (Integer) receiveObj.get(KEY_INDEX);
                     receiveAddress.setIndex(val);
                 }
-                receiveAddress.setLabel(receiveObj.has(KEY_HD_WALLET__LABEL) ? (String) receiveObj.get(KEY_HD_WALLET__LABEL) : "");// TODO: 20/10/16 Don't treat as blank
-                receiveAddress.setAmount(receiveObj.has(KEY_HD_WALLET__AMOUNT) ? receiveObj.getLong(KEY_HD_WALLET__AMOUNT) : 0L);
-                receiveAddress.setPaid(receiveObj.has(KEY_HD_WALLET__PAID) ? receiveObj.getLong(KEY_HD_WALLET__PAID) : 0L);
+                receiveAddress.setLabel(receiveObj.has(KEY_LABEL) ? (String) receiveObj.get(KEY_LABEL) : "");// TODO: 20/10/16 Don't treat as blank
+                receiveAddress.setAmount(receiveObj.has(KEY_AMOUNT) ? receiveObj.getLong(KEY_AMOUNT) : 0L);
+                receiveAddress.setPaid(receiveObj.has(KEY_PAID) ? receiveObj.getLong(KEY_PAID) : 0L);
 //                                    receiveAddress.setCancelled(receiveObj.has(KEY_HD_WALLET__CANCELLED) ? (Boolean)receiveObj.get(KEY_HD_WALLET__CANCELLED) : false);
 //                                    receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
                 receiveAddresses.add(receiveAddress);
@@ -130,8 +117,8 @@ public class Account {
             setReceiveAddresses(receiveAddresses);
         }
 
-        if (accountJsonObj.has(KEY_HD_WALLET__TAGS)) {
-            JSONArray tags = (JSONArray) accountJsonObj.get(KEY_HD_WALLET__TAGS);
+        if (accountJsonObj.has(KEY_TAGS)) {
+            JSONArray tags = (JSONArray) accountJsonObj.get(KEY_TAGS);
             if (tags != null && tags.length() > 0) {
                 List<String> accountTags = new ArrayList<String>();
                 for (int j = 0; j < tags.length(); j++) {
@@ -141,21 +128,21 @@ public class Account {
             }
         }
 
-        if (accountJsonObj.has(KEY_HD_WALLET__ADDRESS_LABELS)) {
-            JSONArray labels = (JSONArray) accountJsonObj.get(KEY_HD_WALLET__ADDRESS_LABELS);
+        if (accountJsonObj.has(KEY_ADDRESS_LABELS)) {
+            JSONArray labels = (JSONArray) accountJsonObj.get(KEY_ADDRESS_LABELS);
             if (labels != null && labels.length() > 0) {
                 TreeMap<Integer, String> addressLabels = new TreeMap<Integer, String>();
                 for (int j = 0; j < labels.length(); j++) {
                     JSONObject obj = labels.getJSONObject(j);
-                    addressLabels.put(obj.getInt(KEY_HD_WALLET__INDEX), obj.getString(KEY_HD_WALLET__LABEL));
+                    addressLabels.put(obj.getInt(KEY_INDEX), obj.getString(KEY_LABEL));
                 }
                 setAddressLabels(addressLabels);
             }
         }
 
-        if (accountJsonObj.has(KEY_HD_WALLET__CACHE)) {
+        if (accountJsonObj.has(KEY_CACHE)) {
 
-            JSONObject cacheObj = (JSONObject) accountJsonObj.get(KEY_HD_WALLET__CACHE);
+            JSONObject cacheObj = (JSONObject) accountJsonObj.get(KEY_CACHE);
 
             Cache cache = new Cache(cacheObj);
             setCache(cache);
@@ -294,12 +281,12 @@ public class Account {
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_HD_WALLET__ARCHIVED, isArchived);
+        obj.put(KEY_ARCHIVED, isArchived);
 //        obj.put("change_addresses", nbChangeAddresses);// TODO: 20/10/16 Why is this commented out?
 //        obj.put("receive_addresses_count", nbReceiveAddresses);
-        obj.put(KEY_HD_WALLET__LABEL, strLabel == null ? "" : strLabel);// TODO: 20/10/16 Don't treat as blank
-        obj.put(KEY_HD_WALLET__XPUB, strXpub == null ? "" : strXpub);// TODO: 20/10/16 Don't treat as blank
-        obj.put(KEY_HD_WALLET__XPRIV, strXpriv == null ? "" : strXpriv);// TODO: 20/10/16 Don't treat as blank
+        obj.put(KEY_LABEL, strLabel == null ? "" : strLabel);// TODO: 20/10/16 Don't treat as blank
+        obj.put(KEY_XPUB, strXpub == null ? "" : strXpub);// TODO: 20/10/16 Don't treat as blank
+        obj.put(KEY_XPRIV, strXpriv == null ? "" : strXpriv);// TODO: 20/10/16 Don't treat as blank
 
         JSONArray receives = new JSONArray();
         for (ReceiveAddress receiveAddress : receiveAddresses) {
@@ -324,15 +311,15 @@ public class Account {
         for (Integer key : addressLabels.keySet()) {
             JSONObject labelObj = new JSONObject();
 
-            labelObj.put(KEY_HD_WALLET__INDEX, key);
-            labelObj.put(KEY_HD_WALLET__LABEL, addressLabels.get(key));
+            labelObj.put(KEY_INDEX, key);
+            labelObj.put(KEY_LABEL, addressLabels.get(key));
 
             labels.put(labelObj);
         }
-        obj.put(KEY_HD_WALLET__ADDRESS_LABELS, labels);
+        obj.put(KEY_ADDRESS_LABELS, labels);
 
         JSONObject _cache = cache.dumpJSON();
-        obj.put(KEY_HD_WALLET__CACHE, _cache);
+        obj.put(KEY_CACHE, _cache);
 
         return obj;
     }
