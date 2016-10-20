@@ -3,11 +3,11 @@ package info.blockchain.wallet.payload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class AddressBookEntry implements PayloadJsonKeys{
+public class AddressBookEntry {
 
     // TODO: 20/10/16 Simplify these keys again after refactor
-    String KEY_ADDRESS_BOOK__LABEL = "label";
-    String KEY_ADDRESS_BOOK__ADDR = "addr";
+    final String KEY_ADDRESS_BOOK__LABEL = "label";
+    final String KEY_ADDRESS_BOOK__ADDR = "addr";
 
     private String strAddress = null;
     private String strLabel = null;

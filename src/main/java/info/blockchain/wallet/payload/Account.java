@@ -11,18 +11,18 @@ import java.util.TreeMap;
 public class Account {
 
     // TODO: 20/10/16 Simplify these keys again after refactor
-    String KEY_HD_WALLET__ARCHIVED = "archived";
-    String KEY_HD_WALLET__LABEL = "label";
-    String KEY_HD_WALLET__XPUB = "xpub";
-    String KEY_HD_WALLET__XPRIV = "xpriv";
-    String KEY_HD_WALLET__RECEIVE_ADDRESSES = "receive_addresses";
-    String KEY_HD_WALLET__INDEX = "index";
-    String KEY_HD_WALLET__AMOUNT = "amount";
-    String KEY_HD_WALLET__PAID = "paid";
-    String KEY_HD_WALLET__CANCELLED = "cancelled";
-    String KEY_HD_WALLET__TAGS = "tags";
-    String KEY_HD_WALLET__ADDRESS_LABELS = "address_labels";
-    String KEY_HD_WALLET__CACHE = "cache";
+    final String KEY_HD_WALLET__ARCHIVED = "archived";
+    final String KEY_HD_WALLET__LABEL = "label";
+    final String KEY_HD_WALLET__XPUB = "xpub";
+    final String KEY_HD_WALLET__XPRIV = "xpriv";
+    final String KEY_HD_WALLET__RECEIVE_ADDRESSES = "receive_addresses";
+    final String KEY_HD_WALLET__INDEX = "index";
+    final String KEY_HD_WALLET__AMOUNT = "amount";
+    final String KEY_HD_WALLET__PAID = "paid";
+    final String KEY_HD_WALLET__CANCELLED = "cancelled";
+    final String KEY_HD_WALLET__TAGS = "tags";
+    final String KEY_HD_WALLET__ADDRESS_LABELS = "address_labels";
+    final String KEY_HD_WALLET__CACHE = "cache";
 
     // TODO: 20/10/16 Belongs to cache
     String KEY_HD_WALLET__RECEIVE_ACCOUNT = "receiveAccount";

@@ -1,19 +1,14 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,7 +34,22 @@ import javax.annotation.Nonnull;
  * Blockchain HD wallet payload format. Such portions might be commented out in the other payload
  * member classes of this package.
  */
-public class Payload implements PayloadJsonKeys, Serializable {
+public class Payload implements Serializable {
+
+    final String KEY_PAYLOAD__GUID = "guid";
+    final String KEY_PAYLOAD__SHAREDKEY = "sharedKey";
+    final String KEY_PAYLOAD__DOUBLE_ENCRYPTION = "double_encryption";
+    final String KEY_PAYLOAD__DPASSWORDHASH = "dpasswordhash";
+    final String KEY_PAYLOAD__PBKDF2_ITERATIONS = "pbkdf2_iterations";
+    final String KEY_PAYLOAD__TX_NOTES = "tx_notes";
+    final String KEY_PAYLOAD__TX_TAGS = "tx_tags";
+    final String KEY_PAYLOAD__TAG_NAMES = "tag_names";
+    final String KEY_PAYLOAD__OPTION = "options";
+    final String KEY_PAYLOAD__WALLET_OPTIONS = "wallet_options";//some wallets might have this key in stead of 'options'
+    final String KEY_PAYLOAD__PAIDTO = "paidTo";
+    final String KEY_PAYLOAD__HD_WALLET = "hd_wallets";
+    final String KEY_PAYLOAD__LEGACY_KEYS = "keys";
+    final String KEY_PAYLOAD__ADDRESS_BOOK = "address_book";
 
     private String guid = null;
     private String sharedKey = null;
@@ -544,18 +554,5 @@ public class Payload implements PayloadJsonKeys, Serializable {
 
     public void setDecryptedPayload(String decryptedPayload) {
         this.decryptedPayload = decryptedPayload;
-    }
-
-    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws Exception {
-
-        String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
-        JSONObject rootObj = new JSONObject();
-        rootObj.put(KEY_WALLET_VERSION, version);
-        rootObj.put(KEY_WALLET_PBKDF2_ITERATIONS, iterations);
-        rootObj.put(KEY_WALLET_PAYLOAD, payloadEncrypted);
-
-        String checkSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
-
-        return Pair.of(checkSum, rootObj);
     }
 }

@@ -4,13 +4,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 // TODO: 20/10/16 This class doesn't seem to be used - We parse the data but never do anything with it
-public class PaidTo implements PayloadJsonKeys{
+public class PaidTo {
 
     // TODO: 20/10/16 Simplify these keys again after refactor
-    String KEY_PAIDTO__EMAIL = "email";
-    String KEY_PAIDTO__MOBILE = "mobile";
-    String KEY_PAIDTO__REDEEMED_AT = "redeemedAt";
-    String KEY_PAIDTO__ADDRESS = "address";
+    final String KEY_PAIDTO__EMAIL = "email";
+    final String KEY_PAIDTO__MOBILE = "mobile";
+    final String KEY_PAIDTO__REDEEMED_AT = "redeemedAt";
+    final String KEY_PAIDTO__ADDRESS = "address";
 
     private String strEmail = null;
     private String strMobile = null;

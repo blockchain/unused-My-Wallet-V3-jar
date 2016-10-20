@@ -3,11 +3,11 @@ package info.blockchain.wallet.payload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Cache implements PayloadJsonKeys{
+public class Cache {
 
     // TODO: 20/10/16 Simplify these keys again after refactor
-    String KEY_HD_WALLET__RECEIVE_ACCOUNT = "receiveAccount";
-    String KEY_HD_WALLET__CHANGE_ACCOUNT = "changeAccount";
+    final String KEY_HD_WALLET__RECEIVE_ACCOUNT = "receiveAccount";
+    final String KEY_HD_WALLET__CHANGE_ACCOUNT = "changeAccount";
 
     protected String receiveAccount = null;
     protected String changeAccount = null;

@@ -214,7 +214,7 @@ public class PayloadManager {
         String method = isNew ? "insert" : "update";
 
         try {
-            Pair pair = payload.encryptPayload(payload.dumpJSON().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
+            Pair pair = bciWallet.encryptPayload(payload.dumpJSON().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
             String newPayloadChecksum = (String) pair.getLeft();

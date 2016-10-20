@@ -10,12 +10,12 @@ import java.util.List;
 public class Options {
 
     // TODO: 20/10/16 Simplify these keys again after refactor
-    String KEY_OPTIONS__FEE_PER_KB = "fee_per_kb";
-    String KEY_OPTIONS__LOGOUT_TIME = "logout_time";
-    String KEY_OPTIONS__HTML5_NOTIFICATIONS = "html5_notifications";
-    String KEY_OPTIONS__ADDITIONAL_SEED = "additional_seeds";
-    String KEY_OPTIONS__PBKDF2_ITERATIONS = "pbkdf2_iterations";
-    String KEY_OPTIONS__ENABLE_MULTIPLE_ACCOUNTS = "enable_multiple_accounts";// TODO: 20/10/16 Why is this written to payload?
+    final String KEY_OPTIONS__FEE_PER_KB = "fee_per_kb";
+    final String KEY_OPTIONS__LOGOUT_TIME = "logout_time";
+    final String KEY_OPTIONS__HTML5_NOTIFICATIONS = "html5_notifications";
+    final String KEY_OPTIONS__ADDITIONAL_SEED = "additional_seeds";
+    final String KEY_OPTIONS__PBKDF2_ITERATIONS = "pbkdf2_iterations";
+    final String KEY_OPTIONS__ENABLE_MULTIPLE_ACCOUNTS = "enable_multiple_accounts";// TODO: 20/10/16 Why is this written to payload?
 
     private int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2;
     private long fee_per_kb = 10000L;

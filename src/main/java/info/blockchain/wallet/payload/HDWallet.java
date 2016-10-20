@@ -10,11 +10,11 @@ import java.util.List;
 
 public class HDWallet {
 
-    String KEY_PAYLOAD__ACCOUNTS = "accounts";
-    String KEY_HD_WALLET__SEED_HEX = "seed_hex";
-    String KEY_HD_WALLET__PASSPHRASE = "passphrase";
-    String KEY_HD_WALLET__MNEMONIC_VERIFIED = "mnemonic_verified";
-    String KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX = "default_account_idx";
+    final String KEY_PAYLOAD__ACCOUNTS = "accounts";
+    final String KEY_HD_WALLET__SEED_HEX = "seed_hex";
+    final String KEY_HD_WALLET__PASSPHRASE = "passphrase";
+    final String KEY_HD_WALLET__MNEMONIC_VERIFIED = "mnemonic_verified";
+    final String KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX = "default_account_idx";
 
     private String strSeedHex = null;
     private List<Account> accounts = null;

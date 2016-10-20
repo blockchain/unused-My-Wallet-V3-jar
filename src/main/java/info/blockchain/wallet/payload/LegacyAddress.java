@@ -12,23 +12,23 @@ import org.json.JSONObject;
 
 import java.math.BigInteger;
 
-public class LegacyAddress implements PayloadJsonKeys{
+public class LegacyAddress {
 
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
 
     // TODO: 20/10/16 Simplify these keys again after refactor
-    String KEY_LEGACY_KEYS__ADDR = "addr";
-    String KEY_LEGACY_KEYS__PRIV = "priv";
-    String KEY_LEGACY_KEYS__LABEL = "label";
-    String KEY_LEGACY_KEYS__CREATED_TIME = "created_time";
-    String KEY_LEGACY_KEYS__TAG = "tag";
-    String KEY_LEGACY_KEYS__CREATED_DEVICE_NAME = "created_device_name";
-    String KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION = "created_device_version";
-    String KEY_LEGACY_KEYS__CHANGE_ADDRESS = "change_addresses";//?
-    String KEY_LEGACY_KEYS__RECEIVE_ADDRESS = "receive_addresses";
-    String KEY_LEGACY_KEYS__TAGS = "tags";//?
-    String KEY_LEGACY_KEYS__AMOUNT = "amount";
+    final String KEY_LEGACY_KEYS__ADDR = "addr";
+    final String KEY_LEGACY_KEYS__PRIV = "priv";
+    final String KEY_LEGACY_KEYS__LABEL = "label";
+    final String KEY_LEGACY_KEYS__CREATED_TIME = "created_time";
+    final String KEY_LEGACY_KEYS__TAG = "tag";
+    final String KEY_LEGACY_KEYS__CREATED_DEVICE_NAME = "created_device_name";
+    final String KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION = "created_device_version";
+    final String KEY_LEGACY_KEYS__CHANGE_ADDRESS = "change_addresses";//?
+    final String KEY_LEGACY_KEYS__RECEIVE_ADDRESS = "receive_addresses";
+    final String KEY_LEGACY_KEYS__TAGS = "tags";//?
+    final String KEY_LEGACY_KEYS__AMOUNT = "amount";
 
     private String strEncryptedKey = null;
     private long created = 0L;
