@@ -79,13 +79,13 @@ public class Account {
     private void parseJson(JSONObject accountJsonObj, int index) throws Exception{
 
         setRealIdx(index);
-        setArchived(accountJsonObj.has(KEY_ARCHIVED) ? (Boolean) accountJsonObj.get(KEY_ARCHIVED) : false);
-        if (accountJsonObj.has(KEY_ARCHIVED) && (Boolean) accountJsonObj.get(KEY_ARCHIVED)) {
+        setArchived(accountJsonObj.has(KEY_ARCHIVED) ? accountJsonObj.getBoolean(KEY_ARCHIVED) : false);
+        if (accountJsonObj.has(KEY_ARCHIVED) && accountJsonObj.getBoolean(KEY_ARCHIVED)) {
             setArchived(true);
         } else {
             setArchived(false);
         }
-        setLabel(accountJsonObj.has(KEY_LABEL) ? (String) accountJsonObj.get(KEY_LABEL) : "");// TODO: 20/10/16 Don't treat as blank
+        setLabel(accountJsonObj.has(KEY_LABEL) ? accountJsonObj.getString(KEY_LABEL) : "");// TODO: 20/10/16 Don't treat as blank
         if (accountJsonObj.has(KEY_XPUB) && (accountJsonObj.getString(KEY_XPUB)) != null && (accountJsonObj.getString(KEY_XPUB)).length() > 0) {
             setXpub((String) accountJsonObj.get(KEY_XPUB));
         } else {
@@ -98,7 +98,7 @@ public class Account {
         }
 
         if (accountJsonObj.has(KEY_RECEIVE_ADDRESSES)) {
-            JSONArray receives = (JSONArray) accountJsonObj.get(KEY_RECEIVE_ADDRESSES);
+            JSONArray receives = accountJsonObj.getJSONArray(KEY_RECEIVE_ADDRESSES);
             List<ReceiveAddress> receiveAddresses = new ArrayList<ReceiveAddress>();
             for (int j = 0; j < receives.length(); j++) {
                 JSONObject receiveObj = (JSONObject) receives.get(j);
@@ -107,29 +107,29 @@ public class Account {
                     int val = (Integer) receiveObj.get(KEY_INDEX);
                     receiveAddress.setIndex(val);
                 }
-                receiveAddress.setLabel(receiveObj.has(KEY_LABEL) ? (String) receiveObj.get(KEY_LABEL) : "");// TODO: 20/10/16 Don't treat as blank
+                receiveAddress.setLabel(receiveObj.has(KEY_LABEL) ? receiveObj.getString(KEY_LABEL) : "");// TODO: 20/10/16 Don't treat as blank
                 receiveAddress.setAmount(receiveObj.has(KEY_AMOUNT) ? receiveObj.getLong(KEY_AMOUNT) : 0L);
                 receiveAddress.setPaid(receiveObj.has(KEY_PAID) ? receiveObj.getLong(KEY_PAID) : 0L);
-//                                    receiveAddress.setCancelled(receiveObj.has(KEY_HD_WALLET__CANCELLED) ? (Boolean)receiveObj.get(KEY_HD_WALLET__CANCELLED) : false);
-//                                    receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
+//              receiveAddress.setCancelled(receiveObj.has(KEY_HD_WALLET__CANCELLED) ? (Boolean)receiveObj.get(KEY_HD_WALLET__CANCELLED) : false);// TODO: 20/10/16 This?
+//              receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
                 receiveAddresses.add(receiveAddress);
             }
             setReceiveAddresses(receiveAddresses);
         }
 
         if (accountJsonObj.has(KEY_TAGS)) {
-            JSONArray tags = (JSONArray) accountJsonObj.get(KEY_TAGS);
+            JSONArray tags = accountJsonObj.getJSONArray(KEY_TAGS);
             if (tags != null && tags.length() > 0) {
                 List<String> accountTags = new ArrayList<String>();
                 for (int j = 0; j < tags.length(); j++) {
-                    accountTags.add((String) tags.get(j));
+                    accountTags.add(tags.getString(j));
                 }
                 setTags(accountTags);
             }
         }
 
         if (accountJsonObj.has(KEY_ADDRESS_LABELS)) {
-            JSONArray labels = (JSONArray) accountJsonObj.get(KEY_ADDRESS_LABELS);
+            JSONArray labels = accountJsonObj.getJSONArray(KEY_ADDRESS_LABELS);
             if (labels != null && labels.length() > 0) {
                 TreeMap<Integer, String> addressLabels = new TreeMap<Integer, String>();
                 for (int j = 0; j < labels.length(); j++) {
@@ -142,7 +142,7 @@ public class Account {
 
         if (accountJsonObj.has(KEY_CACHE)) {
 
-            JSONObject cacheObj = (JSONObject) accountJsonObj.get(KEY_CACHE);
+            JSONObject cacheObj = accountJsonObj.getJSONObject(KEY_CACHE);
 
             Cache cache = new Cache(cacheObj);
             setCache(cache);

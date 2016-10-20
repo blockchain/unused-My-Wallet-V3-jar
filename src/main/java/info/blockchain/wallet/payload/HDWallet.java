@@ -45,10 +45,10 @@ public class HDWallet {
     private void parseJson(JSONObject walletJsonObject){
 
         if (walletJsonObject.has(KEY_SEED_HEX)) {
-            setSeedHex((String) walletJsonObject.get(KEY_SEED_HEX));
+            setSeedHex(walletJsonObject.getString(KEY_SEED_HEX));
         }
         if (walletJsonObject.has(KEY_PASSPHRASE)) {
-            setPassphrase((String) walletJsonObject.get(KEY_PASSPHRASE));
+            setPassphrase(walletJsonObject.getString(KEY_PASSPHRASE));
         }
         if (walletJsonObject.has(KEY_MNEMONIC_VERIFIED)) {
             mnemonic_verified(walletJsonObject.getBoolean(KEY_MNEMONIC_VERIFIED));
@@ -56,10 +56,10 @@ public class HDWallet {
         if (walletJsonObject.has(KEY_DEFAULT_ACCOUNT_INDEX)) {
             int i;
             try {
-                String val = (String) walletJsonObject.get(KEY_DEFAULT_ACCOUNT_INDEX);
+                String val = walletJsonObject.getString(KEY_DEFAULT_ACCOUNT_INDEX);
                 i = Integer.parseInt(val);
             } catch (java.lang.ClassCastException cce) {
-                i = (Integer) walletJsonObject.get(KEY_DEFAULT_ACCOUNT_INDEX);
+                i = walletJsonObject.getInt(KEY_DEFAULT_ACCOUNT_INDEX);
             }
             setDefaultIndex(i);
         }

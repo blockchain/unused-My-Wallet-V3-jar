@@ -20,7 +20,7 @@ public class PaidTo {
 
         setEmail(t.isNull(KEY_EMAIL) ? null : t.optString(KEY_EMAIL, null));
         setMobile(t.isNull(KEY_MOBILE) ? null : t.optString(KEY_MOBILE, null));
-        setRedeemedAt(t.isNull(KEY_REDEEMED_AT) ? null : (Integer) t.get(KEY_REDEEMED_AT));
+        setRedeemedAt(t.isNull(KEY_REDEEMED_AT) ? null : t.getInt(KEY_REDEEMED_AT));
         setAddress(t.isNull(KEY_ADDRESS) ? null : t.optString(KEY_ADDRESS, null));
     }
 

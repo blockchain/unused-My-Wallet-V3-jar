@@ -339,17 +339,17 @@ public class Payload implements Serializable {
         JSONObject optionsJson = null;
         options = new Options();
         if (payloadJson.has(KEY_OPTION)) {
-            optionsJson = (JSONObject) payloadJson.get(KEY_OPTION);
+            optionsJson = payloadJson.getJSONObject(KEY_OPTION);
         }
         if (optionsJson == null && payloadJson.has(KEY_WALLET_OPTIONS)) {
-            optionsJson = (JSONObject) payloadJson.get(KEY_WALLET_OPTIONS);
+            optionsJson = payloadJson.getJSONObject(KEY_WALLET_OPTIONS);
         }
         if (optionsJson != null) {
             options = new Options(optionsJson);
         }
 
         if (payloadJson.has(KEY_TX_NOTES)) {
-            JSONObject txNotesJson = (JSONObject) payloadJson.get(KEY_TX_NOTES);
+            JSONObject txNotesJson = payloadJson.getJSONObject(KEY_TX_NOTES);
             transactionNotesMap = new HashMap<String, String>();
 
             for (Iterator keys = txNotesJson.keys(); keys.hasNext(); ) {
@@ -360,14 +360,14 @@ public class Payload implements Serializable {
         }
 
         if (payloadJson.has(KEY_TX_TAGS)) {
-            JSONObject txTagsJson = (JSONObject) payloadJson.get(KEY_TX_TAGS);
+            JSONObject txTagsJson = payloadJson.getJSONObject(KEY_TX_TAGS);
             transactionTagsMap = new HashMap<String, List<Integer>>();
             for (Iterator keys = txTagsJson.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
-                JSONArray tagsJsonArray = (JSONArray) txTagsJson.get(key);
+                JSONArray tagsJsonArray = txTagsJson.getJSONArray(key);
                 List<Integer> tags = new ArrayList<Integer>();
                 for (int i = 0; i < tagsJsonArray.length(); i++) {
-                    long val = (Long) tagsJsonArray.get(i);
+                    long val = tagsJsonArray.getLong(i);
                     tags.add((int) val);
                 }
                 transactionTagsMap.put(key, tags);
@@ -375,15 +375,15 @@ public class Payload implements Serializable {
         }
 
         if (payloadJson.has(KEY_TAG_NAMES)) {
-            JSONArray tagNamesJsonArray = (JSONArray) payloadJson.get(KEY_TAG_NAMES);
+            JSONArray tagNamesJsonArray = payloadJson.getJSONArray(KEY_TAG_NAMES);
             tagNamesMap = new HashMap<Integer, String>();
             for (int i = 0; i < tagNamesJsonArray.length(); i++) {
-                tagNamesMap.put(i, (String) tagNamesJsonArray.get(i));
+                tagNamesMap.put(i, tagNamesJsonArray.getString(i));
             }
         }
 
         if (payloadJson.has(KEY_PAIDTO)) {
-            JSONObject paidTo = (JSONObject) payloadJson.get(KEY_PAIDTO);
+            JSONObject paidTo = payloadJson.getJSONObject(KEY_PAIDTO);
             paidToMap = new HashMap<String, PaidTo>();
             for (Iterator keys = paidTo.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
@@ -395,7 +395,7 @@ public class Payload implements Serializable {
             isUpgraded = true;
 
             //Json accommodates multiple wallets. Use single wallet untill further notice
-            JSONArray walletJsonArray = (JSONArray) payloadJson.get(KEY_HD_WALLET);
+            JSONArray walletJsonArray = payloadJson.getJSONArray(KEY_HD_WALLET);
             JSONObject walletJsonObject = walletJsonArray.getJSONObject(0);
 
             HDWallet hdw = new HDWallet(walletJsonObject);
