@@ -378,13 +378,7 @@ public class Payload implements PayloadJsonKeys, Serializable {
             paidToMap = new HashMap<String, PaidTo>();
             for (Iterator keys = paidTo.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
-                PaidTo p = new PaidTo();
-                JSONObject t = (JSONObject) paidTo.get(key);
-                p.setEmail(t.isNull(KEY_PAIDTO__EMAIL) ? null : t.optString(KEY_PAIDTO__EMAIL, null));
-                p.setMobile(t.isNull(KEY_PAIDTO__MOBILE) ? null : t.optString(KEY_PAIDTO__MOBILE, null));
-                p.setRedeemedAt(t.isNull(KEY_PAIDTO__REDEEMED_AT) ? null : (Integer) t.get(KEY_PAIDTO__REDEEMED_AT));
-                p.setAddress(t.isNull(KEY_PAIDTO__ADDRESS) ? null : t.optString(KEY_PAIDTO__ADDRESS, null));
-                paidToMap.put(key, p);
+                paidToMap.put(key, new PaidTo(paidTo.getJSONObject(key)));
             }
         }
 
@@ -623,17 +617,10 @@ public class Payload implements PayloadJsonKeys, Serializable {
             JSONArray address_book = (JSONArray) payloadJson.get(KEY_PAYLOAD__ADDRESS_BOOK);
 
             if (address_book != null && address_book.length() > 0) {
-                JSONObject addr;
-                AddressBookEntry addr_entry;
+
                 for (int i = 0; i < address_book.length(); i++) {
-                    addr = (JSONObject) address_book.get(i);
 
-                    addr_entry = new AddressBookEntry(
-                            addr.has(KEY_ADDRESS_BOOK__ADDR) ? (String) addr.get(KEY_ADDRESS_BOOK__ADDR) : null,
-                            addr.has(KEY_ADDRESS_BOOK__LABEL) ? (String) addr.get(KEY_ADDRESS_BOOK__LABEL) : null
-                    );
-
-                    addressBookEntryList.add(addr_entry);
+                    addressBookEntryList.add(new AddressBookEntry(address_book.getJSONObject(i)));
                 }
             }
         }
@@ -729,12 +716,7 @@ public class Payload implements PayloadJsonKeys, Serializable {
         Set<String> pkeys = paidToMap.keySet();
         for (String key : pkeys) {
             PaidTo pto = paidToMap.get(key);
-            JSONObject pobj = new JSONObject();
-            pobj.put(KEY_PAIDTO__EMAIL, pto.getEmail());
-            pobj.put(KEY_PAIDTO__MOBILE, pto.getMobile());
-            pobj.put(KEY_PAIDTO__REDEEMED_AT, pto.getRedeemedAt());
-            pobj.put(KEY_PAIDTO__ADDRESS, pto.getAddress());
-            paidToObj.put(key, pobj);
+            paidToObj.put(key, pto.dumpJSON());
         }
         obj.put(KEY_PAYLOAD__PAIDTO, paidToObj);
 

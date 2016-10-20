@@ -3,14 +3,25 @@ package info.blockchain.wallet.payload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+// TODO: 20/10/16 This class doesn't seem to be used - We parse the data but never do anything with it
 public class PaidTo implements PayloadJsonKeys{
+
+    String KEY_PAIDTO__EMAIL = "email";
+    String KEY_PAIDTO__MOBILE = "mobile";
+    String KEY_PAIDTO__REDEEMED_AT = "redeemedAt";
+    String KEY_PAIDTO__ADDRESS = "address";
 
     private String strEmail = null;
     private String strMobile = null;
     private Integer strRedeemedAt = null;
     private String strAddress = null;
 
-    public PaidTo() {
+    public PaidTo(JSONObject t) {
+
+        setEmail(t.isNull(KEY_PAIDTO__EMAIL) ? null : t.optString(KEY_PAIDTO__EMAIL, null));
+        setMobile(t.isNull(KEY_PAIDTO__MOBILE) ? null : t.optString(KEY_PAIDTO__MOBILE, null));
+        setRedeemedAt(t.isNull(KEY_PAIDTO__REDEEMED_AT) ? null : (Integer) t.get(KEY_PAIDTO__REDEEMED_AT));
+        setAddress(t.isNull(KEY_PAIDTO__ADDRESS) ? null : t.optString(KEY_PAIDTO__ADDRESS, null));
     }
 
     public PaidTo(String email, String mobile, Integer redeemed, String address) {

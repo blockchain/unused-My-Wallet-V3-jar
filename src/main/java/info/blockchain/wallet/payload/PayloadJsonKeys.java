@@ -23,12 +23,6 @@ public interface PayloadJsonKeys {
     String KEY_PAYLOAD__LEGACY_KEYS = "keys";
     String KEY_PAYLOAD__ADDRESS_BOOK = "address_book";
 
-    //Paid to - Currently parsed but not used
-    String KEY_PAIDTO__EMAIL = "email";
-    String KEY_PAIDTO__MOBILE = "mobile";
-    String KEY_PAIDTO__REDEEMED_AT = "redeemedAt";
-    String KEY_PAIDTO__ADDRESS = "address";
-
     //HD wallet
     String KEY_HD_WALLET__SEED_HEX = "seed_hex";
     String KEY_HD_WALLET__PASSPHRASE = "passphrase";
@@ -62,8 +56,4 @@ public interface PayloadJsonKeys {
     String KEY_LEGACY_KEYS__RECEIVE_ADDRESS = "receive_addresses";
     String KEY_LEGACY_KEYS__TAGS = "tags";//?
     String KEY_LEGACY_KEYS__AMOUNT = "amount";
-
-    //Address Book
-    String KEY_ADDRESS_BOOK__LABEL = "label";
-    String KEY_ADDRESS_BOOK__ADDR = "addr";
 }

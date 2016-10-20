@@ -5,15 +5,18 @@ import org.json.JSONObject;
 
 public class AddressBookEntry implements PayloadJsonKeys{
 
+    String KEY_ADDRESS_BOOK__LABEL = "label";
+    String KEY_ADDRESS_BOOK__ADDR = "addr";
+
     private String strAddress = null;
     private String strLabel = null;
 
     public AddressBookEntry() {
     }
 
-    public AddressBookEntry(String address, String label) {
-        this.strAddress = address;
-        this.strLabel = label;
+    public AddressBookEntry(JSONObject addressObject) {
+        this.strAddress = addressObject.has(KEY_ADDRESS_BOOK__ADDR) ? (String) addressObject.get(KEY_ADDRESS_BOOK__ADDR) : null;
+        this.strLabel = addressObject.has(KEY_ADDRESS_BOOK__LABEL) ? (String) addressObject.get(KEY_ADDRESS_BOOK__LABEL) : null;
     }
 
     public String getAddress() {
