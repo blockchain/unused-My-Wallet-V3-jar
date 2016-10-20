@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImportedAccount extends Account {
+public class ImportedAccount extends Account implements PayloadJsonKeys{
 
     private List<LegacyAddress> legacyAddresses = null;
 
@@ -39,23 +39,23 @@ public class ImportedAccount extends Account {
 
         JSONObject obj = super.dumpJSON();
 
-        obj.put("archived", isArchived);
-        obj.put("change_addresses", idxChangeAddresses);
-        obj.put("label", strLabel == null ? "" : strLabel);
+        obj.put(KEY_HD_WALLET__ARCHIVED, isArchived);
+        obj.put(KEY_LEGACY_KEYS__CHANGE_ADDRESS, idxChangeAddresses);
+        obj.put(KEY_LEGACY_KEYS__LABEL, strLabel == null ? "" : strLabel);
 
         JSONArray receives = new JSONArray();
         for (ReceiveAddress receiveAddress : receiveAddresses) {
             receives.put(receiveAddress.dumpJSON());
         }
-        obj.put("receive_addresses", receives);
+        obj.put(KEY_LEGACY_KEYS__RECEIVE_ADDRESS, receives);
 
         JSONArray _tags = new JSONArray();
         for (String tag : tags) {
             _tags.put(tag);
         }
-        obj.put("tags", _tags);
+        obj.put(KEY_LEGACY_KEYS__TAGS, _tags);
 
-        obj.put("amount", amount);
+        obj.put(KEY_LEGACY_KEYS__AMOUNT, amount);
 
         return obj;
     }

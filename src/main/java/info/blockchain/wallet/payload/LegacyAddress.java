@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 import java.math.BigInteger;
 
-public class LegacyAddress {
+public class LegacyAddress implements PayloadJsonKeys{
 
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
@@ -202,36 +202,36 @@ public class LegacyAddress {
             return obj;
         }
 
-        obj.put("addr", strAddress);
+        obj.put(KEY_LEGACY_KEYS__ADDR, strAddress);
 
         if (!"".equals(strEncryptedKey)) {
-            obj.put("priv", strEncryptedKey);
+            obj.put(KEY_LEGACY_KEYS__PRIV, strEncryptedKey);
         } else {
-            obj.put("priv", JSONObject.NULL);
+            obj.put(KEY_LEGACY_KEYS__PRIV, JSONObject.NULL);
         }
 
-        obj.put("tag", tag);
+        obj.put(KEY_LEGACY_KEYS__TAG, tag);
 
         if (strLabel != null && !"".equals(strLabel)) {
-            obj.put("label", strLabel);
+            obj.put(KEY_LEGACY_KEYS__LABEL, strLabel);
         }
 
         if (created >= 0L) {
-            obj.put("created_time", created);
+            obj.put(KEY_LEGACY_KEYS__CREATED_TIME, created);
         } else {
-            obj.put("created_time", 0L);
+            obj.put(KEY_LEGACY_KEYS__CREATED_TIME, 0L);
         }
 
         if (!"".equals(strCreatedDeviceName)) {
-            obj.put("created_device_name", strCreatedDeviceName);
+            obj.put(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME, strCreatedDeviceName);
         } else {
-            obj.put("created_device_name", JSONObject.NULL);
+            obj.put(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME, JSONObject.NULL);
         }
 
         if (!"".equals(strCreatedDeviceVersion)) {
-            obj.put("created_device_version", strCreatedDeviceVersion);
+            obj.put(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION, strCreatedDeviceVersion);
         } else {
-            obj.put("created_device_version", JSONObject.NULL);
+            obj.put(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION, JSONObject.NULL);
         }
 
         return obj;

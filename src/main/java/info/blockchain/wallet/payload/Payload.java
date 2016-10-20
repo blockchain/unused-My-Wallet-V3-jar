@@ -40,50 +40,51 @@ import javax.annotation.Nonnull;
  * Blockchain HD wallet payload format. Such portions might be commented out in the other payload
  * member classes of this package.
  */
-public class Payload implements Serializable {
+public class Payload implements PayloadJsonKeys, Serializable {
 
-    private String strGuid = null;
-    private String strSharedKey = null;
-    private Options options = null;
-    private boolean doubleEncryption = false;
-    private String strDoublePWHash = null;
-    private List<LegacyAddress> legacyAddresses = null;
-    private List<AddressBookEntry> addressBookEntries = null;
-    private List<HDWallet> hdWallets = null;
-    private Map<String, String> notes = null;
-    private Map<String, List<Integer>> tags = null;
-    private Map<Integer, String> tag_names = null;
-    private Map<String, PaidTo> paidTo = null;
-    private Map<String, Integer> xpub2Account = null;
-    private Map<Integer, String> account2Xpub = null;
-
+    private String guid = null;
+    private String sharedKey = null;
+    private String secondPasswordHash = null;
     private String decryptedPayload = null;
-
+    private Options options = null;
+    private boolean isDoubleEncrypted = false;
     private boolean isUpgraded = false;
+    private List<LegacyAddress> legacyAddressList = null;
+    private List<AddressBookEntry> addressBookEntryList = null;
+    private List<HDWallet> hdWalletList = null;
+    private Map<String, String> transactionNotesMap = null;
+    private Map<String, List<Integer>> transactionTagsMap = null;
+    private Map<Integer, String> tagNamesMap = null;
+    private Map<String, PaidTo> paidToMap = null;
+
+    //Maps used to find xpub index and visa versa
+    private Map<String, Integer> xpubToAccountIndexMap = null;
+    private Map<Integer, String> accountIndexToXpubMap = null;
 
     public Payload() {
-        legacyAddresses = new ArrayList<LegacyAddress>();
-        addressBookEntries = new ArrayList<AddressBookEntry>();
-        hdWallets = new ArrayList<HDWallet>();
-        notes = new HashMap<String, String>();
-        tags = new HashMap<String, List<Integer>>();
-        tag_names = new HashMap<Integer, String>();
-        paidTo = new HashMap<String, PaidTo>();
+        legacyAddressList = new ArrayList<LegacyAddress>();
+        addressBookEntryList = new ArrayList<AddressBookEntry>();
+        hdWalletList = new ArrayList<HDWallet>();
+        transactionNotesMap = new HashMap<String, String>();
+        transactionTagsMap = new HashMap<String, List<Integer>>();
+        tagNamesMap = new HashMap<Integer, String>();
+        paidToMap = new HashMap<String, PaidTo>();
         options = new Options();
-        xpub2Account = new HashMap<String, Integer>();
-        account2Xpub = new HashMap<Integer, String>();
+        xpubToAccountIndexMap = new HashMap<String, Integer>();
+        accountIndexToXpubMap = new HashMap<Integer, String>();
     }
 
     public Payload(String decryptedPayload, int pdfdf2Iterations) throws PayloadException {
-        legacyAddresses = new ArrayList<LegacyAddress>();
-        addressBookEntries = new ArrayList<AddressBookEntry>();
-        hdWallets = new ArrayList<HDWallet>();
-        notes = new HashMap<String, String>();
-        tags = new HashMap<String, List<Integer>>();
-        tag_names = new HashMap<Integer, String>();
-        paidTo = new HashMap<String, PaidTo>();
-        xpub2Account = new HashMap<String, Integer>();
-        account2Xpub = new HashMap<Integer, String>();
+        legacyAddressList = new ArrayList<LegacyAddress>();
+        addressBookEntryList = new ArrayList<AddressBookEntry>();
+        hdWalletList = new ArrayList<HDWallet>();
+        transactionNotesMap = new HashMap<String, String>();
+        transactionTagsMap = new HashMap<String, List<Integer>>();
+        tagNamesMap = new HashMap<Integer, String>();
+        paidToMap = new HashMap<String, PaidTo>();
+
+        xpubToAccountIndexMap = new HashMap<String, Integer>();
+        accountIndexToXpubMap = new HashMap<Integer, String>();
 
         options = new Options();
         options.setIterations(pdfdf2Iterations);
@@ -109,19 +110,19 @@ public class Payload implements Serializable {
     }
 
     public String getGuid() {
-        return strGuid;
+        return guid;
     }
 
     public void setGuid(String guid) {
-        this.strGuid = guid;
+        this.guid = guid;
     }
 
     public String getSharedKey() {
-        return strSharedKey;
+        return sharedKey;
     }
 
     public void setSharedKey(String key) {
-        this.strSharedKey = key;
+        this.sharedKey = key;
     }
 
     public Options getOptions() {
@@ -132,14 +133,14 @@ public class Payload implements Serializable {
         this.options = options;
     }
 
-    public List<LegacyAddress> getLegacyAddresses() {
-        return legacyAddresses;
+    public List<LegacyAddress> getLegacyAddressList() {
+        return legacyAddressList;
     }
 
     public List<LegacyAddress> getLegacyAddresses(long tag) {
 
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        for (LegacyAddress legacyAddress : legacyAddressList) {
             if (legacyAddress.getTag() == tag) {
                 addrs.add(legacyAddress);
             }
@@ -151,7 +152,7 @@ public class Payload implements Serializable {
     public List<LegacyAddress> getActiveLegacyAddresses() {
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
 
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        for (LegacyAddress legacyAddress : legacyAddressList) {
             if (legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS &&
                     !legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress);
@@ -164,7 +165,7 @@ public class Payload implements Serializable {
     public List<String> getLegacyAddressStrings() {
 
         List<String> addrs = new ArrayList<String>();
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        for (LegacyAddress legacyAddress : legacyAddressList) {
             addrs.add(legacyAddress.getAddress());
         }
 
@@ -174,7 +175,7 @@ public class Payload implements Serializable {
     public List<String> getWatchOnlyAddressStrings() {
 
         List<String> addrs = new ArrayList<String>();
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        for (LegacyAddress legacyAddress : legacyAddressList) {
             if (legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress.getAddress());
             }
@@ -186,7 +187,7 @@ public class Payload implements Serializable {
     public List<String> getLegacyAddressStrings(long tag) {
 
         List<String> addrs = new ArrayList<String>();
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        for (LegacyAddress legacyAddress : legacyAddressList) {
             if (legacyAddress.getTag() == tag) {
                 addrs.add(legacyAddress.getAddress());
             }
@@ -198,7 +199,7 @@ public class Payload implements Serializable {
     public List<String> getActiveLegacyAddressStrings() {
         List<String> addrs = new ArrayList<String>();
 
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        for (LegacyAddress legacyAddress : legacyAddressList) {
             if (legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS) {
                 addrs.add(legacyAddress.getAddress());
             }
@@ -207,13 +208,13 @@ public class Payload implements Serializable {
         return addrs;
     }
 
-    public void setLegacyAddresses(List<LegacyAddress> legacyAddresses) {
-        this.legacyAddresses = legacyAddresses;
+    public void setLegacyAddressList(List<LegacyAddress> legacyAddressList) {
+        this.legacyAddressList = legacyAddressList;
     }
 
     public boolean containsLegacyAddress(String addr) {
 
-        for (LegacyAddress legacyAddress : legacyAddresses) {
+        for (LegacyAddress legacyAddress : legacyAddressList) {
             if (legacyAddress.getAddress().equals(addr)) {
                 return true;
             }
@@ -222,61 +223,61 @@ public class Payload implements Serializable {
         return false;
     }
 
-    public List<AddressBookEntry> getAddressBookEntries() {
-        return addressBookEntries;
+    public List<AddressBookEntry> getAddressBookEntryList() {
+        return addressBookEntryList;
     }
 
-    public void setAddressBookEntries(List<AddressBookEntry> addressBookEntries) {
-        this.addressBookEntries = addressBookEntries;
+    public void setAddressBookEntryList(List<AddressBookEntry> addressBookEntryList) {
+        this.addressBookEntryList = addressBookEntryList;
     }
 
     public Map<String, String> getNotes() {
-        return notes;
+        return transactionNotesMap;
     }
 
     public void setNotes(Map<String, String> notes) {
-        this.notes = notes;
+        this.transactionNotesMap = notes;
     }
 
     public Map<String, List<Integer>> getTags() {
-        return tags;
+        return transactionTagsMap;
     }
 
     public void setTags(Map<String, List<Integer>> tags) {
-        this.tags = tags;
+        this.transactionTagsMap = tags;
     }
 
-    public List<HDWallet> getHdWallets() {
-        return hdWallets;
+    public List<HDWallet> getHdWalletList() {
+        return hdWalletList;
     }
 
-    public void setHdWallets(List<HDWallet> hdWallets) {
-        this.hdWallets = hdWallets;
+    public void setHdWalletList(List<HDWallet> hdWalletList) {
+        this.hdWalletList = hdWalletList;
     }
 
     public HDWallet getHdWallet() {
-        return hdWallets.size() > 0 ? hdWallets.get(0) : null;
+        return hdWalletList.size() > 0 ? hdWalletList.get(0) : null;
     }
 
     public void setHdWallets(HDWallet hdWallet) {
-        this.hdWallets.clear();
-        this.hdWallets.add(hdWallet);
+        this.hdWalletList.clear();
+        this.hdWalletList.add(hdWallet);
     }
 
-    public Map<Integer, String> getTagNames() {
-        return tag_names;
+    public Map<Integer, String> getTagNamesMap() {
+        return tagNamesMap;
     }
 
-    public void setTagNames(Map<Integer, String> tag_names) {
-        this.tag_names = tag_names;
+    public void setTagNamesMap(Map<Integer, String> tag_names) {
+        this.tagNamesMap = tag_names;
     }
 
-    public Map<String, PaidTo> getPaidTo() {
-        return paidTo;
+    public Map<String, PaidTo> getPaidToMap() {
+        return paidToMap;
     }
 
-    public void setPaidTo(Map<String, PaidTo> paidTo) {
-        this.paidTo = paidTo;
+    public void setPaidToMap(Map<String, PaidTo> paidToMap) {
+        this.paidToMap = paidToMap;
     }
 
     public int getDoubleEncryptionPbkdf2Iterations() {
@@ -288,19 +289,19 @@ public class Payload implements Serializable {
     }
 
     public boolean isDoubleEncrypted() {
-        return doubleEncryption;
+        return isDoubleEncrypted;
     }
 
     public void setDoubleEncrypted(boolean encrypted2) {
-        this.doubleEncryption = encrypted2;
+        this.isDoubleEncrypted = encrypted2;
     }
 
     public String getDoublePasswordHash() {
-        return strDoublePWHash;
+        return secondPasswordHash;
     }
 
     public void setDoublePasswordHash(String hash2) {
-        this.strDoublePWHash = hash2;
+        this.secondPasswordHash = hash2;
     }
 
     /**
@@ -309,141 +310,137 @@ public class Payload implements Serializable {
      * <p>Parses the JSONObject passed as an argument and populates the payload instance with all
      * payload data for legacy and HD parts of the wallet.
      *
-     * @param jsonObject JSON object to be parsed
+     * @param payloadJson JSON object to be parsed
      */
-    public void parsePayload(@Nonnull JSONObject jsonObject) throws PayloadException {
+    public void parsePayload(@Nonnull JSONObject payloadJson) throws PayloadException {
 
-        strGuid = jsonObject.getString("guid");
+        guid = payloadJson.getString(KEY_PAYLOAD__GUID);
 
-        if (!jsonObject.has("sharedKey")) {
+        if (!payloadJson.has(KEY_PAYLOAD__SHAREDKEY)) {
             throw new PayloadException("Payload contains no shared key!");
         }
 
-        strSharedKey = jsonObject.getString("sharedKey");
-        doubleEncryption = jsonObject.has("double_encryption") ? (Boolean) jsonObject.get("double_encryption") : false;
-        strDoublePWHash = jsonObject.has("dpasswordhash") ? (String) jsonObject.get("dpasswordhash") : "";
+        sharedKey = payloadJson.getString(KEY_PAYLOAD__SHAREDKEY);
+        isDoubleEncrypted = payloadJson.has(KEY_PAYLOAD__DOUBLE_ENCRYPTION) ? payloadJson.getBoolean(KEY_PAYLOAD__DOUBLE_ENCRYPTION) : false;
+        secondPasswordHash = payloadJson.has(KEY_PAYLOAD__DPASSWORDHASH) ? payloadJson.getString(KEY_PAYLOAD__DPASSWORDHASH) : "";
 
         //
         // "options" or "wallet_options" ?
         //
-        JSONObject optionsObj = null;
+        JSONObject optionsJson = null;
         options = new Options();
-        if (jsonObject.has("options")) {
-            optionsObj = (JSONObject) jsonObject.get("options");
+        if (payloadJson.has(KEY_PAYLOAD__OPTION)) {
+            optionsJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__OPTION);
         }
-        if (optionsObj == null && jsonObject.has("wallet_options")) {
-            optionsObj = (JSONObject) jsonObject.get("wallet_options");
+        if (optionsJson == null && payloadJson.has(KEY_PAYLOAD__WALLET_OPTIONS)) {
+            optionsJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__WALLET_OPTIONS);
         }
-        if (optionsObj != null) {
-            if (optionsObj.has("pbkdf2_iterations")) {
-                int val = (Integer) optionsObj.get("pbkdf2_iterations");
+        if (optionsJson != null) {
+            if (optionsJson.has(KEY_OPTIONS__PBKDF2_ITERATIONS)) {
+                int val = (Integer) optionsJson.get(KEY_OPTIONS__PBKDF2_ITERATIONS);
                 options.setIterations(val);
             }
-            if (optionsObj.has("fee_per_kb")) {
-                long val = optionsObj.getLong("fee_per_kb");
+            if (optionsJson.has(KEY_OPTIONS__FEE_PER_KB)) {
+                long val = optionsJson.getLong(KEY_OPTIONS__FEE_PER_KB);
                 options.setFeePerKB(val);
             }
-            if (optionsObj.has("logout_time")) {
-                long val = optionsObj.getLong("logout_time");
+            if (optionsJson.has(KEY_OPTIONS__LOGOUT_TIME)) {
+                long val = optionsJson.getLong(KEY_OPTIONS__LOGOUT_TIME);
                 options.setLogoutTime(val);
             }
-            if (optionsObj.has("html5_notifications")) {
-                boolean val = optionsObj.getBoolean("html5_notifications");
+            if (optionsJson.has(KEY_OPTIONS__HTML5_NOTIFICATIONS)) {
+                boolean val = optionsJson.getBoolean(KEY_OPTIONS__HTML5_NOTIFICATIONS);
                 options.setHtml5Notifications(val);
             }
-            if (optionsObj.has("additional_seeds")) {
-                JSONArray seeds = (JSONArray) optionsObj.get("additional_seeds");
+            if (optionsJson.has(KEY_OPTIONS__ADDITIONAL_SEED)) {
+                JSONArray seedJsonArray = (JSONArray) optionsJson.get(KEY_OPTIONS__ADDITIONAL_SEED);
                 List<String> additionalSeeds = new ArrayList<String>();
-                for (int i = 0; i < seeds.length(); i++) {
-                    additionalSeeds.add((String) seeds.get(i));
+                for (int i = 0; i < seedJsonArray.length(); i++) {
+                    additionalSeeds.add((String) seedJsonArray.get(i));
                 }
                 options.setAdditionalSeeds(additionalSeeds);
             }
         }
 
-        if (jsonObject.has("tx_notes")) {
-            JSONObject tx_notes = (JSONObject) jsonObject.get("tx_notes");
-            Map<String, String> notes = new HashMap<String, String>();
+        if (payloadJson.has(KEY_PAYLOAD__TX_NOTES)) {
+            JSONObject txNotesJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__TX_NOTES);
+            transactionNotesMap = new HashMap<String, String>();
 
-            for (Iterator keys = tx_notes.keys(); keys.hasNext(); ) {
+            for (Iterator keys = txNotesJson.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
-                String note = (String) tx_notes.get(key);
-                notes.put(key, note);
+                String note = (String) txNotesJson.get(key);
+                transactionNotesMap.put(key, note);
             }
-            setNotes(notes);
         }
 
-        if (jsonObject.has("tx_tags")) {
-            JSONObject tx_tags = (JSONObject) jsonObject.get("tx_tags");
-            Map<String, List<Integer>> _tags = new HashMap<String, List<Integer>>();
-            for (Iterator keys = tx_tags.keys(); keys.hasNext(); ) {
+        if (payloadJson.has(KEY_PAYLOAD__TX_TAGS)) {
+            JSONObject txTagsJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__TX_TAGS);
+            transactionTagsMap = new HashMap<String, List<Integer>>();
+            for (Iterator keys = txTagsJson.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
-                JSONArray tagsObj = (JSONArray) tx_tags.get(key);
+                JSONArray tagsJsonArray = (JSONArray) txTagsJson.get(key);
                 List<Integer> tags = new ArrayList<Integer>();
-                for (int i = 0; i < tagsObj.length(); i++) {
-                    long val = (Long) tagsObj.get(i);
+                for (int i = 0; i < tagsJsonArray.length(); i++) {
+                    long val = (Long) tagsJsonArray.get(i);
                     tags.add((int) val);
                 }
-                _tags.put(key, tags);
+                transactionTagsMap.put(key, tags);
             }
-            setTags(_tags);
         }
 
-        if (jsonObject.has("tag_names")) {
-            JSONArray tnames = (JSONArray) jsonObject.get("tag_names");
-            Map<Integer, String> _tnames = new HashMap<Integer, String>();
-            for (int i = 0; i < tnames.length(); i++) {
-                _tnames.put(i, (String) tnames.get(i));
+        if (payloadJson.has(KEY_PAYLOAD__TAG_NAMES)) {
+            JSONArray tagNamesJsonArray = (JSONArray) payloadJson.get(KEY_PAYLOAD__TAG_NAMES);
+            tagNamesMap = new HashMap<Integer, String>();
+            for (int i = 0; i < tagNamesJsonArray.length(); i++) {
+                tagNamesMap.put(i, (String) tagNamesJsonArray.get(i));
             }
-            setTagNames(_tnames);
         }
 
-        if (jsonObject.has("paidTo")) {
-            JSONObject paid2 = (JSONObject) jsonObject.get("paidTo");
-            Map<String, PaidTo> pto = new HashMap<String, PaidTo>();
-            for (Iterator keys = paid2.keys(); keys.hasNext(); ) {
+        if (payloadJson.has(KEY_PAYLOAD__PAIDTO)) {
+            JSONObject paidTo = (JSONObject) payloadJson.get(KEY_PAYLOAD__PAIDTO);
+            paidToMap = new HashMap<String, PaidTo>();
+            for (Iterator keys = paidTo.keys(); keys.hasNext(); ) {
                 String key = (String) keys.next();
                 PaidTo p = new PaidTo();
-                JSONObject t = (JSONObject) paid2.get(key);
-                p.setEmail(t.isNull("email") ? null : t.optString("email", null));
-                p.setMobile(t.isNull("mobile") ? null : t.optString("mobile", null));
-                p.setRedeemedAt(t.isNull("redeemedAt") ? null : (Integer) t.get("redeemedAt"));
-                p.setAddress(t.isNull("address") ? null : t.optString("address", null));
-                pto.put(key, p);
+                JSONObject t = (JSONObject) paidTo.get(key);
+                p.setEmail(t.isNull(KEY_PAIDTO__EMAIL) ? null : t.optString(KEY_PAIDTO__EMAIL, null));
+                p.setMobile(t.isNull(KEY_PAIDTO__MOBILE) ? null : t.optString(KEY_PAIDTO__MOBILE, null));
+                p.setRedeemedAt(t.isNull(KEY_PAIDTO__REDEEMED_AT) ? null : (Integer) t.get(KEY_PAIDTO__REDEEMED_AT));
+                p.setAddress(t.isNull(KEY_PAIDTO__ADDRESS) ? null : t.optString(KEY_PAIDTO__ADDRESS, null));
+                paidToMap.put(key, p);
             }
-            setPaidTo(pto);
         }
 
-        if (jsonObject.has("hd_wallets")) {
+        if (payloadJson.has(KEY_PAYLOAD__HD_WALLET)) {
             isUpgraded = true;
 
-            JSONArray wallets = (JSONArray) jsonObject.get("hd_wallets");
+            JSONArray wallets = (JSONArray) payloadJson.get(KEY_PAYLOAD__HD_WALLET);
             JSONObject wallet = (JSONObject) wallets.get(0);
             HDWallet hdw = new HDWallet();
 
-            if (wallet.has("seed_hex")) {
-                hdw.setSeedHex((String) wallet.get("seed_hex"));
+            if (wallet.has(KEY_HD_WALLET__SEED_HEX)) {
+                hdw.setSeedHex((String) wallet.get(KEY_HD_WALLET__SEED_HEX));
             }
-            if (wallet.has("passphrase")) {
-                hdw.setPassphrase((String) wallet.get("passphrase"));
+            if (wallet.has(KEY_HD_WALLET__PASSPHRASE)) {
+                hdw.setPassphrase((String) wallet.get(KEY_HD_WALLET__PASSPHRASE));
             }
-            if (wallet.has("mnemonic_verified")) {
-                hdw.mnemonic_verified(wallet.getBoolean("mnemonic_verified"));
+            if (wallet.has(KEY_HD_WALLET__MNEMONIC_VERIFIED)) {
+                hdw.mnemonic_verified(wallet.getBoolean(KEY_HD_WALLET__MNEMONIC_VERIFIED));
             }
-            if (wallet.has("default_account_idx")) {
+            if (wallet.has(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX)) {
                 int i;
                 try {
-                    String val = (String) wallet.get("default_account_idx");
+                    String val = (String) wallet.get(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX);
                     i = Integer.parseInt(val);
                 } catch (java.lang.ClassCastException cce) {
-                    i = (Integer) wallet.get("default_account_idx");
+                    i = (Integer) wallet.get(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX);
                 }
                 hdw.setDefaultIndex(i);
             }
 
-            if (((JSONObject) wallets.get(0)).has("accounts")) {
+            if (((JSONObject) wallets.get(0)).has(KEY_HD_WALLET__ACCOUNTS)) {
 
-                JSONArray accounts = (JSONArray) ((JSONObject) wallets.get(0)).get("accounts");
+                JSONArray accounts = (JSONArray) ((JSONObject) wallets.get(0)).get(KEY_HD_WALLET__ACCOUNTS);
                 if (accounts != null && accounts.length() > 0) {
                     List<Account> walletAccounts = new ArrayList<Account>();
                     for (int i = 0; i < accounts.length(); i++) {
@@ -451,48 +448,48 @@ public class Payload implements Serializable {
                         JSONObject accountObj = (JSONObject) accounts.get(i);
                         Account account = new Account();
                         account.setRealIdx(i);
-                        account.setArchived(accountObj.has("archived") ? (Boolean) accountObj.get("archived") : false);
-                        if (accountObj.has("archived") && (Boolean) accountObj.get("archived")) {
+                        account.setArchived(accountObj.has(KEY_HD_WALLET__ARCHIVED) ? (Boolean) accountObj.get(KEY_HD_WALLET__ARCHIVED) : false);
+                        if (accountObj.has(KEY_HD_WALLET__ARCHIVED) && (Boolean) accountObj.get(KEY_HD_WALLET__ARCHIVED)) {
                             account.setArchived(true);
                         } else {
                             account.setArchived(false);
                         }
-                        account.setLabel(accountObj.has("label") ? (String) accountObj.get("label") : "");
-                        if (accountObj.has("xpub") && (accountObj.getString("xpub")) != null && (accountObj.getString("xpub")).length() > 0) {
-                            account.setXpub((String) accountObj.get("xpub"));
-                            xpub2Account.put((String) accountObj.get("xpub"), i);
-                            account2Xpub.put(i, (String) accountObj.get("xpub"));
+                        account.setLabel(accountObj.has(KEY_HD_WALLET__LABEL) ? (String) accountObj.get(KEY_HD_WALLET__LABEL) : "");
+                        if (accountObj.has(KEY_HD_WALLET__XPUB) && (accountObj.getString(KEY_HD_WALLET__XPUB)) != null && (accountObj.getString(KEY_HD_WALLET__XPUB)).length() > 0) {
+                            account.setXpub((String) accountObj.get(KEY_HD_WALLET__XPUB));
+                            xpubToAccountIndexMap.put((String) accountObj.get(KEY_HD_WALLET__XPUB), i);
+                            accountIndexToXpubMap.put(i, (String) accountObj.get(KEY_HD_WALLET__XPUB));
                         } else {
                             continue;
                         }
-                        if (accountObj.has("xpriv") && (accountObj.getString("xpriv")) != null && (accountObj.getString("xpriv")).length() > 0) {
-                            account.setXpriv((String) accountObj.get("xpriv"));
+                        if (accountObj.has(KEY_HD_WALLET__XPRIV) && (accountObj.getString(KEY_HD_WALLET__XPRIV)) != null && (accountObj.getString(KEY_HD_WALLET__XPRIV)).length() > 0) {
+                            account.setXpriv((String) accountObj.get(KEY_HD_WALLET__XPRIV));
                         } else {
                             continue;
                         }
 
-                        if (accountObj.has("receive_addresses")) {
-                            JSONArray receives = (JSONArray) accountObj.get("receive_addresses");
+                        if (accountObj.has(KEY_HD_WALLET__RECEIVE_ADDRESSES)) {
+                            JSONArray receives = (JSONArray) accountObj.get(KEY_HD_WALLET__RECEIVE_ADDRESSES);
                             List<ReceiveAddress> receiveAddresses = new ArrayList<ReceiveAddress>();
                             for (int j = 0; j < receives.length(); j++) {
                                 JSONObject receiveObj = (JSONObject) receives.get(j);
                                 ReceiveAddress receiveAddress = new ReceiveAddress();
-                                if (receiveObj.has("index")) {
-                                    int val = (Integer) receiveObj.get("index");
+                                if (receiveObj.has(KEY_HD_WALLET__INDEX)) {
+                                    int val = (Integer) receiveObj.get(KEY_HD_WALLET__INDEX);
                                     receiveAddress.setIndex(val);
                                 }
-                                receiveAddress.setLabel(receiveObj.has("label") ? (String) receiveObj.get("label") : "");
-                                receiveAddress.setAmount(receiveObj.has("amount") ? receiveObj.getLong("amount") : 0L);
-                                receiveAddress.setPaid(receiveObj.has("paid") ? receiveObj.getLong("paid") : 0L);
-//                                    receiveAddress.setCancelled(receiveObj.has("cancelled") ? (Boolean)receiveObj.get("cancelled") : false);
+                                receiveAddress.setLabel(receiveObj.has(KEY_HD_WALLET__LABEL) ? (String) receiveObj.get(KEY_HD_WALLET__LABEL) : "");
+                                receiveAddress.setAmount(receiveObj.has(KEY_HD_WALLET__AMOUNT) ? receiveObj.getLong(KEY_HD_WALLET__AMOUNT) : 0L);
+                                receiveAddress.setPaid(receiveObj.has(KEY_HD_WALLET__PAID) ? receiveObj.getLong(KEY_HD_WALLET__PAID) : 0L);
+//                                    receiveAddress.setCancelled(receiveObj.has(KEY_HD_WALLET__CANCELLED) ? (Boolean)receiveObj.get(KEY_HD_WALLET__CANCELLED) : false);
 //                                    receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
                                 receiveAddresses.add(receiveAddress);
                             }
                             account.setReceiveAddresses(receiveAddresses);
                         }
 
-                        if (accountObj.has("tags")) {
-                            JSONArray tags = (JSONArray) accountObj.get("tags");
+                        if (accountObj.has(KEY_HD_WALLET__TAGS)) {
+                            JSONArray tags = (JSONArray) accountObj.get(KEY_HD_WALLET__TAGS);
                             if (tags != null && tags.length() > 0) {
                                 List<String> accountTags = new ArrayList<String>();
                                 for (int j = 0; j < tags.length(); j++) {
@@ -502,30 +499,30 @@ public class Payload implements Serializable {
                             }
                         }
 
-                        if (accountObj.has("address_labels")) {
-                            JSONArray labels = (JSONArray) accountObj.get("address_labels");
+                        if (accountObj.has(KEY_HD_WALLET__ADDRESS_LABELS)) {
+                            JSONArray labels = (JSONArray) accountObj.get(KEY_HD_WALLET__ADDRESS_LABELS);
                             if (labels != null && labels.length() > 0) {
                                 TreeMap<Integer, String> addressLabels = new TreeMap<Integer, String>();
                                 for (int j = 0; j < labels.length(); j++) {
                                     JSONObject obj = labels.getJSONObject(j);
-                                    addressLabels.put(obj.getInt("index"), obj.getString("label"));
+                                    addressLabels.put(obj.getInt(KEY_HD_WALLET__INDEX), obj.getString(KEY_HD_WALLET__LABEL));
                                 }
                                 account.setAddressLabels(addressLabels);
                             }
                         }
 
-                        if (accountObj.has("cache")) {
+                        if (accountObj.has(KEY_HD_WALLET__CACHE)) {
 
-                            JSONObject cacheObj = (JSONObject) accountObj.get("cache");
+                            JSONObject cacheObj = (JSONObject) accountObj.get(KEY_HD_WALLET__CACHE);
 
                             Cache cache = new Cache();
 
-                            if (cacheObj.has("receiveAccount")) {
-                                cache.setReceiveAccount((String) cacheObj.get("receiveAccount"));
+                            if (cacheObj.has(KEY_HD_WALLET__RECEIVE_ACCOUNT)) {
+                                cache.setReceiveAccount((String) cacheObj.get(KEY_HD_WALLET__RECEIVE_ACCOUNT));
                             }
 
-                            if (cacheObj.has("changeAccount")) {
-                                cache.setChangeAccount((String) cacheObj.get("changeAccount"));
+                            if (cacheObj.has(KEY_HD_WALLET__CHANGE_ACCOUNT)) {
+                                cache.setChangeAccount((String) cacheObj.get(KEY_HD_WALLET__CHANGE_ACCOUNT));
                             }
 
                             account.setCache(cache);
@@ -540,13 +537,13 @@ public class Payload implements Serializable {
                 }
             }
 
-            hdWallets.add(hdw);
+            hdWalletList.add(hdw);
         } else {
             isUpgraded = false;
         }
 
-        if (jsonObject.has("keys")) {
-            JSONArray keys = (JSONArray) jsonObject.get("keys");
+        if (payloadJson.has(KEY_PAYLOAD__LEGACY_KEYS)) {
+            JSONArray keys = (JSONArray) payloadJson.get(KEY_PAYLOAD__LEGACY_KEYS);
             if (keys != null && keys.length() > 0) {
                 List<String> seenAddrs = new ArrayList<String>();
                 String addr;
@@ -555,7 +552,7 @@ public class Payload implements Serializable {
                 for (int i = 0; i < keys.length(); i++) {
                     key = (JSONObject) keys.get(i);
 
-                    addr = (String) key.get("addr");
+                    addr = (String) key.get(KEY_LEGACY_KEYS__ADDR);
 
                     if (addr != null && !addr.equals("null") && !seenAddrs.contains(addr)) {
 
@@ -568,8 +565,8 @@ public class Payload implements Serializable {
                         boolean watchOnly = false;
 
                         try {
-                            if (key.has("priv")) {
-                                priv = key.getString("priv");
+                            if (key.has(KEY_LEGACY_KEYS__PRIV)) {
+                                priv = key.getString(KEY_LEGACY_KEYS__PRIV);
                             }
                             if (priv == null || priv.equals("null")) {
                                 priv = "";
@@ -582,9 +579,9 @@ public class Payload implements Serializable {
                             watchOnly = true;
                         }
 
-                        if (key.has("created_time")) {
+                        if (key.has(KEY_LEGACY_KEYS__CREATED_TIME)) {
                             try {
-                                created_time = key.getLong("created_time");
+                                created_time = key.getLong(KEY_LEGACY_KEYS__CREATED_TIME);
                             } catch (Exception e) {
                                 created_time = 0L;
                             }
@@ -593,8 +590,8 @@ public class Payload implements Serializable {
                         }
 
                         try {
-                            if (key.has("label")) {
-                                label = key.getString("label");
+                            if (key.has(KEY_LEGACY_KEYS__LABEL)) {
+                                label = key.getString(KEY_LEGACY_KEYS__LABEL);
                             }
                             if (label == null || label.equals("null")) {
                                 label = "";
@@ -603,9 +600,9 @@ public class Payload implements Serializable {
                             label = "";
                         }
 
-                        if (key.has("tag")) {
+                        if (key.has(KEY_LEGACY_KEYS__TAG)) {
                             try {
-                                tag = key.getLong("tag");
+                                tag = key.getLong(KEY_LEGACY_KEYS__TAG);
                             } catch (Exception e) {
                                 tag = 0L;
                             }
@@ -614,8 +611,8 @@ public class Payload implements Serializable {
                         }
 
                         try {
-                            if (key.has("created_device_name")) {
-                                created_device_name = key.getString("created_device_name");
+                            if (key.has(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME)) {
+                                created_device_name = key.getString(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME);
                             }
                             if (created_device_name == null || created_device_name.equals("null")) {
                                 created_device_name = "";
@@ -625,8 +622,8 @@ public class Payload implements Serializable {
                         }
 
                         try {
-                            if (key.has("created_device_version")) {
-                                created_device_version = key.getString("created_device_version");
+                            if (key.has(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION)) {
+                                created_device_version = key.getString(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION);
                             }
                             if (created_device_version == null || created_device_version.equals("null")) {
                                 created_device_version = "";
@@ -636,7 +633,7 @@ public class Payload implements Serializable {
                         }
 
                         legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
-                        legacyAddresses.add(legacyAddress);
+                        legacyAddressList.add(legacyAddress);
                         seenAddrs.add(addr);
 
                     }
@@ -644,9 +641,9 @@ public class Payload implements Serializable {
             }
         }
 
-        if (jsonObject.has("address_book")) {
+        if (payloadJson.has(KEY_PAYLOAD__ADDRESS_BOOK)) {
 
-            JSONArray address_book = (JSONArray) jsonObject.get("address_book");
+            JSONArray address_book = (JSONArray) payloadJson.get(KEY_PAYLOAD__ADDRESS_BOOK);
 
             if (address_book != null && address_book.length() > 0) {
                 JSONObject addr;
@@ -655,23 +652,23 @@ public class Payload implements Serializable {
                     addr = (JSONObject) address_book.get(i);
 
                     addr_entry = new AddressBookEntry(
-                            addr.has("addr") ? (String) addr.get("addr") : null,
-                            addr.has("label") ? (String) addr.get("label") : null
+                            addr.has(KEY_ADDRESS_BOOK__ADDR) ? (String) addr.get(KEY_ADDRESS_BOOK__ADDR) : null,
+                            addr.has(KEY_ADDRESS_BOOK__LABEL) ? (String) addr.get(KEY_ADDRESS_BOOK__LABEL) : null
                     );
 
-                    addressBookEntries.add(addr_entry);
+                    addressBookEntryList.add(addr_entry);
                 }
             }
         }
 
     }
 
-    public Map<String, Integer> getXpub2Account() {
-        return xpub2Account;
+    public Map<String, Integer> getXpubToAccountIndexMap() {
+        return xpubToAccountIndexMap;
     }
 
-    public Map<Integer, String> getAccount2Xpub() {
-        return account2Xpub;
+    public Map<Integer, String> getAccountIndexToXpubMap() {
+        return accountIndexToXpubMap;
     }
 
     public boolean isUpgraded() {
@@ -692,77 +689,77 @@ public class Payload implements Serializable {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("guid", getGuid());
-        obj.put("sharedKey", getSharedKey());
-        obj.put("pbkdf2_iterations", this.getDoubleEncryptionPbkdf2Iterations());
+        obj.put(KEY_PAYLOAD__GUID, getGuid());
+        obj.put(KEY_PAYLOAD__SHAREDKEY, getSharedKey());
+        obj.put(KEY_PAYLOAD__PBKDF2_ITERATIONS, this.getDoubleEncryptionPbkdf2Iterations());
 
-        if (doubleEncryption) {
-            obj.put("double_encryption", true);
-            obj.put("dpasswordhash", strDoublePWHash);
+        if (isDoubleEncrypted) {
+            obj.put(KEY_PAYLOAD__DOUBLE_ENCRYPTION, true);
+            obj.put(KEY_PAYLOAD__DPASSWORDHASH, secondPasswordHash);
         }
 
         if (isUpgraded) {
             JSONArray wallets = new JSONArray();
-            for (HDWallet wallet : hdWallets) {
+            for (HDWallet wallet : hdWalletList) {
                 wallets.put(wallet.dumpJSON());
             }
-            obj.put("hd_wallets", wallets);
+            obj.put(KEY_PAYLOAD__HD_WALLET, wallets);
         }
 
         JSONArray keys = new JSONArray();
-        for (LegacyAddress addr : legacyAddresses) {
+        for (LegacyAddress addr : legacyAddressList) {
             JSONObject key = addr.dumpJSON();
             keys.put(key);
         }
-        obj.put("keys", keys);
+        obj.put(KEY_PAYLOAD__LEGACY_KEYS, keys);
 
         JSONObject optionsObj = options.dumpJSON();
-        obj.put("options", optionsObj);
+        obj.put(KEY_PAYLOAD__OPTION, optionsObj);
 
         JSONArray address_book = new JSONArray();
-        for (AddressBookEntry addr : addressBookEntries) {
+        for (AddressBookEntry addr : addressBookEntryList) {
             address_book.put(addr.dumpJSON());
         }
-        obj.put("address_book", address_book);
+        obj.put(KEY_PAYLOAD__ADDRESS_BOOK, address_book);
 
         JSONObject notesObj = new JSONObject();
-        Set<String> nkeys = notes.keySet();
+        Set<String> nkeys = transactionNotesMap.keySet();
         for (String key : nkeys) {
-            notesObj.put(key, notes.get(key));
+            notesObj.put(key, transactionNotesMap.get(key));
         }
-        obj.put("tx_notes", notesObj);
+        obj.put(KEY_PAYLOAD__TX_NOTES, notesObj);
 
         JSONObject tagsObj = new JSONObject();
-        Set<String> tkeys = tags.keySet();
+        Set<String> tkeys = transactionTagsMap.keySet();
         for (String key : tkeys) {
-            List<Integer> ints = tags.get(key);
+            List<Integer> ints = transactionTagsMap.get(key);
             JSONArray tints = new JSONArray();
             for (Integer i : ints) {
                 tints.put(i);
             }
             tagsObj.put(key, tints);
         }
-        obj.put("tx_tags", tagsObj);
+        obj.put(KEY_PAYLOAD__TX_TAGS, tagsObj);
 
         JSONArray tnames = new JSONArray();
-        Set<Integer> skeys = tag_names.keySet();
+        Set<Integer> skeys = tagNamesMap.keySet();
         for (Integer key : skeys) {
-            tnames.put(key, tag_names.get(key));
+            tnames.put(key, tagNamesMap.get(key));
         }
-        obj.put("tag_names", tnames);
+        obj.put(KEY_PAYLOAD__TAG_NAMES, tnames);
 
         JSONObject paidToObj = new JSONObject();
-        Set<String> pkeys = paidTo.keySet();
+        Set<String> pkeys = paidToMap.keySet();
         for (String key : pkeys) {
-            PaidTo pto = paidTo.get(key);
+            PaidTo pto = paidToMap.get(key);
             JSONObject pobj = new JSONObject();
-            pobj.put("email", pto.getEmail());
-            pobj.put("mobile", pto.getMobile());
-            pobj.put("redeemedAt", pto.getRedeemedAt());
-            pobj.put("address", pto.getAddress());
+            pobj.put(KEY_PAIDTO__EMAIL, pto.getEmail());
+            pobj.put(KEY_PAIDTO__MOBILE, pto.getMobile());
+            pobj.put(KEY_PAIDTO__REDEEMED_AT, pto.getRedeemedAt());
+            pobj.put(KEY_PAIDTO__ADDRESS, pto.getAddress());
             paidToObj.put(key, pobj);
         }
-        obj.put("paidTo", paidToObj);
+        obj.put(KEY_PAYLOAD__PAIDTO, paidToObj);
 
         return obj;
     }
@@ -784,9 +781,9 @@ public class Payload implements Serializable {
 
         String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
         JSONObject rootObj = new JSONObject();
-        rootObj.put("version", version);
-        rootObj.put("pbkdf2_iterations", iterations);
-        rootObj.put("payload", payloadEncrypted);
+        rootObj.put(KEY_WALLET_VERSION, version);
+        rootObj.put(KEY_WALLET_PBKDF2_ITERATIONS, iterations);
+        rootObj.put(KEY_WALLET_PAYLOAD, payloadEncrypted);
 
         String checkSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
 

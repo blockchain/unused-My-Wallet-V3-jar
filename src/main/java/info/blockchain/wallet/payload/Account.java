@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-public class Account {
+public class Account implements PayloadJsonKeys{
 
     protected boolean isArchived = false;
     protected int idxChangeAddresses = 0;
@@ -200,12 +200,12 @@ public class Account {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("archived", isArchived);
+        obj.put(KEY_HD_WALLET__ARCHIVED, isArchived);
 //        obj.put("change_addresses", nbChangeAddresses);
 //        obj.put("receive_addresses_count", nbReceiveAddresses);
-        obj.put("label", strLabel == null ? "" : strLabel);
-        obj.put("xpub", strXpub == null ? "" : strXpub);
-        obj.put("xpriv", strXpriv == null ? "" : strXpriv);
+        obj.put(KEY_HD_WALLET__LABEL, strLabel == null ? "" : strLabel);
+        obj.put(KEY_HD_WALLET__XPUB, strXpub == null ? "" : strXpub);
+        obj.put(KEY_HD_WALLET__XPRIV, strXpriv == null ? "" : strXpriv);
 
         JSONArray receives = new JSONArray();
         for (ReceiveAddress receiveAddress : receiveAddresses) {
@@ -230,15 +230,15 @@ public class Account {
         for (Integer key : addressLabels.keySet()) {
             JSONObject labelObj = new JSONObject();
 
-            labelObj.put("index", key);
-            labelObj.put("label", addressLabels.get(key));
+            labelObj.put(KEY_HD_WALLET__INDEX, key);
+            labelObj.put(KEY_HD_WALLET__LABEL, addressLabels.get(key));
 
             labels.put(labelObj);
         }
-        obj.put("address_labels", labels);
+        obj.put(KEY_HD_WALLET__ADDRESS_LABELS, labels);
 
         JSONObject _cache = cache.dumpJSON();
-        obj.put("cache", _cache);
+        obj.put(KEY_HD_WALLET__CACHE, _cache);
 
         return obj;
     }

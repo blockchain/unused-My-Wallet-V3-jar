@@ -3,7 +3,7 @@ package info.blockchain.wallet.payload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class AddressBookEntry {
+public class AddressBookEntry implements PayloadJsonKeys{
 
     private String strAddress = null;
     private String strLabel = null;
@@ -36,8 +36,8 @@ public class AddressBookEntry {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("addr", strAddress);
-        obj.put("label", strLabel == null ? "" : strLabel);
+        obj.put(KEY_ADDRESS_BOOK__ADDR, strAddress);
+        obj.put(KEY_ADDRESS_BOOK__LABEL, strLabel == null ? "" : strLabel);
 
         return obj;
     }

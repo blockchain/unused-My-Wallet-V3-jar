@@ -21,8 +21,8 @@ public class PayloadTest {
         assertThat(payload.getDoublePasswordHash(), is(PayloadTestData.DPASSWORD_HASH));
         assertThat(payload.isDoubleEncrypted(), is(Boolean.parseBoolean(PayloadTestData.DOUBLE_ENCRYPTED)));
         assertThat(payload.getHdWallet().getAccounts().size(), is(PayloadTestData.TOTAL_ACCOUNTS));
-        assertThat(payload.getLegacyAddresses().size(), is(PayloadTestData.TOTAL_LEGACY_ADDRESSES));
-        assertThat(payload.getAddressBookEntries().size(), is(PayloadTestData.TOTAL_ADDRESSBOOK_ENTRIES));
+        assertThat(payload.getLegacyAddressList().size(), is(PayloadTestData.TOTAL_LEGACY_ADDRESSES));
+        assertThat(payload.getAddressBookEntryList().size(), is(PayloadTestData.TOTAL_ADDRESSBOOK_ENTRIES));
 
         assertThat(payload.getOptions().isHtml5Notifications(), is(Boolean.parseBoolean(PayloadTestData.HTML_NOTIFICATIONS)));
         assertThat(payload.getOptions().getIterations(), is(PayloadTestData.PDKDF2_ITERATIONS));
@@ -45,17 +45,17 @@ public class PayloadTest {
 
         assertThat(payload.getHdWallet().getSeedHex(), is(PayloadTestData.HD_WALLET_SEED_HEX));
 
-        assertThat(payload.getLegacyAddresses().get(0).getLabel(), is(PayloadTestData.ADDRESS_1_LABEL));
-        assertThat(payload.getLegacyAddresses().get(1).getLabel(), is(""));
+        assertThat(payload.getLegacyAddressList().get(0).getLabel(), is(PayloadTestData.ADDRESS_1_LABEL));
+        assertThat(payload.getLegacyAddressList().get(1).getLabel(), is(""));
 
-        assertThat(payload.getLegacyAddresses().get(0).getEncryptedKey(), is(PayloadTestData.ADDRESS_1_KEY));
-        assertThat(payload.getLegacyAddresses().get(1).getEncryptedKey(), is(PayloadTestData.ADDRESS_2_KEY));
+        assertThat(payload.getLegacyAddressList().get(0).getEncryptedKey(), is(PayloadTestData.ADDRESS_1_KEY));
+        assertThat(payload.getLegacyAddressList().get(1).getEncryptedKey(), is(PayloadTestData.ADDRESS_2_KEY));
 
-        assertThat(payload.getLegacyAddresses().get(0).getAddress(), is(PayloadTestData.ADDRESS_1_ADDRESS));
-        assertThat(payload.getLegacyAddresses().get(1).getAddress(), is(PayloadTestData.ADDRESS_2_ADDRESS));
+        assertThat(payload.getLegacyAddressList().get(0).getAddress(), is(PayloadTestData.ADDRESS_1_ADDRESS));
+        assertThat(payload.getLegacyAddressList().get(1).getAddress(), is(PayloadTestData.ADDRESS_2_ADDRESS));
 
-        assertThat(payload.getAddressBookEntries().get(0).getLabel(), is(PayloadTestData.ADDRESSBOOK_1_LABEL));
-        assertThat(payload.getAddressBookEntries().get(0).getAddress(), is(PayloadTestData.ADDRESSBOOK_1_ADDRESS));
+        assertThat(payload.getAddressBookEntryList().get(0).getLabel(), is(PayloadTestData.ADDRESSBOOK_1_LABEL));
+        assertThat(payload.getAddressBookEntryList().get(0).getAddress(), is(PayloadTestData.ADDRESSBOOK_1_ADDRESS));
     }
 
     /**

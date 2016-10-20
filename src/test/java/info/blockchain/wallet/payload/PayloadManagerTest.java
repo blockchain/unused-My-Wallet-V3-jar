@@ -155,7 +155,7 @@ public class PayloadManagerTest {
         //Create HD
         String label = "Account 1";
         Payload payload = payloadManager.createHDWallet("password", label);
-        payload.setHdWallets(new ArrayList<HDWallet>());//remove hd
+        payload.setHdWalletList(new ArrayList<HDWallet>());//remove hd
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
         LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", null);
@@ -202,7 +202,7 @@ public class PayloadManagerTest {
         //Create HD
         String label = "Account 1";
         Payload payload = payloadManager.createHDWallet("password", label);
-        payload.setHdWallets(new ArrayList<HDWallet>());//remove hd
+        payload.setHdWalletList(new ArrayList<HDWallet>());//remove hd
 
         //Set second password
         String hash = DoubleEncryptionFactory.getInstance().getHash(payload.getSharedKey(), secondPassword, payload.getDoubleEncryptionPbkdf2Iterations());

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class HDWallet {
+public class HDWallet implements PayloadJsonKeys{
 
     private String strSeedHex = null;
     private List<Account> accounts = null;
@@ -76,10 +76,10 @@ public class HDWallet {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("seed_hex", strSeedHex);
-        obj.put("passphrase", strPassphrase);
-        obj.put("default_account_idx", default_account_idx);
-        obj.put("mnemonic_verified", mnemonic_verified);
+        obj.put(KEY_HD_WALLET__SEED_HEX, strSeedHex);
+        obj.put(KEY_HD_WALLET__PASSPHRASE, strPassphrase);
+        obj.put(KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX, default_account_idx);
+        obj.put(KEY_HD_WALLET__MNEMONIC_VERIFIED, mnemonic_verified);
 
         JSONArray accs = new JSONArray();
         for (Account account : accounts) {
@@ -87,7 +87,7 @@ public class HDWallet {
                 accs.put(account.dumpJSON());
             }
         }
-        obj.put("accounts", accs);
+        obj.put(KEY_HD_WALLET__ACCOUNTS, accs);
 
         return obj;
     }

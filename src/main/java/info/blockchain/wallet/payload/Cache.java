@@ -3,7 +3,7 @@ package info.blockchain.wallet.payload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Cache {
+public class Cache implements PayloadJsonKeys{
 
     protected String receiveAccount = null;
     protected String changeAccount = null;
@@ -31,8 +31,8 @@ public class Cache {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("receiveAccount", receiveAccount == null ? "" : receiveAccount);
-        obj.put("changeAccount", changeAccount == null ? "" : changeAccount);
+        obj.put(KEY_HD_WALLET__RECEIVE_ACCOUNT, receiveAccount == null ? "" : receiveAccount);
+        obj.put(KEY_HD_WALLET__CHANGE_ACCOUNT, changeAccount == null ? "" : changeAccount);
 
         return obj;
     }

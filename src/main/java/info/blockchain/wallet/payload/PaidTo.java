@@ -3,7 +3,7 @@ package info.blockchain.wallet.payload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class PaidTo {
+public class PaidTo implements PayloadJsonKeys{
 
     private String strEmail = null;
     private String strMobile = null;
@@ -57,24 +57,24 @@ public class PaidTo {
         JSONObject obj = new JSONObject();
 
         if ((strEmail != null) && !"".equals(strEmail)) {
-            obj.put("email", strEmail);
+            obj.put(KEY_PAIDTO__EMAIL, strEmail);
         } else {
-            obj.put("email", JSONObject.NULL);
+            obj.put(KEY_PAIDTO__EMAIL, JSONObject.NULL);
         }
         if ((strMobile != null) && !"".equals(strMobile)) {
-            obj.put("mobile", strMobile);
+            obj.put(KEY_PAIDTO__MOBILE, strMobile);
         } else {
-            obj.put("mobile", JSONObject.NULL);
+            obj.put(KEY_PAIDTO__MOBILE, JSONObject.NULL);
         }
         if ((strRedeemedAt != null)) {
-            obj.put("redeemedAt", strRedeemedAt);
+            obj.put(KEY_PAIDTO__REDEEMED_AT, strRedeemedAt);
         } else {
-            obj.put("redeemedAt", JSONObject.NULL);
+            obj.put(KEY_PAIDTO__REDEEMED_AT, JSONObject.NULL);
         }
         if ((strAddress != null) && !"".equals(strAddress)) {
-            obj.put("address", strAddress);
+            obj.put(KEY_PAIDTO__ADDRESS, strAddress);
         } else {
-            obj.put("address", JSONObject.NULL);
+            obj.put(KEY_PAIDTO__ADDRESS, JSONObject.NULL);
         }
         return obj;
     }

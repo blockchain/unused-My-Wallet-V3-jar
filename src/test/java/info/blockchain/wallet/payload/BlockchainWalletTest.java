@@ -100,8 +100,8 @@ public class BlockchainWalletTest {
             for (int j = 0; j < keys.length(); j++) {
                 JSONObject json = keys.getJSONObject(j);
 
-                assertThat(bciWallet.getPayload().getLegacyAddresses().get(j).getEncryptedKey(), is(json.getString("priv")));
-                assertThat(bciWallet.getPayload().getLegacyAddresses().get(j).getAddress(), is(json.getString("addr")));
+                assertThat(bciWallet.getPayload().getLegacyAddressList().get(j).getEncryptedKey(), is(json.getString("priv")));
+                assertThat(bciWallet.getPayload().getLegacyAddressList().get(j).getAddress(), is(json.getString("addr")));
             }
         }
     }

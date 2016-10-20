@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Options {
+public class Options implements PayloadJsonKeys{
 
     private int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2;
     private long fee_per_kb = 10000L;
@@ -72,17 +72,17 @@ public class Options {
 
         JSONObject obj = new JSONObject();
 
-        obj.put("pbkdf2_iterations", iterations);
-        obj.put("fee_per_kb", fee_per_kb);
-        obj.put("logout_time", logout_time);
-        obj.put("enable_multiple_accounts", enable_multiple_accounts);
-        obj.put("html5_notifications", html5_notifications);
+        obj.put(KEY_OPTIONS__PBKDF2_ITERATIONS, iterations);
+        obj.put(KEY_OPTIONS__FEE_PER_KB, fee_per_kb);
+        obj.put(KEY_OPTIONS__LOGOUT_TIME, logout_time);
+        obj.put(KEY_OPTIONS__ENABLE_MULTIPLE_ACCOUNTS, enable_multiple_accounts);
+        obj.put(KEY_OPTIONS__HTML5_NOTIFICATIONS, html5_notifications);
 
         JSONArray seeds = new JSONArray();
         for (String seed : additionalSeeds) {
             seeds.put(seed);
         }
-//        obj.put("additional_seeds", seeds);
+//        obj.put(KEY_OPTIONS__ADDITIONAL_SEED, seeds);
 
         return obj;
     }

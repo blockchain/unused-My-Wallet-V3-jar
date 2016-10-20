@@ -222,7 +222,7 @@ public class PayloadManager {
             new WalletPayload().savePayloadToServer(method,
                     payload.getGuid(),
                     payload.getSharedKey(),
-                    payload.getLegacyAddresses(),
+                    payload.getLegacyAddressList(),
                     encryptedPayload,
                     bciWallet.isSyncPubkeys(),
                     newPayloadChecksum,
@@ -430,7 +430,7 @@ public class PayloadManager {
         }
 
         // Balance for legacy addresses
-        if (payload.getLegacyAddresses().size() > 0) {
+        if (payload.getLegacyAddressList().size() > 0) {
             List<String> legacyAddresses = payload.getLegacyAddressStrings();
             String[] addresses = legacyAddresses.toArray(new String[legacyAddresses.size()]);
             MultiAddrFactory.getInstance().refreshLegacyAddressData(addresses, false);
@@ -557,9 +557,9 @@ public class PayloadManager {
     }
 
     public boolean addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
-        List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddresses();
+        List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddressList();
         updatedLegacyAddresses.add(legacyAddress);
-        payload.setLegacyAddresses(updatedLegacyAddresses);
+        payload.setLegacyAddressList(updatedLegacyAddresses);
         return savePayloadToServer();
     }
 
