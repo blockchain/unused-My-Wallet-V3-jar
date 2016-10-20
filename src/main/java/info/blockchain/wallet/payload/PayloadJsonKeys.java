@@ -22,26 +22,11 @@ public interface PayloadJsonKeys {
     String KEY_PAYLOAD__HD_WALLET = "hd_wallets";
     String KEY_PAYLOAD__LEGACY_KEYS = "keys";
     String KEY_PAYLOAD__ADDRESS_BOOK = "address_book";
+    String KEY_PAYLOAD__ACCOUNTS = "accounts";
 
     //HD wallet
     String KEY_HD_WALLET__SEED_HEX = "seed_hex";
     String KEY_HD_WALLET__PASSPHRASE = "passphrase";
     String KEY_HD_WALLET__MNEMONIC_VERIFIED = "mnemonic_verified";
     String KEY_HD_WALLET__DEFAULT_ACCOUNT_INDEX = "default_account_idx";
-    String KEY_HD_WALLET__ACCOUNTS = "accounts";
-    String KEY_HD_WALLET__ARCHIVED = "archived";
-    String KEY_HD_WALLET__LABEL = "label";
-    String KEY_HD_WALLET__XPUB = "xpub";
-    String KEY_HD_WALLET__XPRIV = "xpriv";
-    String KEY_HD_WALLET__RECEIVE_ADDRESSES = "receive_addresses";
-    String KEY_HD_WALLET__INDEX = "index";
-    String KEY_HD_WALLET__AMOUNT = "amount";
-    String KEY_HD_WALLET__PAID = "paid";
-    String KEY_HD_WALLET__CANCELLED = "cancelled";
-    String KEY_HD_WALLET__TAGS = "tags";
-    String KEY_HD_WALLET__ADDRESS_LABELS = "address_labels";
-    String KEY_HD_WALLET__CACHE = "cache";
-    String KEY_HD_WALLET__RECEIVE_ACCOUNT = "receiveAccount";
-    String KEY_HD_WALLET__CHANGE_ACCOUNT = "changeAccount";
-
 }

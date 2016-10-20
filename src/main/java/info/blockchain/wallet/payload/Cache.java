@@ -5,6 +5,10 @@ import org.json.JSONObject;
 
 public class Cache implements PayloadJsonKeys{
 
+    // TODO: 20/10/16 Simplify these keys again after refactor
+    String KEY_HD_WALLET__RECEIVE_ACCOUNT = "receiveAccount";
+    String KEY_HD_WALLET__CHANGE_ACCOUNT = "changeAccount";
+
     protected String receiveAccount = null;
     protected String changeAccount = null;
 

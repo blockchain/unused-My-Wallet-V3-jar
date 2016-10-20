@@ -87,7 +87,7 @@ public class HDWallet implements PayloadJsonKeys{
                 accs.put(account.dumpJSON());
             }
         }
-        obj.put(KEY_HD_WALLET__ACCOUNTS, accs);
+        obj.put(KEY_PAYLOAD__ACCOUNTS, accs);
 
         return obj;
     }

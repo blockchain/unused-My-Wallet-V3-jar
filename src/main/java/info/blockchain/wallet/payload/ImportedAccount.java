@@ -9,6 +9,19 @@ import java.util.List;
 
 public class ImportedAccount extends Account implements PayloadJsonKeys{
 
+    // TODO: 20/10/16 Simplify these keys again after refactor
+    String KEY_LEGACY_KEYS__ADDR = "addr";
+    String KEY_LEGACY_KEYS__PRIV = "priv";
+    String KEY_LEGACY_KEYS__LABEL = "label";
+    String KEY_LEGACY_KEYS__CREATED_TIME = "created_time";
+    String KEY_LEGACY_KEYS__TAG = "tag";
+    String KEY_LEGACY_KEYS__CREATED_DEVICE_NAME = "created_device_name";
+    String KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION = "created_device_version";
+    String KEY_LEGACY_KEYS__CHANGE_ADDRESS = "change_addresses";//?
+    String KEY_LEGACY_KEYS__RECEIVE_ADDRESS = "receive_addresses";
+    String KEY_LEGACY_KEYS__TAGS = "tags";//?
+    String KEY_LEGACY_KEYS__AMOUNT = "amount";
+
     private List<LegacyAddress> legacyAddresses = null;
 
     public ImportedAccount() {

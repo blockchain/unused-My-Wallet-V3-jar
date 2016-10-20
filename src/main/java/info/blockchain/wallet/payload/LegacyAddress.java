@@ -17,7 +17,7 @@ public class LegacyAddress implements PayloadJsonKeys{
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
 
-    //Legacy Addresses
+    // TODO: 20/10/16 Simplify these keys again after refactor
     String KEY_LEGACY_KEYS__ADDR = "addr";
     String KEY_LEGACY_KEYS__PRIV = "priv";
     String KEY_LEGACY_KEYS__LABEL = "label";

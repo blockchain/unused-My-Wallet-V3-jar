@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 public class AddressBookEntry implements PayloadJsonKeys{
 
+    // TODO: 20/10/16 Simplify these keys again after refactor
     String KEY_ADDRESS_BOOK__LABEL = "label";
     String KEY_ADDRESS_BOOK__ADDR = "addr";
 

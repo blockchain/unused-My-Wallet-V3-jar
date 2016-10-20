@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 
@@ -409,98 +408,26 @@ public class Payload implements PayloadJsonKeys, Serializable {
                 hdw.setDefaultIndex(i);
             }
 
-            if (((JSONObject) wallets.get(0)).has(KEY_HD_WALLET__ACCOUNTS)) {
+            if (((JSONObject) wallets.get(0)).has(KEY_PAYLOAD__ACCOUNTS)) {
 
-                JSONArray accounts = (JSONArray) ((JSONObject) wallets.get(0)).get(KEY_HD_WALLET__ACCOUNTS);
+                JSONArray accounts = (JSONArray) ((JSONObject) wallets.get(0)).get(KEY_PAYLOAD__ACCOUNTS);
                 if (accounts != null && accounts.length() > 0) {
                     List<Account> walletAccounts = new ArrayList<Account>();
                     for (int i = 0; i < accounts.length(); i++) {
 
-                        JSONObject accountObj = (JSONObject) accounts.get(i);
-                        Account account = new Account();
-                        account.setRealIdx(i);
-                        account.setArchived(accountObj.has(KEY_HD_WALLET__ARCHIVED) ? (Boolean) accountObj.get(KEY_HD_WALLET__ARCHIVED) : false);
-                        if (accountObj.has(KEY_HD_WALLET__ARCHIVED) && (Boolean) accountObj.get(KEY_HD_WALLET__ARCHIVED)) {
-                            account.setArchived(true);
-                        } else {
-                            account.setArchived(false);
-                        }
-                        account.setLabel(accountObj.has(KEY_HD_WALLET__LABEL) ? (String) accountObj.get(KEY_HD_WALLET__LABEL) : "");
-                        if (accountObj.has(KEY_HD_WALLET__XPUB) && (accountObj.getString(KEY_HD_WALLET__XPUB)) != null && (accountObj.getString(KEY_HD_WALLET__XPUB)).length() > 0) {
-                            account.setXpub((String) accountObj.get(KEY_HD_WALLET__XPUB));
-                            xpubToAccountIndexMap.put((String) accountObj.get(KEY_HD_WALLET__XPUB), i);
-                            accountIndexToXpubMap.put(i, (String) accountObj.get(KEY_HD_WALLET__XPUB));
-                        } else {
-                            continue;
-                        }
-                        if (accountObj.has(KEY_HD_WALLET__XPRIV) && (accountObj.getString(KEY_HD_WALLET__XPRIV)) != null && (accountObj.getString(KEY_HD_WALLET__XPRIV)).length() > 0) {
-                            account.setXpriv((String) accountObj.get(KEY_HD_WALLET__XPRIV));
-                        } else {
-                            continue;
-                        }
+                        JSONObject accountJsonObj = accounts.getJSONObject(i);
 
-                        if (accountObj.has(KEY_HD_WALLET__RECEIVE_ADDRESSES)) {
-                            JSONArray receives = (JSONArray) accountObj.get(KEY_HD_WALLET__RECEIVE_ADDRESSES);
-                            List<ReceiveAddress> receiveAddresses = new ArrayList<ReceiveAddress>();
-                            for (int j = 0; j < receives.length(); j++) {
-                                JSONObject receiveObj = (JSONObject) receives.get(j);
-                                ReceiveAddress receiveAddress = new ReceiveAddress();
-                                if (receiveObj.has(KEY_HD_WALLET__INDEX)) {
-                                    int val = (Integer) receiveObj.get(KEY_HD_WALLET__INDEX);
-                                    receiveAddress.setIndex(val);
-                                }
-                                receiveAddress.setLabel(receiveObj.has(KEY_HD_WALLET__LABEL) ? (String) receiveObj.get(KEY_HD_WALLET__LABEL) : "");
-                                receiveAddress.setAmount(receiveObj.has(KEY_HD_WALLET__AMOUNT) ? receiveObj.getLong(KEY_HD_WALLET__AMOUNT) : 0L);
-                                receiveAddress.setPaid(receiveObj.has(KEY_HD_WALLET__PAID) ? receiveObj.getLong(KEY_HD_WALLET__PAID) : 0L);
-//                                    receiveAddress.setCancelled(receiveObj.has(KEY_HD_WALLET__CANCELLED) ? (Boolean)receiveObj.get(KEY_HD_WALLET__CANCELLED) : false);
-//                                    receiveAddress.setComplete(receiveAddress.getPaid() >= receiveAddress.getAmount());
-                                receiveAddresses.add(receiveAddress);
-                            }
-                            account.setReceiveAddresses(receiveAddresses);
-                        }
-
-                        if (accountObj.has(KEY_HD_WALLET__TAGS)) {
-                            JSONArray tags = (JSONArray) accountObj.get(KEY_HD_WALLET__TAGS);
-                            if (tags != null && tags.length() > 0) {
-                                List<String> accountTags = new ArrayList<String>();
-                                for (int j = 0; j < tags.length(); j++) {
-                                    accountTags.add((String) tags.get(j));
-                                }
-                                account.setTags(accountTags);
-                            }
-                        }
-
-                        if (accountObj.has(KEY_HD_WALLET__ADDRESS_LABELS)) {
-                            JSONArray labels = (JSONArray) accountObj.get(KEY_HD_WALLET__ADDRESS_LABELS);
-                            if (labels != null && labels.length() > 0) {
-                                TreeMap<Integer, String> addressLabels = new TreeMap<Integer, String>();
-                                for (int j = 0; j < labels.length(); j++) {
-                                    JSONObject obj = labels.getJSONObject(j);
-                                    addressLabels.put(obj.getInt(KEY_HD_WALLET__INDEX), obj.getString(KEY_HD_WALLET__LABEL));
-                                }
-                                account.setAddressLabels(addressLabels);
-                            }
-                        }
-
-                        if (accountObj.has(KEY_HD_WALLET__CACHE)) {
-
-                            JSONObject cacheObj = (JSONObject) accountObj.get(KEY_HD_WALLET__CACHE);
-
-                            Cache cache = new Cache();
-
-                            if (cacheObj.has(KEY_HD_WALLET__RECEIVE_ACCOUNT)) {
-                                cache.setReceiveAccount((String) cacheObj.get(KEY_HD_WALLET__RECEIVE_ACCOUNT));
-                            }
-
-                            if (cacheObj.has(KEY_HD_WALLET__CHANGE_ACCOUNT)) {
-                                cache.setChangeAccount((String) cacheObj.get(KEY_HD_WALLET__CHANGE_ACCOUNT));
-                            }
-
-                            account.setCache(cache);
-
+                        Account account = null;
+                        try {
+                            account = new Account(accountJsonObj, i);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
 
                         walletAccounts.add(account);
+
+                        xpubToAccountIndexMap.put(account.getXpub(), i);
+                        accountIndexToXpubMap.put(i, account.getXpub());
                     }
 
                     hdw.setAccounts(walletAccounts);

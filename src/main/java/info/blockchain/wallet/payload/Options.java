@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Options {
 
+    // TODO: 20/10/16 Simplify these keys again after refactor
     String KEY_OPTIONS__FEE_PER_KB = "fee_per_kb";
     String KEY_OPTIONS__LOGOUT_TIME = "logout_time";
     String KEY_OPTIONS__HTML5_NOTIFICATIONS = "html5_notifications";
