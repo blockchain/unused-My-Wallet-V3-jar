@@ -514,99 +514,19 @@ public class Payload implements PayloadJsonKeys, Serializable {
         }
 
         if (payloadJson.has(KEY_PAYLOAD__LEGACY_KEYS)) {
-            JSONArray keys = (JSONArray) payloadJson.get(KEY_PAYLOAD__LEGACY_KEYS);
+
+            List<String> seenAddrs = new ArrayList<String>();
+            JSONArray keys = payloadJson.getJSONArray(KEY_PAYLOAD__LEGACY_KEYS);
+
             if (keys != null && keys.length() > 0) {
-                List<String> seenAddrs = new ArrayList<String>();
-                String addr;
-                JSONObject key;
-                LegacyAddress legacyAddress;
+
                 for (int i = 0; i < keys.length(); i++) {
-                    key = (JSONObject) keys.get(i);
 
-                    addr = (String) key.get(KEY_LEGACY_KEYS__ADDR);
+                    LegacyAddress legacyAddress = new LegacyAddress(keys.getJSONObject(i));
 
-                    if (addr != null && !addr.equals("null") && !seenAddrs.contains(addr)) {
-
-                        String priv = null;
-                        long created_time;
-                        String label = null;
-                        long tag;
-                        String created_device_name = null;
-                        String created_device_version = null;
-                        boolean watchOnly = false;
-
-                        try {
-                            if (key.has(KEY_LEGACY_KEYS__PRIV)) {
-                                priv = key.getString(KEY_LEGACY_KEYS__PRIV);
-                            }
-                            if (priv == null || priv.equals("null")) {
-                                priv = "";
-                            }
-                        } catch (Exception e) {
-                            priv = "";
-                        }
-
-                        if (priv.length() == 0) {
-                            watchOnly = true;
-                        }
-
-                        if (key.has(KEY_LEGACY_KEYS__CREATED_TIME)) {
-                            try {
-                                created_time = key.getLong(KEY_LEGACY_KEYS__CREATED_TIME);
-                            } catch (Exception e) {
-                                created_time = 0L;
-                            }
-                        } else {
-                            created_time = 0L;
-                        }
-
-                        try {
-                            if (key.has(KEY_LEGACY_KEYS__LABEL)) {
-                                label = key.getString(KEY_LEGACY_KEYS__LABEL);
-                            }
-                            if (label == null || label.equals("null")) {
-                                label = "";
-                            }
-                        } catch (Exception e) {
-                            label = "";
-                        }
-
-                        if (key.has(KEY_LEGACY_KEYS__TAG)) {
-                            try {
-                                tag = key.getLong(KEY_LEGACY_KEYS__TAG);
-                            } catch (Exception e) {
-                                tag = 0L;
-                            }
-                        } else {
-                            tag = 0L;
-                        }
-
-                        try {
-                            if (key.has(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME)) {
-                                created_device_name = key.getString(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME);
-                            }
-                            if (created_device_name == null || created_device_name.equals("null")) {
-                                created_device_name = "";
-                            }
-                        } catch (Exception e) {
-                            created_device_name = "";
-                        }
-
-                        try {
-                            if (key.has(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION)) {
-                                created_device_version = key.getString(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION);
-                            }
-                            if (created_device_version == null || created_device_version.equals("null")) {
-                                created_device_version = "";
-                            }
-                        } catch (Exception e) {
-                            created_device_version = "";
-                        }
-
-                        legacyAddress = new LegacyAddress(priv, created_time, addr, label, tag, created_device_name, created_device_version, watchOnly);
+                    if (!seenAddrs.contains(legacyAddress.getAddress())) {
                         legacyAddressList.add(legacyAddress);
-                        seenAddrs.add(addr);
-
+                        seenAddrs.add(legacyAddress.getAddress());
                     }
                 }
             }
@@ -614,7 +534,7 @@ public class Payload implements PayloadJsonKeys, Serializable {
 
         if (payloadJson.has(KEY_PAYLOAD__ADDRESS_BOOK)) {
 
-            JSONArray address_book = (JSONArray) payloadJson.get(KEY_PAYLOAD__ADDRESS_BOOK);
+            JSONArray address_book = payloadJson.getJSONArray(KEY_PAYLOAD__ADDRESS_BOOK);
 
             if (address_book != null && address_book.length() > 0) {
 

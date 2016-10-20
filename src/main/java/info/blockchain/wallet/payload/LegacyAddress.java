@@ -17,6 +17,19 @@ public class LegacyAddress implements PayloadJsonKeys{
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
 
+    //Legacy Addresses
+    String KEY_LEGACY_KEYS__ADDR = "addr";
+    String KEY_LEGACY_KEYS__PRIV = "priv";
+    String KEY_LEGACY_KEYS__LABEL = "label";
+    String KEY_LEGACY_KEYS__CREATED_TIME = "created_time";
+    String KEY_LEGACY_KEYS__TAG = "tag";
+    String KEY_LEGACY_KEYS__CREATED_DEVICE_NAME = "created_device_name";
+    String KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION = "created_device_version";
+    String KEY_LEGACY_KEYS__CHANGE_ADDRESS = "change_addresses";//?
+    String KEY_LEGACY_KEYS__RECEIVE_ADDRESS = "receive_addresses";
+    String KEY_LEGACY_KEYS__TAGS = "tags";//?
+    String KEY_LEGACY_KEYS__AMOUNT = "amount";
+
     private String strEncryptedKey = null;
     private long created = 0L;
     private String strAddress = null;
@@ -56,6 +69,87 @@ public class LegacyAddress implements PayloadJsonKeys{
         this.strAddress = address;
         this.strLabel = "";
         this.tag = 0L;
+    }
+
+    public LegacyAddress(JSONObject key) {
+
+        parseJson(key);
+    }
+
+    private void parseJson(JSONObject key) {
+
+        String strAddress = key.getString(KEY_LEGACY_KEYS__ADDR);
+
+        if (strAddress != null && !strAddress.equals("null")) {
+
+            try {
+                if (key.has(KEY_LEGACY_KEYS__PRIV)) {
+                    strEncryptedKey = key.getString(KEY_LEGACY_KEYS__PRIV);
+                }
+                if (strEncryptedKey == null || strEncryptedKey.equals("null")) {
+                    strEncryptedKey = "";// TODO: 20/10/16 Don't treat this as empty string
+                }
+            } catch (Exception e) {
+                strEncryptedKey = "";
+            }
+
+            if (strEncryptedKey.length() == 0) {
+                watchOnly = true;
+            }
+
+            if (key.has(KEY_LEGACY_KEYS__CREATED_TIME)) {
+                try {
+                    created = key.getLong(KEY_LEGACY_KEYS__CREATED_TIME);
+                } catch (Exception e) {
+                    created = 0L;
+                }
+            } else {
+                created = 0L;
+            }
+
+            try {
+                if (key.has(KEY_LEGACY_KEYS__LABEL)) {
+                    strLabel = key.getString(KEY_LEGACY_KEYS__LABEL);
+                }
+                if (strLabel == null || strLabel.equals("null")) {
+                    strLabel = "";// TODO: 20/10/16 Don't treat this as empty string
+                }
+            } catch (Exception e) {
+                strLabel = "";
+            }
+
+            if (key.has(KEY_LEGACY_KEYS__TAG)) {
+                try {
+                    tag = key.getLong(KEY_LEGACY_KEYS__TAG);
+                } catch (Exception e) {
+                    tag = 0L;
+                }
+            } else {
+                tag = 0L;
+            }
+
+            try {
+                if (key.has(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME)) {
+                    strCreatedDeviceName = key.getString(KEY_LEGACY_KEYS__CREATED_DEVICE_NAME);
+                }
+                if (strCreatedDeviceName == null || strCreatedDeviceName.equals("null")) {
+                    strCreatedDeviceName = "";// TODO: 20/10/16 Don't treat this as empty string
+                }
+            } catch (Exception e) {
+                strCreatedDeviceName = "";
+            }
+
+            try {
+                if (key.has(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION)) {
+                    strCreatedDeviceVersion = key.getString(KEY_LEGACY_KEYS__CREATED_DEVICE_VERSION);
+                }
+                if (strCreatedDeviceVersion == null || strCreatedDeviceVersion.equals("null")) {
+                    strCreatedDeviceVersion = "";// TODO: 20/10/16 Don't treat this as empty string
+                }
+            } catch (Exception e) {
+                strCreatedDeviceVersion = "";
+            }
+        }
     }
 
     public String getEncryptedKey() {
