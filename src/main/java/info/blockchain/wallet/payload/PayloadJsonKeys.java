@@ -23,14 +23,6 @@ public interface PayloadJsonKeys {
     String KEY_PAYLOAD__LEGACY_KEYS = "keys";
     String KEY_PAYLOAD__ADDRESS_BOOK = "address_book";
 
-    //Options - Found in unencrypted payload
-    String KEY_OPTIONS__FEE_PER_KB = "fee_per_kb";
-    String KEY_OPTIONS__LOGOUT_TIME = "logout_time";
-    String KEY_OPTIONS__HTML5_NOTIFICATIONS = "html5_notifications";
-    String KEY_OPTIONS__ADDITIONAL_SEED = "additional_seeds";
-    String KEY_OPTIONS__PBKDF2_ITERATIONS = "pbkdf2_iterations";
-    String KEY_OPTIONS__ENABLE_MULTIPLE_ACCOUNTS = "enable_multiple_accounts";//?
-
     //Paid to - Currently parsed but not used
     String KEY_PAIDTO__EMAIL = "email";
     String KEY_PAIDTO__MOBILE = "mobile";

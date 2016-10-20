@@ -336,30 +336,7 @@ public class Payload implements PayloadJsonKeys, Serializable {
             optionsJson = (JSONObject) payloadJson.get(KEY_PAYLOAD__WALLET_OPTIONS);
         }
         if (optionsJson != null) {
-            if (optionsJson.has(KEY_OPTIONS__PBKDF2_ITERATIONS)) {
-                int val = (Integer) optionsJson.get(KEY_OPTIONS__PBKDF2_ITERATIONS);
-                options.setIterations(val);
-            }
-            if (optionsJson.has(KEY_OPTIONS__FEE_PER_KB)) {
-                long val = optionsJson.getLong(KEY_OPTIONS__FEE_PER_KB);
-                options.setFeePerKB(val);
-            }
-            if (optionsJson.has(KEY_OPTIONS__LOGOUT_TIME)) {
-                long val = optionsJson.getLong(KEY_OPTIONS__LOGOUT_TIME);
-                options.setLogoutTime(val);
-            }
-            if (optionsJson.has(KEY_OPTIONS__HTML5_NOTIFICATIONS)) {
-                boolean val = optionsJson.getBoolean(KEY_OPTIONS__HTML5_NOTIFICATIONS);
-                options.setHtml5Notifications(val);
-            }
-            if (optionsJson.has(KEY_OPTIONS__ADDITIONAL_SEED)) {
-                JSONArray seedJsonArray = (JSONArray) optionsJson.get(KEY_OPTIONS__ADDITIONAL_SEED);
-                List<String> additionalSeeds = new ArrayList<String>();
-                for (int i = 0; i < seedJsonArray.length(); i++) {
-                    additionalSeeds.add((String) seedJsonArray.get(i));
-                }
-                options.setAdditionalSeeds(additionalSeeds);
-            }
+            options = new Options(optionsJson);
         }
 
         if (payloadJson.has(KEY_PAYLOAD__TX_NOTES)) {

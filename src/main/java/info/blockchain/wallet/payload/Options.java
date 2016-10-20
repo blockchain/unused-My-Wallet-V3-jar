@@ -7,7 +7,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Options implements PayloadJsonKeys{
+public class Options {
+
+    String KEY_OPTIONS__FEE_PER_KB = "fee_per_kb";
+    String KEY_OPTIONS__LOGOUT_TIME = "logout_time";
+    String KEY_OPTIONS__HTML5_NOTIFICATIONS = "html5_notifications";
+    String KEY_OPTIONS__ADDITIONAL_SEED = "additional_seeds";
+    String KEY_OPTIONS__PBKDF2_ITERATIONS = "pbkdf2_iterations";
+    String KEY_OPTIONS__ENABLE_MULTIPLE_ACCOUNTS = "enable_multiple_accounts";// TODO: 20/10/16 Why is this written to payload?
 
     private int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2;
     private long fee_per_kb = 10000L;
@@ -18,6 +25,35 @@ public class Options implements PayloadJsonKeys{
 
     public Options() {
         additionalSeeds = new ArrayList<String>();
+    }
+
+    public Options(JSONObject optionsJson) {
+
+        if (optionsJson.has(KEY_OPTIONS__PBKDF2_ITERATIONS)) {
+            int val = optionsJson.getInt(KEY_OPTIONS__PBKDF2_ITERATIONS);
+            setIterations(val);
+        }
+        if (optionsJson.has(KEY_OPTIONS__FEE_PER_KB)) {
+            long val = optionsJson.getLong(KEY_OPTIONS__FEE_PER_KB);
+            setFeePerKB(val);
+        }
+        if (optionsJson.has(KEY_OPTIONS__LOGOUT_TIME)) {
+            long val = optionsJson.getLong(KEY_OPTIONS__LOGOUT_TIME);
+            setLogoutTime(val);
+        }
+        if (optionsJson.has(KEY_OPTIONS__HTML5_NOTIFICATIONS)) {
+            boolean val = optionsJson.getBoolean(KEY_OPTIONS__HTML5_NOTIFICATIONS);
+            setHtml5Notifications(val);
+        }
+        if (optionsJson.has(KEY_OPTIONS__ADDITIONAL_SEED)) {
+            JSONArray seedJsonArray = optionsJson.getJSONArray(KEY_OPTIONS__ADDITIONAL_SEED);
+            List<String> additionalSeeds = new ArrayList<String>();
+            for (int i = 0; i < seedJsonArray.length(); i++) {
+                additionalSeeds.add(seedJsonArray.getString(i));
+            }
+            setAdditionalSeeds(additionalSeeds);
+        }
+
     }
 
     public void setIterations(int iterations) {
@@ -82,6 +118,8 @@ public class Options implements PayloadJsonKeys{
         for (String seed : additionalSeeds) {
             seeds.put(seed);
         }
+
+        // TODO: 20/10/16 Confirm that we don't use this and remove
 //        obj.put(KEY_OPTIONS__ADDITIONAL_SEED, seeds);
 
         return obj;
