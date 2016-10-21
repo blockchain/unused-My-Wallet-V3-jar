@@ -64,10 +64,6 @@ public class Payload implements Serializable {
     private Map<String, List<Integer>> transactionTagsMap = null;
     private Map<Integer, String> tagNamesMap = null;
 
-    //Maps used to find xpub index and visa versa
-    private Map<String, Integer> xpubToAccountIndexMap = null;
-    private Map<Integer, String> accountIndexToXpubMap = null;
-
     public Payload() {
         legacyAddressList = new ArrayList<LegacyAddress>();
         addressBookEntryList = new ArrayList<AddressBookEntry>();
@@ -76,8 +72,6 @@ public class Payload implements Serializable {
         transactionTagsMap = new HashMap<String, List<Integer>>();
         tagNamesMap = new HashMap<Integer, String>();
         options = new Options();
-        xpubToAccountIndexMap = new HashMap<String, Integer>();
-        accountIndexToXpubMap = new HashMap<Integer, String>();
     }
 
     public Payload(String decryptedPayload, int pdfdf2Iterations) throws PayloadException {
@@ -87,10 +81,6 @@ public class Payload implements Serializable {
         transactionNotesMap = new HashMap<String, String>();
         transactionTagsMap = new HashMap<String, List<Integer>>();
         tagNamesMap = new HashMap<Integer, String>();
-
-        xpubToAccountIndexMap = new HashMap<String, Integer>();
-        accountIndexToXpubMap = new HashMap<Integer, String>();
-
         options = new Options();
         options.setIterations(pdfdf2Iterations);
 
@@ -142,19 +132,7 @@ public class Payload implements Serializable {
         return legacyAddressList;
     }
 
-    public List<LegacyAddress> getLegacyAddresses(long tag) {
-
-        List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
-        for (LegacyAddress legacyAddress : legacyAddressList) {
-            if (legacyAddress.getTag() == tag) {
-                addrs.add(legacyAddress);
-            }
-        }
-
-        return addrs;
-    }
-
-    public List<LegacyAddress> getActiveLegacyAddresses() {
+    public List<LegacyAddress> getActiveLegacyAddressList() {
         List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
 
         for (LegacyAddress legacyAddress : legacyAddressList) {
@@ -167,7 +145,7 @@ public class Payload implements Serializable {
         return addrs;
     }
 
-    public List<String> getLegacyAddressStrings() {
+    public List<String> getLegacyAddressStringList() {
 
         List<String> addrs = new ArrayList<String>();
         for (LegacyAddress legacyAddress : legacyAddressList) {
@@ -177,7 +155,7 @@ public class Payload implements Serializable {
         return addrs;
     }
 
-    public List<String> getWatchOnlyAddressStrings() {
+    public List<String> getWatchOnlyAddressStringList() {
 
         List<String> addrs = new ArrayList<String>();
         for (LegacyAddress legacyAddress : legacyAddressList) {
@@ -189,7 +167,7 @@ public class Payload implements Serializable {
         return addrs;
     }
 
-    public List<String> getLegacyAddressStrings(long tag) {
+    public List<String> getLegacyAddressStringList(long tag) {
 
         List<String> addrs = new ArrayList<String>();
         for (LegacyAddress legacyAddress : legacyAddressList) {
@@ -201,7 +179,7 @@ public class Payload implements Serializable {
         return addrs;
     }
 
-    public List<String> getActiveLegacyAddressStrings() {
+    public List<String> getActiveLegacyAddressStringList() {
         List<String> addrs = new ArrayList<String>();
 
         for (LegacyAddress legacyAddress : legacyAddressList) {
@@ -236,19 +214,19 @@ public class Payload implements Serializable {
         this.addressBookEntryList = addressBookEntryList;
     }
 
-    public Map<String, String> getNotes() {
+    public Map<String, String> getTransactionNotesMap() {
         return transactionNotesMap;
     }
 
-    public void setNotes(Map<String, String> notes) {
+    public void setTransactionNotesMap(Map<String, String> notes) {
         this.transactionNotesMap = notes;
     }
 
-    public Map<String, List<Integer>> getTags() {
+    public Map<String, List<Integer>> getTransactionTagsMap() {
         return transactionTagsMap;
     }
 
-    public void setTags(Map<String, List<Integer>> tags) {
+    public void setTransactionTagsMap(Map<String, List<Integer>> tags) {
         this.transactionTagsMap = tags;
     }
 
@@ -378,14 +356,6 @@ public class Payload implements Serializable {
             JSONObject walletJsonObject = walletJsonArray.getJSONObject(0);
 
             HDWallet hdw = new HDWallet(walletJsonObject);
-
-            // TODO: 20/10/16 This is weird. Try to move/get rid of this part
-            List<Account> accountList = hdw.getAccounts();
-            for (Account account : accountList) {
-                xpubToAccountIndexMap.put(account.getXpub(), account.getRealIdx());
-                accountIndexToXpubMap.put(account.getRealIdx(), account.getXpub());
-            }
-
             hdWalletList.add(hdw);
 
         } else {
@@ -424,14 +394,6 @@ public class Payload implements Serializable {
             }
         }
 
-    }
-
-    public Map<String, Integer> getXpubToAccountIndexMap() {
-        return xpubToAccountIndexMap;
-    }
-
-    public Map<Integer, String> getAccountIndexToXpubMap() {
-        return accountIndexToXpubMap;
     }
 
     public boolean isUpgraded() {

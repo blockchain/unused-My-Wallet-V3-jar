@@ -129,7 +129,7 @@ public class MultiAddrFactory {
                 }
             }
 
-            List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(LegacyAddress.NORMAL_ADDRESS);
+            List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
 
             if (jsonObject.has("txs")) {
 
@@ -369,8 +369,8 @@ public class MultiAddrFactory {
                         ts = txObj.getLong("time");
                     }
 
-                    List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(LegacyAddress.NORMAL_ADDRESS);
-                    List<String> watchOnlyLegacyAddresses = PayloadManager.getInstance().getPayload().getWatchOnlyAddressStrings();
+                    List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
+                    List<String> watchOnlyLegacyAddresses = PayloadManager.getInstance().getPayload().getWatchOnlyAddressStringList();
 
                     if (txObj.has("inputs")) {
                         JSONArray inputArray = (JSONArray) txObj.get("inputs");
@@ -554,7 +554,7 @@ public class MultiAddrFactory {
     public long getLegacyBalance(long address_type) {
 
         if (PayloadManager.getInstance().getPayload() != null) {
-            List<String> addrs = PayloadManager.getInstance().getPayload().getLegacyAddressStrings(address_type);
+            List<String> addrs = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(address_type);
             long value = 0L;
 
             for (String addr : addrs) {
@@ -572,7 +572,7 @@ public class MultiAddrFactory {
     public long getLegacyActiveBalance() {
 
         if (PayloadManager.getInstance().getPayload() != null) {
-            List<String> addrs = PayloadManager.getInstance().getPayload().getActiveLegacyAddressStrings();
+            List<String> addrs = PayloadManager.getInstance().getPayload().getActiveLegacyAddressStringList();
             long value = 0L;
 
             for (String addr : addrs) {

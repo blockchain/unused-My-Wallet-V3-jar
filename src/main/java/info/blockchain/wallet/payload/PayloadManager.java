@@ -1,6 +1,8 @@
 package info.blockchain.wallet.payload;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
@@ -33,6 +35,7 @@ import org.json.JSONObject;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -110,9 +113,7 @@ public class PayloadManager {
                 throw new ServerConnectionException();
             }
         }
-        System.out.println(1);
         bciWallet = new BlockchainWallet(walletData, password);
-        System.out.println(2);
         payload = bciWallet.getPayload();
 
         if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
@@ -432,7 +433,7 @@ public class PayloadManager {
 
         // Balance for legacy addresses
         if (payload.getLegacyAddressList().size() > 0) {
-            List<String> legacyAddresses = payload.getLegacyAddressStrings();
+            List<String> legacyAddresses = payload.getLegacyAddressStringList();
             String[] addresses = legacyAddresses.toArray(new String[legacyAddresses.size()]);
             MultiAddrFactory.getInstance().refreshLegacyAddressData(addresses, false);
         }
@@ -644,4 +645,22 @@ public class PayloadManager {
 
         return keys;
     }
+
+    public BiMap<String, Integer> getXpubToAccountIndexMap() {
+
+        BiMap<String, Integer> xpubToAccountIndexMap = HashBiMap.create();
+
+        List<Account> accountList = payload.getHdWallet().getAccounts();
+
+        for (Account account : accountList) {
+            xpubToAccountIndexMap.put(account.getXpub(), account.getRealIdx());
+        }
+
+        return xpubToAccountIndexMap;
+    }
+
+    public Map<Integer, String> getAccountIndexToXpubMap() {
+        return getXpubToAccountIndexMap().inverse();
+    }
+
 }
