@@ -5,7 +5,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class HDWallet {
@@ -27,12 +26,6 @@ public class HDWallet {
     }
 
     public HDWallet(String seed, List<Account> accounts, String passphrase) {
-        this.strSeedHex = seed;
-        this.accounts = accounts;
-        this.strPassphrase = passphrase;
-    }
-
-    public HDWallet(String seed, List<Account> accounts, String passphrase, HashMap<String, PaidTo> paidTo) {
         this.strSeedHex = seed;
         this.accounts = accounts;
         this.strPassphrase = passphrase;

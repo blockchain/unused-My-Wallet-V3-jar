@@ -46,7 +46,6 @@ public class Payload implements Serializable {
     private final String KEY_TAG_NAMES = "tag_names";
     private final String KEY_OPTION = "options";
     private final String KEY_WALLET_OPTIONS = "wallet_options";//some wallets might have this key in stead of 'options'
-    private final String KEY_PAIDTO = "paidTo";
     private final String KEY_HD_WALLET = "hd_wallets";
     private final String KEY_LEGACY_KEYS = "keys";
     private final String KEY_ADDRESS_BOOK = "address_book";
@@ -64,7 +63,6 @@ public class Payload implements Serializable {
     private Map<String, String> transactionNotesMap = null;
     private Map<String, List<Integer>> transactionTagsMap = null;
     private Map<Integer, String> tagNamesMap = null;
-    private Map<String, PaidTo> paidToMap = null;
 
     //Maps used to find xpub index and visa versa
     private Map<String, Integer> xpubToAccountIndexMap = null;
@@ -77,7 +75,6 @@ public class Payload implements Serializable {
         transactionNotesMap = new HashMap<String, String>();
         transactionTagsMap = new HashMap<String, List<Integer>>();
         tagNamesMap = new HashMap<Integer, String>();
-        paidToMap = new HashMap<String, PaidTo>();
         options = new Options();
         xpubToAccountIndexMap = new HashMap<String, Integer>();
         accountIndexToXpubMap = new HashMap<Integer, String>();
@@ -90,7 +87,6 @@ public class Payload implements Serializable {
         transactionNotesMap = new HashMap<String, String>();
         transactionTagsMap = new HashMap<String, List<Integer>>();
         tagNamesMap = new HashMap<Integer, String>();
-        paidToMap = new HashMap<String, PaidTo>();
 
         xpubToAccountIndexMap = new HashMap<String, Integer>();
         accountIndexToXpubMap = new HashMap<Integer, String>();
@@ -281,14 +277,6 @@ public class Payload implements Serializable {
         this.tagNamesMap = tag_names;
     }
 
-    public Map<String, PaidTo> getPaidToMap() {
-        return paidToMap;
-    }
-
-    public void setPaidToMap(Map<String, PaidTo> paidToMap) {
-        this.paidToMap = paidToMap;
-    }
-
     public int getDoubleEncryptionPbkdf2Iterations() {
         return options.getIterations();
     }
@@ -379,15 +367,6 @@ public class Payload implements Serializable {
             tagNamesMap = new HashMap<Integer, String>();
             for (int i = 0; i < tagNamesJsonArray.length(); i++) {
                 tagNamesMap.put(i, tagNamesJsonArray.getString(i));
-            }
-        }
-
-        if (payloadJson.has(KEY_PAIDTO)) {
-            JSONObject paidTo = payloadJson.getJSONObject(KEY_PAIDTO);
-            paidToMap = new HashMap<String, PaidTo>();
-            for (Iterator keys = paidTo.keys(); keys.hasNext(); ) {
-                String key = (String) keys.next();
-                paidToMap.put(key, new PaidTo(paidTo.getJSONObject(key)));
             }
         }
 
@@ -531,14 +510,6 @@ public class Payload implements Serializable {
             tnames.put(key, tagNamesMap.get(key));
         }
         obj.put(KEY_TAG_NAMES, tnames);
-
-        JSONObject paidToObj = new JSONObject();
-        Set<String> pkeys = paidToMap.keySet();
-        for (String key : pkeys) {
-            PaidTo pto = paidToMap.get(key);
-            paidToObj.put(key, pto.dumpJSON());
-        }
-        obj.put(KEY_PAIDTO, paidToObj);
 
         return obj;
     }
