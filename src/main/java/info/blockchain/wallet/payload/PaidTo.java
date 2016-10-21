@@ -3,7 +3,6 @@ package info.blockchain.wallet.payload;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-// TODO: 20/10/16 This class doesn't seem to be used - We parse the data but never do anything with it
 public class PaidTo {
 
     private final String KEY_EMAIL = "email";

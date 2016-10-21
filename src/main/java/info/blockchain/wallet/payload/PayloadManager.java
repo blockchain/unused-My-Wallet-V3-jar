@@ -514,7 +514,7 @@ public class PayloadManager {
         }
 
         //Add new account to payload
-        if (accounts.get(accounts.size() - 1) instanceof ImportedAddress) {
+        if (accounts.get(accounts.size() - 1) instanceof ImportedAccount) {
             accounts.add(accounts.size() - 1, account);
         } else {
             accounts.add(account);

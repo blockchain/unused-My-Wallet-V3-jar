@@ -58,7 +58,7 @@ public class HDWallet {
             try {
                 String val = walletJsonObject.getString(KEY_DEFAULT_ACCOUNT_INDEX);
                 i = Integer.parseInt(val);
-            } catch (java.lang.ClassCastException cce) {
+            } catch (Exception cce) {
                 i = walletJsonObject.getInt(KEY_DEFAULT_ACCOUNT_INDEX);
             }
             setDefaultIndex(i);
@@ -140,7 +140,7 @@ public class HDWallet {
 
         JSONArray accs = new JSONArray();
         for (Account account : accounts) {
-            if (!(account instanceof ImportedAddress)) {
+            if (!(account instanceof ImportedAccount)) {
                 accs.put(account.dumpJSON());
             }
         }

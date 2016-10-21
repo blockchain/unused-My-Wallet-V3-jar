@@ -73,7 +73,7 @@ public class LegacyAddress {
 
     private void parseJson(JSONObject key) {
 
-        String strAddress = key.getString(KEY_ADDR);
+        strAddress = key.getString(KEY_ADDR);
 
         if (strAddress != null && !strAddress.equals("null")) {
 
@@ -228,20 +228,10 @@ public class LegacyAddress {
 
     public ECKey getECKey(CharSequenceX secondPassword) throws Exception {
 
-        /*
-        Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);
-        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getSharedKey());
-        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().getTempDoubleEncryptPassword().toString());
-        Log.i("LegacyAddress double encryptedPairingCode", "hash:" + DoubleEncryptionFactory.getInstance().validateSecondPassword(PayloadManager.getInstance().get().getDoublePasswordHash(), PayloadManager.getInstance().get().getSharedKey(), PayloadManager.getInstance().getTempDoubleEncryptPassword(), PayloadManager.getInstance().get().getIterations()));
-        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getDoublePasswordHash());
-        Log.i("LegacyAddress double encryptedPairingCode", "" + PayloadManager.getInstance().get().getIterations());
-        */
-
         String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey,
                 PayloadManager.getInstance().getPayload().getSharedKey(),
                 secondPassword.toString(),
                 PayloadManager.getInstance().getPayload().getDoubleEncryptionPbkdf2Iterations());
-//    		Log.i("LegacyAddress double encryptedPairingCode", encryptedKey);
 
         return getECKey(encryptedKey);
     }
