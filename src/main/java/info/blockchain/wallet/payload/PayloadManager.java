@@ -29,7 +29,6 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
@@ -208,13 +207,14 @@ public class PayloadManager {
 
         if (payload == null) return false;
 
-        if (cached_payload != null && cached_payload.equals(payload.dumpJSON().toString())) {
-            return true;
-        }
-
-        String method = isNew ? "insert" : "update";
-
         try {
+            if (cached_payload != null && cached_payload.equals(payload.dumpJSON().toString())) {
+                return true;
+            }
+
+            String method = isNew ? "insert" : "update";
+
+
             Pair pair = bciWallet.encryptPayload(payload.dumpJSON().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
@@ -246,7 +246,7 @@ public class PayloadManager {
     /**
      * Write to current client payload to cache.
      */
-    public void cachePayload(Payload payload) throws JSONException{
+    public void cachePayload(Payload payload) throws Exception{
         cached_payload = payload.dumpJSON().toString();
     }
 

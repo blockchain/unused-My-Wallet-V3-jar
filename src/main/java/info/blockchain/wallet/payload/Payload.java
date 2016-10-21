@@ -5,7 +5,6 @@ import info.blockchain.wallet.util.FormatsUtil;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
@@ -410,7 +409,7 @@ public class Payload implements Serializable {
      *
      * @return JSONObject
      */
-    public JSONObject dumpJSON() throws JSONException {
+    public JSONObject dumpJSON() throws Exception {
 
         JSONObject obj = new JSONObject();
 

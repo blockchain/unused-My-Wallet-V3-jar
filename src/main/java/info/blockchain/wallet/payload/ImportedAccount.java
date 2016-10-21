@@ -42,7 +42,7 @@ public class ImportedAccount extends Account {
         JSONObject obj = super.dumpJSON();
 
         obj.put(KEY_ARCHIVED, isArchived);
-        obj.put(KEY_LABEL, strLabel == null ? "" : strLabel);
+        obj.put(KEY_LABEL, strLabel == null ? JSONObject.NULL : strLabel);
         obj.put(KEY_AMOUNT, amount);
 
         return obj;

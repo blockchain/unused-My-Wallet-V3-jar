@@ -81,11 +81,11 @@ public class LegacyAddress {
                 if (key.has(KEY_PRIV)) {
                     strEncryptedKey = key.getString(KEY_PRIV);
                 }
-                if (strEncryptedKey == null || strEncryptedKey.equals("null")) {
-                    strEncryptedKey = "";// TODO: 20/10/16 Don't treat this as empty string
+                if (strEncryptedKey != null && strEncryptedKey.equals("null")) {
+                    strEncryptedKey = null;
                 }
             } catch (Exception e) {
-                strEncryptedKey = "";
+                strEncryptedKey = null;
             }
 
             if (strEncryptedKey.length() == 0) {
@@ -272,18 +272,21 @@ public class LegacyAddress {
         return ecKey;
     }
 
-    public JSONObject dumpJSON() {
+    public JSONObject dumpJSON() throws Exception {
 
         JSONObject obj = new JSONObject();
 
         if (strAddress == null || "".equals(strAddress)) {
-            // TODO should probably throw an error here and not sync
-            return obj;
+            throw new Exception("Address null or empty");
         }
 
-        obj.put(KEY_ADDR, strAddress);
+        if (strAddress == null || !"".equals(strAddress)) {
+            obj.put(KEY_ADDR, strAddress);
+        } else {
+            obj.put(KEY_ADDR, JSONObject.NULL);
+        }
 
-        if (!"".equals(strEncryptedKey)) {
+        if (strEncryptedKey == null || !"".equals(strEncryptedKey)) {
             obj.put(KEY_PRIV, strEncryptedKey);
         } else {
             obj.put(KEY_PRIV, JSONObject.NULL);
@@ -293,6 +296,8 @@ public class LegacyAddress {
 
         if (strLabel != null && !"".equals(strLabel)) {
             obj.put(KEY_LABEL, strLabel);
+        } else {
+            obj.put(KEY_LABEL, JSONObject.NULL);
         }
 
         if (created >= 0L) {

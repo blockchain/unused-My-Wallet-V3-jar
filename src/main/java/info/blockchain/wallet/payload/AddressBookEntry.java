@@ -44,7 +44,7 @@ public class AddressBookEntry {
         JSONObject obj = new JSONObject();
 
         obj.put(KEY_ADDR, strAddress);
-        obj.put(KEY_LABEL, strLabel == null ? "" : strLabel);
+        obj.put(KEY_LABEL, strLabel == null ? JSONObject.NULL : strLabel);
 
         return obj;
     }

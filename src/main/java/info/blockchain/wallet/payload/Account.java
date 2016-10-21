@@ -71,7 +71,7 @@ public class Account {
         } else {
             setArchived(false);
         }
-        setLabel(accountJsonObj.has(KEY_LABEL) ? accountJsonObj.getString(KEY_LABEL) : "");// TODO: 20/10/16 Don't treat as blank
+        setLabel(accountJsonObj.has(KEY_LABEL) ? accountJsonObj.getString(KEY_LABEL) : null);
         if (accountJsonObj.has(KEY_XPUB) && (accountJsonObj.getString(KEY_XPUB)) != null && (accountJsonObj.getString(KEY_XPUB)).length() > 0) {
             setXpub((String) accountJsonObj.get(KEY_XPUB));
         } else {
@@ -149,11 +149,7 @@ public class Account {
     }
 
     public String getFullLabel() {
-        if (strLabel == null) {
-            return "";
-        } else {
-            return strLabel;
-        }
+        return strLabel;
     }
 
     public void setLabel(String strLabel) {
@@ -221,16 +217,17 @@ public class Account {
         JSONObject obj = new JSONObject();
 
         obj.put(KEY_ARCHIVED, isArchived);
-        obj.put(KEY_LABEL, strLabel == null ? "" : strLabel);// TODO: 20/10/16 Don't treat as blank
-        obj.put(KEY_XPUB, strXpub == null ? "" : strXpub);// TODO: 20/10/16 Don't treat as blank
-        obj.put(KEY_XPRIV, strXpriv == null ? "" : strXpriv);// TODO: 20/10/16 Don't treat as blank
+        obj.put(KEY_LABEL, strLabel == null ? JSONObject.NULL : strLabel);
+        obj.put(KEY_XPUB, strXpub == null ? JSONObject.NULL : strXpub);
+        obj.put(KEY_XPRIV, strXpriv == null ? JSONObject.NULL : strXpriv);
 
         JSONArray labels = new JSONArray();
         for (Integer key : addressLabels.keySet()) {
             JSONObject labelObj = new JSONObject();
 
             labelObj.put(KEY_ADDRESS_INDEX, key);
-            labelObj.put(KEY_ADDRESS_LABEL, addressLabels.get(key));
+            String addressLabel = addressLabels.get(key);
+            labelObj.put(KEY_ADDRESS_LABEL, addressLabel == null ? JSONObject.NULL : addressLabel);
 
             labels.put(labelObj);
         }

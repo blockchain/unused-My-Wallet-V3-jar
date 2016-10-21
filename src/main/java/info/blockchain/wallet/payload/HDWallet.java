@@ -126,8 +126,8 @@ public class HDWallet {
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_SEED_HEX, strSeedHex);
-        obj.put(KEY_PASSPHRASE, strPassphrase);
+        obj.put(KEY_SEED_HEX, strSeedHex == null ? JSONObject.NULL : strSeedHex);
+        obj.put(KEY_PASSPHRASE, strPassphrase == null ? JSONObject.NULL : strPassphrase);
         obj.put(KEY_DEFAULT_ACCOUNT_INDEX, default_account_idx);
         obj.put(KEY_MNEMONIC_VERIFIED, mnemonic_verified);
 

@@ -58,7 +58,7 @@ public class BlockchainWallet {
      * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException
      */
-    public BlockchainWallet(Payload payload) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public BlockchainWallet(Payload payload) throws Exception {
 
         this.pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
         this.version = 3.0;

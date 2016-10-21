@@ -51,8 +51,8 @@ public class Cache {
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_RECEIVE_ACCOUNT, receiveAccount == null ? "" : receiveAccount);
-        obj.put(KEY_CHANGE_ACCOUNT, changeAccount == null ? "" : changeAccount);
+        obj.put(KEY_RECEIVE_ACCOUNT, receiveAccount == null ? JSONObject.NULL : receiveAccount);
+        obj.put(KEY_CHANGE_ACCOUNT, changeAccount == null ? JSONObject.NULL : changeAccount);
 
         return obj;
     }
