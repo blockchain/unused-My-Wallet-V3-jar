@@ -208,14 +208,14 @@ public class PayloadManager {
         if (payload == null) return false;
 
         try {
-            if (cached_payload != null && cached_payload.equals(payload.dumpJSON().toString())) {
+            if (cached_payload != null && cached_payload.equals(payload.toJson().toString())) {
                 return true;
             }
 
             String method = isNew ? "insert" : "update";
 
 
-            Pair pair = bciWallet.encryptPayload(payload.dumpJSON().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
+            Pair pair = bciWallet.encryptPayload(payload.toJson().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
             String newPayloadChecksum = (String) pair.getLeft();
@@ -247,7 +247,7 @@ public class PayloadManager {
      * Write to current client payload to cache.
      */
     public void cachePayload(Payload payload) throws Exception{
-        cached_payload = payload.dumpJSON().toString();
+        cached_payload = payload.toJson().toString();
     }
 
     private void clearCachedPayload() {

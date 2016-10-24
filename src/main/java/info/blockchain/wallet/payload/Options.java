@@ -76,7 +76,7 @@ public class Options {
         this.html5_notifications = enable;
     }
 
-    public JSONObject dumpJSON() throws JSONException {
+    public JSONObject toJson() throws JSONException {
 
         JSONObject obj = new JSONObject();
 

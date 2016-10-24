@@ -5,12 +5,14 @@ import info.blockchain.wallet.payload.PayloadManager;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static junit.framework.TestCase.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+@Ignore
 public class SettingsTest {
 
     String mnemonic = "all all all all all all all all all all all all";

@@ -272,7 +272,7 @@ public class LegacyAddress {
         return ecKey;
     }
 
-    public JSONObject dumpJSON() throws Exception {
+    public JSONObject toJson() throws Exception {
 
         JSONObject obj = new JSONObject();
 

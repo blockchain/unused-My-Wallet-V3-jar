@@ -37,9 +37,9 @@ public class ImportedAccount extends Account {
         this.legacyAddresses = addrs;
     }
 
-    public JSONObject dumpJSON() throws JSONException {
+    public JSONObject toJson() throws JSONException {
 
-        JSONObject obj = super.dumpJSON();
+        JSONObject obj = super.toJson();
 
         obj.put(KEY_ARCHIVED, isArchived);
         obj.put(KEY_LABEL, strLabel == null ? JSONObject.NULL : strLabel);

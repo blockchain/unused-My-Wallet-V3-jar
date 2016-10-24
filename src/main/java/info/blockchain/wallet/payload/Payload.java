@@ -409,7 +409,7 @@ public class Payload implements Serializable {
      *
      * @return JSONObject
      */
-    public JSONObject dumpJSON() throws Exception {
+    public JSONObject toJson() throws Exception {
 
         JSONObject obj = new JSONObject();
 
@@ -425,24 +425,24 @@ public class Payload implements Serializable {
         if (isUpgraded) {
             JSONArray wallets = new JSONArray();
             for (HDWallet wallet : hdWalletList) {
-                wallets.put(wallet.dumpJSON());
+                wallets.put(wallet.toJson());
             }
             obj.put(KEY_HD_WALLET, wallets);
         }
 
         JSONArray keys = new JSONArray();
         for (LegacyAddress addr : legacyAddressList) {
-            JSONObject key = addr.dumpJSON();
+            JSONObject key = addr.toJson();
             keys.put(key);
         }
         obj.put(KEY_LEGACY_KEYS, keys);
 
-        JSONObject optionsObj = options.dumpJSON();
+        JSONObject optionsObj = options.toJson();
         obj.put(KEY_OPTION, optionsObj);
 
         JSONArray address_book = new JSONArray();
         for (AddressBookEntry addr : addressBookEntryList) {
-            address_book.put(addr.dumpJSON());
+            address_book.put(addr.toJson());
         }
         obj.put(KEY_ADDRESS_BOOK, address_book);
 

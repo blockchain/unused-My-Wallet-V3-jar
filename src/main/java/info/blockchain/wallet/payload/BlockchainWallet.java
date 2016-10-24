@@ -63,7 +63,7 @@ public class BlockchainWallet {
         this.pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
         this.version = 3.0;
         this.syncPubkeys = false;
-        this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.dumpJSON().toString().getBytes("UTF-8"))));
+        this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.toJson().toString().getBytes("UTF-8"))));
     }
 
     public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {

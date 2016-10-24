@@ -39,7 +39,7 @@ public class AddressBookEntry {
         strLabel = label;
     }
 
-    public JSONObject dumpJSON() throws JSONException {
+    public JSONObject toJson() throws JSONException {
 
         JSONObject obj = new JSONObject();
 

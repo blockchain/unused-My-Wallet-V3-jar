@@ -62,6 +62,7 @@ public class Account {
         parseJson(accountJsonObj, index);
     }
 
+    // TODO: 24/10/16 static fromJson
     private void parseJson(JSONObject accountJsonObj, int index) throws Exception{
 
         setRealIdx(index);
@@ -98,10 +99,7 @@ public class Account {
         if (accountJsonObj.has(KEY_CACHE)) {
 
             JSONObject cacheObj = accountJsonObj.getJSONObject(KEY_CACHE);
-
-            Cache cache = new Cache(cacheObj);
-            setCache(cache);
-
+            setCache(Cache.fromJson(cacheObj));
         }
     }
 
@@ -212,7 +210,7 @@ public class Account {
         this.realIdx = realIdx;
     }
 
-    public JSONObject dumpJSON() throws JSONException {
+    public JSONObject toJson() throws JSONException {
 
         JSONObject obj = new JSONObject();
 
@@ -222,18 +220,20 @@ public class Account {
         obj.put(KEY_XPRIV, strXpriv == null ? JSONObject.NULL : strXpriv);
 
         JSONArray labels = new JSONArray();
-        for (Integer key : addressLabels.keySet()) {
-            JSONObject labelObj = new JSONObject();
+        if (addressLabels != null) {
+            for (Integer key : addressLabels.keySet()) {
+                JSONObject labelObj = new JSONObject();
 
-            labelObj.put(KEY_ADDRESS_INDEX, key);
-            String addressLabel = addressLabels.get(key);
-            labelObj.put(KEY_ADDRESS_LABEL, addressLabel == null ? JSONObject.NULL : addressLabel);
+                labelObj.put(KEY_ADDRESS_INDEX, key);
+                String addressLabel = addressLabels.get(key);
+                labelObj.put(KEY_ADDRESS_LABEL, addressLabel == null ? JSONObject.NULL : addressLabel);
 
-            labels.put(labelObj);
+                labels.put(labelObj);
+            }
         }
         obj.put(KEY_ADDRESS_LABELS, labels);
 
-        JSONObject _cache = cache.dumpJSON();
+        JSONObject _cache = cache.toJson();
         obj.put(KEY_CACHE, _cache);
 
         return obj;

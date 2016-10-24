@@ -44,7 +44,7 @@ public class HDWallet {
             setPassphrase(walletJsonObject.getString(KEY_PASSPHRASE));
         }
         if (walletJsonObject.has(KEY_MNEMONIC_VERIFIED)) {
-            mnemonic_verified(walletJsonObject.getBoolean(KEY_MNEMONIC_VERIFIED));
+            setMnemonicVerified(walletJsonObject.getBoolean(KEY_MNEMONIC_VERIFIED));
         }
         if (walletJsonObject.has(KEY_DEFAULT_ACCOUNT_INDEX)) {
             int i;
@@ -110,7 +110,7 @@ public class HDWallet {
         return mnemonic_verified;
     }
 
-    public void mnemonic_verified(boolean verified) {
+    public void setMnemonicVerified(boolean verified) {
         this.mnemonic_verified = verified;
     }
 
@@ -122,7 +122,7 @@ public class HDWallet {
         this.default_account_idx = idx;
     }
 
-    public JSONObject dumpJSON() throws JSONException {
+    public JSONObject toJson() throws JSONException {
 
         JSONObject obj = new JSONObject();
 
@@ -132,9 +132,11 @@ public class HDWallet {
         obj.put(KEY_MNEMONIC_VERIFIED, mnemonic_verified);
 
         JSONArray accs = new JSONArray();
-        for (Account account : accounts) {
-            if (!(account instanceof ImportedAccount)) {
-                accs.put(account.dumpJSON());
+        if (accounts != null) {
+            for (Account account : accounts) {
+                if (!(account instanceof ImportedAccount)) {
+                    accs.put(account.toJson());
+                }
             }
         }
         obj.put(KEY_ACCOUNTS, accs);
