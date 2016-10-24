@@ -33,7 +33,7 @@ public class LegacyAddressTest {
     @Test
     public void testSetEncryptedKey() throws Exception {
 
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setEncryptedKey("test");
 
         Assert.assertEquals(legacyAddress.getEncryptedKey(), "test");
@@ -42,7 +42,7 @@ public class LegacyAddressTest {
     @Test
     public void testSetEncryptedKey1() throws Exception {
 
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setEncryptedKey(Base58.decode("test"));
 
         Assert.assertEquals(legacyAddress.getEncryptedKey(), "test");
@@ -51,7 +51,7 @@ public class LegacyAddressTest {
     @Test
     public void testSetCreated() throws Exception {
 
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
 
         long now = System.currentTimeMillis();
         legacyAddress.setCreated(now);
@@ -62,7 +62,7 @@ public class LegacyAddressTest {
     @Test
     public void testSetAddress() throws Exception {
 
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setAddress("test");
 
         Assert.assertEquals(legacyAddress.getAddress(), "test");
@@ -70,7 +70,7 @@ public class LegacyAddressTest {
 
     @Test
     public void testSetLabel() throws Exception {
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setLabel("test");
 
         Assert.assertEquals(legacyAddress.getLabel(), "test");
@@ -78,7 +78,7 @@ public class LegacyAddressTest {
 
     @Test
     public void testSetTag() throws Exception {
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setTag(321);
 
         Assert.assertEquals(legacyAddress.getTag(), 321);
@@ -86,7 +86,7 @@ public class LegacyAddressTest {
 
     @Test
     public void testSetWatchOnly() throws Exception {
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setWatchOnly(true);
         Assert.assertEquals(legacyAddress.isWatchOnly(), true);
         legacyAddress.setWatchOnly(false);
@@ -95,7 +95,7 @@ public class LegacyAddressTest {
 
     @Test
     public void testSetCreatedDeviceName() throws Exception {
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setCreatedDeviceName("test");
 
         Assert.assertEquals(legacyAddress.getCreatedDeviceName(), "test");
@@ -103,7 +103,7 @@ public class LegacyAddressTest {
 
     @Test
     public void testSetCreatedDeviceVersion() throws Exception {
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         legacyAddress.setCreatedDeviceVersion("test");
 
         Assert.assertEquals(legacyAddress.getCreatedDeviceVersion(), "test");
@@ -111,7 +111,7 @@ public class LegacyAddressTest {
 
     @Test
     public void testToJson() throws Exception {
-        LegacyAddress legacyAddress = new LegacyAddress(new JSONObject(testString));
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
         AssertJson.assertEqual(testString, legacyAddress.toJson().toString());
     }
 

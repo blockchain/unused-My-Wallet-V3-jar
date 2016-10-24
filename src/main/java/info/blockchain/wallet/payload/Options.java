@@ -5,43 +5,38 @@ import org.json.JSONObject;
 
 public class Options {
 
-    private final String KEY_FEE_PER_KB = "fee_per_kb";
-    private final String KEY_LOGOUT_TIME = "logout_time";
-    private final String KEY_HTML5_NOTIFICATIONS = "html5_notifications";
-    private final String KEY_PBKDF2_ITERATIONS = "pbkdf2_iterations";
+    private static final String KEY_FEE_PER_KB = "fee_per_kb";
+    private static final String KEY_LOGOUT_TIME = "logout_time";
+    private static final String KEY_HTML5_NOTIFICATIONS = "html5_notifications";
+    private static final String KEY_PBKDF2_ITERATIONS = "pbkdf2_iterations";
 
     private int iterations = BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2;
     private long fee_per_kb = 10000L;
     private long logout_time = 600000L;
     private boolean html5_notifications = false;
 
-    public Options() {
+    public static Options fromJson(JSONObject optionsJson){
 
-    }
-
-    public Options(JSONObject optionsJson) {
-
-        parseJson(optionsJson);
-    }
-
-    private void parseJson(JSONObject optionsJson){
+        Options options = new Options();
 
         if (optionsJson.has(KEY_PBKDF2_ITERATIONS)) {
             int val = optionsJson.getInt(KEY_PBKDF2_ITERATIONS);
-            setIterations(val);
+            options.setIterations(val);
         }
         if (optionsJson.has(KEY_FEE_PER_KB)) {
             long val = optionsJson.getLong(KEY_FEE_PER_KB);
-            setFeePerKB(val);
+            options.setFeePerKB(val);
         }
         if (optionsJson.has(KEY_LOGOUT_TIME)) {
             long val = optionsJson.getLong(KEY_LOGOUT_TIME);
-            setLogoutTime(val);
+            options.setLogoutTime(val);
         }
         if (optionsJson.has(KEY_HTML5_NOTIFICATIONS)) {
             boolean val = optionsJson.getBoolean(KEY_HTML5_NOTIFICATIONS);
-            setHtml5Notifications(val);
+            options.setHtml5Notifications(val);
         }
+
+        return options;
     }
 
     public void setIterations(int iterations) {

@@ -8,14 +8,14 @@ import java.util.TreeMap;
 
 public class Account {
 
-    private final String KEY_LABEL = "label";
-    private final String KEY_ARCHIVED = "archived";
-    private final String KEY_XPRIV = "xpriv";
-    private final String KEY_XPUB = "xpub";
-    private final String KEY_CACHE = "cache";
-    private final String KEY_ADDRESS_LABELS = "address_labels";
-    private final String KEY_ADDRESS_INDEX = "index";
-    private final String KEY_ADDRESS_LABEL = KEY_LABEL;
+    private static final String KEY_LABEL = "label";
+    private static final String KEY_ARCHIVED = "archived";
+    private static final String KEY_XPRIV = "xpriv";
+    private static final String KEY_XPUB = "xpub";
+    private static final String KEY_CACHE = "cache";
+    private static final String KEY_ADDRESS_LABELS = "address_labels";
+    private static final String KEY_ADDRESS_INDEX = "index";
+    private static final String KEY_ADDRESS_LABEL = KEY_LABEL;
 
     protected boolean isArchived = false;
     protected int idxChangeAddresses = 0;
@@ -57,29 +57,24 @@ public class Account {
         cache = new Cache();
     }
 
-    public Account(JSONObject accountJsonObj, int index) throws Exception {
+    public static Account fromJson(JSONObject accountJsonObj) throws Exception{
 
-        parseJson(accountJsonObj, index);
-    }
+        Account account = new Account();
 
-    // TODO: 24/10/16 static fromJson
-    private void parseJson(JSONObject accountJsonObj, int index) throws Exception{
-
-        setRealIdx(index);
-        setArchived(accountJsonObj.has(KEY_ARCHIVED) ? accountJsonObj.getBoolean(KEY_ARCHIVED) : false);
+        account.setArchived(accountJsonObj.has(KEY_ARCHIVED) ? accountJsonObj.getBoolean(KEY_ARCHIVED) : false);
         if (accountJsonObj.has(KEY_ARCHIVED) && accountJsonObj.getBoolean(KEY_ARCHIVED)) {
-            setArchived(true);
+            account.setArchived(true);
         } else {
-            setArchived(false);
+            account.setArchived(false);
         }
-        setLabel(accountJsonObj.has(KEY_LABEL) ? accountJsonObj.getString(KEY_LABEL) : null);
+        account.setLabel(accountJsonObj.has(KEY_LABEL) ? accountJsonObj.getString(KEY_LABEL) : null);
         if (accountJsonObj.has(KEY_XPUB) && (accountJsonObj.getString(KEY_XPUB)) != null && (accountJsonObj.getString(KEY_XPUB)).length() > 0) {
-            setXpub((String) accountJsonObj.get(KEY_XPUB));
+            account.setXpub((String) accountJsonObj.get(KEY_XPUB));
         } else {
             throw new Exception("Account contains no xpub");
         }
         if (accountJsonObj.has(KEY_XPRIV) && (accountJsonObj.getString(KEY_XPRIV)) != null && (accountJsonObj.getString(KEY_XPRIV)).length() > 0) {
-            setXpriv((String) accountJsonObj.get(KEY_XPRIV));
+            account.setXpriv((String) accountJsonObj.get(KEY_XPRIV));
         } else {
             throw new Exception("Account contains no private key");
         }
@@ -92,15 +87,17 @@ public class Account {
                     JSONObject obj = labels.getJSONObject(j);
                     addressLabels.put(obj.getInt(KEY_ADDRESS_INDEX), obj.getString(KEY_ADDRESS_LABEL));
                 }
-                setAddressLabels(addressLabels);
+                account.setAddressLabels(addressLabels);
             }
         }
 
         if (accountJsonObj.has(KEY_CACHE)) {
 
             JSONObject cacheObj = accountJsonObj.getJSONObject(KEY_CACHE);
-            setCache(Cache.fromJson(cacheObj));
+            account.setCache(Cache.fromJson(cacheObj));
         }
+
+        return account;
     }
 
     public void incChange() {

@@ -10,21 +10,21 @@ public class AddressBookEntryTest {
 
     @Test
     public void testSetAddress() throws Exception {
-        AddressBookEntry addressBookEntry = new AddressBookEntry(new JSONObject(testString));
+        AddressBookEntry addressBookEntry = AddressBookEntry.fromJson(new JSONObject(testString));
         addressBookEntry.setAddress("Address 1");
         Assert.assertEquals(addressBookEntry.getAddress(), "Address 1");
     }
 
     @Test
     public void testSetLabel() throws Exception {
-        AddressBookEntry addressBookEntry = new AddressBookEntry(new JSONObject(testString));
+        AddressBookEntry addressBookEntry = AddressBookEntry.fromJson(new JSONObject(testString));
         addressBookEntry.setLabel("Label 1");
         Assert.assertEquals(addressBookEntry.getLabel(), "Label 1");
     }
 
     @Test
     public void testToJSON() throws Exception {
-        AddressBookEntry addressBookEntry = new AddressBookEntry(new JSONObject(testString));
+        AddressBookEntry addressBookEntry = AddressBookEntry.fromJson(new JSONObject(testString));
         AssertJson.assertEqual(addressBookEntry.toJson().toString(), testString);
     }
 

@@ -17,13 +17,13 @@ public class LegacyAddress {
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
 
-    private final String KEY_ADDR = "addr";
-    private final String KEY_PRIV = "priv";
-    private final String KEY_LABEL = "label";
-    private final String KEY_CREATED_TIME = "created_time";
-    private final String KEY_TAG = "tag";
-    private final String KEY_CREATED_DEVICE_NAME = "created_device_name";
-    private final String KEY_CREATED_DEVICE_VERSION = "created_device_version";
+    private static final String KEY_ADDR = "addr";
+    private static final String KEY_PRIV = "priv";
+    private static final String KEY_LABEL = "label";
+    private static final String KEY_CREATED_TIME = "created_time";
+    private static final String KEY_TAG = "tag";
+    private static final String KEY_CREATED_DEVICE_NAME = "created_device_name";
+    private static final String KEY_CREATED_DEVICE_VERSION = "created_device_version";
 
     private String strEncryptedKey = null;
     private long created = 0L;
@@ -66,85 +66,84 @@ public class LegacyAddress {
         this.tag = 0L;
     }
 
-    public LegacyAddress(JSONObject key) {
+    public static LegacyAddress fromJson(JSONObject legacyJsonObject){
 
-        parseJson(key);
-    }
+        LegacyAddress legacyAddress = new LegacyAddress();
 
-    private void parseJson(JSONObject key) {
+        legacyAddress.strAddress = legacyJsonObject.getString(KEY_ADDR);
 
-        strAddress = key.getString(KEY_ADDR);
-
-        if (strAddress != null && !strAddress.equals("null")) {
+        if (legacyAddress.strAddress != null && !legacyAddress.strAddress.equals("null")) {
 
             try {
-                if (key.has(KEY_PRIV)) {
-                    strEncryptedKey = key.getString(KEY_PRIV);
+                if (legacyJsonObject.has(KEY_PRIV)) {
+                    legacyAddress.strEncryptedKey = legacyJsonObject.getString(KEY_PRIV);
                 }
-                if (strEncryptedKey != null && strEncryptedKey.equals("null")) {
-                    strEncryptedKey = null;
+                if (legacyAddress.strEncryptedKey != null && legacyAddress.strEncryptedKey.equals("null")) {
+                    legacyAddress.strEncryptedKey = null;
                 }
             } catch (Exception e) {
-                strEncryptedKey = null;
+                legacyAddress.strEncryptedKey = null;
             }
 
-            if (strEncryptedKey.length() == 0) {
-                watchOnly = true;
+            if (legacyAddress.strEncryptedKey.length() == 0) {
+                legacyAddress.watchOnly = true;
             }
 
-            if (key.has(KEY_CREATED_TIME)) {
+            if (legacyJsonObject.has(KEY_CREATED_TIME)) {
                 try {
-                    created = key.getLong(KEY_CREATED_TIME);
+                    legacyAddress.created = legacyJsonObject.getLong(KEY_CREATED_TIME);
                 } catch (Exception e) {
-                    created = 0L;
+                    legacyAddress.created = 0L;
                 }
             } else {
-                created = 0L;
+                legacyAddress.created = 0L;
             }
 
             try {
-                if (key.has(KEY_LABEL)) {
-                    strLabel = key.getString(KEY_LABEL);
+                if (legacyJsonObject.has(KEY_LABEL)) {
+                    legacyAddress.strLabel = legacyJsonObject.getString(KEY_LABEL);
                 }
-                if (strLabel == null || strLabel.equals("null")) {
-                    strLabel = "";// TODO: 20/10/16 Don't treat this as empty string
+                if (legacyAddress.strLabel == null || legacyAddress.strLabel.equals("null")) {
+                    legacyAddress.strLabel = "";// TODO: 20/10/16 Don't treat this as empty string
                 }
             } catch (Exception e) {
-                strLabel = "";
+                legacyAddress.strLabel = "";
             }
 
-            if (key.has(KEY_TAG)) {
+            if (legacyJsonObject.has(KEY_TAG)) {
                 try {
-                    tag = key.getLong(KEY_TAG);
+                    legacyAddress.tag = legacyJsonObject.getLong(KEY_TAG);
                 } catch (Exception e) {
-                    tag = 0L;
+                    legacyAddress.tag = 0L;
                 }
             } else {
-                tag = 0L;
+                legacyAddress.tag = 0L;
             }
 
             try {
-                if (key.has(KEY_CREATED_DEVICE_NAME)) {
-                    strCreatedDeviceName = key.getString(KEY_CREATED_DEVICE_NAME);
+                if (legacyJsonObject.has(KEY_CREATED_DEVICE_NAME)) {
+                    legacyAddress.strCreatedDeviceName = legacyJsonObject.getString(KEY_CREATED_DEVICE_NAME);
                 }
-                if (strCreatedDeviceName == null || strCreatedDeviceName.equals("null")) {
-                    strCreatedDeviceName = "";// TODO: 20/10/16 Don't treat this as empty string
+                if (legacyAddress.strCreatedDeviceName == null || legacyAddress.strCreatedDeviceName.equals("null")) {
+                    legacyAddress.strCreatedDeviceName = "";// TODO: 20/10/16 Don't treat this as empty string
                 }
             } catch (Exception e) {
-                strCreatedDeviceName = "";
+                legacyAddress.strCreatedDeviceName = "";
             }
 
             try {
-                if (key.has(KEY_CREATED_DEVICE_VERSION)) {
-                    strCreatedDeviceVersion = key.getString(KEY_CREATED_DEVICE_VERSION);
+                if (legacyJsonObject.has(KEY_CREATED_DEVICE_VERSION)) {
+                    legacyAddress.strCreatedDeviceVersion = legacyJsonObject.getString(KEY_CREATED_DEVICE_VERSION);
                 }
-                if (strCreatedDeviceVersion == null || strCreatedDeviceVersion.equals("null")) {
-                    strCreatedDeviceVersion = "";// TODO: 20/10/16 Don't treat this as empty string
+                if (legacyAddress.strCreatedDeviceVersion == null || legacyAddress.strCreatedDeviceVersion.equals("null")) {
+                    legacyAddress.strCreatedDeviceVersion = "";// TODO: 20/10/16 Don't treat this as empty string
                 }
             } catch (Exception e) {
-                strCreatedDeviceVersion = "";
+                legacyAddress.strCreatedDeviceVersion = "";
             }
         }
+
+        return legacyAddress;
     }
 
     public String getEncryptedKey() {

@@ -5,22 +5,18 @@ import org.json.JSONObject;
 
 public class AddressBookEntry {
 
-    private final String KEY_LABEL = "label";
-    private final String KEY_ADDR = "addr";
+    private static final String KEY_LABEL = "label";
+    private static final String KEY_ADDR = "addr";
 
     private String strAddress = null;
     private String strLabel = null;
 
-    public AddressBookEntry() {
-    }
+    public static AddressBookEntry fromJson(JSONObject addressObject){
 
-    public AddressBookEntry(JSONObject addressObject) {
-        parseJson(addressObject);
-    }
-
-    private void parseJson(JSONObject addressObject) {
-        this.strAddress = addressObject.has(KEY_ADDR) ? addressObject.getString(KEY_ADDR) : null;
-        this.strLabel = addressObject.has(KEY_LABEL) ? addressObject.getString(KEY_LABEL) : null;
+        AddressBookEntry addressBookEntry = new AddressBookEntry();
+        addressBookEntry.strAddress = addressObject.has(KEY_ADDR) ? addressObject.getString(KEY_ADDR) : null;
+        addressBookEntry.strLabel = addressObject.has(KEY_LABEL) ? addressObject.getString(KEY_LABEL) : null;
+        return addressBookEntry;
     }
 
     public String getAddress() {

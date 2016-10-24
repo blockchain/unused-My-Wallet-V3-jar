@@ -11,7 +11,7 @@ public class OptionsTest {
     @Test
     public void testSetIterations() throws Exception {
 
-        Options options = new Options(new JSONObject(testString));
+        Options options = Options.fromJson(new JSONObject(testString));
         options.setIterations(2300);
 
         Assert.assertEquals(options.getIterations(), 2300);
@@ -20,7 +20,7 @@ public class OptionsTest {
     @Test
     public void testSetFeePerKB() throws Exception {
 
-        Options options = new Options(new JSONObject(testString));
+        Options options = Options.fromJson(new JSONObject(testString));
         options.setFeePerKB(321);
 
         Assert.assertEquals(options.getFeePerKB(), 321);
@@ -29,7 +29,7 @@ public class OptionsTest {
     @Test
     public void testSetLogoutTime() throws Exception {
 
-        Options options = new Options(new JSONObject(testString));
+        Options options = Options.fromJson(new JSONObject(testString));
         options.setLogoutTime(66000);
 
         Assert.assertEquals(options.getLogoutTime(), 66000);
@@ -38,7 +38,7 @@ public class OptionsTest {
     @Test
     public void testSetHtml5Notifications() throws Exception {
 
-        Options options = new Options(new JSONObject(testString));
+        Options options = Options.fromJson(new JSONObject(testString));
 
         options.setHtml5Notifications(true);
         Assert.assertEquals(options.isHtml5Notifications(), true);
@@ -49,7 +49,7 @@ public class OptionsTest {
 
     @Test
     public void testToJson() throws Exception {
-        Options options = new Options(new JSONObject(testString));
+        Options options = Options.fromJson(new JSONObject(testString));
         AssertJson.assertEqual(testString, options.toJson().toString());
     }
 

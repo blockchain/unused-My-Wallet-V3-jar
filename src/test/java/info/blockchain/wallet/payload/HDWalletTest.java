@@ -13,7 +13,7 @@ public class HDWalletTest {
 
     @Test
     public void testSetSeedHex() throws Exception {
-        HDWallet hdWallet = new HDWallet(new JSONObject(testString));
+        HDWallet hdWallet = HDWallet.fromJson(new JSONObject(testString));
         hdWallet.setSeedHex("test hex");
 
         Assert.assertEquals(hdWallet.getSeedHex(), "test hex");
@@ -21,7 +21,7 @@ public class HDWalletTest {
 
     @Test
     public void testSetAccounts() throws Exception {
-        HDWallet hdWallet = new HDWallet(new JSONObject(testString));
+        HDWallet hdWallet = HDWallet.fromJson(new JSONObject(testString));
 
         List<Account> accounts = new ArrayList<Account>();
         accounts.add(new Account());
@@ -33,7 +33,7 @@ public class HDWalletTest {
 
     @Test
     public void testSetPassphrase() throws Exception {
-        HDWallet hdWallet = new HDWallet(new JSONObject(testString));
+        HDWallet hdWallet = HDWallet.fromJson(new JSONObject(testString));
         hdWallet.setPassphrase("test");
 
         Assert.assertEquals(hdWallet.getPassphrase(), "test");
@@ -41,7 +41,7 @@ public class HDWalletTest {
 
     @Test
     public void testMnemonic_verified() throws Exception {
-        HDWallet hdWallet = new HDWallet(new JSONObject(testString));
+        HDWallet hdWallet = HDWallet.fromJson(new JSONObject(testString));
         hdWallet.setMnemonicVerified(true);
         Assert.assertEquals(hdWallet.isMnemonicVerified(), true);
         hdWallet.setMnemonicVerified(false);
@@ -50,7 +50,7 @@ public class HDWalletTest {
 
     @Test
     public void testSetDefaultIndex() throws Exception {
-        HDWallet hdWallet = new HDWallet(new JSONObject(testString));
+        HDWallet hdWallet = HDWallet.fromJson(new JSONObject(testString));
         hdWallet.setDefaultIndex(6);
 
         Assert.assertEquals(hdWallet.getDefaultIndex(), 6);
@@ -58,7 +58,7 @@ public class HDWalletTest {
 
     @Test
     public void testToJson() throws Exception {
-        HDWallet hdWallet = new HDWallet(new JSONObject(testString));
+        HDWallet hdWallet = HDWallet.fromJson(new JSONObject(testString));
         AssertJson.assertEqual(hdWallet.toJson().toString(), testString);
 
     }

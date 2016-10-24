@@ -9,11 +9,11 @@ import java.util.List;
 
 public class HDWallet {
 
-    private final String KEY_ACCOUNTS = "accounts";
-    private final String KEY_SEED_HEX = "seed_hex";
-    private final String KEY_PASSPHRASE = "passphrase";
-    private final String KEY_MNEMONIC_VERIFIED = "mnemonic_verified";
-    private final String KEY_DEFAULT_ACCOUNT_INDEX = "default_account_idx";
+    private static final String KEY_ACCOUNTS = "accounts";
+    private static final String KEY_SEED_HEX = "seed_hex";
+    private static final String KEY_PASSPHRASE = "passphrase";
+    private static final String KEY_MNEMONIC_VERIFIED = "mnemonic_verified";
+    private static final String KEY_DEFAULT_ACCOUNT_INDEX = "default_account_idx";
 
     private String strSeedHex = null;
     private List<Account> accounts = null;
@@ -31,20 +31,17 @@ public class HDWallet {
         this.strPassphrase = passphrase;
     }
 
-    public HDWallet(JSONObject walletJsonObject) {
-        parseJson(walletJsonObject);
-    }
-
-    private void parseJson(JSONObject walletJsonObject){
+    public static HDWallet fromJson(JSONObject walletJsonObject){
+        HDWallet hdWallet = new HDWallet();
 
         if (walletJsonObject.has(KEY_SEED_HEX)) {
-            setSeedHex(walletJsonObject.getString(KEY_SEED_HEX));
+            hdWallet.setSeedHex(walletJsonObject.getString(KEY_SEED_HEX));
         }
         if (walletJsonObject.has(KEY_PASSPHRASE)) {
-            setPassphrase(walletJsonObject.getString(KEY_PASSPHRASE));
+            hdWallet.setPassphrase(walletJsonObject.getString(KEY_PASSPHRASE));
         }
         if (walletJsonObject.has(KEY_MNEMONIC_VERIFIED)) {
-            setMnemonicVerified(walletJsonObject.getBoolean(KEY_MNEMONIC_VERIFIED));
+            hdWallet.setMnemonicVerified(walletJsonObject.getBoolean(KEY_MNEMONIC_VERIFIED));
         }
         if (walletJsonObject.has(KEY_DEFAULT_ACCOUNT_INDEX)) {
             int i;
@@ -54,7 +51,7 @@ public class HDWallet {
             } catch (Exception cce) {
                 i = walletJsonObject.getInt(KEY_DEFAULT_ACCOUNT_INDEX);
             }
-            setDefaultIndex(i);
+            hdWallet.setDefaultIndex(i);
         }
 
         if (walletJsonObject.has(KEY_ACCOUNTS)) {
@@ -66,20 +63,21 @@ public class HDWallet {
 
                     JSONObject accountJsonObj = accountsJsonArray.getJSONObject(i);
 
-                    Account account = null;
                     try {
-                        account = new Account(accountJsonObj, i);
+                        Account account = Account.fromJson(accountJsonObj);
+                        account.setRealIdx(i);
+                        walletAccounts.add(account);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
-                    walletAccounts.add(account);
                 }
 
-                setAccounts(walletAccounts);
+                hdWallet.setAccounts(walletAccounts);
 
             }
         }
+
+        return hdWallet;
     }
 
     public String getSeedHex() {

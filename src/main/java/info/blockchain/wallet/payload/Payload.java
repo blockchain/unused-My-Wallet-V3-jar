@@ -310,7 +310,7 @@ public class Payload implements Serializable {
             optionsJson = payloadJson.getJSONObject(KEY_WALLET_OPTIONS);
         }
         if (optionsJson != null) {
-            options = new Options(optionsJson);
+            options = Options.fromJson(optionsJson);
         }
 
         if (payloadJson.has(KEY_TX_NOTES)) {
@@ -354,7 +354,7 @@ public class Payload implements Serializable {
             JSONArray walletJsonArray = payloadJson.getJSONArray(KEY_HD_WALLET);
             JSONObject walletJsonObject = walletJsonArray.getJSONObject(0);
 
-            HDWallet hdw = new HDWallet(walletJsonObject);
+            HDWallet hdw = HDWallet.fromJson(walletJsonObject);
             hdWalletList.add(hdw);
 
         } else {
@@ -370,7 +370,7 @@ public class Payload implements Serializable {
 
                 for (int i = 0; i < keys.length(); i++) {
 
-                    LegacyAddress legacyAddress = new LegacyAddress(keys.getJSONObject(i));
+                    LegacyAddress legacyAddress = LegacyAddress.fromJson(keys.getJSONObject(i));
 
                     if (!seenAddrs.contains(legacyAddress.getAddress())) {
                         legacyAddressList.add(legacyAddress);
@@ -388,7 +388,7 @@ public class Payload implements Serializable {
 
                 for (int i = 0; i < address_book.length(); i++) {
 
-                    addressBookEntryList.add(new AddressBookEntry(address_book.getJSONObject(i)));
+                    addressBookEntryList.add(AddressBookEntry.fromJson(address_book.getJSONObject(i)));
                 }
             }
         }
