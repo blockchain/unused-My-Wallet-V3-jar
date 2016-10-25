@@ -61,7 +61,6 @@ public class Account {
 
         Account account = new Account();
 
-        account.setArchived(accountJsonObj.has(KEY_ARCHIVED) ? accountJsonObj.getBoolean(KEY_ARCHIVED) : false);
         if (accountJsonObj.has(KEY_ARCHIVED) && accountJsonObj.getBoolean(KEY_ARCHIVED)) {
             account.setArchived(true);
         } else {
