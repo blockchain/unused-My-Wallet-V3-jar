@@ -2,6 +2,7 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.test_data.PayloadTestData;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,7 +47,7 @@ public class PayloadTest {
         assertThat(payload.getHdWallet().getSeedHex(), is(PayloadTestData.HD_WALLET_SEED_HEX));
 
         assertThat(payload.getLegacyAddressList().get(0).getLabel(), is(PayloadTestData.ADDRESS_1_LABEL));
-        assertThat(payload.getLegacyAddressList().get(1).getLabel(), is(""));
+        Assert.assertEquals(payload.getLegacyAddressList().get(1).getLabel(), null);
 
         assertThat(payload.getLegacyAddressList().get(0).getEncryptedKey(), is(PayloadTestData.ADDRESS_1_KEY));
         assertThat(payload.getLegacyAddressList().get(1).getEncryptedKey(), is(PayloadTestData.ADDRESS_2_KEY));

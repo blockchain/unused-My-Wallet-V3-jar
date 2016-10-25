@@ -103,11 +103,11 @@ public class LegacyAddress {
                 if (legacyJsonObject.has(KEY_LABEL)) {
                     legacyAddress.strLabel = legacyJsonObject.getString(KEY_LABEL);
                 }
-                if (legacyAddress.strLabel == null || legacyAddress.strLabel.equals("null")) {
-                    legacyAddress.strLabel = "";// TODO: 20/10/16 Don't treat this as empty string
+                if (legacyAddress.strLabel != null && legacyAddress.strLabel.equals("null")) {
+                    legacyAddress.strLabel = null;
                 }
             } catch (Exception e) {
-                legacyAddress.strLabel = "";
+                legacyAddress.strLabel = null;
             }
 
             if (legacyJsonObject.has(KEY_TAG)) {
@@ -124,19 +124,19 @@ public class LegacyAddress {
                 if (legacyJsonObject.has(KEY_CREATED_DEVICE_NAME)) {
                     legacyAddress.strCreatedDeviceName = legacyJsonObject.getString(KEY_CREATED_DEVICE_NAME);
                 }
-                if (legacyAddress.strCreatedDeviceName == null || legacyAddress.strCreatedDeviceName.equals("null")) {
-                    legacyAddress.strCreatedDeviceName = "";// TODO: 20/10/16 Don't treat this as empty string
+                if (legacyAddress.strCreatedDeviceName != null && legacyAddress.strCreatedDeviceName.equals("null")) {
+                    legacyAddress.strCreatedDeviceName = null;
                 }
             } catch (Exception e) {
-                legacyAddress.strCreatedDeviceName = "";
+                legacyAddress.strCreatedDeviceName = null;
             }
 
             try {
                 if (legacyJsonObject.has(KEY_CREATED_DEVICE_VERSION)) {
                     legacyAddress.strCreatedDeviceVersion = legacyJsonObject.getString(KEY_CREATED_DEVICE_VERSION);
                 }
-                if (legacyAddress.strCreatedDeviceVersion == null || legacyAddress.strCreatedDeviceVersion.equals("null")) {
-                    legacyAddress.strCreatedDeviceVersion = "";// TODO: 20/10/16 Don't treat this as empty string
+                if (legacyAddress.strCreatedDeviceVersion != null && legacyAddress.strCreatedDeviceVersion.equals("null")) {
+                    legacyAddress.strCreatedDeviceVersion = null;
                 }
             } catch (Exception e) {
                 legacyAddress.strCreatedDeviceVersion = "";
