@@ -76,4 +76,15 @@ public class PayloadTest {
         assertThat(payload.getOptions().isHtml5Notifications(), is(false));
         assertThat(payload.getOptions().getIterations(), is(BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2));
     }
+
+    @Test
+    public void parsePayload_withCorruptLegacyAddress_shouldFail()  {
+
+        try {
+            new Payload(PayloadTestData.jsonObject_CorruptLegacyAddress, 5000);
+            Assert.assertTrue("Corrupt wallet should not pass parse", false);
+        } catch (Exception e) {
+            Assert.assertTrue("Corrupt wallet parse failed", true);
+        }
+    }
 }

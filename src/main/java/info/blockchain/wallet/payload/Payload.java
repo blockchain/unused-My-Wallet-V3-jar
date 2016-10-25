@@ -351,12 +351,14 @@ public class Payload implements Serializable {
         if (payloadJson.has(KEY_HD_WALLET)) {
             isUpgraded = true;
 
-            //Json accommodates multiple wallets. Use single wallet untill further notice
+            //Json accommodates multiple wallets. Use single wallet until further notice
             JSONArray walletJsonArray = payloadJson.getJSONArray(KEY_HD_WALLET);
-            JSONObject walletJsonObject = walletJsonArray.getJSONObject(0);
+            if (walletJsonArray.length() > 0) {
+                JSONObject walletJsonObject = walletJsonArray.getJSONObject(0);
 
-            HDWallet hdw = HDWallet.fromJson(walletJsonObject);
-            hdWalletList.add(hdw);
+                HDWallet hdw = HDWallet.fromJson(walletJsonObject);
+                hdWalletList.add(hdw);
+            }
 
         } else {
             isUpgraded = false;
@@ -372,8 +374,7 @@ public class Payload implements Serializable {
                 for (int i = 0; i < keys.length(); i++) {
 
                     LegacyAddress legacyAddress = LegacyAddress.fromJson(keys.getJSONObject(i));
-
-                    if (!seenAddrs.contains(legacyAddress.getAddress())) {
+                    if (legacyAddress != null && !seenAddrs.contains(legacyAddress.getAddress())) {
                         legacyAddressList.add(legacyAddress);
                         seenAddrs.add(legacyAddress.getAddress());
                     }

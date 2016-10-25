@@ -14,6 +14,26 @@ import static org.hamcrest.core.Is.is;
 
 public class LegacyAddressTest {
 
+    private String testString = "{\n" +
+            "      \"addr\": \"someaddress\",\n" +
+            "      \"priv\": \"someprivatekey\",\n" +
+            "      \"tag\": 0,\n" +
+            "      \"label\": \"Label 1\",\n" +
+            "      \"created_time\": 1469624014,\n" +
+            "      \"created_device_name\": \"android\",\n" +
+            "      \"created_device_version\": 6.1.31\n" +
+            "    }";
+
+    private String testStringNull = "{\n" +
+            "      \"addr\": \"someaddress\",\n" +
+            "      \"priv\": null,\n" +
+            "      \"tag\": 0,\n" +
+            "      \"label\": null,\n" +
+            "      \"created_time\": 0,\n" +
+            "      \"created_device_name\": null,\n" +
+            "      \"created_device_version\": null\n" +
+            "    }";
+
     @Test
     public void generateLegacyAddress_address_shouldMatchECKeyAddress() throws Exception {
 
@@ -115,13 +135,50 @@ public class LegacyAddressTest {
         AssertJson.assertEqual(testString, legacyAddress.toJson().toString());
     }
 
-    private String testString = "{\n" +
-            "      \"addr\": \"someaddress\",\n" +
-            "      \"priv\": \"someprivatekey\",\n" +
-            "      \"tag\": 0,\n" +
-            "      \"label\": \"Label 1\",\n" +
-            "      \"created_time\": 1469624014,\n" +
-            "      \"created_device_name\": \"android\",\n" +
-            "      \"created_device_version\": 6.1.31\n" +
-            "    }";
+    @Test
+    public void testToJsonNull() throws Exception {
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testStringNull));
+        AssertJson.assertEqual(testStringNull, legacyAddress.toJson().toString());
+    }
+
+    @Test
+    public void testToJson_shouldPass_with_only_address() throws Exception {
+
+        String testString2 = "{\n" +
+                "      \"addr\": \"someaddress\"\n" +
+                "    }";
+
+        LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString2));
+        AssertJson.assertEqual(testString2, legacyAddress.toJson().toString());
+    }
+
+    @Test
+    public void testToJson_shouldFail_if_null_address()  {
+
+        String testString2 = "{\n" +
+                "      \"addr\": null\n" +
+                "    }";
+
+        try {
+            LegacyAddress.fromJson(new JSONObject(testString2));
+            Assert.assertTrue("Should not parse legacy address with null or empty address.", false);
+        }catch (Exception e){
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void testToJson_shouldFail_if_empty_address()  {
+
+        String testString2 = "{\n" +
+                "      \"addr\": \"\",\n" +
+                "    }";
+
+        try {
+            LegacyAddress.fromJson(new JSONObject(testString2));
+            Assert.assertTrue("Should not parse legacy address with null or empty address.", false);
+        }catch (Exception e){
+            Assert.assertTrue(true);
+        }
+    }
 }

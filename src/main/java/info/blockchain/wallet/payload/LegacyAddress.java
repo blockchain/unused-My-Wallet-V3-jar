@@ -1,5 +1,6 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
@@ -66,81 +67,85 @@ public class LegacyAddress {
         this.tag = 0L;
     }
 
-    public static LegacyAddress fromJson(JSONObject legacyJsonObject){
-
+    public static LegacyAddress fromJson(JSONObject legacyJsonObject) throws PayloadException {
         LegacyAddress legacyAddress = new LegacyAddress();
+
+        if(legacyJsonObject.has(KEY_ADDR) && legacyJsonObject.get(KEY_ADDR).equals(JSONObject.NULL)){
+            throw new PayloadException("Address is null");
+        }
 
         legacyAddress.strAddress = legacyJsonObject.getString(KEY_ADDR);
 
-        if (legacyAddress.strAddress != null && !legacyAddress.strAddress.equals("null")) {
+        if (legacyAddress.strAddress == null || legacyAddress.strAddress.equals("null") || legacyAddress.strAddress.equals("")){
+            throw new PayloadException("Address is null");
+        }
 
-            try {
-                if (legacyJsonObject.has(KEY_PRIV)) {
-                    legacyAddress.strEncryptedKey = legacyJsonObject.getString(KEY_PRIV);
-                }
-                if (legacyAddress.strEncryptedKey != null && legacyAddress.strEncryptedKey.equals("null")) {
-                    legacyAddress.strEncryptedKey = null;
-                }
-            } catch (Exception e) {
+        try {
+            if (legacyJsonObject.has(KEY_PRIV)) {
+                legacyAddress.strEncryptedKey = legacyJsonObject.getString(KEY_PRIV);
+            }
+            if (legacyAddress.strEncryptedKey != null && legacyAddress.strEncryptedKey.equals("null")) {
                 legacyAddress.strEncryptedKey = null;
             }
+        } catch (Exception e) {
+            legacyAddress.strEncryptedKey = null;
+        }
 
-            if (legacyAddress.strEncryptedKey.length() == 0) {
-                legacyAddress.watchOnly = true;
-            }
+        if (legacyAddress.strEncryptedKey == null || legacyAddress.strEncryptedKey.length() == 0) {
+            legacyAddress.watchOnly = true;
+        }
 
-            if (legacyJsonObject.has(KEY_CREATED_TIME)) {
-                try {
-                    legacyAddress.created = legacyJsonObject.getLong(KEY_CREATED_TIME);
-                } catch (Exception e) {
-                    legacyAddress.created = 0L;
-                }
-            } else {
+        if (legacyJsonObject.has(KEY_CREATED_TIME)) {
+            try {
+                legacyAddress.created = legacyJsonObject.getLong(KEY_CREATED_TIME);
+            } catch (Exception e) {
                 legacyAddress.created = 0L;
             }
+        } else {
+            legacyAddress.created = 0L;
+        }
 
-            try {
-                if (legacyJsonObject.has(KEY_LABEL)) {
-                    legacyAddress.strLabel = legacyJsonObject.getString(KEY_LABEL);
-                }
-                if (legacyAddress.strLabel != null && legacyAddress.strLabel.equals("null")) {
-                    legacyAddress.strLabel = null;
-                }
-            } catch (Exception e) {
+        try {
+            if (legacyJsonObject.has(KEY_LABEL)) {
+                legacyAddress.strLabel = legacyJsonObject.getString(KEY_LABEL);
+            }
+            if (legacyAddress.strLabel != null && legacyAddress.strLabel.equals("null")) {
                 legacyAddress.strLabel = null;
             }
+        } catch (Exception e) {
+            legacyAddress.strLabel = null;
+        }
 
-            if (legacyJsonObject.has(KEY_TAG)) {
-                try {
-                    legacyAddress.tag = legacyJsonObject.getLong(KEY_TAG);
-                } catch (Exception e) {
-                    legacyAddress.tag = 0L;
-                }
-            } else {
+        if (legacyJsonObject.has(KEY_TAG)) {
+            try {
+                legacyAddress.tag = legacyJsonObject.getLong(KEY_TAG);
+            } catch (Exception e) {
                 legacyAddress.tag = 0L;
             }
+        } else {
+            legacyAddress.tag = 0L;
+        }
 
-            try {
-                if (legacyJsonObject.has(KEY_CREATED_DEVICE_NAME)) {
-                    legacyAddress.strCreatedDeviceName = legacyJsonObject.getString(KEY_CREATED_DEVICE_NAME);
-                }
-                if (legacyAddress.strCreatedDeviceName != null && legacyAddress.strCreatedDeviceName.equals("null")) {
-                    legacyAddress.strCreatedDeviceName = null;
-                }
-            } catch (Exception e) {
+        try {
+            if (legacyJsonObject.has(KEY_CREATED_DEVICE_NAME)) {
+                legacyAddress.strCreatedDeviceName = legacyJsonObject.getString(KEY_CREATED_DEVICE_NAME);
+            }
+            if (legacyAddress.strCreatedDeviceName != null && legacyAddress.strCreatedDeviceName.equals("null")) {
                 legacyAddress.strCreatedDeviceName = null;
             }
+        } catch (Exception e) {
+            legacyAddress.strCreatedDeviceName = null;
+        }
 
-            try {
-                if (legacyJsonObject.has(KEY_CREATED_DEVICE_VERSION)) {
-                    legacyAddress.strCreatedDeviceVersion = legacyJsonObject.getString(KEY_CREATED_DEVICE_VERSION);
-                }
-                if (legacyAddress.strCreatedDeviceVersion != null && legacyAddress.strCreatedDeviceVersion.equals("null")) {
-                    legacyAddress.strCreatedDeviceVersion = null;
-                }
-            } catch (Exception e) {
-                legacyAddress.strCreatedDeviceVersion = "";
+        try {
+            if (legacyJsonObject.has(KEY_CREATED_DEVICE_VERSION)) {
+                legacyAddress.strCreatedDeviceVersion = legacyJsonObject.getString(KEY_CREATED_DEVICE_VERSION);
             }
+            if (legacyAddress.strCreatedDeviceVersion != null && legacyAddress.strCreatedDeviceVersion.equals("null")) {
+                legacyAddress.strCreatedDeviceVersion = null;
+            }
+        } catch (Exception e) {
+            legacyAddress.strCreatedDeviceVersion = null;
         }
 
         return legacyAddress;
@@ -277,15 +282,11 @@ public class LegacyAddress {
 
         if (strAddress == null || "".equals(strAddress)) {
             throw new Exception("Address null or empty");
-        }
-
-        if (strAddress == null || !"".equals(strAddress)) {
-            obj.put(KEY_ADDR, strAddress);
         } else {
-            obj.put(KEY_ADDR, JSONObject.NULL);
+            obj.put(KEY_ADDR, strAddress);
         }
 
-        if (strEncryptedKey == null || !"".equals(strEncryptedKey)) {
+        if (strEncryptedKey != null && !"".equals(strEncryptedKey)) {
             obj.put(KEY_PRIV, strEncryptedKey);
         } else {
             obj.put(KEY_PRIV, JSONObject.NULL);
@@ -305,13 +306,13 @@ public class LegacyAddress {
             obj.put(KEY_CREATED_TIME, 0L);
         }
 
-        if (!"".equals(strCreatedDeviceName)) {
+        if (strCreatedDeviceName != null && !"".equals(strCreatedDeviceName)) {
             obj.put(KEY_CREATED_DEVICE_NAME, strCreatedDeviceName);
         } else {
             obj.put(KEY_CREATED_DEVICE_NAME, JSONObject.NULL);
         }
 
-        if (!"".equals(strCreatedDeviceVersion)) {
+        if (strCreatedDeviceVersion != null && !"".equals(strCreatedDeviceVersion)) {
             obj.put(KEY_CREATED_DEVICE_VERSION, strCreatedDeviceVersion);
         } else {
             obj.put(KEY_CREATED_DEVICE_VERSION, JSONObject.NULL);

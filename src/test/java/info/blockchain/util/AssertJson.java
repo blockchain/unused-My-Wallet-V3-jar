@@ -17,14 +17,11 @@ public class AssertJson {
 
         for (String key : jsonA.keySet()) {
             if (!(jsonB.get(key) instanceof JSONObject) && !(jsonB.get(key) instanceof JSONArray) && !(jsonB.get(key) instanceof String)) {
-                System.out.println("Not String - "+key);
-                Assert.assertEquals(jsonB.get(key), jsonA.get(key));
+                Assert.assertEquals(jsonA.toString(4)+ "\n"+ jsonB.toString(4),jsonB.get(key), jsonA.get(key));
             } else if (jsonB.get(key) instanceof String){
-                System.out.println("String - "+key);
-                Assert.assertEquals(jsonB.getString(key), jsonA.getString(key));
+                Assert.assertEquals(jsonA.toString(4)+ "\n"+ jsonB.toString(4),jsonB.getString(key), jsonA.getString(key));
             } else {
                 //Skip json element (Have separate test)
-                System.out.println("skipping - "+key);
             }
         }
     }
