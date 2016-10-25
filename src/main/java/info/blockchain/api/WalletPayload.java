@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,7 +99,7 @@ public class WalletPayload implements BaseApi {
 
         StringBuilder args = new StringBuilder();
 
-        String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString(), StandardCharsets.UTF_8.toString());
+        String urlEncodedPayload = URLEncoder.encode(encryptedPayload.toString());
 
         args.append("guid=");
         args.append(URLEncoder.encode(guid, "utf-8"));
