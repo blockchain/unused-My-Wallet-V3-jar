@@ -1,6 +1,8 @@
 package info.blockchain.wallet.payload;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.WalletPayload;
@@ -15,6 +17,7 @@ import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
+import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -26,12 +29,12 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -204,14 +207,15 @@ public class PayloadManager {
 
         if (payload == null) return false;
 
-        if (cached_payload != null && cached_payload.equals(payload.dumpJSON().toString())) {
-            return true;
-        }
-
-        String method = isNew ? "insert" : "update";
-
         try {
-            Pair pair = payload.encryptPayload(payload.dumpJSON().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
+            if (cached_payload != null && cached_payload.equals(payload.toJson().toString())) {
+                return true;
+            }
+
+            String method = isNew ? "insert" : "update";
+
+
+            Pair pair = bciWallet.encryptPayload(payload.toJson().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
             String newPayloadChecksum = (String) pair.getLeft();
@@ -220,7 +224,7 @@ public class PayloadManager {
             new WalletPayload().savePayloadToServer(method,
                     payload.getGuid(),
                     payload.getSharedKey(),
-                    payload.getLegacyAddresses(),
+                    payload.getLegacyAddressList(),
                     encryptedPayload,
                     bciWallet.isSyncPubkeys(),
                     newPayloadChecksum,
@@ -242,8 +246,8 @@ public class PayloadManager {
     /**
      * Write to current client payload to cache.
      */
-    public void cachePayload(Payload payload) throws JSONException{
-        cached_payload = payload.dumpJSON().toString();
+    public void cachePayload(Payload payload) throws Exception{
+        cached_payload = payload.toJson().toString();
     }
 
     private void clearCachedPayload() {
@@ -428,8 +432,8 @@ public class PayloadManager {
         }
 
         // Balance for legacy addresses
-        if (payload.getLegacyAddresses().size() > 0) {
-            List<String> legacyAddresses = payload.getLegacyAddressStrings();
+        if (payload.getLegacyAddressList().size() > 0) {
+            List<String> legacyAddresses = payload.getLegacyAddressStringList();
             String[] addresses = legacyAddresses.toArray(new String[legacyAddresses.size()]);
             MultiAddrFactory.getInstance().refreshLegacyAddressData(addresses, false);
         }
@@ -555,9 +559,9 @@ public class PayloadManager {
     }
 
     public boolean addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
-        List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddresses();
+        List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddressList();
         updatedLegacyAddresses.add(legacyAddress);
-        payload.setLegacyAddresses(updatedLegacyAddresses);
+        payload.setLegacyAddressList(updatedLegacyAddresses);
         return savePayloadToServer();
     }
 
@@ -641,4 +645,22 @@ public class PayloadManager {
 
         return keys;
     }
+
+    public BiMap<String, Integer> getXpubToAccountIndexMap() {
+
+        BiMap<String, Integer> xpubToAccountIndexMap = HashBiMap.create();
+
+        List<Account> accountList = payload.getHdWallet().getAccounts();
+
+        for (Account account : accountList) {
+            xpubToAccountIndexMap.put(account.getXpub(), account.getRealIdx());
+        }
+
+        return xpubToAccountIndexMap;
+    }
+
+    public Map<Integer, String> getAccountIndexToXpubMap() {
+        return getXpubToAccountIndexMap().inverse();
+    }
+
 }

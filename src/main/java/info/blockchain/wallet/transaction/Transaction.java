@@ -1,4 +1,6 @@
-package info.blockchain.wallet.payload;
+package info.blockchain.wallet.transaction;
+
+import info.blockchain.wallet.payload.PayloadManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;

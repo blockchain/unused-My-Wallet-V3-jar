@@ -1,5 +1,6 @@
 package info.blockchain.api;
 
+import info.blockchain.wallet.transaction.Transaction;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.WebUtil;
 
@@ -16,12 +17,12 @@ public class TransactionDetails implements BaseApi {
         txDetailsUrl = PersistentUrls.getInstance().getTransactionDetailsUrl();
     }
 
-    public info.blockchain.wallet.payload.Transaction getTransactionDetails(String hash) throws Exception {
+    public Transaction getTransactionDetails(String hash) throws Exception {
 
         String response = WebUtil.getInstance().getURL(txDetailsUrl + hash + "?format=json");
 
         if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
-            return new info.blockchain.wallet.payload.Transaction(new JSONObject(response));
+            return new Transaction(new JSONObject(response));
         } else {
             return null;
         }

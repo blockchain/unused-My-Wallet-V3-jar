@@ -193,4 +193,24 @@ public class PayloadTestData {
             "    ],\n" +
             "    \"guid\": \"" + GUID + "\"\n" +
             "}";
+
+    /*
+    Null legacy address
+     */
+    public static String jsonObject_CorruptLegacyAddress = "{\n" +
+            "    \"sharedKey\": \"" + SHARED_KEY + "\",\n" +
+            "    \"hd_wallets\": [],\n" +
+            "    \"keys\": [\n" +
+            "        {\n" +
+            "            \"created_time\": 1427898445750,\n" +
+            "            \"created_device_version\": \"1.0\",\n" +
+            "            \"priv\": \"nkdmAFsgDNT1mVzPm7GGj6+Z4sL7gnY/PxrWFe6Yrj8hzbHOik1ZyVes1Ryz5NTUkodnu6Py8LuqKD3a6jQ1WA==\",\n" +
+            "            \"tag\": 0,\n" +
+            "            \"label\": \"Weird chars !£@%@*&^!@)(&!£\\\":<>?\",\n" +
+            "            \"addr\": null,\n" +
+            "            \"created_device_name\": \"javascript_web\"\n" +
+            "        }\n" +
+            "    ],\n" +
+            "    \"guid\": \"" + GUID + "\"\n" +
+            "}";
 }

@@ -1,13 +1,19 @@
 package info.blockchain.wallet.payload;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+Could be used to represent a collection of all legacy addresses as a single account
+ */
 public class ImportedAccount extends Account {
+
+    private final String KEY_LABEL = "label";
+    private final String KEY_AMOUNT = "amount";
+    private final String KEY_ARCHIVED = "archived";
 
     private List<LegacyAddress> legacyAddresses = null;
 
@@ -16,14 +22,10 @@ public class ImportedAccount extends Account {
         this.legacyAddresses = new ArrayList<LegacyAddress>();
     }
 
-    public ImportedAccount(String label, List<LegacyAddress> legacyAddresses, List<String> tags, long amount) {
+    public ImportedAccount(String label, List<LegacyAddress> legacyAddresses, long amount) {
         this.isArchived = false;
-        this.idxChangeAddresses = 0;
-        this.receiveAddresses = new ArrayList<ReceiveAddress>();
-
         this.strLabel = label;
         this.legacyAddresses = legacyAddresses;
-        this.tags = tags;
         this.amount = amount;
     }
 
@@ -35,27 +37,13 @@ public class ImportedAccount extends Account {
         this.legacyAddresses = addrs;
     }
 
-    public JSONObject dumpJSON() throws JSONException {
+    public JSONObject toJson() throws JSONException {
 
-        JSONObject obj = super.dumpJSON();
+        JSONObject obj = super.toJson();
 
-        obj.put("archived", isArchived);
-        obj.put("change_addresses", idxChangeAddresses);
-        obj.put("label", strLabel == null ? "" : strLabel);
-
-        JSONArray receives = new JSONArray();
-        for (ReceiveAddress receiveAddress : receiveAddresses) {
-            receives.put(receiveAddress.dumpJSON());
-        }
-        obj.put("receive_addresses", receives);
-
-        JSONArray _tags = new JSONArray();
-        for (String tag : tags) {
-            _tags.put(tag);
-        }
-        obj.put("tags", _tags);
-
-        obj.put("amount", amount);
+        obj.put(KEY_ARCHIVED, isArchived);
+        obj.put(KEY_LABEL, strLabel == null ? JSONObject.NULL : strLabel);
+        obj.put(KEY_AMOUNT, amount);
 
         return obj;
     }

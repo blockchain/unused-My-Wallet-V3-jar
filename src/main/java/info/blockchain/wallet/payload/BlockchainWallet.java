@@ -27,6 +27,17 @@ public class BlockchainWallet {
     private static final int DEFAULT_PBKDF2_ITERATIONS_V1_A = 1;
     private static final int DEFAULT_PBKDF2_ITERATIONS_V1_B = 10;
 
+    private final String KEY_VERSION = "version";
+    private final String KEY_PAYLOAD = "payload";//encrypted payload
+    private final String KEY_PBKDF2_ITERATIONS = "pbkdf2_iterations";
+
+    private final String KEY_EXTRA_SEED = "extra_seed";
+    private final String KEY_PAYLOAD_CHECKSUM = "payload_checksum";
+    private final String KEY_WAR_CHECKSUM = "war_checksum";
+    private final String KEY_LANGUAGE = "language";
+    private final String KEY_STORAGE_TOKEN = "storage_token";
+    private final String KEY_SYNC_PUBKEYS = "sync_pubkeys";
+
     private String extraSeed;
     private String payloadChecksum;
     private String warChecksum;
@@ -37,20 +48,9 @@ public class BlockchainWallet {
     private String unparsedWalletData;//Un-parsed wallet data - Debugging purposes
     private Payload payload;
 
-    private final String KEY_EXTRA_SEED = "extra_seed";
-    private final String KEY_PAYLOAD_CHECKSUM = "payload_checksum";
-    private final String KEY_PAYLOAD = "payload";
-    private final String KEY_WAR_CHECKSUM = "war_checksum";
-    private final String KEY_LANGUAGE = "language";
-    private final String KEY_STORAGE_TOKEN = "storage_token";
-    private final String KEY_SYNC_PUBKEYS = "sync_pubkeys";
-
     //Payload wrapper
     private int pbkdf2Iterations;
     private double version;
-
-    private final String KEY_VERSION = "version";
-    private final String KEY_PBKDF2_ITERATIONS = "pbkdf2_iterations";
 
     /**
      *
@@ -58,12 +58,12 @@ public class BlockchainWallet {
      * @throws UnsupportedEncodingException
      * @throws NoSuchAlgorithmException
      */
-    public BlockchainWallet(Payload payload) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public BlockchainWallet(Payload payload) throws Exception {
 
         this.pbkdf2Iterations = DEFAULT_PBKDF2_ITERATIONS_V2;
         this.version = 3.0;
         this.syncPubkeys = false;
-        this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.dumpJSON().toString().getBytes("UTF-8"))));
+        this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.toJson().toString().getBytes("UTF-8"))));
     }
 
     public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
@@ -276,6 +276,19 @@ public class BlockchainWallet {
 
     public String getUnparsedWalletData() {
         return unparsedWalletData;
+    }
+
+    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws Exception {
+
+        String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
+        JSONObject rootObj = new JSONObject();
+        rootObj.put(KEY_VERSION, version);
+        rootObj.put(KEY_PBKDF2_ITERATIONS, iterations);
+        rootObj.put(KEY_PAYLOAD, payloadEncrypted);
+
+        String checkSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(rootObj.toString().getBytes("UTF-8"))));
+
+        return Pair.of(checkSum, rootObj);
     }
 
     @Override

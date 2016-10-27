@@ -2,6 +2,7 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.test_data.PayloadTestData;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,8 +22,8 @@ public class PayloadTest {
         assertThat(payload.getDoublePasswordHash(), is(PayloadTestData.DPASSWORD_HASH));
         assertThat(payload.isDoubleEncrypted(), is(Boolean.parseBoolean(PayloadTestData.DOUBLE_ENCRYPTED)));
         assertThat(payload.getHdWallet().getAccounts().size(), is(PayloadTestData.TOTAL_ACCOUNTS));
-        assertThat(payload.getLegacyAddresses().size(), is(PayloadTestData.TOTAL_LEGACY_ADDRESSES));
-        assertThat(payload.getAddressBookEntries().size(), is(PayloadTestData.TOTAL_ADDRESSBOOK_ENTRIES));
+        assertThat(payload.getLegacyAddressList().size(), is(PayloadTestData.TOTAL_LEGACY_ADDRESSES));
+        assertThat(payload.getAddressBookEntryList().size(), is(PayloadTestData.TOTAL_ADDRESSBOOK_ENTRIES));
 
         assertThat(payload.getOptions().isHtml5Notifications(), is(Boolean.parseBoolean(PayloadTestData.HTML_NOTIFICATIONS)));
         assertThat(payload.getOptions().getIterations(), is(PayloadTestData.PDKDF2_ITERATIONS));
@@ -45,17 +46,17 @@ public class PayloadTest {
 
         assertThat(payload.getHdWallet().getSeedHex(), is(PayloadTestData.HD_WALLET_SEED_HEX));
 
-        assertThat(payload.getLegacyAddresses().get(0).getLabel(), is(PayloadTestData.ADDRESS_1_LABEL));
-        assertThat(payload.getLegacyAddresses().get(1).getLabel(), is(""));
+        assertThat(payload.getLegacyAddressList().get(0).getLabel(), is(PayloadTestData.ADDRESS_1_LABEL));
+        Assert.assertEquals(payload.getLegacyAddressList().get(1).getLabel(), null);
 
-        assertThat(payload.getLegacyAddresses().get(0).getEncryptedKey(), is(PayloadTestData.ADDRESS_1_KEY));
-        assertThat(payload.getLegacyAddresses().get(1).getEncryptedKey(), is(PayloadTestData.ADDRESS_2_KEY));
+        assertThat(payload.getLegacyAddressList().get(0).getEncryptedKey(), is(PayloadTestData.ADDRESS_1_KEY));
+        assertThat(payload.getLegacyAddressList().get(1).getEncryptedKey(), is(PayloadTestData.ADDRESS_2_KEY));
 
-        assertThat(payload.getLegacyAddresses().get(0).getAddress(), is(PayloadTestData.ADDRESS_1_ADDRESS));
-        assertThat(payload.getLegacyAddresses().get(1).getAddress(), is(PayloadTestData.ADDRESS_2_ADDRESS));
+        assertThat(payload.getLegacyAddressList().get(0).getAddress(), is(PayloadTestData.ADDRESS_1_ADDRESS));
+        assertThat(payload.getLegacyAddressList().get(1).getAddress(), is(PayloadTestData.ADDRESS_2_ADDRESS));
 
-        assertThat(payload.getAddressBookEntries().get(0).getLabel(), is(PayloadTestData.ADDRESSBOOK_1_LABEL));
-        assertThat(payload.getAddressBookEntries().get(0).getAddress(), is(PayloadTestData.ADDRESSBOOK_1_ADDRESS));
+        assertThat(payload.getAddressBookEntryList().get(0).getLabel(), is(PayloadTestData.ADDRESSBOOK_1_LABEL));
+        assertThat(payload.getAddressBookEntryList().get(0).getAddress(), is(PayloadTestData.ADDRESSBOOK_1_ADDRESS));
     }
 
     /**
@@ -74,5 +75,16 @@ public class PayloadTest {
 
         assertThat(payload.getOptions().isHtml5Notifications(), is(false));
         assertThat(payload.getOptions().getIterations(), is(BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2));
+    }
+
+    @Test
+    public void parsePayload_withCorruptLegacyAddress_shouldFail()  {
+
+        try {
+            new Payload(PayloadTestData.jsonObject_CorruptLegacyAddress, 5000);
+            Assert.assertTrue("Corrupt wallet should not pass parse", false);
+        } catch (Exception e) {
+            Assert.assertTrue("Corrupt wallet parse failed", true);
+        }
     }
 }

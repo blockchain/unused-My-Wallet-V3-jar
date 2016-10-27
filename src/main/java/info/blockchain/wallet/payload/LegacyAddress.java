@@ -1,5 +1,6 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
@@ -16,6 +17,14 @@ public class LegacyAddress {
 
     public static final long NORMAL_ADDRESS = 0L;
     public static final long ARCHIVED_ADDRESS = 2L;
+
+    private static final String KEY_ADDR = "addr";
+    private static final String KEY_PRIV = "priv";
+    private static final String KEY_LABEL = "label";
+    private static final String KEY_CREATED_TIME = "created_time";
+    private static final String KEY_TAG = "tag";
+    private static final String KEY_CREATED_DEVICE_NAME = "created_device_name";
+    private static final String KEY_CREATED_DEVICE_VERSION = "created_device_version";
 
     private String strEncryptedKey = null;
     private long created = 0L;
@@ -56,6 +65,90 @@ public class LegacyAddress {
         this.strAddress = address;
         this.strLabel = "";
         this.tag = 0L;
+    }
+
+    public static LegacyAddress fromJson(JSONObject legacyJsonObject) throws PayloadException {
+        LegacyAddress legacyAddress = new LegacyAddress();
+
+        if(legacyJsonObject.has(KEY_ADDR) && legacyJsonObject.get(KEY_ADDR).equals(JSONObject.NULL)){
+            throw new PayloadException("Address is null");
+        }
+
+        legacyAddress.strAddress = legacyJsonObject.getString(KEY_ADDR);
+
+        if (legacyAddress.strAddress == null || legacyAddress.strAddress.equals("null") || legacyAddress.strAddress.equals("")){
+            throw new PayloadException("Address is null");
+        }
+
+        try {
+            if (legacyJsonObject.has(KEY_PRIV)) {
+                legacyAddress.strEncryptedKey = legacyJsonObject.getString(KEY_PRIV);
+            }
+            if (legacyAddress.strEncryptedKey != null && legacyAddress.strEncryptedKey.equals("null")) {
+                legacyAddress.strEncryptedKey = null;
+            }
+        } catch (Exception e) {
+            legacyAddress.strEncryptedKey = null;
+        }
+
+        if (legacyAddress.strEncryptedKey == null || legacyAddress.strEncryptedKey.length() == 0) {
+            legacyAddress.watchOnly = true;
+        }
+
+        if (legacyJsonObject.has(KEY_CREATED_TIME)) {
+            try {
+                legacyAddress.created = legacyJsonObject.getLong(KEY_CREATED_TIME);
+            } catch (Exception e) {
+                legacyAddress.created = 0L;
+            }
+        } else {
+            legacyAddress.created = 0L;
+        }
+
+        try {
+            if (legacyJsonObject.has(KEY_LABEL)) {
+                legacyAddress.strLabel = legacyJsonObject.getString(KEY_LABEL);
+            }
+            if (legacyAddress.strLabel != null && legacyAddress.strLabel.equals("null")) {
+                legacyAddress.strLabel = null;
+            }
+        } catch (Exception e) {
+            legacyAddress.strLabel = null;
+        }
+
+        if (legacyJsonObject.has(KEY_TAG)) {
+            try {
+                legacyAddress.tag = legacyJsonObject.getLong(KEY_TAG);
+            } catch (Exception e) {
+                legacyAddress.tag = 0L;
+            }
+        } else {
+            legacyAddress.tag = 0L;
+        }
+
+        try {
+            if (legacyJsonObject.has(KEY_CREATED_DEVICE_NAME)) {
+                legacyAddress.strCreatedDeviceName = legacyJsonObject.getString(KEY_CREATED_DEVICE_NAME);
+            }
+            if (legacyAddress.strCreatedDeviceName != null && legacyAddress.strCreatedDeviceName.equals("null")) {
+                legacyAddress.strCreatedDeviceName = null;
+            }
+        } catch (Exception e) {
+            legacyAddress.strCreatedDeviceName = null;
+        }
+
+        try {
+            if (legacyJsonObject.has(KEY_CREATED_DEVICE_VERSION)) {
+                legacyAddress.strCreatedDeviceVersion = legacyJsonObject.getString(KEY_CREATED_DEVICE_VERSION);
+            }
+            if (legacyAddress.strCreatedDeviceVersion != null && legacyAddress.strCreatedDeviceVersion.equals("null")) {
+                legacyAddress.strCreatedDeviceVersion = null;
+            }
+        } catch (Exception e) {
+            legacyAddress.strCreatedDeviceVersion = null;
+        }
+
+        return legacyAddress;
     }
 
     public String getEncryptedKey() {
@@ -139,20 +232,10 @@ public class LegacyAddress {
 
     public ECKey getECKey(CharSequenceX secondPassword) throws Exception {
 
-        /*
-        Log.i("LegacyAddress double encryptedPairingCode", strEncryptedKey);
-        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getSharedKey());
-        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().getTempDoubleEncryptPassword().toString());
-        Log.i("LegacyAddress double encryptedPairingCode", "hash:" + DoubleEncryptionFactory.getInstance().validateSecondPassword(PayloadManager.getInstance().get().getDoublePasswordHash(), PayloadManager.getInstance().get().getSharedKey(), PayloadManager.getInstance().getTempDoubleEncryptPassword(), PayloadManager.getInstance().get().getIterations()));
-        Log.i("LegacyAddress double encryptedPairingCode", PayloadManager.getInstance().get().getDoublePasswordHash());
-        Log.i("LegacyAddress double encryptedPairingCode", "" + PayloadManager.getInstance().get().getIterations());
-        */
-
         String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey,
                 PayloadManager.getInstance().getPayload().getSharedKey(),
                 secondPassword.toString(),
                 PayloadManager.getInstance().getPayload().getDoubleEncryptionPbkdf2Iterations());
-//    		Log.i("LegacyAddress double encryptedPairingCode", encryptedKey);
 
         return getECKey(encryptedKey);
     }
@@ -193,45 +276,46 @@ public class LegacyAddress {
         return ecKey;
     }
 
-    public JSONObject dumpJSON() {
+    public JSONObject toJson() throws Exception {
 
         JSONObject obj = new JSONObject();
 
         if (strAddress == null || "".equals(strAddress)) {
-            // TODO should probably throw an error here and not sync
-            return obj;
-        }
-
-        obj.put("addr", strAddress);
-
-        if (!"".equals(strEncryptedKey)) {
-            obj.put("priv", strEncryptedKey);
+            throw new Exception("Address null or empty");
         } else {
-            obj.put("priv", JSONObject.NULL);
+            obj.put(KEY_ADDR, strAddress);
         }
 
-        obj.put("tag", tag);
+        if (strEncryptedKey != null && !"".equals(strEncryptedKey)) {
+            obj.put(KEY_PRIV, strEncryptedKey);
+        } else {
+            obj.put(KEY_PRIV, JSONObject.NULL);
+        }
+
+        obj.put(KEY_TAG, tag);
 
         if (strLabel != null && !"".equals(strLabel)) {
-            obj.put("label", strLabel);
+            obj.put(KEY_LABEL, strLabel);
+        } else {
+            obj.put(KEY_LABEL, JSONObject.NULL);
         }
 
         if (created >= 0L) {
-            obj.put("created_time", created);
+            obj.put(KEY_CREATED_TIME, created);
         } else {
-            obj.put("created_time", 0L);
+            obj.put(KEY_CREATED_TIME, 0L);
         }
 
-        if (!"".equals(strCreatedDeviceName)) {
-            obj.put("created_device_name", strCreatedDeviceName);
+        if (strCreatedDeviceName != null && !"".equals(strCreatedDeviceName)) {
+            obj.put(KEY_CREATED_DEVICE_NAME, strCreatedDeviceName);
         } else {
-            obj.put("created_device_name", JSONObject.NULL);
+            obj.put(KEY_CREATED_DEVICE_NAME, JSONObject.NULL);
         }
 
-        if (!"".equals(strCreatedDeviceVersion)) {
-            obj.put("created_device_version", strCreatedDeviceVersion);
+        if (strCreatedDeviceVersion != null && !"".equals(strCreatedDeviceVersion)) {
+            obj.put(KEY_CREATED_DEVICE_VERSION, strCreatedDeviceVersion);
         } else {
-            obj.put("created_device_version", JSONObject.NULL);
+            obj.put(KEY_CREATED_DEVICE_VERSION, JSONObject.NULL);
         }
 
         return obj;

@@ -1,4 +1,4 @@
-package info.blockchain.wallet.payload;
+package info.blockchain.wallet.transaction;
 
 import java.util.Map;
 

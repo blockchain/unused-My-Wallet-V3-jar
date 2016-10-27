@@ -145,7 +145,7 @@ public class HDPayloadBridge {
         //
         // create HD wallet and sync w/ payload
         //
-        if (payload.getHdWallets() == null || payload.getHdWallets().size() == 0) {
+        if (payload.getHdWalletList() == null || payload.getHdWalletList().size() == 0) {
 
             String xpub;
             int attempts = 0;
