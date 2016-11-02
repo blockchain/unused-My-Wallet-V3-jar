@@ -14,11 +14,11 @@ public class Cache{
     public static Cache fromJson(JSONObject cacheObj){
         Cache cache = new Cache();
 
-        if (cacheObj.has(KEY_RECEIVE_ACCOUNT)) {
+        if (cacheObj.has(KEY_RECEIVE_ACCOUNT) && !cacheObj.isNull(KEY_RECEIVE_ACCOUNT)) {
             cache.receiveAccount = cacheObj.getString(KEY_RECEIVE_ACCOUNT);
         }
 
-        if (cacheObj.has(KEY_CHANGE_ACCOUNT)) {
+        if (cacheObj.has(KEY_CHANGE_ACCOUNT) && !cacheObj.isNull(KEY_CHANGE_ACCOUNT)) {
             cache.changeAccount = cacheObj.getString(KEY_CHANGE_ACCOUNT);
         }
 
@@ -45,8 +45,13 @@ public class Cache{
 
         JSONObject obj = new JSONObject();
 
-        obj.put(KEY_RECEIVE_ACCOUNT, receiveAccount == null ? JSONObject.NULL : receiveAccount);
-        obj.put(KEY_CHANGE_ACCOUNT, changeAccount == null ? JSONObject.NULL : changeAccount);
+        if(receiveAccount != null) {
+            obj.put(KEY_RECEIVE_ACCOUNT, receiveAccount);
+        }
+
+        if(changeAccount != null) {
+            obj.put(KEY_CHANGE_ACCOUNT, changeAccount);
+        }
 
         return obj;
     }

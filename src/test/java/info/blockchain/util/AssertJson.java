@@ -15,7 +15,8 @@ public class AssertJson {
             Assert.assertTrue("json keys missing", false);
         }
 
-        for (String key : jsonA.keySet()) {
+        for (Object keyO : jsonA.keySet()) {
+            String key = (String)keyO;
             if (!(jsonB.get(key) instanceof JSONObject) && !(jsonB.get(key) instanceof JSONArray) && !(jsonB.get(key) instanceof String)) {
                 Assert.assertEquals(jsonA.toString(4)+ "\n"+ jsonB.toString(4),jsonB.get(key), jsonA.get(key));
             } else if (jsonB.get(key) instanceof String){

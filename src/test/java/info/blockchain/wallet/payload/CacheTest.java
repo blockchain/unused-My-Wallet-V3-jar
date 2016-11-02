@@ -41,6 +41,16 @@ public class CacheTest {
         AssertJson.assertEqual(testString, cache.toJson().toString());
     }
 
+    @Test
+    public void testSetChangeAccountNull() throws Exception {
+        Cache cache = Cache.fromJson(new JSONObject(testString));
+        cache.setChangeAccount(null);
+        cache.setReceiveAccount(null);
+
+        Assert.assertTrue(!cache.toJson().has("changeAccount"));
+        Assert.assertTrue(!cache.toJson().has("receiveAccount"));
+    }
+
     private final String testString = "{\n" +
             "            \"receiveAccount\": \"xpub1\",\n" +
             "            \"changeAccount\": \"xpub2\"\n" +
