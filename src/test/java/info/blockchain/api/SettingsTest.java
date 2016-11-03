@@ -236,25 +236,6 @@ public class SettingsTest {
     }
 
     @Test
-    public void testEnableEmailAndSmsNotifications() throws Exception {
-
-        settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_ALL, new Settings.ResultListener() {
-            public void onSuccess() {
-                assertThat("notifications toggle", settingsApi.isNotificationsOn());
-                assertThat(settingsApi.getNotificationTypes(), CoreMatchers.hasItem(Settings.NOTIFICATION_TYPE_ALL));
-            }
-
-            public void onFail() {
-                fail("");
-            }
-
-            public void onBadRequest() {
-                fail("");
-            }
-        });
-    }
-
-    @Test
     public void testDisableNotifications() throws Exception {
 
         settingsApi.enableNotification(Settings.NOTIFICATION_TYPE_EMAIL, new Settings.ResultListener() {

@@ -81,7 +81,10 @@ public class WebUtil {
 //					Log.d("postURL", "return code " + error);
                 }
 
-                Thread.sleep(5000);
+                // Sleep unless last request
+                if (ii != requestRetry - 1) {
+                    Thread.sleep(5000);
+                }
             } catch (Exception e) {
                 throw new Exception("Network error" + e.getMessage());
             } finally {
