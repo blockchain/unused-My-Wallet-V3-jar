@@ -131,19 +131,6 @@ public class Payload implements Serializable {
         return legacyAddressList;
     }
 
-    public List<LegacyAddress> getActiveLegacyAddressList() {
-        List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
-
-        for (LegacyAddress legacyAddress : legacyAddressList) {
-            if (legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS &&
-                    !legacyAddress.isWatchOnly()) {
-                addrs.add(legacyAddress);
-            }
-        }
-
-        return addrs;
-    }
-
     public List<String> getLegacyAddressStringList() {
 
         List<String> addrs = new ArrayList<String>();
@@ -166,24 +153,23 @@ public class Payload implements Serializable {
         return addrs;
     }
 
-    public List<String> getLegacyAddressStringList(long tag) {
+    public List<LegacyAddress> getLegacyAddressList(long tag) {
 
-        List<String> addrs = new ArrayList<String>();
+        List<LegacyAddress> addrs = new ArrayList<LegacyAddress>();
         for (LegacyAddress legacyAddress : legacyAddressList) {
             if (legacyAddress.getTag() == tag) {
-                addrs.add(legacyAddress.getAddress());
+                addrs.add(legacyAddress);
             }
         }
 
         return addrs;
     }
 
-    public List<String> getActiveLegacyAddressStringList() {
-        List<String> addrs = new ArrayList<String>();
+    public List<String> getLegacyAddressStringList(long tag) {
 
+        List<String> addrs = new ArrayList<String>();
         for (LegacyAddress legacyAddress : legacyAddressList) {
-            if (legacyAddress.getTag() == LegacyAddress.NORMAL_ADDRESS &&
-                    !legacyAddress.isWatchOnly()) {
+            if (legacyAddress.getTag() == tag) {
                 addrs.add(legacyAddress.getAddress());
             }
         }
