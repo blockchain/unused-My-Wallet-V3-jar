@@ -402,10 +402,16 @@ public class PayloadManager {
 
     public String getNextReceiveAddress(int accountIndex) throws AddressFormatException {
 
-        int receiveAddressIndex = payload.getHdWallet().getAccounts().get(accountIndex).getIdxReceiveAddresses();
+        Account account = payload.getHdWallet().getAccounts().get(accountIndex);
+        int receiveAddressIndex = findNextReservedReceiveAddressIndex(account, account.getIdxReceiveAddresses());
 
         String xpub = getXpubFromAccountIndex(accountIndex);
         return hdPayloadBridge.getAddressAt(xpub, Chain.RECEIVE_CHAIN, receiveAddressIndex).getAddressString();
+    }
+
+    private int findNextReservedReceiveAddressIndex(Account account, int addressPosition) {
+        return account.getAddressLabels().containsKey(addressPosition)
+                ? findNextReservedReceiveAddressIndex(account, addressPosition + 1) : addressPosition;
     }
 
     public String getXpubFromAccountIndex(int accountIdx) {
