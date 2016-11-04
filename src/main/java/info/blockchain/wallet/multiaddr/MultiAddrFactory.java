@@ -572,7 +572,7 @@ public class MultiAddrFactory {
     public long getLegacyActiveBalance() {
 
         if (PayloadManager.getInstance().getPayload() != null) {
-            List<String> addrs = PayloadManager.getInstance().getPayload().getActiveLegacyAddressStringList();
+            List<String> addrs = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
             long value = 0L;
 
             for (String addr : addrs) {
