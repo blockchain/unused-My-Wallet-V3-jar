@@ -1,16 +1,20 @@
 package info.blockchain.wallet.util;
 
+import info.blockchain.api.Balance;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
+import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 public class PrivateKeyFactory {
 
@@ -23,19 +27,14 @@ public class PrivateKeyFactory {
     public final static String WIF_COMPRESSED = "wif_c";
     public final static String WIF_UNCOMPRESSED = "wif_u";
 
+    private Balance api;
 
-    private static PrivateKeyFactory instance = null;
-
-    private PrivateKeyFactory() {
+    public PrivateKeyFactory(Balance api) {
+        this.api = api;
     }
 
-    public static PrivateKeyFactory getInstance() {
-
-        if (instance == null) {
-            instance = new PrivateKeyFactory();
-        }
-
-        return instance;
+    public PrivateKeyFactory() {
+        this.api = new Balance();
     }
 
     public String getFormat(String key) {
@@ -95,12 +94,42 @@ public class PrivateKeyFactory {
         } else if (format.equals(HEX_COMPRESSED)) {
             return decodeHexPK(data, true);
         } else if (format.equals(MINI)) {
-
-            Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
-            return decodeHexPK(hash.toString(), false);    // assume uncompressed
-
+            return decodeMiniKey(data);
         } else {
             throw new Exception("Unknown key format: "+format);
+        }
+    }
+
+    private ECKey decodeMiniKey(String hex) throws Exception {
+
+        if (api == null) {
+            throw new Exception("Balance API not set");
+        }
+
+        Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(hex.getBytes("UTF-8")));
+        ECKey uncompressedKey = decodeHexPK(hash.toString(), false);
+        ECKey compressedKey = decodeHexPK(hash.toString(), true);
+
+        try {
+            String uncompressedAddress = uncompressedKey.toAddress(MainNetParams.get()).toString();
+            String compressedAddress = compressedKey.toAddress(MainNetParams.get()).toString();
+
+            ArrayList<String> list = new ArrayList<String>();
+            list.add(uncompressedAddress);
+            list.add(compressedAddress);
+
+            JSONObject json = api.getBalance(list);
+            long uncompressedBalance = json.getJSONObject(uncompressedAddress).getLong("final_balance");
+            long compressedBalance = json.getJSONObject(compressedAddress).getLong("final_balance");
+
+            if (compressedBalance == 0 && uncompressedBalance > 0) {
+                return uncompressedKey;
+            } else {
+                return compressedKey;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return compressedKey;
         }
     }
 

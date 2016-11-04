@@ -62,11 +62,13 @@ public class PayloadManager {
 
     private final HDPayloadBridge hdPayloadBridge;
     private info.blockchain.bip44.Wallet wallet;
+    private PrivateKeyFactory privateKeyFactory;
 
     private PayloadManager() {
         hdPayloadBridge = new HDPayloadBridge();
         payload = new Payload();
         cached_payload = "";
+        privateKeyFactory = new PrivateKeyFactory();
     }
 
     /**
@@ -645,7 +647,7 @@ public class PayloadManager {
             }
 
             Address hd_address = wallet.getAccount(account.getRealIdx()).getChain(chain).getAddressAt(addressIndex);
-            ECKey walletKey = PrivateKeyFactory.getInstance().getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+            ECKey walletKey = privateKeyFactory.getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
             keys.add(walletKey);
         }
 
