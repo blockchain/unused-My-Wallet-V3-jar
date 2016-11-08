@@ -2,6 +2,10 @@ package info.blockchain.api;
 
 public class PersistentUrls {
 
+    public static final String KEY_ENV_PROD = "env_prod";
+    public static final String KEY_ENV_STAGING = "env_staging";
+    public static final String KEY_ENV_DEV = "env_dev";
+
     private String multiAddressUrl = MultiAddress.PROD_MULTIADDR_URL;
     private String balanceUrl = Balance.PROD_BALANCE_URL;
     private String dynamicFeeUrl = DynamicFee.PROD_DYNAMIC_FEE;
@@ -14,11 +18,35 @@ public class PersistentUrls {
 
     private static PersistentUrls instance = null;
 
-    public enum Environment {
-        PRODUCTION, DEV, STAGING
-    }
-
     private Environment currentEnvironment = Environment.PRODUCTION;
+
+    public enum Environment {
+
+        PRODUCTION(KEY_ENV_PROD),
+        STAGING(KEY_ENV_STAGING),
+        DEV(KEY_ENV_DEV);
+
+        private String name;
+
+        Environment(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static Environment fromString(String text) {
+            if (text != null) {
+                for (Environment environment : Environment.values()) {
+                    if (text.equalsIgnoreCase(environment.getName())) {
+                        return environment;
+                    }
+                }
+            }
+            return null;
+        }
+    }
 
     private PersistentUrls() {
         // No-op
