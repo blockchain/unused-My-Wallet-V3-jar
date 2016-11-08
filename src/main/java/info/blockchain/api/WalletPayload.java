@@ -10,7 +10,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WalletPayload implements BaseApi {
+public class WalletPayload extends BaseApi {
 
     private static final String WALLET = "wallet";
     public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
@@ -18,20 +18,19 @@ public class WalletPayload implements BaseApi {
     private String sessionId;
     public static final String KEY_AUTH_REQUIRED = "Authorization Required";
 
-    private String payloadUrl = PROD_PAYLOAD_URL;
-
     public WalletPayload() {
-        payloadUrl = PersistentUrls.getInstance().getWalletPayloadUrl();
+        // No-op
     }
 
     public String getSessionId(String guid) throws Exception {
 
         if (sessionId == null) {
             sessionId = WebUtil.getInstance().getCookie(
-                    payloadUrl + "/" +
-                            guid +
-                            "?format=json&" +
-                            "resend_code=false",
+                    PersistentUrls.getInstance().getWalletPayloadUrl()
+                            + "/"
+                            + guid
+                            + "?format=json&"
+                            + "resend_code=false",
                     "SID");
         }
 
@@ -44,15 +43,15 @@ public class WalletPayload implements BaseApi {
         args.append("guid=").append(guid);
         args.append("&method=pairing-encryption-password");
 
-        return WebUtil.getInstance().postURL(payloadUrl, args.toString());
+        return WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
     }
 
     public String getEncryptedPayload(final String guid, final String sessionId) throws Exception {
 
         String response = WebUtil.getInstance().getURL(
-                payloadUrl +
-                        "/" + guid +
-                        "?format=json&resend_code=false",
+                PersistentUrls.getInstance().getWalletPayloadUrl()
+                        + "/" + guid
+                        + "?format=json&resend_code=false",
                 "SID=" + sessionId);
 
         JSONObject jsonObject = new JSONObject(response);
@@ -79,11 +78,13 @@ public class WalletPayload implements BaseApi {
     public String fetchWalletData(String guid, String sharedKey) throws Exception {
 
         String response = WebUtil.getInstance().postURL(
-                payloadUrl,
-                "method=wallet.aes.json&guid=" + guid +
-                        "&sharedKey=" + sharedKey +
-                        "&format=json" +
-                        "&api_code=" + API_CODE);
+                PersistentUrls.getInstance().getWalletPayloadUrl(),
+                "method=wallet.aes.json&guid="
+                        + guid
+                        + "&sharedKey="
+                        + sharedKey
+                        + "&format=json"
+                        + getApiCode());
 
         if (response == null) {
             throw new Exception("Payload fetch from server is null");
@@ -140,8 +141,8 @@ public class WalletPayload implements BaseApi {
             args.append(oldChecksum);
         }
 
-        args.append("&api_code=" + API_CODE);
+        args.append(getApiCode());
 
-        String response = WebUtil.getInstance().postURL(payloadUrl, args.toString());
+        String response = WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
     }
 }

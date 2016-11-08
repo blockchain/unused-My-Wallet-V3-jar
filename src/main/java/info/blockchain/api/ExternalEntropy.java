@@ -4,7 +4,7 @@ import info.blockchain.wallet.util.WebUtil;
 
 import org.spongycastle.util.encoders.Hex;
 
-public class ExternalEntropy implements BaseApi {
+public class ExternalEntropy extends BaseApi {
 
     private static final String RANDOM_BYTES = "v2/randombytes?bytes=32&format=hex";
     public static final String PROD_EXTERNAL_ENTROPY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + RANDOM_BYTES;

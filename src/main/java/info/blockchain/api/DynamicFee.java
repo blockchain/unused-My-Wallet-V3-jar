@@ -10,20 +10,18 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-public class DynamicFee implements BaseApi {
+public class DynamicFee extends BaseApi {
 
     private static final String FEES = "fees";
     public static final String PROD_DYNAMIC_FEE = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + FEES;
 
-    private String dynamicFeeUrl = PROD_DYNAMIC_FEE;
-
     public DynamicFee() {
-        dynamicFeeUrl = PersistentUrls.getInstance().getDynamicFeeUrl();
+        // No-op
     }
 
     public SuggestedFee getDynamicFee() throws Exception {
 
-        String response = WebUtil.getInstance().getURL(dynamicFeeUrl);
+        String response = WebUtil.getInstance().getURL(PersistentUrls.getInstance().getDynamicFeeUrl());
 
         if (response != null) {
 

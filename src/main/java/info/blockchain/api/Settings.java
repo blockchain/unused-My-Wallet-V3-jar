@@ -8,15 +8,13 @@ import org.json.JSONObject;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-public class Settings implements BaseApi {
+public class Settings extends BaseApi {
 
     private static final String WALLET = "wallet";
     public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
 
-    private String settingsUrl = PROD_PAYLOAD_URL;
-
     public Settings() {
-        settingsUrl = PersistentUrls.getInstance().getSettingsUrl();
+        // No-op
     }
 
     //API methods
@@ -136,10 +134,10 @@ public class Settings implements BaseApi {
 
         args.append("&guid=").append(URLEncoder.encode(this.guid, "utf-8"));
         args.append("&sharedKey=").append(URLEncoder.encode(this.sharedKey, "utf-8"));
-        args.append("&api_code=" + API_CODE);
+        args.append(getApiCode());
         args.append("&format=plain");
 
-        return WebUtil.getInstance().postURL(settingsUrl, args.toString());
+        return WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
     }
 
     public String getInfo() throws Exception {

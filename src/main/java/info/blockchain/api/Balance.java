@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.List;
 
-public class Balance implements BaseApi {
+public class Balance extends BaseApi {
 
     private static final String BALANCE = "balance?active=";
     public static final String PROD_BALANCE_URL = PROTOCOL + SERVER_ADDRESS + BALANCE;
@@ -21,10 +21,8 @@ public class Balance implements BaseApi {
     public static final int TxFilterRemoveUnspendable = 6;
     public static final int TxFilterUnconfirmedOnly = 7;
 
-    private String balanceUrl = PROD_BALANCE_URL;
-
     public Balance() {
-        balanceUrl = PersistentUrls.getInstance().getBalanceUrl();
+        // No-op
     }
 
     public JSONObject getBalance(List<String> addresses) throws Exception {
@@ -37,10 +35,10 @@ public class Balance implements BaseApi {
 
     private JSONObject getBalanceAPICall(List<String> addresses, int filter) throws Exception {
 
-        StringBuilder url = new StringBuilder(balanceUrl);
+        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getBalanceUrl());
         url.append(StringUtils.join(addresses, "|"));
         if (filter > 0) url.append("&filter=").append(filter);
-        url.append("&api_code=" + API_CODE);
+        url.append(getApiCode());
 
         String response = WebUtil.getInstance().getURL(url.toString());
 
