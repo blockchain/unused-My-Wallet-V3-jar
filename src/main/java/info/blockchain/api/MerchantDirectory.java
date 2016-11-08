@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MerchantDirectory implements BaseApi {
+public class MerchantDirectory extends BaseApi {
 
     public static final String PROD_MERCHANT_DIRECTORY_URL = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + "merchant";
 

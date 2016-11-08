@@ -2,7 +2,7 @@ package info.blockchain.api;
 
 import info.blockchain.wallet.util.WebUtil;
 
-public class ExchangeTicker implements BaseApi {
+public class ExchangeTicker extends BaseApi {
 
     public static final String PROD_EXCHANGE_URL = PROTOCOL + SERVER_ADDRESS + "ticker?_=";
 

@@ -15,12 +15,13 @@ public class PersistentUrls {
     private static PersistentUrls instance = null;
 
     public enum Environment {
-        PROD, DEV, STAGING
+        PRODUCTION, DEV, STAGING
     }
 
-    private Environment currentEnvironment = Environment.PROD;
+    private Environment currentEnvironment = Environment.PRODUCTION;
 
     private PersistentUrls() {
+        // No-op
     }
 
     public static PersistentUrls getInstance() {
@@ -43,36 +44,8 @@ public class PersistentUrls {
         setTransactionDetailsUrl(TransactionDetails.PROD_TRANSACTION_URL);
         setUnspentUrl(Unspent.PROD_UNSPENT_OUTPUTS_URL);
 
-        currentEnvironment = Environment.PROD;
+        currentEnvironment = Environment.PRODUCTION;
     }
-
-//    public void setDevelopmentEnvironment() {
-//        setMultiAddressUrl(MultiAddress.DEV_MULTIADDR_URL);
-//        setSettingsUrl(Settings.DEV_PAYLOAD_URL);
-//        setWalletPayloadUrl(WalletPayload.DEV_PAYLOAD_URL);
-//        setAddressInfoUrl(AddressInfo.DEV_ADDRESS_INFO_URL);
-//        setBalanceUrl(Balance.DEV_BALANCE_URL);
-//        setDynamicFeeUrl(DynamicFee.DEV_DYNAMIC_FEE);
-//        setPinstoreUrl(PinStore.DEV_PIN_STORE_URL);
-//        setTransactionDetailsUrl(TransactionDetails.DEV_TRANSACTION_URL);
-//        setUnspentUrl(Unspent.DEV_UNSPENT_OUTPUTS_URL);
-//
-//        currentEnvironment = Environment.DEV;
-//    }
-//
-//    public void setStagingEnvironment() {
-//        setMultiAddressUrl(MultiAddress.STAGING_MULTIADDR_URL);
-//        setSettingsUrl(Settings.STAGING_PAYLOAD_URL);
-//        setWalletPayloadUrl(WalletPayload.STAGING_PAYLOAD_URL);
-//        setAddressInfoUrl(AddressInfo.STAGING_ADDRESS_INFO_URL);
-//        setBalanceUrl(Balance.STAGING_BALANCE_URL);
-//        setDynamicFeeUrl(DynamicFee.STAGING_DYNAMIC_FEE);
-//        setPinstoreUrl(PinStore.STAGING_PIN_STORE_URL);
-//        setTransactionDetailsUrl(TransactionDetails.STAGING_TRANSACTION_URL);
-//        setUnspentUrl(Unspent.STAGING_UNSPENT_OUTPUTS_URL);
-//
-//        currentEnvironment = Environment.STAGING;
-//    }
 
     public void setMultiAddressUrl(String multiAddressUrl) {
         this.multiAddressUrl = multiAddressUrl;
@@ -108,6 +81,10 @@ public class PersistentUrls {
 
     public void setWalletPayloadUrl(String walletPayloadUrl) {
         this.walletPayloadUrl = walletPayloadUrl;
+    }
+
+    public void setCurrentEnvironment(Environment currentEnvironment) {
+        this.currentEnvironment = currentEnvironment;
     }
 
     public String getMultiAddressUrl() {
