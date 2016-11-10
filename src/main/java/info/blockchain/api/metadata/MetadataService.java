@@ -1,12 +1,9 @@
 package info.blockchain.api.metadata;
 
-import info.blockchain.api.metadata.request.MessagePostRequest;
-import info.blockchain.api.metadata.response.AuthNonceResponse;
-import info.blockchain.api.metadata.response.AuthTokenResponse;
-import info.blockchain.api.metadata.response.AuthTrustedResponse;
-import info.blockchain.api.metadata.response.MessagePostResponse;
-import info.blockchain.api.metadata.response.StatusResponse;
-import info.blockchain.api.metadata.response.TrustedPutResponse;
+import info.blockchain.api.metadata.data.Auth;
+import info.blockchain.api.metadata.data.Message;
+import info.blockchain.api.metadata.data.Status;
+import info.blockchain.api.metadata.data.Trusted;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,38 +20,44 @@ import retrofit2.http.Query;
 
 interface MetadataService {
 
+//    https://api.blockchain.info/metadata/:uuid
     String API_URL = "http://localhost:8080/";
 
     @GET("auth")
-    Call<AuthNonceResponse> getNonce();
+    Call<Auth> getNonce();
 
     @POST("auth")
-    Call<AuthTokenResponse> getToken(@Body HashMap<String, String> body);
+    Call<Auth> getToken(@Body HashMap<String, String> body);
 
 
     @GET("trusted")
-    Call<AuthTrustedResponse> getTrustedList(@Header("Authorization") String jwToken);
+    Call<Trusted> getTrustedList(@Header("Authorization") String jwToken);
 
     @GET("trusted")
-    Call<AuthTrustedResponse> getTrusted(@Header("Authorization") String jwToken, @Query("mdid") String mdid);
+    Call<Trusted> getTrusted(@Header("Authorization") String jwToken, @Query("mdid") String mdid);
 
     @PUT("trusted/{mdid}")
-    Call<TrustedPutResponse> putTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
+    Call<Trusted> putTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
     @DELETE("trusted/{mdid}")
-    Call<StatusResponse> deleteTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
+    Call<Status> deleteTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
 
     @POST("messages")
-    Call<MessagePostResponse> postMessage(@Header("Authorization") String jwToken, @Body MessagePostRequest body);
+    Call<Message> postMessage(@Header("Authorization") String jwToken, @Body Message body);
 
     @GET("messages")
-    Call<List<MessagePostResponse>> getMessages(@Header("Authorization") String jwToken, @Query("new") Boolean onlyProcessed);
+    Call<List<Message>> getMessages(@Header("Authorization") String jwToken, @Query("new") Boolean onlyProcessed);
 
-//    @GET("messages/{mdid}")
-//    Call<MessagePostResponse> getMessages(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
+    @GET("messages")
+    Call<List<Message>> getMessages(@Header("Authorization") String jwToken, @Query("uuid") String messageId);
 
+    @GET("message/{uuid}")
+    Call<Message> getMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId);
 
+    //Broken
+    @PUT("message/{uuid}")
+    Call<Message> processMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId, @Query("processed") boolean processed);
 
 
 
@@ -75,10 +78,10 @@ interface MetadataService {
 
     //MESSAGES
     postMessage(key, token, address, msg, type)     POST /messages                  ✓
-    getMessages(token, onlyProcessed)               GET /messages?:from             pending
-    getMessage(token, uuid)                         GET /messages/:ID
-                                                    PATCH /messages/:ID
-    setProcessed(token, uuid, processed)            PUT /messages/{uuid}/processed
+    getMessages(token, onlyProcessed)               GET /messages?:from             ✓
+    getMessages(token, uuid)                         GET /messages/:ID               ✓
+    processMessage(token, uuid)                     PATCH /messages/:ID
+    setProcessed(token, uuid, processed)            PUT /messages/{uuid}/processed  nope
 
     //METADATA
     getMetadata(address)                        GET /metadata/{mdid}

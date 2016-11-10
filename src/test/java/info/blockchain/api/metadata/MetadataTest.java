@@ -1,11 +1,16 @@
 package info.blockchain.api.metadata;
 
+import info.blockchain.api.metadata.data.Message;
+import info.blockchain.api.metadata.data.Trusted;
+
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Before;
 import org.junit.Test;
+import org.spongycastle.util.encoders.Base64;
 
 import java.security.SecureRandom;
+import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
 
@@ -55,28 +60,23 @@ public class MetadataTest {
     }
 
     @Test
-    public void testGetTrustedList() throws Exception {
-        String token = mds.getToken(senderKey);
-        String result = mds.getTrustedList(token);
-        Assert.isTrue(result.equals(senderMdid));
-    }
+    public void testPutGetTrusted() throws Exception {
 
-    @Test
-    public void testGetTrusted() throws Exception {
-        String token = mds.getToken(senderKey);
-        String result = mds.getTrusted(token, senderMdid);
-        Assert.isTrue(result.equals(senderMdid));
-    }
-
-    @Test
-    public void testPutTrusted() throws Exception {
         ECKey otherKey = getRandomECKey();
         String otherMdid = otherKey.toAddress(MainNetParams.get()).toString();
 
+        //PUT assert
         String token = mds.getToken(senderKey);
-        String result = mds.putTrusted(token, otherMdid);
-        System.out.println(result);
-        Assert.isTrue(result.equals(otherMdid));
+        boolean result = mds.putTrusted(token, otherMdid);
+        Assert.isTrue(result);
+
+        //GET assert
+        boolean isTrusted = mds.getTrusted(token, otherMdid);
+        Assert.isTrue(isTrusted);
+
+        Trusted list = mds.getTrustedList(token);
+        Assert.hasText(list.getMdid());
+        Assert.isTrue(list.getContacts().length > 0);
     }
 
     @Test
@@ -92,26 +92,39 @@ public class MetadataTest {
     }
 
     @Test
-    public void testPostMessage() throws Exception {
-        //Add senderMdid to trust
-        String recipientToken = mds.getToken(recipientKey);
+    public void testPostGetMessage() throws Exception {
 
+        String recipientToken = mds.getToken(recipientKey);
         ECKey senderKey = this.senderKey;
         String senderToken = mds.getToken(this.senderKey);
         String senderMdid = this.senderMdid;
 
+        //Add senderMdid to trust list
         mds.putTrusted(recipientToken, senderMdid);
+        boolean isTrusted = mds.getTrusted(recipientToken, senderMdid);
+        Assert.isTrue(isTrusted);
 
         //Send that senderMdid a message
-        String message = "Any fool can paint a picture, but it takes a wise person to be able to sell it.";
-        mds.postMessage(senderToken, senderKey, recipientMdid, message, 1);
-    }
+        String messageString = "Any fool can paint a picture, but it takes a wise person to be able to sell it.";
+        Message messageId = mds.postMessage(senderToken, senderKey, recipientMdid, messageString, 1);
 
-    @Test
-    public void testGetMessage() throws Exception {
-        String senderToken = mds.getToken(senderKey);
-        String result = mds.getMessage(senderToken, true);
+        //Get message
+        Message message = mds.getMessage(recipientToken, messageId.getId());
+        String returnedMessage = new String(Base64.decode(message.getPayload()));
+        Assert.isTrue(returnedMessage.equals(messageString));
 
-        System.out.println(result);
+        //Get messages
+        List<Message> messages = mds.getMessages(recipientToken, messageId.getId());
+        returnedMessage = new String(Base64.decode(messages.get(0).getPayload()));
+        Assert.isTrue(returnedMessage.equals(messageString));
+
+        //Get unprocessed messages
+        messages = mds.getMessages(recipientToken, false);
+        returnedMessage = new String(Base64.decode(messages.get(0).getPayload()));
+        Assert.isTrue(returnedMessage.equals(messageString));
+
+        //Process message
+        boolean isProcessed = mds.processMessage(recipientToken, messageId.getId(), true);
+        Assert.isTrue(isProcessed);
     }
 }
