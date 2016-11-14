@@ -2,6 +2,7 @@ package info.blockchain.api.metadata;
 
 import info.blockchain.api.metadata.data.Auth;
 import info.blockchain.api.metadata.data.Message;
+import info.blockchain.api.metadata.data.Share;
 import info.blockchain.api.metadata.data.Status;
 import info.blockchain.api.metadata.data.Trusted;
 
@@ -31,7 +32,6 @@ public class Metadata {
 //        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
 //        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 //        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
 
         //Setup retrofit
         Retrofit retrofit = new Retrofit.Builder()
@@ -228,9 +228,12 @@ public class Metadata {
         }
     }
 
-    public boolean processMessage(String token, String messageId, boolean processed) throws Exception {
+    /*
+    Marks message as processed
+     */
+    public boolean processMessage(String token, String messageId) throws Exception {
 
-        Call<Message> response = mds.processMessage("Bearer " + token, messageId, processed);
+        Call<Message> response = mds.processMessage("Bearer " + token, messageId, true);
 //        System.out.println("curl -X GET http://localhost:8080/messages?id="+lastMessageId+" -H \"Authorization: Bearer "+token+"\"");
 
         System.out.println("Bearer " + token);
@@ -238,6 +241,75 @@ public class Metadata {
         System.out.println(response.request().url());
 
         Response<Message> exe = response.execute();
+
+        if (exe.isSuccessful()) {
+            return true;
+        } else {
+            throw new Exception(exe.message());
+        }
+    }
+
+    /*
+    Obtains a one-time UUID for key sharing
+    Gets MDID of sender from one-time UUID
+     */
+    public Share postShare(String token) throws Exception {
+
+        Call<Share> response = mds.postShare("Bearer " + token);
+//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
+
+        Response<Share> exe = response.execute();
+
+        if (exe.isSuccessful()) {
+            return exe.body();
+        } else {
+            throw new Exception(exe.message());
+        }
+    }
+
+    /*
+    Sets the MDID of the recipient
+     */
+    public Share postToShare(String token, String uuid) throws Exception {
+
+        Call<Share> response = mds.postToShare("Bearer " + token, uuid);
+//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
+
+        Response<Share> exe = response.execute();
+
+        if (exe.isSuccessful()) {
+            return exe.body();
+        } else {
+            throw new Exception(exe.message());
+        }
+    }
+
+    /*
+    Gets MDID of sender from one-time UUID
+     */
+    public Share getShare(String token, String uuid) throws Exception {
+
+        Call<Share> response = mds.getShare("Bearer " + token, uuid);
+//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
+
+        Response<Share> exe = response.execute();
+
+        if (exe.isSuccessful()) {
+            return exe.body();
+        } else {
+            throw new Exception(exe.message());
+        }
+    }
+
+    /*
+    Deletes one-time UUID
+     */
+    public boolean deleteShare(String token, String uuid) throws Exception {
+
+        Call<Share> response = mds.deleteShare("Bearer " + token, uuid);
+//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
+
+        Response<Share> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return true;

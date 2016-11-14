@@ -2,6 +2,7 @@ package info.blockchain.api.metadata;
 
 import info.blockchain.api.metadata.data.Auth;
 import info.blockchain.api.metadata.data.Message;
+import info.blockchain.api.metadata.data.Share;
 import info.blockchain.api.metadata.data.Status;
 import info.blockchain.api.metadata.data.Trusted;
 
@@ -20,8 +21,7 @@ import retrofit2.http.Query;
 
 interface MetadataService {
 
-//    https://api.blockchain.info/metadata/:uuid
-    String API_URL = "http://localhost:8080/";
+    String API_URL = "https://api.dev.blockchain.co.uk/metadata/";
 
     @GET("auth")
     Call<Auth> getNonce();
@@ -60,6 +60,18 @@ interface MetadataService {
     Call<Message> processMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId, @Query("processed") boolean processed);
 
 
+    @POST("share")
+    Call<Share> postShare(@Header("Authorization") String jwToken);
+
+    @POST("share/{uuid}")
+    Call<Share> postToShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+
+    @GET("share/{uuid}")
+    Call<Share> getShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+
+    @DELETE("share/{uuid}")
+    Call<Share> deleteShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+
 
     /*
     //INFO
@@ -88,15 +100,15 @@ interface MetadataService {
     putMetadata(key, payload, type, magic)      PUT /metadata/{mdid}?form
     deleteMetadata(key, magic)                  DELETE /metadata/{mdid}?
 
-    //MDID
+    //MDID - needs admin?
     getMDID(token, guid)         GET /mdid/{guid}
     addMDID(token, guid, mdid)   PUT /guid/{mdid}
     getGUID(token, mdid)         GET /guid/{mdid}
 
     //SHARE
-    postShare(token)            POST /share
-    postToShare(token, id)      POST /share/{id}
-    getShare(id)                GET /share/{id}
-    deleteShare(token, id)      DELETE /share/{id}
+    postShare(token)            POST /share             ✓
+    postToShare(token, id)      POST /share/{id}        ✓
+    getShare(id)                GET /share/{id}         ✓
+    deleteShare(token, id)      DELETE /share/{id}      ✓
      */
 }
