@@ -12,4 +12,12 @@ public class Auth {
     public String getToken() {
         return token;
     }
+
+    @Override
+    public String toString() {
+        return "Auth{" +
+                "nonce='" + nonce + '\'' +
+                ", token='" + token + '\'' +
+                '}';
+    }
 }

@@ -1,5 +1,7 @@
 package info.blockchain.api.metadata.data;
 
+import java.util.Arrays;
+
 public class Trusted {
 
     String mdid;
@@ -16,5 +18,14 @@ public class Trusted {
 
     public String getContact() {
         return contact;
+    }
+
+    @Override
+    public String toString() {
+        return "Trusted{" +
+                "mdid='" + mdid + '\'' +
+                ", contacts=" + Arrays.toString(contacts) +
+                ", contact='" + contact + '\'' +
+                '}';
     }
 }

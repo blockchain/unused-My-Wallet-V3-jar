@@ -55,10 +55,6 @@ interface MetadataService {
     @GET("message/{uuid}")
     Call<Message> getMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId);
 
-    //Broken
-    @PUT("message/{uuid}")
-    Call<Message> processMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId, @Query("processed") boolean processed);
-
 
     @POST("share")
     Call<Share> postShare(@Header("Authorization") String jwToken);
@@ -71,44 +67,4 @@ interface MetadataService {
 
     @DELETE("share/{uuid}")
     Call<Share> deleteShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
-
-
-    /*
-    //INFO
-    getHealth()                 GET /healthz    ignore
-    getStats()                  GET /statz      ignore
-
-    //AUTH
-    getNonce()                   GET /auth   ✓
-    getToken(key)                POST /auth  ✓
-
-    //TRUSTED
-    getTrustedList(token)               GET /trusted            ✓
-    getTrusted(token, mdid)             GET /trusted/{mdid}     ✓
-    putTrusted(token, address)          PUT /trusted/{mdid}     ✓
-    deleteTrusted(token, mdid)          DELETE /trusted/{mdid}  ✓
-
-    //MESSAGES
-    postMessage(key, token, address, msg, type)     POST /messages                  ✓
-    getMessages(token, onlyProcessed)               GET /messages?:from             ✓
-    getMessages(token, uuid)                         GET /messages/:ID               ✓
-    processMessage(token, uuid)                     PATCH /messages/:ID
-    setProcessed(token, uuid, processed)            PUT /messages/{uuid}/processed  nope
-
-    //METADATA - needs admin?
-    getMetadata(address)                        GET /metadata/{mdid}
-    putMetadata(key, payload, type, magic)      PUT /metadata/{mdid}?form
-    deleteMetadata(key, magic)                  DELETE /metadata/{mdid}?
-
-    //MDID - needs admin?
-    getMDID(token, guid)         GET /mdid/{guid}
-    addMDID(token, guid, mdid)   PUT /guid/{mdid}
-    getGUID(token, mdid)         GET /guid/{mdid}
-
-    //SHARE
-    postShare(token)            POST /share             ✓
-    postToShare(token, id)      POST /share/{id}        ✓
-    getShare(id)                GET /share/{id}         ✓
-    deleteShare(token, id)      DELETE /share/{id}      ✓
-     */
 }

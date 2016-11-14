@@ -1,7 +1,5 @@
 package info.blockchain.api.metadata;
 
-import com.google.gson.Gson;
-
 import info.blockchain.api.metadata.data.Auth;
 import info.blockchain.api.metadata.data.Message;
 import info.blockchain.api.metadata.data.Share;
@@ -30,15 +28,8 @@ public class Metadata {
 
     public Metadata() {
 
-        //Debug
-//        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-//        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-//        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
-        //Setup retrofit
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(MetadataService.API_URL)
-//                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         mds = retrofit.create(MetadataService.class);
@@ -54,8 +45,6 @@ public class Metadata {
         Call<Auth> response = mds.getNonce();
 
         Response<Auth> exe = response.execute();
-
-//        System.out.println(response.request().url());
 
         if (exe.isSuccessful()) {
             return exe.body().getNonce();
@@ -100,11 +89,8 @@ public class Metadata {
     public Trusted getTrustedList(String token) throws Exception {
 
         Call<Trusted> response = mds.getTrustedList("Bearer " + token);
-//        System.out.println("curl -X GET http://localhost:8080/trusted -H \"Authorization: Bearer "+token+"\"");
 
         Response<Trusted> exe = response.execute();
-
-        System.out.println(exe.body().toString());
 
         if (exe.isSuccessful()) {
             return exe.body();
@@ -123,7 +109,7 @@ public class Metadata {
     public boolean getTrusted(String token, String mdid) throws Exception {
 
         Call<Trusted> response = mds.getTrusted("Bearer " + token, mdid);
-//        System.out.println("curl -X GET http://localhost:8080/trusted?mdid="+mdid+" -H \"Authorization: Bearer "+token+"\"");
+
         Response<Trusted> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -143,7 +129,7 @@ public class Metadata {
     public boolean putTrusted(String token, String mdid) throws Exception {
 
         Call<Trusted> response = mds.putTrusted("Bearer " + token, mdid);
-//        System.out.println("curl -X PUT http://localhost:8080/trusted/"+mdid+" -H \"Authorization: Bearer "+token+"\"");
+
         Response<Trusted> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -163,7 +149,7 @@ public class Metadata {
     public boolean deleteTrusted(String token, String mdid) throws Exception {
 
         Call<Status> response = mds.deleteTrusted("Bearer " + token, mdid);
-//        System.out.println("curl -X DELETE http://localhost:8080/trusted/"+mdid+" -H \"Authorization: Bearer "+token+"\"");
+
         Response<Status> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -196,7 +182,7 @@ public class Metadata {
         request.setSignature(signature);
 
         Call<Message> response = mds.postMessage("Bearer " + token, request);
-        System.out.println("curl -X POST "+response.request().url()+" -H \"Content-Type: application/json\" -H \"Authorization: Bearer "+token+"\" -d '"+new Gson().toJson(request)+"'");
+
         Response<Message> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -237,7 +223,7 @@ public class Metadata {
     public List<Message> getMessages(String token, String lastMessageId) throws Exception {
 
         Call<List<Message>> response = mds.getMessages("Bearer " + token, lastMessageId);
-//        System.out.println("curl -X GET http://localhost:8080/messages?id="+lastMessageId+" -H \"Authorization: Bearer "+token+"\"");
+
         Response<List<Message>> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -258,37 +244,10 @@ public class Metadata {
 
         Call<Message> response = mds.getMessage("Bearer " + token, messageId);
 
-        System.out.println(response.request().url());
-
         Response<Message> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
-        } else {
-            throw new Exception(exe.message());
-        }
-    }
-
-    /**
-     * Marks message as processed
-     * @param token
-     * @param messageId
-     * @return
-     * @throws Exception
-     */
-    public boolean processMessage(String token, String messageId) throws Exception {
-
-        Call<Message> response = mds.processMessage("Bearer " + token, messageId, true);
-//        System.out.println("curl -X GET http://localhost:8080/messages?id="+lastMessageId+" -H \"Authorization: Bearer "+token+"\"");
-
-        System.out.println("Bearer " + token);
-
-        System.out.println(response.request().url());
-
-        Response<Message> exe = response.execute();
-
-        if (exe.isSuccessful()) {
-            return true;
         } else {
             throw new Exception(exe.message());
         }
@@ -304,7 +263,6 @@ public class Metadata {
     public Share postShare(String token) throws Exception {
 
         Call<Share> response = mds.postShare("Bearer " + token);
-//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
 
         Response<Share> exe = response.execute();
 
@@ -325,7 +283,6 @@ public class Metadata {
     public Share postToShare(String token, String uuid) throws Exception {
 
         Call<Share> response = mds.postToShare("Bearer " + token, uuid);
-//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
 
         Response<Share> exe = response.execute();
 
@@ -346,7 +303,6 @@ public class Metadata {
     public Share getShare(String token, String uuid) throws Exception {
 
         Call<Share> response = mds.getShare("Bearer " + token, uuid);
-//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
 
         Response<Share> exe = response.execute();
 
@@ -367,7 +323,6 @@ public class Metadata {
     public boolean deleteShare(String token, String uuid) throws Exception {
 
         Call<Share> response = mds.deleteShare("Bearer " + token, uuid);
-//        System.out.println("curl -X GET "+response.request().url()+" -H \"Authorization: Bearer "+token+"\"");
 
         Response<Share> exe = response.execute();
 

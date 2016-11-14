@@ -124,10 +124,6 @@ public class MetadataTest {
         returnedMessage = new String(Base64.decode(messages.get(0).getPayload()));
         Assert.isTrue(returnedMessage.equals(messageString));
 
-        //Process message
-        //todo can't get this to work
-//        boolean isProcessed = mds.processMessage(recipientToken, messageId.getId());
-//        Assert.isTrue(isProcessed);
     }
 
     @Test
@@ -181,11 +177,11 @@ public class MetadataTest {
 
         //Get receiver mdid and uuid from QR
         Share senderShareData = mds.postToShare(senderToken, uuid);
-        System.out.println(senderShareData.toString());
         String recipientMdidFromOTUUID = senderShareData.getMdid();//is recipient mdid
         Assert.isTrue(recipientMdidFromOTUUID.equals(recipientMdid), "Mdid from share data should match original recipient mdid.");
 
         //Add recipient to sender's trusted list
+        //IMO this should notify recipient and allow him to accept - which would add sender to trusted list as well.
         mds.putTrusted(senderToken, recipientMdidFromOTUUID);
         boolean isTrusted = mds.getTrusted(senderToken, recipientMdidFromOTUUID);
         Assert.isTrue(isTrusted);
