@@ -17,7 +17,7 @@ public class TransactionDetails extends BaseApi {
 
     public Transaction getTransactionDetails(String hash) throws Exception {
 
-        String response = WebUtil.getInstance().getURL(PersistentUrls.getInstance().getWalletPayloadUrl() + hash + "?format=json");
+        String response = WebUtil.getInstance().getURL(PersistentUrls.getInstance().getTransactionDetailsUrl() + hash + "?format=json");
 
         if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
             return new Transaction(new JSONObject(response));
