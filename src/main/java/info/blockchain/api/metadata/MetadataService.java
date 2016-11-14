@@ -95,7 +95,7 @@ interface MetadataService {
     processMessage(token, uuid)                     PATCH /messages/:ID
     setProcessed(token, uuid, processed)            PUT /messages/{uuid}/processed  nope
 
-    //METADATA
+    //METADATA - needs admin?
     getMetadata(address)                        GET /metadata/{mdid}
     putMetadata(key, payload, type, magic)      PUT /metadata/{mdid}?form
     deleteMetadata(key, magic)                  DELETE /metadata/{mdid}?
