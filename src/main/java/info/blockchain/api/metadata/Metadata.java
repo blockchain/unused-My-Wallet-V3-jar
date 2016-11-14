@@ -1,5 +1,7 @@
 package info.blockchain.api.metadata;
 
+import com.google.gson.Gson;
+
 import info.blockchain.api.metadata.data.Auth;
 import info.blockchain.api.metadata.data.Message;
 import info.blockchain.api.metadata.data.Share;
@@ -194,7 +196,7 @@ public class Metadata {
         request.setSignature(signature);
 
         Call<Message> response = mds.postMessage("Bearer " + token, request);
-//        System.out.println("curl -X POST http://localhost:8080/messages -H \"Content-Type: application/json\" -H \"Authorization: Bearer "+token+"\" -d '"+new Gson().toJson(request)+"'");
+        System.out.println("curl -X POST "+response.request().url()+" -H \"Content-Type: application/json\" -H \"Authorization: Bearer "+token+"\" -d '"+new Gson().toJson(request)+"'");
         Response<Message> exe = response.execute();
 
         if (exe.isSuccessful()) {

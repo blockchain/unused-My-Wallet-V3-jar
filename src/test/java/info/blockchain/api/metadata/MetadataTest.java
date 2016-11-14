@@ -155,4 +155,52 @@ public class MetadataTest {
         Share shareDel = mds.getShare(recipientToken, share.getId());
         Assert.isNull(shareDel);
     }
+
+    @Test
+    public void testCompleteScenario() throws Exception {
+
+        //Receiver shows sender a QR on device
+
+        //Receiver
+        //Authenticate and share one-time uuid
+        ECKey recipientKey = getRandomECKey();//Derived from master
+        String recipientToken = mds.getToken(recipientKey);
+        String recipientMdid = recipientKey.toAddress(MainNetParams.get()).toString();
+        Share recipientShareData = mds.postShare(recipientToken);
+        String uuid = recipientShareData.getId();
+        Assert.notNull(uuid);
+
+        //
+        //Share above one-time uuid over QR code with sender
+        //
+
+        //Sender
+        //Authenticate yourself
+        ECKey senderKey = getRandomECKey();//Derived from master
+        String senderToken = mds.getToken(senderKey);
+
+        //Get receiver mdid and uuid from QR
+        Share senderShareData = mds.postToShare(senderToken, uuid);
+        System.out.println(senderShareData.toString());
+        String recipientMdidFromOTUUID = senderShareData.getMdid();//is recipient mdid
+        Assert.isTrue(recipientMdidFromOTUUID.equals(recipientMdid), "Mdid from share data should match original recipient mdid.");
+
+        //Add recipient to sender's trusted list
+        mds.putTrusted(senderToken, recipientMdidFromOTUUID);
+        boolean isTrusted = mds.getTrusted(senderToken, recipientMdidFromOTUUID);
+        Assert.isTrue(isTrusted);
+
+
+        //
+        //Add recipient to sender trusted list somehow?
+        // TODO: 14/11/16 How to get sender mdid to recipient?
+        String senderMdid = senderKey.toAddress(MainNetParams.get()).toString();
+        mds.putTrusted(recipientToken, senderMdid);
+        //
+
+        //Send recipient a message
+        String messageString = "Hey fool.";
+        Message messageId = mds.postMessage(senderToken, senderKey, recipientMdidFromOTUUID, messageString, 1);
+        //If all goes well and notifications work - recipient should get a notification
+    }
 }

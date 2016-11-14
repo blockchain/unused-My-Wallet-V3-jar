@@ -4,7 +4,7 @@ public class Share {
 
     String id;//one-time UUID
     String mdid;//mdid of sender
-//    String contact;//this is returned but not sure what for yet
+    String contact;//this is returned but not sure what for yet
 
     public String getId() {
         return id;
@@ -19,6 +19,7 @@ public class Share {
         return "Share{" +
                 "id='" + id + '\'' +
                 ", mdid='" + mdid + '\'' +
+                ", contact='" + contact + '\'' +
                 '}';
     }
 }
