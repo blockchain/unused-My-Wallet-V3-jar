@@ -62,7 +62,7 @@ public class PayloadManager {
 
     private BlockchainWallet bciWallet;
 
-    private final HDPayloadBridge hdPayloadBridge;
+    private HDPayloadBridge hdPayloadBridge;
     private info.blockchain.bip44.Wallet wallet;
     private PrivateKeyFactory privateKeyFactory;
     private WalletPayload walletApi;
@@ -90,10 +90,20 @@ public class PayloadManager {
     }
 
     /**
-     * Reset PayloadManager to null instance.
+     * Clear all values. This is to prevent issues with DI where two instances can accidentally
+     * be created as getInstance() is rarely called
      */
     public void wipe() {
-        instance = null;
+        payload = new Payload();
+        cached_payload = "";
+        strTempPassword = null;
+        isNew = false;
+        email = null;
+        version = 2.0;
+        bciWallet = null;
+        hdPayloadBridge = new HDPayloadBridge();
+        wallet = null;
+        privateKeyFactory = new PrivateKeyFactory();
     }
 
     public interface InitiatePayloadListener {
