@@ -1,10 +1,15 @@
 package info.blockchain.api.metadata;
 
+import info.blockchain.api.WalletPayload;
 import info.blockchain.api.metadata.data.Message;
 import info.blockchain.api.metadata.data.Share;
 import info.blockchain.api.metadata.data.Trusted;
+import info.blockchain.wallet.payload.Payload;
+import info.blockchain.wallet.payload.PayloadManager;
 
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Before;
 import org.junit.Test;
@@ -155,48 +160,65 @@ public class MetadataTest {
     @Test
     public void testCompleteScenario() throws Exception {
 
-        //Receiver shows sender a QR on device
+        System.out.println("Creating recipient wallet...");
+        PayloadManager payloadManager = PayloadManager.getInstance();
+        Payload recipientWallet = payloadManager.createHDWallet("password", "Account 1");
 
-        //Receiver
-        //Authenticate and share one-time uuid
-        ECKey recipientKey = getRandomECKey();//Derived from master
+        System.out.println("Registering recipient mdid-guid...");
+        DeterministicKey recipientKey = HDKeyDerivation.createMasterPrivateKey(payloadManager.getHDSeed());
+        boolean success = new WalletPayload().registerMdid(recipientKey, recipientWallet.getGuid(), recipientWallet.getSharedKey());
+        Assert.isTrue(success);
+
+        System.out.println("Authenticating recipient...");
         String recipientToken = mds.getToken(recipientKey);
         String recipientMdid = recipientKey.toAddress(MainNetParams.get()).toString();
+
+        System.out.println("Share one time uuid...");
         Share recipientShareData = mds.postShare(recipientToken);
         String uuid = recipientShareData.getId();
         Assert.notNull(uuid);
+
+        System.out.println("Wiping recipient payload instance");
+        payloadManager.wipe();
 
         //
         //Share above one-time uuid over QR code with sender
         //
 
-        //Sender
-        //Authenticate yourself
-        ECKey senderKey = getRandomECKey();//Derived from master
+        System.out.println("Creating sender wallet...");
+        Payload senderWallet = payloadManager.createHDWallet("password", "Account 1");
+
+        System.out.println("Registering sender mdid-guid...");
+        DeterministicKey senderKey = HDKeyDerivation.createMasterPrivateKey(payloadManager.getHDSeed());
+        success = new WalletPayload().registerMdid(senderKey, senderWallet.getGuid(), senderWallet.getSharedKey());
+        Assert.isTrue(success);
+
+        System.out.println("Authenticating sender...");
         String senderToken = mds.getToken(senderKey);
 
-        //Get receiver mdid and uuid from QR
+        System.out.println("Getting recipient mdid and uuid from scanned QR...");
         Share senderShareData = mds.postToShare(senderToken, uuid);
         String recipientMdidFromOTUUID = senderShareData.getMdid();//is recipient mdid
         Assert.isTrue(recipientMdidFromOTUUID.equals(recipientMdid), "Mdid from share data should match original recipient mdid.");
 
-        //Add recipient to sender's trusted list
-        //IMO this should notify recipient and allow him to accept - which would add sender to trusted list as well.
+        System.out.println("Adding recipient's mdid to sender's trusted list...");
         mds.putTrusted(senderToken, recipientMdidFromOTUUID);
         boolean isTrusted = mds.getTrusted(senderToken, recipientMdidFromOTUUID);
         Assert.isTrue(isTrusted);
 
-
         //
-        //Add recipient to sender trusted list somehow?
         // TODO: 14/11/16 How to get sender mdid to recipient?
+        System.out.println("CHEATING!!! - Adding sender's mdid to recipient's trusted list. (the recipient will probably get a notification with sender's mdid.)");
         String senderMdid = senderKey.toAddress(MainNetParams.get()).toString();
         mds.putTrusted(recipientToken, senderMdid);
         //
 
         //Send recipient a message
+        System.out.println("Sender is sending a message to recipient...");
         String messageString = "Hey fool.";
         Message messageId = mds.postMessage(senderToken, senderKey, recipientMdidFromOTUUID, messageString, 1);
         //If all goes well and notifications work - recipient should get a notification
+
+        System.out.println("Done.");
     }
 }

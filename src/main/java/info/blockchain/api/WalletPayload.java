@@ -4,22 +4,40 @@ import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bitcoinj.core.ECKey;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class WalletPayload extends BaseApi {
 
     private static final String WALLET = "wallet";
-    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
+    public static final String PROD_PAYLOAD_URL = "https://explorer.dev.blockchain.co.uk/wallet";//PROTOCOL + SERVER_ADDRESS + WALLET;
 
     private String sessionId;
     public static final String KEY_AUTH_REQUIRED = "Authorization Required";
 
+    WalletEndpoints api;
+
     public WalletPayload() {
-        // No-op
+
+//        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+//        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+//        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(WalletEndpoints.API_URL)
+//                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        api = retrofit.create(WalletEndpoints.class);
     }
 
     public String getSessionId(String guid) throws Exception {
@@ -141,8 +159,26 @@ public class WalletPayload extends BaseApi {
             args.append(oldChecksum);
         }
 
-        args.append(getApiCode());
+//        args.append(getApiCode());
 
         String response = WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
+    }
+
+    public boolean registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
+
+        String signedGuid = walletKey.signMessage(guid);
+
+        Call<Void> call = api.registerMdid("register-mdid",
+                guid,
+                sharedKey,
+                signedGuid,
+                signedGuid.length());
+
+        Response<Void> result = call.execute();
+
+        if(!result.isSuccessful())
+            throw new Exception(result.code()+" "+result.message());
+
+        return true;
     }
 }
