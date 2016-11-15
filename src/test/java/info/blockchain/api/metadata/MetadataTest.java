@@ -213,11 +213,18 @@ public class MetadataTest {
         mds.putTrusted(recipientToken, senderMdid);
         //
 
-        //Send recipient a message
         System.out.println("Sender is sending a message to recipient...");
         String messageString = "Hey fool.";
         Message messageId = mds.postMessage(senderToken, senderKey, recipientMdidFromOTUUID, messageString, 1);
         //If all goes well and notifications work - recipient should get a notification
+
+        System.out.println("Unregistering sender mdid-guid...");
+        success = new WalletPayload().unregisterMdid(senderKey, senderWallet.getGuid(), senderWallet.getSharedKey());
+        Assert.isTrue(success);
+
+        System.out.println("Unregistering recipient mdid-guid...");
+        success = new WalletPayload().unregisterMdid(recipientKey, recipientWallet.getGuid(), recipientWallet.getSharedKey());
+        Assert.isTrue(success);
 
         System.out.println("Done.");
     }

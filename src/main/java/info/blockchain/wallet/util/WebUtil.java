@@ -47,7 +47,7 @@ public class WebUtil {
 
         for (int ii = 0; ii < requestRetry; ++ii) {
             URL url = new URL(request);
-            System.out.println(request+urlParameters);
+
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             try {
                 connection.setDoOutput(true);

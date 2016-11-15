@@ -159,16 +159,25 @@ public class WalletPayload extends BaseApi {
             args.append(oldChecksum);
         }
 
+        // TODO: 15/11/16 Add this after metadata testing on dev is complete
 //        args.append(getApiCode());
 
         String response = WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
     }
 
     public boolean registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
+        return updateMdid("register-mdid", walletKey, guid, sharedKey);
+    }
+
+    public boolean unregisterMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
+        return updateMdid("unregister-mdid", walletKey, guid, sharedKey);
+    }
+
+    private boolean updateMdid(String method, ECKey walletKey, String guid, String sharedKey) throws Exception {
 
         String signedGuid = walletKey.signMessage(guid);
 
-        Call<Void> call = api.registerMdid("register-mdid",
+        Call<Void> call = api.registerMdid(method,
                 guid,
                 sharedKey,
                 signedGuid,
