@@ -127,12 +127,12 @@ public class WebUtil {
 
                 connection.connect();
 
-                if (connection.getResponseCode() == 200)
+                if (connection.getResponseCode() == 200) {
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
-                else
+                } else {
                     error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
+                }
 
-                Thread.sleep(5000);
             } catch (Exception e) {
                 throw new Exception("Network error" + e.getMessage());
             } finally {
@@ -140,7 +140,7 @@ public class WebUtil {
             }
         }
 
-        return error;
+        throw new Exception("Invalid Response " + error);
     }
 
     public String getCookie(String url, String cname) throws Exception {
@@ -166,13 +166,18 @@ public class WebUtil {
                     String cookieValue = fields[0];
 
                     // Parse each field
+                    // TODO: 21/11/2016 What is this even here for?
                     for (int j = 1; j < fields.length; j++) {
                         if ("secure".equalsIgnoreCase(fields[j])) {
+                            // No-op
                         } else if (fields[j].indexOf('=') > 0) {
                             String[] f = fields[j].split("=");
                             if ("expires".equalsIgnoreCase(f[0])) {
+                                // No-op
                             } else if ("domain".equalsIgnoreCase(f[0])) {
+                                // No-op
                             } else if ("path".equalsIgnoreCase(f[0])) {
+                                // No-op
                             }
                         }
                     }
