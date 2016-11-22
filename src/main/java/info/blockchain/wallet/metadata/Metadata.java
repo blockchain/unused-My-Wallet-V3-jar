@@ -190,7 +190,7 @@ public class Metadata {
     private String getNonce() throws Exception {
 
         Call<Auth> response = mds.getNonce();
-        System.out.println(response.request().url());
+
         Response<Auth> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -474,19 +474,16 @@ public class Metadata {
     public void putMetadata(String payload) throws Exception {
 
         String encryptedPayload = AESUtil.encrypt(payload, new CharSequenceX(encryptionKey), 65536);//todo iterations?
+        byte[] encryptedPayloadBytes = encryptedPayload.getBytes("utf-8");
+        byte[] nextMagicHash = MetadataUtil.magic(encryptedPayloadBytes, magicHash);
 
-        byte[] nextMagicHash = MetadataUtil.magic(encryptedPayload.getBytes("utf-8"), magicHash);
-        byte[] messageBytes = MetadataUtil.getMessage(encryptedPayload.getBytes("utf-8"), magicHash);
+        byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
 
-        //// TODO: 18/11/16  
-        String signature = node.signMessage(Base64.encodeBase64String(messageBytes));
-
-        //Working sig
-        signature = node.signMessage(encryptedPayload);
+        String signature = node.signMessage(Base64.encodeBase64String(message));
 
         MetadataRequest body = new MetadataRequest();
         body.setVersion(METADATA_VERSION);
-        body.setPayload(encryptedPayload);
+        body.setPayload(Base64.encodeBase64String(encryptedPayloadBytes));
         body.setSignature(signature);
         body.setPrev_magic_hash(magicHash != null ? new String(Hex.encode(magicHash)) : null);
         body.setType_id(type);
@@ -516,8 +513,8 @@ public class Metadata {
         Response<MetadataResponse> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            String decryptedPayload = AESUtil.decrypt(exe.body().getPayload(), new CharSequenceX(encryptionKey), 65536);
-            return decryptedPayload;
+            String encrypted = new String(Base64.decodeBase64(exe.body().getPayload()));
+            return AESUtil.decrypt(encrypted, new CharSequenceX(encryptionKey), 65536);
         } else {
             throw new Exception(exe.message());
         }
@@ -531,9 +528,11 @@ public class Metadata {
     public void deleteMetadata(String payload) throws Exception {
 
         String encryptedPayload = AESUtil.encrypt(payload, new CharSequenceX(encryptionKey), 65536);//todo iterations?
+        byte[] encryptedPayloadBytes = encryptedPayload.getBytes("utf-8");
 
-//        byte[] nextMagicHash = MetadataUtil.magic(encryptedPayload.getBytes(), magicHash);
-        String signature = node.signMessage(encryptedPayload);//MetadataUtil.message(encryptedPayload.getBytes(), nextMagicHash));
+        byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
+
+        String signature = node.signMessage(Base64.encodeBase64String(message));
 
         Call<Void> response = mds.deleteMetadata(address, signature);
 

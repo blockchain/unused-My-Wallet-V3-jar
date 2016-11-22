@@ -14,10 +14,10 @@ public class MetadataUtilTest {
         String expected1 = "eyJoZWxsbyI6IndvcmxkIn0=";
         String expected2 = "LxR+2CipfgdIdi4EZgNOKTT+96WbppXnPZZjdZJ2vwCTojlxqRTl6svwqNJRVM2jCcPBxy+7mRTUfGDzy2gViA==";
 
-        byte[] result = MetadataUtil.getMessage(message.getBytes(), null);
+        byte[] result = MetadataUtil.message(message.getBytes(), null);
         Assert.isTrue(expected1.equals(Base64.encodeBase64String(result)));
         byte[] magic = MetadataUtil.magic(message.getBytes(), null);
-        byte[] nextResult = MetadataUtil.getMessage(message.getBytes(), magic);
+        byte[] nextResult = MetadataUtil.message(message.getBytes(), magic);
         Assert.isTrue(expected2.equals(Base64.encodeBase64String(nextResult)));
     }
 

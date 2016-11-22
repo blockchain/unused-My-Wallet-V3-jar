@@ -9,7 +9,6 @@ import info.blockchain.wallet.payload.PayloadManager;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Base64;
 
@@ -53,30 +52,6 @@ public class MetadataTest {
     @Test
     public void testMetadata() throws Exception{
 
-        DeterministicKey key = getRandomECKey();
-
-        String message = "{hello: 'world'}";
-
-        Metadata metadata5 = new Metadata(key, 5);
-        metadata5.putMetadata(message);
-
-        String response = metadata5.getMetadata();
-        Assert.isTrue(message.equals(response));
-
-        metadata5.deleteMetadata(message);
-
-        try {
-            metadata5.getMetadata();
-            Assert.isTrue(false);
-        }catch (Exception e){
-            Assert.isTrue(true);
-        }
-    }
-
-    @Test
-    @Ignore
-    public void testMetadataMagic() throws Exception{
-
 //        String web_mnemonic = "bicycle balcony prefer kid flower pole goose crouch century lady worry flavor";
 //        PayloadManager payloadManager = PayloadManager.getInstance();
 //        payloadManager.restoreHDWallet("", web_mnemonic, "Account 1");
@@ -87,12 +62,25 @@ public class MetadataTest {
         String message = "{hello: 'world'}";
 
         Metadata metadata5 = new Metadata(key, 5);
-        System.out.println("PUT = "+message);
         metadata5.putMetadata(message);
 
-        message = "{hello again: 'world again'}";
-        System.out.println("PUT AGAIN = "+message);
+        String result1 = metadata5.getMetadata();
+        Assert.isTrue(message.equals(result1));
+
+        message = "{hello: 'mars'}";
         metadata5.putMetadata(message);
+
+        String result2 = metadata5.getMetadata();
+        Assert.isTrue(message.equals(result2));
+
+        metadata5.deleteMetadata(message);
+
+        try {
+            metadata5.getMetadata();
+            Assert.isTrue(false);
+        }catch (Exception e){
+            Assert.isTrue(true);
+        }
     }
 
     @Test
