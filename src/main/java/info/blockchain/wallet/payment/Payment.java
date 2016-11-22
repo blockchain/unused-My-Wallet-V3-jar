@@ -8,7 +8,6 @@ import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.Hash;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
@@ -20,11 +19,7 @@ import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Payment {
 
@@ -117,18 +112,18 @@ public class Payment {
 
         SpendableUnspentOutputs result = new SpendableUnspentOutputs();
 
-        // select the minimum number of outputs necessary
+        // Select the minimum number of outputs necessary
         Collections.sort(coins.getOutputs(), new UnspentOutputAmountComparator());
         List<MyTransactionOutPoint> minimumUnspentOutputsList = new ArrayList<MyTransactionOutPoint>();
         BigInteger totalValue = BigInteger.ZERO;
         BigInteger consumedBalance = BigInteger.ZERO;
         double inputCost = inputCost(feePerKb);
 
-        int outputCount = 2;//initially assume change
+        int outputCount = -1;
 
         for (MyTransactionOutPoint output : coins.getOutputs()) {
 
-            //Filter usable coins
+            // Filter usable coins
             if (output.getValue().doubleValue() < inputCost) {
                 continue;
             }
@@ -136,35 +131,117 @@ public class Payment {
             totalValue = totalValue.add(output.getValue());
             minimumUnspentOutputsList.add(output);
 
-            //No change = 1 output (Exact amount)
-            BigInteger spendAmountNoChange = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
-            if (spendAmountNoChange.compareTo(totalValue) == 0) {
-                outputCount = 1;
-                break;
-            }
-
-            //No change = 1 output (Don't allow dust to be sent back as change - consume it rather)
-            BigInteger spendAmountNoChangeWithDustInclusion = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
-            if (spendAmountNoChangeWithDustInclusion.compareTo(totalValue) == -1
-                    && spendAmountNoChangeWithDustInclusion.compareTo(totalValue.subtract(SendCoins.bDust)) >= 0) {
-                consumedBalance = consumedBalance.add(spendAmountNoChangeWithDustInclusion.subtract(totalValue));
-                outputCount = 1;
-                break;
-            }
-
-            //Expect change = 2 outputs
-            BigInteger spendAmountWithChange = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 2, feePerKb));
-            if (totalValue.compareTo(spendAmountWithChange) >= 0) {
-                outputCount = 2;//[multiple inputs, 2 outputs] - assume change
-                break;
+            if (getOutputCount(coins, spendAmount, feePerKb, inputCost, minimumUnspentOutputsList, totalValue) != -1
+                    && outputCount == -1) {
+                // Only assign once if function returned real number
+                outputCount = getOutputCount(coins, spendAmount, feePerKb, inputCost, minimumUnspentOutputsList, totalValue);
             }
         }
+
+        if (outputCount == -1) {
+            // If never assigned, assume change
+            outputCount = 2;
+        }
+
+        consumedBalance = consumedBalance.add(
+                getConsumedBalance(
+                        coins,
+                        spendAmount,
+                        feePerKb,
+                        inputCost,
+                        minimumUnspentOutputsList,
+                        totalValue,
+                        consumedBalance));
 
         result.setSpendableOutputs(minimumUnspentOutputsList);
         result.setAbsoluteFee(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), outputCount, feePerKb));
         result.setConsumedAmount(consumedBalance);
 
         return result;
+    }
+
+    private int getOutputCount(UnspentOutputs coins,
+                               BigInteger spendAmount,
+                               BigInteger feePerKb,
+                               double inputCost,
+                               List<MyTransactionOutPoint> minimumUnspentOutputsList,
+                               BigInteger totalValue) {
+
+        int outputCount = -1;
+
+        for (MyTransactionOutPoint output : coins.getOutputs()) {
+            // Filter usable coins
+            if (output.getValue().doubleValue() < inputCost) {
+                continue;
+            }
+
+            // No change = 1 output (Exact amount)
+            BigInteger spendAmountNoChange = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
+
+            if (spendAmountNoChange.compareTo(totalValue) == 0) {
+                outputCount = 1;
+                break;
+            }
+
+            // No change = 1 output
+            BigInteger spendAmountNoChangeWithDustInclusion = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
+
+            if (spendAmountNoChangeWithDustInclusion.compareTo(totalValue) == -1
+                    && spendAmountNoChangeWithDustInclusion.compareTo(totalValue.subtract(SendCoins.bDust)) >= 0) {
+                outputCount = 1;
+                break;
+            }
+
+            // Expect change = 2 outputs
+            BigInteger spendAmountWithChange = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 2, feePerKb));
+
+            if (totalValue.compareTo(spendAmountWithChange) >= 0) {
+                outputCount = 2; // [multiple inputs, 2 outputs] - assume change
+                break;
+            }
+        }
+
+        return outputCount;
+    }
+
+    private BigInteger getConsumedBalance(UnspentOutputs coins,
+                                          BigInteger spendAmount,
+                                          BigInteger feePerKb,
+                                          double inputCost,
+                                          List<MyTransactionOutPoint> minimumUnspentOutputsList,
+                                          BigInteger totalValue,
+                                          BigInteger consumedBalance) {
+
+        for (MyTransactionOutPoint output : coins.getOutputs()) {
+            // Filter usable coins
+            if (output.getValue().doubleValue() < inputCost) {
+                continue;
+            }
+
+            BigInteger spendAmountNoChange = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
+
+            if (spendAmountNoChange.compareTo(totalValue) == 0) {
+                break;
+            }
+
+            // Don't allow dust to be sent back as change - consume it rather
+            BigInteger spendAmountNoChangeWithDustInclusion = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 1, feePerKb));
+
+            if (spendAmountNoChangeWithDustInclusion.compareTo(totalValue) == -1
+                    && spendAmountNoChangeWithDustInclusion.compareTo(totalValue.subtract(SendCoins.bDust)) >= 0) {
+
+                consumedBalance = consumedBalance.add(spendAmountNoChangeWithDustInclusion.subtract(totalValue));
+                break;
+            }
+
+            BigInteger spendAmountWithChange = spendAmount.add(FeeUtil.estimatedFee(minimumUnspentOutputsList.size(), 2, feePerKb));
+
+            if (totalValue.compareTo(spendAmountWithChange) >= 0) {
+                break;
+            }
+        }
+
+        return consumedBalance;
     }
 
     /**
