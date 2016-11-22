@@ -1,7 +1,5 @@
 package info.blockchain.wallet.metadata;
 
-import com.google.gson.Gson;
-
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.Auth;
@@ -45,7 +43,7 @@ public class Metadata {
 
     final static int METADATA_VERSION = 1;
 
-    private MetadataEndpoints mds;
+    private MetadataEndpoints endpoints;
     private int type;
     private String address;
     private DeterministicKey node;
@@ -71,7 +69,7 @@ public class Metadata {
 //                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        mds = retrofit.create(MetadataEndpoints.class);
+        endpoints = retrofit.create(MetadataEndpoints.class);
 
         setMetadataNode(type, masterHDNode);
         this.token = getToken();
@@ -95,7 +93,7 @@ public class Metadata {
 //                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        mds = retrofit.create(MetadataEndpoints.class);
+        endpoints = retrofit.create(MetadataEndpoints.class);
 
         //Not sure if we should use masterHDNode here
         this.node = masterHDNode;
@@ -189,7 +187,7 @@ public class Metadata {
      */
     private String getNonce() throws Exception {
 
-        Call<Auth> response = mds.getNonce();
+        Call<Auth> response = endpoints.getNonce();
 
         Response<Auth> exe = response.execute();
 
@@ -214,14 +212,14 @@ public class Metadata {
         map.put("mdid", address);
         map.put("signature", sig);
         map.put("nonce", nonce);
-        Call<Auth> response = mds.getToken(map);
+        Call<Auth> response = endpoints.getToken(map);
 
         Response<Auth> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body().getToken();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -232,14 +230,14 @@ public class Metadata {
      */
     public Trusted getTrustedList() throws Exception {
 
-        Call<Trusted> response = mds.getTrustedList("Bearer " + token);
+        Call<Trusted> response = endpoints.getTrustedList("Bearer " + token);
 
         Response<Trusted> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -251,14 +249,14 @@ public class Metadata {
      */
     public boolean getTrusted(String mdid) throws Exception {
 
-        Call<Trusted> response = mds.getTrusted("Bearer " + token, mdid);
+        Call<Trusted> response = endpoints.getTrusted("Bearer " + token, mdid);
 
         Response<Trusted> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return Arrays.asList(exe.body().getContacts()).contains(mdid);
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -270,14 +268,14 @@ public class Metadata {
      */
     public boolean putTrusted(String mdid) throws Exception {
 
-        Call<Trusted> response = mds.putTrusted("Bearer " + token, mdid);
+        Call<Trusted> response = endpoints.putTrusted("Bearer " + token, mdid);
 
         Response<Trusted> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return mdid.equals(exe.body().getContact());
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -289,47 +287,54 @@ public class Metadata {
      */
     public boolean deleteTrusted(String mdid) throws Exception {
 
-        Call<Status> response = mds.deleteTrusted("Bearer " + token, mdid);
+        Call<Status> response = endpoints.deleteTrusted("Bearer " + token, mdid);
 
         Response<Status> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return true;
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
     /**
      * Add new shared metadata entry. Signed. Authenticated.
-     * @param recipientMdid
+     * @param mdid
      * @param message
      * @param type
      * @return
      * @throws Exception
      */
-    public Message postMessage(String recipientMdid, String message, int type) throws Exception {
+    public Message postMessage(String mdid, String message, int type) throws Exception {
 
-        String b64Msg = new String(Base64.encodeBase64String(message.getBytes()));
+        String encryptedMessage = encryptFor(message, mdid);
+
+        String b64Msg = new String(Base64.encodeBase64String(encryptedMessage.getBytes()));
 
         String signature = node.signMessage(b64Msg);
 
         Message request = new Message();
-        request.setRecipient(recipientMdid);
+        request.setRecipient(mdid);
         request.setType(type);
         request.setPayload(b64Msg);
         request.setSignature(signature);
 
-        Call<Message> response = mds.postMessage("Bearer " + token, request);
+        Call<Message> response = endpoints.postMessage("Bearer " + token, request);
 
         Response<Message> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
 
+    }
+
+    private String encryptFor(String message, String mdid) throws Exception {
+
+        return message;
     }
 
     /**
@@ -340,14 +345,14 @@ public class Metadata {
      */
     public List<Message> getMessages(boolean onlyProcessed) throws Exception {
 
-        Call<List<Message>> response = mds.getMessages("Bearer " + token, onlyProcessed);
+        Call<List<Message>> response = endpoints.getMessages("Bearer " + token, onlyProcessed);
 
         Response<List<Message>> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -359,14 +364,14 @@ public class Metadata {
      */
     public List<Message> getMessages(String lastMessageId) throws Exception {
 
-        Call<List<Message>> response = mds.getMessages("Bearer " + token, lastMessageId);
+        Call<List<Message>> response = endpoints.getMessages("Bearer " + token, lastMessageId);
 
         Response<List<Message>> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -378,14 +383,14 @@ public class Metadata {
      */
     public Message getMessage(String messageId) throws Exception {
 
-        Call<Message> response = mds.getMessage("Bearer " + token, messageId);
+        Call<Message> response = endpoints.getMessage("Bearer " + token, messageId);
 
         Response<Message> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -397,14 +402,14 @@ public class Metadata {
      */
     public Invitation createInvitation() throws Exception {
 
-        Call<Invitation> response = mds.postShare("Bearer " + token);
+        Call<Invitation> response = endpoints.postShare("Bearer " + token);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -416,14 +421,14 @@ public class Metadata {
      */
     public Invitation acceptInvitation(String uuid) throws Exception {
 
-        Call<Invitation> response = mds.postToShare("Bearer " + token, uuid);
+        Call<Invitation> response = endpoints.postToShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -435,14 +440,14 @@ public class Metadata {
      */
     public Invitation readInvitation(String uuid) throws Exception {
 
-        Call<Invitation> response = mds.getShare("Bearer " + token, uuid);
+        Call<Invitation> response = endpoints.getShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return exe.body();
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -454,14 +459,14 @@ public class Metadata {
      */
     public boolean deleteInvitation(String uuid) throws Exception {
 
-        Call<Invitation> response = mds.deleteShare("Bearer " + token, uuid);
+        Call<Invitation> response = endpoints.deleteShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return true;
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -488,9 +493,7 @@ public class Metadata {
         body.setPrev_magic_hash(magicHash != null ? new String(Hex.encode(magicHash)) : null);
         body.setType_id(type);
 
-        System.out.println(new Gson().toJson(body));
-
-        Call<Void> response = mds.putMetadata(address, body);
+        Call<Void> response = endpoints.putMetadata(address, body);
 
         Response<Void> exe = response.execute();
 
@@ -508,7 +511,7 @@ public class Metadata {
      */
     public String getMetadata() throws Exception {
 
-        Call<MetadataResponse> response = mds.getMetadata(address);
+        Call<MetadataResponse> response = endpoints.getMetadata(address);
 
         Response<MetadataResponse> exe = response.execute();
 
@@ -516,7 +519,7 @@ public class Metadata {
             String encrypted = new String(Base64.decodeBase64(exe.body().getPayload()));
             return AESUtil.decrypt(encrypted, new CharSequenceX(encryptionKey), 65536);
         } else {
-            throw new Exception(exe.message());
+            throw new Exception(exe.code()+" "+exe.message());
         }
     }
 
@@ -534,7 +537,7 @@ public class Metadata {
 
         String signature = node.signMessage(Base64.encodeBase64String(message));
 
-        Call<Void> response = mds.deleteMetadata(address, signature);
+        Call<Void> response = endpoints.deleteMetadata(address, signature);
 
         Response<Void> exe = response.execute();
 

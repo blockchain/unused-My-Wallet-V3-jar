@@ -1,6 +1,5 @@
-package info.blockchain.api.metadata;
+package info.blockchain.wallet.metadata;
 
-import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.Trusted;
@@ -181,5 +180,50 @@ public class MetadataTest {
         senderMetadata = new Metadata(payloadManager.getMasterKey(), 2);
         Assert.isTrue(senderMetadata.getAddress().equals(web_address));
         payloadManager.wipe();
+    }
+
+    @Test
+    public void testMe() throws Exception {
+
+        System.out.println("--Sender--");
+        //Create invite
+        Invitation invitation = senderMetadata.createInvitation();
+        System.out.println("Creating invite with my address "+senderMetadata.getAddress());
+
+        //contact is recipient address (not available until accepted)
+        invitation = senderMetadata.readInvitation(invitation.getId());
+        Assert.isNull(invitation.getContact());
+        System.out.println("Check not accepted yet");
+
+
+
+        System.out.println("\n--Recipient--");
+        //Accept one time url invite - mdid is sender address
+        invitation = recipientMetadata.acceptInvitation(invitation.getId());
+        System.out.println("Accepting invite from "+invitation.getMdid()+"--");
+        System.out.println("attaching my address "+recipientMetadata.getAddress()+"--");
+        //Add sender address to trusted list
+        System.out.println("Adding to trusted list...");
+        recipientMetadata.putTrusted(invitation.getMdid());
+
+
+        System.out.println("\n--Sender--");
+        //contact is recipient address (now available)
+        invitation = senderMetadata.readInvitation(invitation.getId());
+        System.out.println(invitation.getContact()+" accepted the invite");
+        //Add recipient address to trusted list
+        System.out.println("Adding to trusted list...");
+        senderMetadata.putTrusted(invitation.getContact());
+
+        String messageString = "Any fool can paint a picture, but it takes a wise person to be able to sell it.";
+        System.out.println("Encrypting and sending message: '"+messageString+"'");
+        senderMetadata.postMessage(invitation.getContact(), messageString, 1);
+
+
+
+        System.out.println("\n--Recipient--");
+        List<Message> messages = recipientMetadata.getMessages(false);
+        System.out.println("Checking messages and found "+messages.size()+" new message.");
+        System.out.println("It says: '"+new String(Base64.decode(messages.get(0).getPayload()))+"'");
     }
 }
