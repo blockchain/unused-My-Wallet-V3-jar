@@ -1,10 +1,6 @@
-package info.blockchain.api.metadata;
+package info.blockchain.api;
 
-import info.blockchain.api.metadata.data.Auth;
-import info.blockchain.api.metadata.data.Message;
-import info.blockchain.api.metadata.data.Share;
-import info.blockchain.api.metadata.data.Status;
-import info.blockchain.api.metadata.data.Trusted;
+import info.blockchain.wallet.metadata.data.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,12 +10,13 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-interface MetadataService {
+public interface MetadataEndpoints {
 
     String API_URL = "https://api.dev.blockchain.co.uk/metadata/";
 
@@ -57,14 +54,25 @@ interface MetadataService {
 
 
     @POST("share")
-    Call<Share> postShare(@Header("Authorization") String jwToken);
+    Call<Invitation> postShare(@Header("Authorization") String jwToken);
 
     @POST("share/{uuid}")
-    Call<Share> postToShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+    Call<Invitation> postToShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
     @GET("share/{uuid}")
-    Call<Share> getShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+    Call<Invitation> getShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
     @DELETE("share/{uuid}")
-    Call<Share> deleteShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+    Call<Invitation> deleteShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+
+
+    @PUT("{addr}")
+    @Headers("Origin: http://localhost:8080")
+    Call<Void> putMetadata(@Path("addr") String address, @Body MetadataRequest body);
+
+    @GET("{addr}")
+    Call<MetadataResponse> getMetadata(@Path("addr") String address);
+
+    @DELETE("{addr}")
+    Call<Void> deleteMetadata(@Path("addr") String address, @Query("signature") String signature);
 }

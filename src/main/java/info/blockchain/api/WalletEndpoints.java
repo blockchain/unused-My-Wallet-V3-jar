@@ -11,7 +11,7 @@ interface WalletEndpoints {
 
     @POST("wallet")
     @Headers("Origin: http://localhost:8080")
-    Call<Void> registerMdid(@Query("method") String method,
+    Call<Void> postMdidRegistration(@Query("method") String method,
                                     @Query("guid") String guid,
                                     @Query("sharedKey") String sharedKey,
                                     @Query("payload") String payload,

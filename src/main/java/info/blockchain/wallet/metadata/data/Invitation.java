@@ -1,10 +1,10 @@
-package info.blockchain.api.metadata.data;
+package info.blockchain.wallet.metadata.data;
 
-public class Share {
+public class Invitation {
 
     String id;//one-time UUID
     String mdid;//mdid of sender
-    String contact;//this is returned but not sure what for yet
+    String contact;//mdid of recipient
 
     public String getId() {
         return id;
@@ -14,9 +14,13 @@ public class Share {
         return mdid;
     }
 
+    public String getContact() {
+        return contact;
+    }
+
     @Override
     public String toString() {
-        return "Share{" +
+        return "Invitation{" +
                 "id='" + id + '\'' +
                 ", mdid='" + mdid + '\'' +
                 ", contact='" + contact + '\'' +

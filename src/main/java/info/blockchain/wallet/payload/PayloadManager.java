@@ -603,6 +603,14 @@ public class PayloadManager {
         return wallet.getSeed();
     }
 
+    public String getHDSeedHex() {
+        return wallet.getSeedHex();
+    }
+
+    public DeterministicKey getMasterKey() {
+        return wallet.getMasterKey();
+    }
+
     public String[] getMnemonic(String secondPassword) throws Exception {
 
         Wallet wallet = getDecryptedWallet(secondPassword);

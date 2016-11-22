@@ -1,21 +1,18 @@
 package info.blockchain.api.metadata;
 
-import info.blockchain.api.WalletPayload;
-import info.blockchain.api.metadata.data.Message;
-import info.blockchain.api.metadata.data.Share;
-import info.blockchain.api.metadata.data.Trusted;
-import info.blockchain.wallet.payload.Payload;
+import info.blockchain.wallet.metadata.Metadata;
+import info.blockchain.wallet.metadata.data.Invitation;
+import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Base64;
 
-import java.security.SecureRandom;
 import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
@@ -25,207 +22,176 @@ import io.jsonwebtoken.lang.Assert;
  */
 public class MetadataTest {
 
-    Metadata mds;
-
-    ECKey senderKey;//extended public senderKey derived from master senderKey
-    String senderMdid;
-
-    ECKey recipientKey;
-    String recipientMdid;
+    Metadata senderMetadata;
+    Metadata recipientMetadata;
 
     @Before
     public void setup() throws Exception {
 
-        mds = new Metadata();
+        //Sender metadata
+        PayloadManager payloadManager = PayloadManager.getInstance();
+        payloadManager.createHDWallet("", "Account 1");
+        DeterministicKey senderKey = payloadManager.getMasterKey();
+        senderMetadata = new Metadata(senderKey);
+        payloadManager.wipe();
 
-        senderKey = getRandomECKey();
-        senderMdid = senderKey.toAddress(MainNetParams.get()).toString();
-
-        recipientKey = getRandomECKey();
-        recipientMdid = recipientKey.toAddress(MainNetParams.get()).toString();
+        //Recipient metadata
+        payloadManager = PayloadManager.getInstance();
+        payloadManager.createHDWallet("", "Account 1");
+        DeterministicKey recipientKey = payloadManager.getMasterKey();
+        recipientMetadata = new Metadata(recipientKey);
+        payloadManager.wipe();
     }
 
-    private ECKey getRandomECKey() throws Exception {
+    private DeterministicKey getRandomECKey() throws Exception {
 
-        byte[] rdata = new byte[32];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(rdata);
-        return ECKey.fromPrivate(rdata, true);
-    }
-
-    @Test
-    public void testGetNonce() throws Exception {
-        String nonce = mds.getNonce();
-        Assert.hasText(nonce);
-    }
-
-    @Test
-    public void testGetToken() throws Exception {
-        String token = mds.getToken(senderKey);
-        Assert.hasText(token);
+        PayloadManager payloadManager = PayloadManager.getInstance();
+        payloadManager.createHDWallet("", "Account 1");
+        return payloadManager.getMasterKey();
     }
 
     @Test
-    public void testPutGetTrusted() throws Exception {
+    public void testMetadata() throws Exception{
 
-        ECKey otherKey = getRandomECKey();
-        String otherMdid = otherKey.toAddress(MainNetParams.get()).toString();
+        DeterministicKey key = getRandomECKey();
+
+        String message = "{hello: 'world'}";
+
+        Metadata metadata5 = new Metadata(key, 5);
+        metadata5.putMetadata(message);
+
+        String response = metadata5.getMetadata();
+        Assert.isTrue(message.equals(response));
+
+        metadata5.deleteMetadata(message);
+
+        try {
+            metadata5.getMetadata();
+            Assert.isTrue(false);
+        }catch (Exception e){
+            Assert.isTrue(true);
+        }
+    }
+
+    @Test
+    @Ignore
+    public void testMetadataMagic() throws Exception{
+
+//        String web_mnemonic = "bicycle balcony prefer kid flower pole goose crouch century lady worry flavor";
+//        PayloadManager payloadManager = PayloadManager.getInstance();
+//        payloadManager.restoreHDWallet("", web_mnemonic, "Account 1");
+//        DeterministicKey key = payloadManager.getMasterKey();
+
+        DeterministicKey key = getRandomECKey();
+
+        String message = "{hello: 'world'}";
+
+        Metadata metadata5 = new Metadata(key, 5);
+        System.out.println("PUT = "+message);
+        metadata5.putMetadata(message);
+
+        message = "{hello again: 'world again'}";
+        System.out.println("PUT AGAIN = "+message);
+        metadata5.putMetadata(message);
+    }
+
+    @Test
+    public void testTrusted() throws Exception {
+
+        String recipientMdid = recipientMetadata.getAddress();
 
         //PUT assert
-        String token = mds.getToken(senderKey);
-        boolean result = mds.putTrusted(token, otherMdid);
+        boolean result = senderMetadata.putTrusted(recipientMdid);
         Assert.isTrue(result);
 
         //GET assert
-        boolean isTrusted = mds.getTrusted(token, otherMdid);
+        boolean isTrusted = senderMetadata.getTrusted(recipientMdid);
         Assert.isTrue(isTrusted);
 
-        Trusted list = mds.getTrustedList(token);
+        Trusted list = senderMetadata.getTrustedList();
         Assert.hasText(list.getMdid());
         Assert.isTrue(list.getContacts().length > 0);
-    }
 
-    @Test
-    public void testDeleteTrusted() throws Exception {
-        ECKey otherKey = getRandomECKey();
-        String otherMdid = otherKey.toAddress(MainNetParams.get()).toString();
-
-        String token = mds.getToken(senderKey);
-        mds.putTrusted(token, otherMdid);
-
-        boolean result = mds.deleteTrusted(token, otherMdid);
+        result = senderMetadata.deleteTrusted(recipientMdid);
         Assert.isTrue(result);
     }
 
     @Test
-    public void testPostGetMessage() throws Exception {
+    public void testMessage() throws Exception {
 
-        String recipientToken = mds.getToken(recipientKey);
-        ECKey senderKey = this.senderKey;
-        String senderToken = mds.getToken(this.senderKey);
-        String senderMdid = this.senderMdid;
+        String recipientMdid = recipientMetadata.getAddress();
 
-        //Add senderMdid to trust list
-        mds.putTrusted(recipientToken, senderMdid);
-        boolean isTrusted = mds.getTrusted(recipientToken, senderMdid);
-        Assert.isTrue(isTrusted);
+        //Add both to each other's trust lists
+        senderMetadata.putTrusted(recipientMdid);
+        recipientMetadata.putTrusted(senderMetadata.getAddress());
 
         //Send that senderMdid a message
         String messageString = "Any fool can paint a picture, but it takes a wise person to be able to sell it.";
-        Message messageId = mds.postMessage(senderToken, senderKey, recipientMdid, messageString, 1);
+        Message messageId = senderMetadata.postMessage(recipientMdid, messageString, 1);
 
         //Get message
-        Message message = mds.getMessage(recipientToken, messageId.getId());
+        Message message = recipientMetadata.getMessage(messageId.getId());
         String returnedMessage = new String(Base64.decode(message.getPayload()));
         Assert.isTrue(returnedMessage.equals(messageString));
 
         //Get messages
-        List<Message> messages = mds.getMessages(recipientToken, messageId.getId());
+        List<Message> messages = recipientMetadata.getMessages(messageId.getId());
         returnedMessage = new String(Base64.decode(messages.get(0).getPayload()));
         Assert.isTrue(returnedMessage.equals(messageString));
 
         //Get unprocessed messages
-        messages = mds.getMessages(recipientToken, false);
+        messages = recipientMetadata.getMessages(false);
         returnedMessage = new String(Base64.decode(messages.get(0).getPayload()));
         Assert.isTrue(returnedMessage.equals(messageString));
-
     }
 
     @Test
-    public void testPostShare() throws Exception {
+    public void testInvitation() throws Exception {
 
-        //Get one-use uuid
-        String recipientToken = mds.getToken(recipientKey);
-        Share share = mds.postShare(recipientToken);
-        Assert.notNull(share.getId());
-        Assert.notNull(share.getMdid());
+        //Sender - Create invitation
+        Invitation invitation = senderMetadata.createInvitation();
+        Assert.notNull(invitation.getId());
+        Assert.notNull(invitation.getMdid());
 
-        //set the MDID of the recipient
-        Share toShare = mds.postToShare(recipientToken, share.getId());
-        Assert.isTrue(share.getId().equals(toShare.getId()));
+        //Recipient - Accept invitation and check if sender mdid is included
+        Invitation acceptedInvitation = recipientMetadata.acceptInvitation(invitation.getId());
+        System.out.println(acceptedInvitation.toString());
+        Assert.isTrue(invitation.getId().equals(acceptedInvitation.getId()));
+        Assert.isTrue(senderMetadata.getAddress().equals(acceptedInvitation.getMdid()));
 
-        //make sure MDID of the recipient was set
-        Share recipientShare = mds.getShare(recipientToken, share.getId());
-        Assert.isTrue(share.getId().equals(recipientShare.getId()));
+        //Sender - Check if invitation was accepted
+        //If it has been accepted the recipient mdid will be included in invitation contact
+        Invitation checkInvitation = senderMetadata.readInvitation(invitation.getId());
+        System.out.println(checkInvitation.toString());
+        Assert.isTrue(invitation.getId().equals(checkInvitation.getId()));
+        Assert.isTrue(recipientMetadata.getAddress().equals(checkInvitation.getContact()));
 
         //delete one-time UUID
-        boolean success = mds.deleteShare(recipientToken, share.getId());
+        boolean success = senderMetadata.deleteInvitation(invitation.getId());
         Assert.isTrue(success);
 
         //make sure one-time UUID is deleted
-        Share shareDel = mds.getShare(recipientToken, share.getId());
-        Assert.isNull(shareDel);
+        Invitation invitationDel = senderMetadata.readInvitation(invitation.getId());
+        Assert.isNull(invitationDel);
     }
 
     @Test
-    public void testCompleteScenario() throws Exception {
+    public void testGetMetadataNode() throws Exception {
 
-        System.out.println("Creating recipient wallet...");
+        String web_mnemonic = "bicycle balcony prefer kid flower pole goose crouch century lady worry flavor";
+        String web_seedHex = "15e23aa73d25994f1921a1256f93f72c";
+        String web_address = "12sC9tqHzAhdoukhCbTnyx2MjYXNXBGHnF";
+
         PayloadManager payloadManager = PayloadManager.getInstance();
-        Payload recipientWallet = payloadManager.createHDWallet("password", "Account 1");
+        payloadManager.restoreHDWallet("", web_mnemonic, "Account 1");
 
-        System.out.println("Registering recipient mdid-guid...");
-        DeterministicKey recipientKey = HDKeyDerivation.createMasterPrivateKey(payloadManager.getHDSeed());
-        boolean success = new WalletPayload().registerMdid(recipientKey, recipientWallet.getGuid(), recipientWallet.getSharedKey());
-        Assert.isTrue(success);
+        //Ensure web_wallet and this restore wallet is same
+        Assert.isTrue(web_seedHex.equals(payloadManager.getHDSeedHex()));
+        String web_priv = "xprv9s21ZrQH143K2qnxcoP1RnRkxYvHT5ZDamV4B4UYTmAuANBnyWwVP7e3GYmEkt1chPWq264tiUxo21FiRKx3kVTpHLkkP65NRzHSAjS8nHA";
+        Assert.isTrue(web_priv.equals(payloadManager.getMasterKey().serializePrivB58(MainNetParams.get())));
 
-        System.out.println("Authenticating recipient...");
-        String recipientToken = mds.getToken(recipientKey);
-        String recipientMdid = recipientKey.toAddress(MainNetParams.get()).toString();
-
-        System.out.println("Share one time uuid...");
-        Share recipientShareData = mds.postShare(recipientToken);
-        String uuid = recipientShareData.getId();
-        Assert.notNull(uuid);
-
-        System.out.println("Wiping recipient payload instance");
+        senderMetadata = new Metadata(payloadManager.getMasterKey(), 2);
+        Assert.isTrue(senderMetadata.getAddress().equals(web_address));
         payloadManager.wipe();
-
-        //
-        //Share above one-time uuid over QR code with sender
-        //
-
-        System.out.println("Creating sender wallet...");
-        Payload senderWallet = payloadManager.createHDWallet("password", "Account 1");
-
-        System.out.println("Registering sender mdid-guid...");
-        DeterministicKey senderKey = HDKeyDerivation.createMasterPrivateKey(payloadManager.getHDSeed());
-        success = new WalletPayload().registerMdid(senderKey, senderWallet.getGuid(), senderWallet.getSharedKey());
-        Assert.isTrue(success);
-
-        System.out.println("Authenticating sender...");
-        String senderToken = mds.getToken(senderKey);
-
-        System.out.println("Getting recipient mdid and uuid from scanned QR...");
-        Share senderShareData = mds.postToShare(senderToken, uuid);
-        String recipientMdidFromOTUUID = senderShareData.getMdid();//is recipient mdid
-        Assert.isTrue(recipientMdidFromOTUUID.equals(recipientMdid), "Mdid from share data should match original recipient mdid.");
-
-        System.out.println("Adding recipient's mdid to sender's trusted list...");
-        mds.putTrusted(senderToken, recipientMdidFromOTUUID);
-        boolean isTrusted = mds.getTrusted(senderToken, recipientMdidFromOTUUID);
-        Assert.isTrue(isTrusted);
-
-        //
-        // TODO: 14/11/16 How to get sender mdid to recipient?
-        System.out.println("CHEATING!!! - Adding sender's mdid to recipient's trusted list. (the recipient will probably get a notification with sender's mdid.)");
-        String senderMdid = senderKey.toAddress(MainNetParams.get()).toString();
-        mds.putTrusted(recipientToken, senderMdid);
-        //
-
-        System.out.println("Sender is sending a message to recipient...");
-        String messageString = "Hey fool.";
-        Message messageId = mds.postMessage(senderToken, senderKey, recipientMdidFromOTUUID, messageString, 1);
-        //If all goes well and notifications work - recipient should get a notification
-
-        System.out.println("Unregistering sender mdid-guid...");
-        success = new WalletPayload().unregisterMdid(senderKey, senderWallet.getGuid(), senderWallet.getSharedKey());
-        Assert.isTrue(success);
-
-        System.out.println("Unregistering recipient mdid-guid...");
-        success = new WalletPayload().unregisterMdid(recipientKey, recipientWallet.getGuid(), recipientWallet.getSharedKey());
-        Assert.isTrue(success);
-
-        System.out.println("Done.");
     }
 }

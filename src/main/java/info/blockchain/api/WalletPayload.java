@@ -19,7 +19,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class WalletPayload extends BaseApi {
 
     private static final String WALLET = "wallet";
-    public static final String PROD_PAYLOAD_URL = "https://explorer.dev.blockchain.co.uk/wallet";//PROTOCOL + SERVER_ADDRESS + WALLET;
+//    public static final String PROD_PAYLOAD_URL = "https://explorer.dev.blockchain.co.uk/wallet";
+    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
 
     private String sessionId;
     public static final String KEY_AUTH_REQUIRED = "Authorization Required";
@@ -177,7 +178,7 @@ public class WalletPayload extends BaseApi {
 
         String signedGuid = walletKey.signMessage(guid);
 
-        Call<Void> call = api.registerMdid(method,
+        Call<Void> call = api.postMdidRegistration(method,
                 guid,
                 sharedKey,
                 signedGuid,

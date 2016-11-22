@@ -1,4 +1,4 @@
-package info.blockchain.api.metadata.data;
+package info.blockchain.wallet.metadata.data;
 
 public class Contacts {
 
