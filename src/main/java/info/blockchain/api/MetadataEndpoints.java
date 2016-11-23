@@ -1,6 +1,12 @@
 package info.blockchain.api;
 
-import info.blockchain.wallet.metadata.data.*;
+import info.blockchain.wallet.metadata.data.Auth;
+import info.blockchain.wallet.metadata.data.Invitation;
+import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.MetadataRequest;
+import info.blockchain.wallet.metadata.data.MetadataResponse;
+import info.blockchain.wallet.metadata.data.Status;
+import info.blockchain.wallet.metadata.data.Trusted;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +16,6 @@ import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -67,7 +72,6 @@ public interface MetadataEndpoints {
 
 
     @PUT("{addr}")
-    @Headers("Origin: http://localhost:8080")
     Call<Void> putMetadata(@Path("addr") String address, @Body MetadataRequest body);
 
     @GET("{addr}")
