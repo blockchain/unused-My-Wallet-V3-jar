@@ -73,4 +73,19 @@ public class MetadataTest {
         Assert.isTrue(metadata.getAddress().equals(web_address));
         payloadManager.wipe();
     }
+
+    @Test
+    public void testFetchExistingMagicHash() throws Exception {
+
+        DeterministicKey key = getRandomECKey();
+
+        Metadata metadata = new Metadata(key, 2);
+        metadata.putMetadata("Yolo");
+
+        metadata = new Metadata(key, 2);
+        metadata.putMetadata("Yolo2");
+
+        metadata = new Metadata(key, 2);
+        metadata.putMetadata("Yolo3");
+    }
 }

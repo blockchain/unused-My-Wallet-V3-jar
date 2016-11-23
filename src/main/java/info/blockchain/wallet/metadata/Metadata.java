@@ -58,7 +58,7 @@ public class Metadata {
         endpoints = retrofit.create(MetadataEndpoints.class);
 
         setMetadataNode(type, masterHDNode);
-        this.magicHash = null;
+        fetch();
     }
 
     /**
@@ -82,6 +82,35 @@ public class Metadata {
         this.address = node.toAddress(MainNetParams.get()).toString();
         this.node = node;
         encryptionKey = MetadataUtil.deriveHardened(payloadTypeNode, 1).serializePrivB58(MainNetParams.get());
+    }
+
+    private void fetch() throws Exception{
+
+        Call<MetadataResponse> response = endpoints.getMetadata(address);
+
+        Response<MetadataResponse> exe = response.execute();
+
+        if (exe.isSuccessful()) {
+            MetadataResponse body = exe.body();
+
+            byte[] encryptedPayloadBytes = new String(Base64.decodeBase64(exe.body().getPayload())).getBytes("utf-8");
+
+            byte[] prevMagicBytes = null;
+
+            if(body.getPrev_magic_hash() != null){
+                prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
+                magicHash = MetadataUtil.magic(encryptedPayloadBytes, prevMagicBytes);
+            } else {
+                magicHash = MetadataUtil.magic(encryptedPayloadBytes, null);
+            }
+
+        } else {
+            if(exe.code() == 404) {
+                magicHash = null;
+            } else {
+                throw new Exception(exe.code() + " " + exe.message());
+            }
+        }
     }
 
     /**
@@ -115,7 +144,7 @@ public class Metadata {
         body.setVersion(METADATA_VERSION);
         body.setPayload(Base64.encodeBase64String(encryptedPayloadBytes));
         body.setSignature(signature);
-        body.setPrev_magic_hash(magicHash != null ? new String(Hex.encode(magicHash)) : null);
+        body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
         body.setType_id(type);
 
         Call<Void> response = endpoints.putMetadata(address, body);
