@@ -9,11 +9,7 @@ import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.exceptions.ServerConnectionException;
-import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
@@ -118,10 +114,12 @@ public class PayloadManager {
 
             e.printStackTrace();
 
-            if (e.getMessage().contains("Invalid GUID")) {
+            if (e.getMessage() != null && e.getMessage().contains("Invalid GUID")) {
                 throw new InvalidCredentialsException();
+            } else if (e.getMessage() != null && e.getMessage().contains("locked")) {
+                throw new AccountLockedException(e.getMessage(), e);
             } else {
-                throw new ServerConnectionException();
+                throw new ServerConnectionException(e.getMessage(), e);
             }
         }
         bciWallet = new BlockchainWallet(walletData, password);

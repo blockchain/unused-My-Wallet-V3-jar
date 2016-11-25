@@ -73,7 +73,7 @@ public class Payload implements Serializable {
         options = new Options();
     }
 
-    public Payload(String decryptedPayload, int pdfdf2Iterations) throws PayloadException {
+    public Payload(String decryptedPayload, int pbkdf2Iterations) throws PayloadException {
         legacyAddressList = new ArrayList<LegacyAddress>();
         addressBookEntryList = new ArrayList<AddressBookEntry>();
         hdWalletList = new ArrayList<HDWallet>();
@@ -81,22 +81,19 @@ public class Payload implements Serializable {
         transactionTagsMap = new HashMap<String, List<Integer>>();
         tagNamesMap = new HashMap<Integer, String>();
         options = new Options();
-        options.setIterations(pdfdf2Iterations);
+        options.setIterations(pbkdf2Iterations);
 
         this.decryptedPayload = decryptedPayload;
 
-        parseWalletData(decryptedPayload, pdfdf2Iterations);
+        parseWalletData(decryptedPayload, pbkdf2Iterations);
     }
 
-    private void parseWalletData(final String decryptedPayload, int pdfdf2Iterations) throws PayloadException {
+    private void parseWalletData(final String decryptedPayload, int pbkdf2Iterations) throws PayloadException {
 
         if (FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
-
-            parsePayload(new JSONObject(decryptedPayload));
-
             // Default to wallet pbkdf2 iterations in case the double encryption pbkdf2 iterations is not set in wallet.json > options
-            setDoubleEncryptionPbkdf2Iterations(pdfdf2Iterations);
-
+            setDoubleEncryptionPbkdf2Iterations(pbkdf2Iterations);
+            parsePayload(new JSONObject(decryptedPayload));
         } else {
             //Iterations might be incorrect
             throw new PayloadException("Payload not valid json");
@@ -282,14 +279,13 @@ public class Payload implements Serializable {
         }
 
         sharedKey = payloadJson.getString(KEY_SHAREDKEY);
-        isDoubleEncrypted = payloadJson.has(KEY_DOUBLE_ENCRYPTION) ? payloadJson.getBoolean(KEY_DOUBLE_ENCRYPTION) : false;
+        isDoubleEncrypted = payloadJson.has(KEY_DOUBLE_ENCRYPTION) && payloadJson.getBoolean(KEY_DOUBLE_ENCRYPTION);
         secondPasswordHash = payloadJson.has(KEY_DPASSWORDHASH) ? payloadJson.getString(KEY_DPASSWORDHASH) : "";
 
         //
         // "options" or "wallet_options" ?
         //
         JSONObject optionsJson = null;
-        options = new Options();
         if (payloadJson.has(KEY_OPTION)) {
             optionsJson = payloadJson.getJSONObject(KEY_OPTION);
         }
