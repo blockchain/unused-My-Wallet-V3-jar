@@ -1,7 +1,10 @@
 package info.blockchain.wallet.metadata;
 
+import com.google.gson.Gson;
+
 import info.blockchain.wallet.metadata.data.Invitation;
-import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.PaymentRequest;
+import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.util.MetadataUtil;
@@ -24,6 +27,8 @@ public class MetadataSharedTest {
     MetadataShared senderMetadata;
     MetadataShared recipientMetadata;
 
+    PayloadManager recipientPayloadManager;
+
     @Before
     public void setup() throws Exception {
 
@@ -35,11 +40,10 @@ public class MetadataSharedTest {
         payloadManager.wipe();
 
         //Recipient metadata
-        payloadManager = PayloadManager.getInstance();
-        payloadManager.createHDWallet("", "Account 1");
-        DeterministicKey recipientKey = payloadManager.getMasterKey();
+        recipientPayloadManager = PayloadManager.getInstance();
+        recipientPayloadManager.createHDWallet("", "Account 1");
+        DeterministicKey recipientKey = recipientPayloadManager.getMasterKey();
         recipientMetadata = new MetadataShared(recipientKey);
-        payloadManager.wipe();
     }
 
     private DeterministicKey getRandomECKey() throws Exception {
@@ -68,35 +72,6 @@ public class MetadataSharedTest {
 
         result = senderMetadata.deleteTrusted(recipientMdid);
         Assert.isTrue(result);
-    }
-
-    @Test
-    public void testMessage() throws Exception {
-
-        String recipientMdid = recipientMetadata.getAddress();
-
-        //Add both to each other's trust lists
-        senderMetadata.putTrusted(recipientMdid);
-        recipientMetadata.putTrusted(senderMetadata.getAddress());
-
-        //Send that senderMdid a message
-        String messageString = "Any fool can paint a picture, but it takes a wise person to be able to sell it.";
-        Message messageId = senderMetadata.postMessage(recipientMdid, messageString, 1);
-
-        //Get message
-        Message message = recipientMetadata.getMessage(messageId.getId());
-        String returnedMessage = message.getPayload();
-        Assert.isTrue(returnedMessage.equals(messageString));
-
-        //Get messages
-        List<Message> messages = recipientMetadata.getMessages(messageId.getId());
-        returnedMessage = messages.get(0).getPayload();
-        Assert.isTrue(returnedMessage.equals(messageString));
-
-        //Get unprocessed messages
-        messages = recipientMetadata.getMessages(false);
-        returnedMessage = messages.get(0).getPayload();
-        Assert.isTrue(returnedMessage.equals(messageString));
     }
 
     @Test
@@ -130,14 +105,14 @@ public class MetadataSharedTest {
     }
 
     @Test
-    public void testSendMessage() throws Exception {
+    public void testSendPayment() throws Exception {
 
         System.out.println("--Sender--");
         //Create invite
         Invitation invitation = senderMetadata.createInvitation();
         System.out.println("Creating invite with my address " + senderMetadata.getAddress());
 
-        //contact is recipient address (not available until accepted)
+        //'contact' is recipient address (not available until accepted)
         invitation = senderMetadata.readInvitation(invitation.getId());
         System.out.println("Check if accepted...");
         Assert.isNull(invitation.getContact());
@@ -145,7 +120,7 @@ public class MetadataSharedTest {
 
 
         System.out.println("\n--Recipient--");
-        //Accept one time url invite - mdid is sender address
+        //Accept one time url invite - 'mdid' is sender address
         invitation = recipientMetadata.acceptInvitation(invitation.getId());
         System.out.println("Accepting invite from " + invitation.getMdid());
         System.out.println("Attaching my address to invite" + recipientMetadata.getAddress());
@@ -163,16 +138,32 @@ public class MetadataSharedTest {
         System.out.println("Adding recipient to my trusted list...");
         senderMetadata.putTrusted(invitation.getContact());
 
-        String messageString = "Any fool can paint a picture, but it takes a wise person to be able to sell it.";
-        System.out.println("Sending message: '" + messageString + "'");
-        senderMetadata.postMessage(invitation.getContact(), messageString, 1);
+        //Payment request test
+        System.out.println("\n--Sender--");
+        PaymentRequest paymentRequest = new PaymentRequest();
+        paymentRequest.setNote("I owe you £15.50 for the Honest burger.");
+        paymentRequest.setAmount(2637310);
 
-        //multiple
+        System.out.println("Sending payment request: " +new Gson().toJson(paymentRequest));
+        senderMetadata.sendPaymentRequest(invitation.getContact(), paymentRequest);
+
         System.out.println("\n--Recipient--");
-        List<Message> messages = recipientMetadata.getMessages(false);
-        System.out.println("Checking messages and found " + messages.size() + " new message.");
-        System.out.println("Received message: '" + messages.get(0).getPayload() + "'");
-        Assert.isTrue(messageString.equals(messages.get(0).getPayload()));
+        List<PaymentRequest> paymentRequests = recipientMetadata.getPaymentRequests(true);
+        String receivingAddress = recipientPayloadManager.getNextReceiveAddress(0);
+        System.out.println("Checking payment requests and found " + paymentRequests.size() + " new request.");
+        System.out.println("Received payment request: '" + paymentRequests.get(0).getNote() + "'");
+        System.out.println("Accepting payment request and responding with address '"+receivingAddress+"'");
+        recipientMetadata.acceptPaymentRequest(invitation.getMdid(), paymentRequests.get(0), "Send coins here please.", receivingAddress);
+
+        System.out.println("\n--Sender--");
+        List<PaymentRequestResponse> paymentRequestResponses = senderMetadata.getPaymentRequestResponses(true);
+        System.out.println("Checking payment requests responses and found " + paymentRequestResponses.size() + " new responses.");
+        System.out.println("Received payment request response with address: '" + paymentRequestResponses.get(0).getAddress() + "'");
+
+        //Use this URI for SendActivity
+        System.out.println("Bitcoin URL: '" + paymentRequestResponses.get(0).toBitcoinURI() + "'");
+
+        System.out.println("Marking payment as processed...");
     }
 
     @Test

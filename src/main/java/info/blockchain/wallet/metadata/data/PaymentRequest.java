@@ -9,8 +9,8 @@ public class PaymentRequest {
         return amount;
     }
 
-    public void setAmount(long amount) {
-        this.amount = amount;
+    public void setAmount(long satoshis) {
+        this.amount = satoshis;
     }
 
     public String getNote() {

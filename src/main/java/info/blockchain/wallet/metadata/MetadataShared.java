@@ -9,6 +9,8 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
+import info.blockchain.wallet.metadata.data.PaymentRequest;
+import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.metadata.data.Status;
 import info.blockchain.wallet.metadata.data.Trusted;
@@ -21,6 +23,7 @@ import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Hex;
 
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +38,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MetadataShared {
 
     final int TYPE_PAYMENT_REQUEST = 1;
-    final int TYPE_PAYMENT_REQUEST_RESPONSE = 3;
+    final int TYPE_PAYMENT_REQUEST_RESPONSE = 2;
 
     private MetadataEndpoints endpoints;
     private String token;
@@ -223,7 +226,7 @@ public class MetadataShared {
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
-    public Message postMessage(String mdid, String message, int type) throws Exception {
+    private Message postMessage(String mdid, String message, int type) throws Exception {
 
         String recipientXpub = getPublicXpubFromMdid(mdid);
 
@@ -232,7 +235,7 @@ public class MetadataShared {
         String b64Msg = new String(Base64.encodeBase64String(encryptedMessage.getBytes()));
 
         String signature = node.signMessage(b64Msg);
-        
+
         Message request = new Message();
         request.setRecipient(mdid);
         request.setType(type);
@@ -254,7 +257,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    public List<Message> getMessages(boolean onlyProcessed) throws Exception {
+    private List<Message> getMessages(boolean onlyProcessed) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, onlyProcessed);
 
@@ -275,7 +278,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    public List<Message> getMessages(String lastMessageId) throws Exception {
+    private List<Message> getMessages(String lastMessageId) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, lastMessageId);
 
@@ -296,7 +299,7 @@ public class MetadataShared {
     /**
      * Get message from message id. Authenticated.
      */
-    public Message getMessage(String messageId) throws Exception {
+    private Message getMessage(String messageId) throws Exception {
 
         Call<Message> response = endpoints.getMessage("Bearer " + token, messageId);
 
@@ -310,6 +313,53 @@ public class MetadataShared {
         } else {
             throw new Exception(exe.code() + " " + exe.message());
         }
+    }
+
+    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
+        return postMessage(mdid, new Gson().toJson(paymentRequest), TYPE_PAYMENT_REQUEST);
+    }
+
+    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
+
+        PaymentRequestResponse response = new PaymentRequestResponse();
+        response.setAmount(paymentRequest.getAmount());
+        response.setNote(note);
+        response.setAddress(receiveAddress);
+
+        return postMessage(mdid, new Gson().toJson(response), TYPE_PAYMENT_REQUEST_RESPONSE);
+    }
+
+
+    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
+
+        List<PaymentRequest> requests = new ArrayList<>();
+
+        List<Message> messages = getMessages(onlyProcessed);
+
+        for(Message message : messages){
+
+            if(message.getType() == TYPE_PAYMENT_REQUEST) {
+                requests.add(new Gson().fromJson(message.getPayload(), PaymentRequest.class));
+            }
+        }
+
+        return requests;
+    }
+
+    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws Exception {
+
+        List<PaymentRequestResponse> responses = new ArrayList<>();
+
+        List<Message> messages = getMessages(onlyProcessed);
+
+        for (Message message : messages){
+
+            if(message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
+                responses.add(new Gson().fromJson(message.getPayload(), PaymentRequestResponse.class));
+            }
+        }
+
+        return responses;
     }
 
     /**
