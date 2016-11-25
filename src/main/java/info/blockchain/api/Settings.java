@@ -1,7 +1,6 @@
 package info.blockchain.api;
 
 import info.blockchain.wallet.util.WebUtil;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -55,6 +54,7 @@ public class Settings extends BaseApi {
     public static final int NOTIFICATION_TYPE_NONE = 0;
     public static final int NOTIFICATION_TYPE_EMAIL = 1;
     public static final int NOTIFICATION_TYPE_SMS = 32;
+    public static final int NOTIFICATION_TYPE_ALL = 33;
 
     public static final int AUTH_TYPE_OFF = 0;
     public static final int AUTH_TYPE_YUBI_KEY = 1;
@@ -399,12 +399,20 @@ public class Settings extends BaseApi {
     }
 
     /**
-     * @param type NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL
+     * @param type NOTIFICATION_TYPE_SMS, NOTIFICATION_TYPE_EMAIL, NOTIFICATION_TYPE_ALL
      */
     public void enableNotification(int type, ResultListener listener) {
 
+        if ((type == NOTIFICATION_TYPE_EMAIL && notificationType.contains(NOTIFICATION_TYPE_SMS))
+                || (type == NOTIFICATION_TYPE_SMS && notificationType.contains(NOTIFICATION_TYPE_EMAIL))) {
+            type = NOTIFICATION_TYPE_ALL;
+        }
+
         boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, type + "");
         if (success) {
+            if (type == NOTIFICATION_TYPE_ALL) {
+                notificationType.clear();
+            }
             if (!notificationType.contains(type)) {
                 notificationType.add(type);
             }
@@ -451,6 +459,21 @@ public class Settings extends BaseApi {
 
         } else {
             listener.onSuccess();
+        }
+    }
+
+    public void enableAllNotifications(ResultListener listener) {
+
+        boolean success = updateValue(METHOD_UPDATE_NOTIFICATION_TYPE, NOTIFICATION_TYPE_ALL + "");
+        if (success) {
+            if (!notificationType.contains(NOTIFICATION_TYPE_ALL)) {
+                notificationType.add(NOTIFICATION_TYPE_ALL);
+                enableNotifications(true, listener);
+            }
+
+            listener.onSuccess();
+        } else {
+            listener.onFail();
         }
     }
 

@@ -21,7 +21,7 @@ public class DynamicFee extends BaseApi {
 
     public SuggestedFee getDynamicFee() throws Exception {
 
-        String response = WebUtil.getInstance().getURL(PersistentUrls.getInstance().getDynamicFeeUrl());
+        String response = WebUtil.getInstance().getRequest(PersistentUrls.getInstance().getDynamicFeeUrl());
 
         if (response != null) {
 

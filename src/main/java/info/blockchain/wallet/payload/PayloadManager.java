@@ -9,11 +9,7 @@ import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.exceptions.ServerConnectionException;
-import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
@@ -62,7 +58,7 @@ public class PayloadManager {
 
     private BlockchainWallet bciWallet;
 
-    private final HDPayloadBridge hdPayloadBridge;
+    private HDPayloadBridge hdPayloadBridge;
     private info.blockchain.bip44.Wallet wallet;
     private PrivateKeyFactory privateKeyFactory;
     private WalletPayload walletApi;
@@ -90,10 +86,20 @@ public class PayloadManager {
     }
 
     /**
-     * Reset PayloadManager to null instance.
+     * Clear all values. This is to prevent issues with DI where two instances can accidentally
+     * be created as getInstance() is rarely called
      */
     public void wipe() {
-        instance = null;
+        payload = new Payload();
+        cached_payload = "";
+        strTempPassword = null;
+        isNew = false;
+        email = null;
+        version = 2.0;
+        bciWallet = null;
+        hdPayloadBridge = new HDPayloadBridge();
+        wallet = null;
+        privateKeyFactory = new PrivateKeyFactory();
     }
 
     public interface InitiatePayloadListener {
@@ -112,10 +118,12 @@ public class PayloadManager {
 
             e.printStackTrace();
 
-            if (e.getMessage().contains("Invalid GUID")) {
+            if (e.getMessage() != null && e.getMessage().contains("Invalid GUID")) {
                 throw new InvalidCredentialsException();
+            } else if (e.getMessage() != null && e.getMessage().contains("locked")) {
+                throw new AccountLockedException(e.getMessage(), e);
             } else {
-                throw new ServerConnectionException();
+                throw new ServerConnectionException(e.getMessage(), e);
             }
         }
         bciWallet = new BlockchainWallet(walletData, password);
