@@ -6,7 +6,6 @@ public class MetadataRequest {
     String signature;
     String prev_magic_hash;
     int type_id;
-    String xpub;
 
     public int getVersion() {
         return version;
@@ -46,13 +45,5 @@ public class MetadataRequest {
 
     public void setType_id(int type_id) {
         this.type_id = type_id;
-    }
-
-    public String getXpub() {
-        return xpub;
-    }
-
-    public void setXpub(String xpub) {
-        this.xpub = xpub;
     }
 }

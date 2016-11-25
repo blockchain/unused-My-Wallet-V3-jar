@@ -1,17 +1,26 @@
 package info.blockchain.wallet.metadata;
 
+import com.google.gson.Gson;
+
 import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.MetadataRequest;
+import info.blockchain.wallet.metadata.data.MetadataResponse;
+import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.metadata.data.Status;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
+import org.spongycastle.util.encoders.Hex;
 
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,11 +34,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MetadataShared {
 
+    final int TYPE_PAYMENT_REQUEST = 1;
+    final int TYPE_PAYMENT_REQUEST_RESPONSE = 3;
+
     private MetadataEndpoints endpoints;
     private String token;
     private String publicXpub;
     private String address;
     private DeterministicKey node;
+
+    private byte[] magicHash;
 
     public MetadataShared(DeterministicKey masterHDNode) throws Exception {
 
@@ -65,7 +79,35 @@ public class MetadataShared {
         this.address = metaDataHDNode.toAddress(MainNetParams.get()).toString();
         this.node = metaDataHDNode;
         this.publicXpub = metaDataHDNode.serializePubB58(MainNetParams.get());
-        // TODO: 23/11/16 Publish xpub
+        fetch();
+        publishXpub(publicXpub);
+    }
+
+    private void fetch() throws Exception{
+
+        Call<MetadataResponse> response = endpoints.getMetadata(address);
+
+        Response<MetadataResponse> exe = response.execute();
+
+        if (exe.isSuccessful()) {
+            MetadataResponse body = exe.body();
+
+            byte[] encryptedPayloadBytes = new String(Base64.decodeBase64(exe.body().getPayload())).getBytes("utf-8");
+
+            if(body.getPrev_magic_hash() != null){
+                byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
+                magicHash = MetadataUtil.magic(encryptedPayloadBytes, prevMagicBytes);
+            } else {
+                magicHash = MetadataUtil.magic(encryptedPayloadBytes, null);
+            }
+
+        } else {
+            if(exe.code() == 404) {
+                magicHash = null;
+            } else {
+                throw new Exception(exe.code() + " " + exe.message());
+            }
+        }
     }
 
     /**
@@ -178,18 +220,19 @@ public class MetadataShared {
         }
     }
 
-
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
     public Message postMessage(String mdid, String message, int type) throws Exception {
 
-        String encryptedMessage = encryptFor(message, mdid);
+        String recipientXpub = getPublicXpubFromMdid(mdid);
+
+        String encryptedMessage = MetadataUtil.encryptFor(node, recipientXpub, message);
 
         String b64Msg = new String(Base64.encodeBase64String(encryptedMessage.getBytes()));
 
         String signature = node.signMessage(b64Msg);
-
+        
         Message request = new Message();
         request.setRecipient(mdid);
         request.setType(type);
@@ -208,11 +251,6 @@ public class MetadataShared {
 
     }
 
-    private String encryptFor(String message, String mdid) throws Exception {
-
-        return message;
-    }
-
     /**
      * Get messages sent to my MDID. Authenticated.
      */
@@ -223,6 +261,11 @@ public class MetadataShared {
         Response<List<Message>> exe = response.execute();
 
         if (exe.isSuccessful()) {
+
+            for(Message msg : exe.body()){
+                verifiedAndDecryptMessage(msg);
+            }
+
             return exe.body();
         } else {
             throw new Exception(exe.code() + " " + exe.message());
@@ -239,6 +282,11 @@ public class MetadataShared {
         Response<List<Message>> exe = response.execute();
 
         if (exe.isSuccessful()) {
+
+            for(Message msg : exe.body()){
+                verifiedAndDecryptMessage(msg);
+            }
+
             return exe.body();
         } else {
             throw new Exception(exe.code() + " " + exe.message());
@@ -255,9 +303,42 @@ public class MetadataShared {
         Response<Message> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            return exe.body();
+
+            Message msg = exe.body();
+            verifiedAndDecryptMessage(msg);
+            return msg;
         } else {
             throw new Exception(exe.code() + " " + exe.message());
+        }
+    }
+
+    /**
+     * Verify message signature and return decrypted.
+     * @param msg
+     * @return
+     * @throws Exception
+     */
+    private void verifiedAndDecryptMessage(Message msg) throws Exception {
+
+        validateSignature(msg);
+
+        String senderXpub = getPublicXpubFromMdid(msg.getSender());
+
+        String message = new String(Base64.decodeBase64(msg.getPayload()));
+        msg.setPayload(MetadataUtil.decryptFrom(node, senderXpub, message));
+    }
+
+    private void validateSignature(Message msg) throws ValidationException, SignatureException {
+
+        ECKey key = ECKey.signedMessageToKey(
+                msg.getPayload(),
+                msg.getSignature());
+
+        String senderAddress = msg.getSender();
+        String addressFromSignature = key.toAddress(MainNetParams.get()).toString();
+
+        if(!senderAddress.equals(addressFromSignature)) {
+            throw new ValidationException("Signature is not well-formed");
         }
     }
 
@@ -320,6 +401,55 @@ public class MetadataShared {
 
         if (exe.isSuccessful()) {
             return true;
+        } else {
+            throw new Exception(exe.code() + " " + exe.message());
+        }
+    }
+
+    /**
+     * Publish xpub (public readable)
+     */
+    public void publishXpub(String xpub) throws Exception {
+
+        PublicContactDetails publicXpub = new PublicContactDetails();
+        publicXpub.setXpub(xpub);
+
+        byte[] xpubBytes = new Gson().toJson(publicXpub).getBytes("utf-8");
+        byte[] nextMagicHash = MetadataUtil.magic(xpubBytes, magicHash);
+
+        byte[] message = MetadataUtil.message(xpubBytes, magicHash);
+
+        String signature = node.signMessage(Base64.encodeBase64String(message));
+
+        MetadataRequest body = new MetadataRequest();
+        body.setPayload(Base64.encodeBase64String(xpubBytes));
+        body.setSignature(signature);
+        body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
+
+        Call<Void> response = endpoints.putMetadata(address, body);
+
+        Response<Void> exe = response.execute();
+
+        if (!exe.isSuccessful()) {
+            throw new Exception(exe.code() + " " + exe.message());
+        } else {
+            magicHash = nextMagicHash;
+        }
+    }
+
+    /**
+     * Get public xpub for specified mdid
+     */
+    public String getPublicXpubFromMdid(String mdid) throws Exception {
+
+        Call<MetadataResponse> response = endpoints.getMetadata(mdid);
+
+        Response<MetadataResponse> exe = response.execute();
+
+        if (exe.isSuccessful()) {
+            String payload = new String(Base64.decodeBase64(exe.body().getPayload()));
+            PublicContactDetails publicXpub = new Gson().fromJson(payload, PublicContactDetails.class);
+            return publicXpub.getXpub();
         } else {
             throw new Exception(exe.code() + " " + exe.message());
         }

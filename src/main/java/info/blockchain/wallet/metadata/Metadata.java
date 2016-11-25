@@ -95,10 +95,8 @@ public class Metadata {
 
             byte[] encryptedPayloadBytes = new String(Base64.decodeBase64(exe.body().getPayload())).getBytes("utf-8");
 
-            byte[] prevMagicBytes = null;
-
             if(body.getPrev_magic_hash() != null){
-                prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
+                byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
                 magicHash = MetadataUtil.magic(encryptedPayloadBytes, prevMagicBytes);
             } else {
                 magicHash = MetadataUtil.magic(encryptedPayloadBytes, null);
