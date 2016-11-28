@@ -4,6 +4,7 @@ import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
+import info.blockchain.wallet.util.Base64Util;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.MetadataUtil;
 
@@ -136,11 +137,11 @@ public class Metadata {
 
         byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
 
-        String signature = node.signMessage(Base64.encodeBase64String(message));
+        String signature = node.signMessage(Base64Util.encodeBase64String(message));
 
         MetadataRequest body = new MetadataRequest();
         body.setVersion(METADATA_VERSION);
-        body.setPayload(Base64.encodeBase64String(encryptedPayloadBytes));
+        body.setPayload(Base64Util.encodeBase64String(encryptedPayloadBytes));
         body.setSignature(signature);
         body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
         body.setType_id(type);
@@ -183,7 +184,7 @@ public class Metadata {
 
         byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
 
-        String signature = node.signMessage(Base64.encodeBase64String(message));
+        String signature = node.signMessage(Base64Util.encodeBase64String(message));
 
         Call<Void> response = endpoints.deleteMetadata(address, signature);
 

@@ -60,7 +60,7 @@ public class MetadataUtil {
     }
 
     private static byte[] magicHash(byte[] message) {
-        byte[] messageBytes = Utils.formatMessageForSigning(Base64.encodeBase64String(message));
+        byte[] messageBytes = Utils.formatMessageForSigning(Base64Util.encodeBase64String(message));
         return Sha256Hash.hashTwice(messageBytes);
     }
 
@@ -137,9 +137,7 @@ public class MetadataUtil {
         hash.update(keys.get(0));
         hash.update(keys.get(1));
 
-        byte[] derivedKey = hash.digest();
-
-        return derivedKey;
+        return hash.digest();
     }
 
     public static String encryptFor(ECKey myKey, String theirXpub, String message) throws Exception {

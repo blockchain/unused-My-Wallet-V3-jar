@@ -24,10 +24,11 @@ import io.jsonwebtoken.lang.Assert;
  */
 public class MetadataSharedTest {
 
-    MetadataShared senderMetadata;
-    MetadataShared recipientMetadata;
-
-    PayloadManager recipientPayloadManager;
+    private MetadataShared senderMetadata;
+    private MetadataShared recipientMetadata;
+    private PayloadManager recipientPayloadManager;
+    private String senderToken;
+    private String recipientToken;
 
     @Before
     public void setup() throws Exception {
@@ -36,14 +37,18 @@ public class MetadataSharedTest {
         PayloadManager payloadManager = PayloadManager.getInstance();
         payloadManager.createHDWallet("", "Account 1");
         DeterministicKey senderKey = payloadManager.getMasterKey();
-        senderMetadata = new MetadataShared(senderKey);
+        senderMetadata = new MetadataShared();
+        senderMetadata.setMetadataNode(senderKey);
         payloadManager.wipe();
+        senderToken = senderMetadata.getToken();
 
         //Recipient metadata
         recipientPayloadManager = PayloadManager.getInstance();
         recipientPayloadManager.createHDWallet("", "Account 1");
         DeterministicKey recipientKey = recipientPayloadManager.getMasterKey();
-        recipientMetadata = new MetadataShared(recipientKey);
+        recipientMetadata = new MetadataShared();
+        recipientMetadata.setMetadataNode(recipientKey);
+        recipientToken = recipientMetadata.getToken();
     }
 
     private DeterministicKey getRandomECKey() throws Exception {
@@ -59,18 +64,18 @@ public class MetadataSharedTest {
         String recipientMdid = recipientMetadata.getAddress();
 
         //PUT assert
-        boolean result = senderMetadata.putTrusted(recipientMdid);
+        boolean result = senderMetadata.putTrusted(senderToken, recipientMdid);
         Assert.isTrue(result);
 
         //GET assert
-        boolean isTrusted = senderMetadata.getTrusted(recipientMdid);
+        boolean isTrusted = senderMetadata.getTrusted(senderToken, recipientMdid);
         Assert.isTrue(isTrusted);
 
-        Trusted list = senderMetadata.getTrustedList();
+        Trusted list = senderMetadata.getTrustedList(senderToken);
         Assert.hasText(list.getMdid());
         Assert.isTrue(list.getContacts().length > 0);
 
-        result = senderMetadata.deleteTrusted(recipientMdid);
+        result = senderMetadata.deleteTrusted(senderToken, recipientMdid);
         Assert.isTrue(result);
     }
 
@@ -78,29 +83,29 @@ public class MetadataSharedTest {
     public void testInvitation() throws Exception {
 
         //Sender - Create invitation
-        Invitation invitation = senderMetadata.createInvitation();
+        Invitation invitation = senderMetadata.createInvitation(senderToken);
         Assert.notNull(invitation.getId());
         Assert.notNull(invitation.getMdid());
 
         //Recipient - Accept invitation and check if sender mdid is included
-        Invitation acceptedInvitation = recipientMetadata.acceptInvitation(invitation.getId());
+        Invitation acceptedInvitation = recipientMetadata.acceptInvitation(recipientToken, invitation.getId());
         System.out.println(acceptedInvitation.toString());
         Assert.isTrue(invitation.getId().equals(acceptedInvitation.getId()));
         Assert.isTrue(senderMetadata.getAddress().equals(acceptedInvitation.getMdid()));
 
         //Sender - Check if invitation was accepted
         //If it has been accepted the recipient mdid will be included in invitation contact
-        Invitation checkInvitation = senderMetadata.readInvitation(invitation.getId());
+        Invitation checkInvitation = senderMetadata.readInvitation(senderToken, invitation.getId());
         System.out.println(checkInvitation.toString());
         Assert.isTrue(invitation.getId().equals(checkInvitation.getId()));
         Assert.isTrue(recipientMetadata.getAddress().equals(checkInvitation.getContact()));
 
         //delete one-time UUID
-        boolean success = senderMetadata.deleteInvitation(invitation.getId());
+        boolean success = senderMetadata.deleteInvitation(senderToken, invitation.getId());
         Assert.isTrue(success);
 
         //make sure one-time UUID is deleted
-        Invitation invitationDel = senderMetadata.readInvitation(invitation.getId());
+        Invitation invitationDel = senderMetadata.readInvitation(senderToken, invitation.getId());
         Assert.isNull(invitationDel);
     }
 
@@ -109,11 +114,11 @@ public class MetadataSharedTest {
 
         System.out.println("--Sender--");
         //Create invite
-        Invitation invitation = senderMetadata.createInvitation();
+        Invitation invitation = senderMetadata.createInvitation(senderToken);
         System.out.println("Creating invite with my address " + senderMetadata.getAddress());
 
         //'contact' is recipient address (not available until accepted)
-        invitation = senderMetadata.readInvitation(invitation.getId());
+        invitation = senderMetadata.readInvitation(senderToken, invitation.getId());
         System.out.println("Check if accepted...");
         Assert.isNull(invitation.getContact());
         System.out.println("not yet");
@@ -121,22 +126,22 @@ public class MetadataSharedTest {
 
         System.out.println("\n--Recipient--");
         //Accept one time url invite - 'mdid' is sender address
-        invitation = recipientMetadata.acceptInvitation(invitation.getId());
+        invitation = recipientMetadata.acceptInvitation(recipientToken, invitation.getId());
         System.out.println("Accepting invite from " + invitation.getMdid());
         System.out.println("Attaching my address to invite" + recipientMetadata.getAddress());
         //Add sender address to trusted list
         System.out.println("Adding sender to my trusted list...");
-        recipientMetadata.putTrusted(invitation.getMdid());
+        recipientMetadata.putTrusted(recipientToken, invitation.getMdid());
 
 
         System.out.println("\n--Sender--");
         //contact is recipient address (now available)
-        invitation = senderMetadata.readInvitation(invitation.getId());
+        invitation = senderMetadata.readInvitation(senderToken, invitation.getId());
         System.out.println("Check if accepted...");
         System.out.println(invitation.getContact() + " accepted the invite");
         //Add recipient address to trusted list
         System.out.println("Adding recipient to my trusted list...");
-        senderMetadata.putTrusted(invitation.getContact());
+        senderMetadata.putTrusted(senderToken, invitation.getContact());
 
         //Payment request test
         System.out.println("\n--Sender--");
@@ -145,18 +150,18 @@ public class MetadataSharedTest {
         paymentRequest.setAmount(2637310);
 
         System.out.println("Sending payment request: " +new Gson().toJson(paymentRequest));
-        senderMetadata.sendPaymentRequest(invitation.getContact(), paymentRequest);
+        senderMetadata.sendPaymentRequest(senderToken, invitation.getContact(), paymentRequest);
 
         System.out.println("\n--Recipient--");
-        List<PaymentRequest> paymentRequests = recipientMetadata.getPaymentRequests(true);
+        List<PaymentRequest> paymentRequests = recipientMetadata.getPaymentRequests(recipientToken, true);
         String receivingAddress = recipientPayloadManager.getNextReceiveAddress(0);
         System.out.println("Checking payment requests and found " + paymentRequests.size() + " new request.");
         System.out.println("Received payment request: '" + paymentRequests.get(0).getNote() + "'");
         System.out.println("Accepting payment request and responding with address '"+receivingAddress+"'");
-        recipientMetadata.acceptPaymentRequest(invitation.getMdid(), paymentRequests.get(0), "Send coins here please.", receivingAddress);
+        recipientMetadata.acceptPaymentRequest(recipientToken, invitation.getMdid(), paymentRequests.get(0), "Send coins here please.", receivingAddress);
 
         System.out.println("\n--Sender--");
-        List<PaymentRequestResponse> paymentRequestResponses = senderMetadata.getPaymentRequestResponses(true);
+        List<PaymentRequestResponse> paymentRequestResponses = senderMetadata.getPaymentRequestResponses(senderToken, true);
         System.out.println("Checking payment requests responses and found " + paymentRequestResponses.size() + " new responses.");
         System.out.println("Received payment request response with address: '" + paymentRequestResponses.get(0).getAddress() + "'");
 

@@ -14,6 +14,7 @@ import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.metadata.data.Status;
 import info.blockchain.wallet.metadata.data.Trusted;
+import info.blockchain.wallet.util.Base64Util;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.apache.commons.codec.binary.Base64;
@@ -41,14 +42,13 @@ public class MetadataShared {
     final int TYPE_PAYMENT_REQUEST_RESPONSE = 2;
 
     private MetadataEndpoints endpoints;
-    private String token;
     private String publicXpub;
     private String address;
     private DeterministicKey node;
 
     private byte[] magicHash;
 
-    public MetadataShared(DeterministicKey masterHDNode) throws Exception {
+    public MetadataShared() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -60,9 +60,6 @@ public class MetadataShared {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         endpoints = retrofit.create(MetadataEndpoints.class);
-
-        setMetadataNode(masterHDNode);
-        this.token = getToken();
     }
 
     /**
@@ -73,7 +70,7 @@ public class MetadataShared {
      * @param masterHDNode
      * @throws Exception
      */
-    private void setMetadataNode(DeterministicKey masterHDNode) throws Exception{
+    public void setMetadataNode(DeterministicKey masterHDNode) throws Exception{
 
         int purpose = MetadataUtil.getPurpose();
 
@@ -139,7 +136,7 @@ public class MetadataShared {
     /**
      * Get JSON Web Token if signed nonce is correct. Signed.
      */
-    protected String getToken() throws Exception {
+    public String getToken() throws Exception {
 
         String nonce = getNonce();
         String sig = node.signMessage(nonce);
@@ -162,7 +159,7 @@ public class MetadataShared {
     /**
      * Get list of all trusted MDIDs. Authenticated.
      */
-    public Trusted getTrustedList() throws Exception {
+    public Trusted getTrustedList(String token) throws Exception {
 
         Call<Trusted> response = endpoints.getTrustedList("Bearer " + token);
 
@@ -178,7 +175,7 @@ public class MetadataShared {
     /**
      * Check if a contact is on trusted list of mdid. Authenticated.
      */
-    public boolean getTrusted(String mdid) throws Exception {
+    public boolean getTrusted(String token, String mdid) throws Exception {
 
         Call<Trusted> response = endpoints.getTrusted("Bearer " + token, mdid);
 
@@ -194,7 +191,7 @@ public class MetadataShared {
     /**
      * Add a contact to trusted list of mdid. Authenticated.
      */
-    public boolean putTrusted(String mdid) throws Exception {
+    public boolean putTrusted(String token, String mdid) throws Exception {
 
         Call<Trusted> response = endpoints.putTrusted("Bearer " + token, mdid);
 
@@ -210,7 +207,7 @@ public class MetadataShared {
     /**
      * Delete a contact from trusted list of mdid. Authenticated.
      */
-    public boolean deleteTrusted(String mdid) throws Exception {
+    public boolean deleteTrusted(String token, String mdid) throws Exception {
 
         Call<Status> response = endpoints.deleteTrusted("Bearer " + token, mdid);
 
@@ -226,13 +223,13 @@ public class MetadataShared {
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
-    private Message postMessage(String mdid, String message, int type) throws Exception {
+    private Message postMessage(String token, String mdid, String message, int type) throws Exception {
 
         String recipientXpub = getPublicXpubFromMdid(mdid);
 
         String encryptedMessage = MetadataUtil.encryptFor(node, recipientXpub, message);
 
-        String b64Msg = new String(Base64.encodeBase64String(encryptedMessage.getBytes()));
+        String b64Msg = Base64Util.encodeBase64String(encryptedMessage.getBytes());
 
         String signature = node.signMessage(b64Msg);
 
@@ -257,7 +254,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(boolean onlyProcessed) throws Exception {
+    private List<Message> getMessages(String token, boolean onlyProcessed) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, onlyProcessed);
 
@@ -278,7 +275,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(String lastMessageId) throws Exception {
+    private List<Message> getMessages(String token, String lastMessageId) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, lastMessageId);
 
@@ -299,7 +296,7 @@ public class MetadataShared {
     /**
      * Get message from message id. Authenticated.
      */
-    private Message getMessage(String messageId) throws Exception {
+    private Message getMessage(String token, String messageId) throws Exception {
 
         Call<Message> response = endpoints.getMessage("Bearer " + token, messageId);
 
@@ -315,26 +312,26 @@ public class MetadataShared {
         }
     }
 
-    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
-        return postMessage(mdid, new Gson().toJson(paymentRequest), TYPE_PAYMENT_REQUEST);
+    public Message sendPaymentRequest(String token, String mdid, PaymentRequest paymentRequest) throws Exception {
+        return postMessage(token, mdid, new Gson().toJson(paymentRequest), TYPE_PAYMENT_REQUEST);
     }
 
-    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
+    public Message acceptPaymentRequest(String token, String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
 
         PaymentRequestResponse response = new PaymentRequestResponse();
         response.setAmount(paymentRequest.getAmount());
         response.setNote(note);
         response.setAddress(receiveAddress);
 
-        return postMessage(mdid, new Gson().toJson(response), TYPE_PAYMENT_REQUEST_RESPONSE);
+        return postMessage(token, mdid, new Gson().toJson(response), TYPE_PAYMENT_REQUEST_RESPONSE);
     }
 
 
-    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
+    public List<PaymentRequest> getPaymentRequests(String token, boolean onlyProcessed) throws Exception {
 
         List<PaymentRequest> requests = new ArrayList<>();
 
-        List<Message> messages = getMessages(onlyProcessed);
+        List<Message> messages = getMessages(token, onlyProcessed);
 
         for(Message message : messages){
 
@@ -346,11 +343,11 @@ public class MetadataShared {
         return requests;
     }
 
-    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws Exception {
+    public List<PaymentRequestResponse> getPaymentRequestResponses(String token, boolean onlyProcessed) throws Exception {
 
         List<PaymentRequestResponse> responses = new ArrayList<>();
 
-        List<Message> messages = getMessages(onlyProcessed);
+        List<Message> messages = getMessages(token, onlyProcessed);
 
         for (Message message : messages){
 
@@ -395,7 +392,7 @@ public class MetadataShared {
     /**
      * Obtains a one-time UUID for key sharing Gets MDID of sender from one-time UUID
      */
-    public Invitation createInvitation() throws Exception {
+    public Invitation createInvitation(String token) throws Exception {
 
         Call<Invitation> response = endpoints.postShare("Bearer " + token);
 
@@ -411,7 +408,7 @@ public class MetadataShared {
     /**
      * Sets the MDID of the recipient
      */
-    public Invitation acceptInvitation(String uuid) throws Exception {
+    public Invitation acceptInvitation(String token, String uuid) throws Exception {
 
         Call<Invitation> response = endpoints.postToShare("Bearer " + token, uuid);
 
@@ -427,7 +424,7 @@ public class MetadataShared {
     /**
      * Gets MDID of sender from one-time UUID
      */
-    public Invitation readInvitation(String uuid) throws Exception {
+    public Invitation readInvitation(String token, String uuid) throws Exception {
 
         Call<Invitation> response = endpoints.getShare("Bearer " + token, uuid);
 
@@ -443,7 +440,7 @@ public class MetadataShared {
     /**
      * Deletes one-time UUID
      */
-    public boolean deleteInvitation(String uuid) throws Exception {
+    public boolean deleteInvitation(String token, String uuid) throws Exception {
 
         Call<Invitation> response = endpoints.deleteShare("Bearer " + token, uuid);
 
@@ -469,10 +466,10 @@ public class MetadataShared {
 
         byte[] message = MetadataUtil.message(xpubBytes, magicHash);
 
-        String signature = node.signMessage(Base64.encodeBase64String(message));
+        String signature = node.signMessage(Base64Util.encodeBase64String(message));
 
         MetadataRequest body = new MetadataRequest();
-        body.setPayload(Base64.encodeBase64String(xpubBytes));
+        body.setPayload(Base64Util.encodeBase64String(xpubBytes));
         body.setSignature(signature);
         body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
 
