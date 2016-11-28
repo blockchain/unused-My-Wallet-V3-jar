@@ -4,6 +4,8 @@ import com.lambdaworks.codec.Base64;
 
 import org.apache.commons.codec.binary.StringUtils;
 
+import javax.annotation.Nonnull;
+
 public final class Base64Util {
 
     private Base64Util() {
@@ -22,6 +24,14 @@ public final class Base64Util {
      */
     public static String encodeBase64String(byte[] input) {
         return StringUtils.newStringUtf8(getStringToBytes(encode(input)));
+    }
+
+    public static String decodeBase64(@Nonnull String input) {
+        return StringUtils.newStringUtf8(decode(input));
+    }
+
+    private static byte[] decode(@Nonnull String input) {
+        return Base64.decode(input.toCharArray());
     }
 
     private static char[] encode(byte[] bytes) {

@@ -92,7 +92,7 @@ public class MetadataShared {
         if (exe.isSuccessful()) {
             MetadataResponse body = exe.body();
 
-            byte[] encryptedPayloadBytes = new String(Base64.decodeBase64(exe.body().getPayload())).getBytes("utf-8");
+            byte[] encryptedPayloadBytes = Base64Util.decodeBase64(exe.body().getPayload()).getBytes();
 
             if(body.getPrev_magic_hash() != null){
                 byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
@@ -494,7 +494,7 @@ public class MetadataShared {
         Response<MetadataResponse> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            String payload = new String(Base64.decodeBase64(exe.body().getPayload()));
+            String payload = Base64Util.decodeBase64(exe.body().getPayload());
             PublicContactDetails publicXpub = new Gson().fromJson(payload, PublicContactDetails.class);
             return publicXpub.getXpub();
         } else {
