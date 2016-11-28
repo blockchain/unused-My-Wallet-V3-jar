@@ -7,10 +7,9 @@ import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.MetadataUtil;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.encoders.*;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -93,7 +92,7 @@ public class Metadata {
         if (exe.isSuccessful()) {
             MetadataResponse body = exe.body();
 
-            byte[] encryptedPayloadBytes = new String(Base64.decodeBase64(exe.body().getPayload())).getBytes("utf-8");
+            byte[] encryptedPayloadBytes = new String(Base64.decode(exe.body().getPayload())).getBytes("utf-8");
 
             if(body.getPrev_magic_hash() != null){
                 byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
@@ -136,11 +135,11 @@ public class Metadata {
 
         byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
 
-        String signature = node.signMessage(Base64.encodeBase64String(message));
+        String signature = node.signMessage(new String(Base64.encode(message)));
 
         MetadataRequest body = new MetadataRequest();
         body.setVersion(METADATA_VERSION);
-        body.setPayload(Base64.encodeBase64String(encryptedPayloadBytes));
+        body.setPayload(new String(Base64.encode(encryptedPayloadBytes)));
         body.setSignature(signature);
         body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
         body.setType_id(type);
@@ -166,7 +165,7 @@ public class Metadata {
         Response<MetadataResponse> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            String encrypted = new String(Base64.decodeBase64(exe.body().getPayload()));
+            String encrypted = new String(Base64.decode(exe.body().getPayload()));
             return AESUtil.decrypt(encrypted, new CharSequenceX(encryptionKey), 65536);
         } else {
             throw new Exception(exe.code() + " " + exe.message());
@@ -183,7 +182,7 @@ public class Metadata {
 
         byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
 
-        String signature = node.signMessage(Base64.encodeBase64String(message));
+        String signature = node.signMessage(new String(Base64.encode(message)));
 
         Call<Void> response = endpoints.deleteMetadata(address, signature);
 

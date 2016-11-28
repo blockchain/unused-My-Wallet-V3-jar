@@ -16,11 +16,10 @@ import info.blockchain.wallet.metadata.data.Status;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.encoders.*;
 
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -95,7 +94,7 @@ public class MetadataShared {
         if (exe.isSuccessful()) {
             MetadataResponse body = exe.body();
 
-            byte[] encryptedPayloadBytes = new String(Base64.decodeBase64(exe.body().getPayload())).getBytes("utf-8");
+            byte[] encryptedPayloadBytes = new String(Base64.decode(exe.body().getPayload())).getBytes("utf-8");
 
             if(body.getPrev_magic_hash() != null){
                 byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
@@ -232,7 +231,7 @@ public class MetadataShared {
 
         String encryptedMessage = MetadataUtil.encryptFor(node, recipientXpub, message);
 
-        String b64Msg = new String(Base64.encodeBase64String(encryptedMessage.getBytes()));
+        String b64Msg = new String(Base64.encode(encryptedMessage.getBytes()));
 
         String signature = node.signMessage(b64Msg);
 
@@ -374,7 +373,7 @@ public class MetadataShared {
 
         String senderXpub = getPublicXpubFromMdid(msg.getSender());
 
-        String message = new String(Base64.decodeBase64(msg.getPayload()));
+        String message = new String(Base64.decode(msg.getPayload()));
         msg.setPayload(MetadataUtil.decryptFrom(node, senderXpub, message));
     }
 
@@ -469,10 +468,10 @@ public class MetadataShared {
 
         byte[] message = MetadataUtil.message(xpubBytes, magicHash);
 
-        String signature = node.signMessage(Base64.encodeBase64String(message));
+        String signature = node.signMessage(new String(Base64.encode(message)));
 
         MetadataRequest body = new MetadataRequest();
-        body.setPayload(Base64.encodeBase64String(xpubBytes));
+        body.setPayload(new String(Base64.encode(xpubBytes)));
         body.setSignature(signature);
         body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
 
@@ -497,7 +496,7 @@ public class MetadataShared {
         Response<MetadataResponse> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            String payload = new String(Base64.decodeBase64(exe.body().getPayload()));
+            String payload = new String(Base64.decode(exe.body().getPayload()));
             PublicContactDetails publicXpub = new Gson().fromJson(payload, PublicContactDetails.class);
             return publicXpub.getXpub();
         } else {

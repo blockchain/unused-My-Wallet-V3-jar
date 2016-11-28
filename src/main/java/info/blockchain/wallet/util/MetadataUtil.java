@@ -2,7 +2,6 @@ package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Utils;
@@ -10,7 +9,7 @@ import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.encoders.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,7 +59,7 @@ public class MetadataUtil {
     }
 
     private static byte[] magicHash(byte[] message) {
-        byte[] messageBytes = Utils.formatMessageForSigning(Base64.encodeBase64String(message));
+        byte[] messageBytes = Utils.formatMessageForSigning(new String(Base64.encode(message)));
         return Sha256Hash.hashTwice(messageBytes);
     }
 
