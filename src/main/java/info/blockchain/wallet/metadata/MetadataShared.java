@@ -91,7 +91,7 @@ public class MetadataShared {
         if (exe.isSuccessful()) {
             MetadataResponse body = exe.body();
 
-            byte[] encryptedPayloadBytes = Base64Util.decodeBase64(exe.body().getPayload()).getBytes();
+            byte[] encryptedPayloadBytes = Base64Util.decodeBase64(exe.body().getPayload());
 
             if(body.getPrev_magic_hash() != null){
                 byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());

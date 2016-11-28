@@ -26,8 +26,15 @@ public final class Base64Util {
         return StringUtils.newStringUtf8(getStringToBytes(encode(input)));
     }
 
-    public static String decodeBase64(@Nonnull String input) {
-        return StringUtils.newStringUtf8(decode(input));
+    /**
+     * Returns a byte array from a Base64 encoded String. This helper method replaces {@link
+     * org.apache.commons.codec.binary.Base64#decodeBase64(byte[])}
+     *
+     * @param input A String in Base64 format
+     * @return A decoded byte array
+     */
+    public static byte[] decodeBase64(@Nonnull String input) {
+        return StringUtils.newStringUtf8(decode(input)).getBytes();
     }
 
     private static byte[] decode(@Nonnull String input) {
