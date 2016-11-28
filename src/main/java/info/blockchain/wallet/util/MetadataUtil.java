@@ -2,7 +2,6 @@ package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Utils;
@@ -10,7 +9,7 @@ import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.util.encoders.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -157,9 +156,8 @@ public class MetadataUtil {
         System.out.println("Shared Secret: "+ Hex.toHexString(secret));
 
         System.out.println("Encrypting message with secret...");
-        String encryptedMessage = AESUtil.encrypt(message, new CharSequenceX(Hex.toHexString(secret)), 65536);
 
-        return encryptedMessage;
+        return AESUtil.encrypt(message, new CharSequenceX(Hex.toHexString(secret)), 65536);
     }
 
     public static String decryptFrom(DeterministicKey myKey, String theirXpub, String message) throws Exception {
