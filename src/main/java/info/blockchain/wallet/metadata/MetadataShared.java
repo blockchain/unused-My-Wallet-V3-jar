@@ -229,9 +229,9 @@ public class MetadataShared {
 
         String recipientXpub = getPublicXpubFromMdid(mdid);
 
-        String encryptedMessage = MetadataUtil.encryptFor(node, recipientXpub, message);
+        byte[] encryptedMessage = MetadataUtil.encryptFor(node, recipientXpub, message);
 
-        String b64Msg = new String(Base64.encode(encryptedMessage.getBytes()));
+        String b64Msg = new String(Base64.encode(encryptedMessage));
 
         String signature = node.signMessage(b64Msg);
 
