@@ -293,7 +293,12 @@ public class Payload implements Serializable {
             optionsJson = payloadJson.getJSONObject(KEY_WALLET_OPTIONS);
         }
         if (optionsJson != null) {
+            int iterations = getDoubleEncryptionPbkdf2Iterations();
             options = Options.fromJson(optionsJson);
+            // If already set and non-default, likely V1. Reset here
+            if (iterations != BlockchainWallet.DEFAULT_PBKDF2_ITERATIONS_V2) {
+                options.setIterations(iterations);
+            }
         }
 
         if (payloadJson.has(KEY_TX_NOTES)) {
