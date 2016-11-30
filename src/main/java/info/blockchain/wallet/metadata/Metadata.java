@@ -193,21 +193,27 @@ public class Metadata {
      */
     public void deleteMetadata(String payload) throws Exception {
 
-//        String encryptedPayload = AESUtil.encryptWithKey(encryptionKey, payload);
-//        byte[] encryptedPayloadBytes = encryptedPayload.getBytes("utf-8");
-//
-//        byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
-//
-//        String signature = node.signMessage(new String(Base64.encode(message)));
-//
-//        Call<Void> response = endpoints.deleteMetadata(address, signature);
-//
-//        Response<Void> exe = response.execute();
-//
-//        if (!exe.isSuccessful()) {
-//            throw new Exception(exe.code() + " " + exe.message());
-//        } else {
-//            magicHash = null;
-//        }
+        byte[] encryptedPayloadBytes;
+
+        if(isEncrypted){
+            //base64 to buffer
+            encryptedPayloadBytes = Base64.decode(AESUtil.encryptWithKey(encryptionKey, payload));
+        } else {
+            encryptedPayloadBytes = payload.getBytes("utf-8");
+        }
+
+        byte[] message = MetadataUtil.message(encryptedPayloadBytes, magicHash);
+
+        String signature = node.signMessage(new String(Base64.encode(message)));
+
+        Call<Void> response = endpoints.deleteMetadata(address, signature);
+
+        Response<Void> exe = response.execute();
+
+        if (!exe.isSuccessful()) {
+            throw new Exception(exe.code() + " " + exe.message());
+        } else {
+            magicHash = null;
+        }
     }
 }
