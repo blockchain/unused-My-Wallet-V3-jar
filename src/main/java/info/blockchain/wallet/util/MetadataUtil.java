@@ -139,7 +139,7 @@ public class MetadataUtil {
         return hash.digest();
     }
 
-    public static String encryptFor(ECKey myKey, String theirXpub, String message) throws Exception {
+    public static byte[] encryptFor(ECKey myKey, String theirXpub, String message) throws Exception {
 
         // Read other's public key:
         DeterministicKey otherKey = DeterministicKey.deserializeB58(null, theirXpub, MainNetParams.get());
@@ -157,7 +157,9 @@ public class MetadataUtil {
 
         System.out.println("Encrypting message with secret...");
 
-        return AESUtil.encrypt(message, new CharSequenceX(Hex.toHexString(secret)), 65536);
+        byte[] keyBuffer = Sha256Hash.hash(secret);
+
+        return AESUtil.encryptWithKey(keyBuffer, message);
     }
 
     public static String decryptFrom(DeterministicKey myKey, String theirXpub, String message) throws Exception {
@@ -176,7 +178,8 @@ public class MetadataUtil {
         byte[] secret = MetadataUtil.getSharedSecret(ourKeyPair, otherPublicKey.getEncoded());
         System.out.println("Shared Secret: "+ Hex.toHexString(secret));
 
-        String decryptedMessage = AESUtil.decrypt(message, new CharSequenceX(Hex.toHexString(secret)), 65536);
+        byte[] keyBuffer = Sha256Hash.hash(secret);
+        String decryptedMessage = AESUtil.decryptWithKey(keyBuffer, message);
 
         System.out.println("Decrypting message with secret...");
 
