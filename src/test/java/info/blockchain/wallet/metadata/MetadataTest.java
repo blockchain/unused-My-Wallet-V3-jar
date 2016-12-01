@@ -1,123 +1,97 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.wallet.payload.PayloadManager;
+import com.google.gson.Gson;
+
+import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.bip44.Wallet;
+import info.blockchain.bip44.WalletFactory;
 
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.MainNetParams;
+import org.junit.Before;
 import org.junit.Test;
 
 import io.jsonwebtoken.lang.Assert;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 
-/**
- * Integration Test
- */
 public class MetadataTest {
 
     boolean isEncrypted = false;
 
-    private DeterministicKey getRandomECKey() throws Exception {
+    MetadataEndpoints httpClient;
+    MockInterceptor mockInterceptor;
 
-        PayloadManager payloadManager = PayloadManager.getInstance();
-        payloadManager.createHDWallet("", "Account 1");
-        return payloadManager.getMasterKey();
+    @Before
+    public void setup() throws Exception {
+
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        mockInterceptor = new MockInterceptor();
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(mockInterceptor)//Mock responses
+//                .addInterceptor(loggingInterceptor)//Extensive logging
+                .build();
+
+        httpClient = RestClient.getClient(okHttpClient);
+    }
+
+    private Wallet getWallet() throws Exception {
+
+        return new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c",
+                "",
+                1);
+    }
+
+    @Test
+    public void testAddressDerivation() throws Exception {
+
+        String address = "12sC9tqHzAhdoukhCbTnyx2MjYXNXBGHnF";
+
+        Wallet wallet = getWallet();
+        DeterministicKey key = wallet.getMasterKey();
+
+        mockInterceptor.setResponse_404();//New metadata response
+        Metadata metadata = new Metadata(httpClient, key, 2, isEncrypted);
+        Assert.isTrue(metadata.getAddress().equals(address));
     }
 
     @Test
     public void testMetadata() throws Exception{
 
-//        String web_mnemonic = "bicycle balcony prefer kid flower pole goose crouch century lady worry flavor";
-//        PayloadManager payloadManager = PayloadManager.getInstance();
-//        payloadManager.restoreHDWallet("", web_mnemonic, "Account 1");
-//        DeterministicKey key = payloadManager.getMasterKey();
+        Wallet wallet = getWallet();
+        DeterministicKey key = wallet.getMasterKey();
 
-        DeterministicKey key = getRandomECKey();
+        mockInterceptor.setResponse_404();//New metadata response
+        Metadata metadata = new Metadata(httpClient, key, Metadata.PAYLOAD_TYPE_RESERVED, isEncrypted);
 
-        String message = "{hello: 'world'}";
+        String message = new Gson().toJson("{hello: 'world'}");
 
-        Metadata metadata5 = new Metadata(key, Metadata.PAYLOAD_TYPE_RESERVED, isEncrypted);
-        metadata5.putMetadata(message);
+        mockInterceptor.setResponse_PUT_hello_world();
+        metadata.putMetadata(message);
 
-        String result1 = metadata5.getMetadata();
+        mockInterceptor.setResponse_GET_hello_world();
+        String result1 = metadata.getMetadata();
         Assert.isTrue(message.equals(result1));
 
-        message = "{hello: 'mars'}";
-        metadata5.putMetadata(message);
+        mockInterceptor.setResponse_PUT_hello_mars();
+        message = new Gson().toJson("{hello: 'mars'}");
+        metadata.putMetadata(message);
 
-        String result2 = metadata5.getMetadata();
+        mockInterceptor.setResponse_GET_hello_mars();
+        String result2 = metadata.getMetadata();
         Assert.isTrue(message.equals(result2));
 
-        metadata5.deleteMetadata(message);
+        mockInterceptor.setResponse_DELETE_ok();
+        metadata.deleteMetadata(message);
 
+        mockInterceptor.setResponse_404();
         try {
-            metadata5.getMetadata();
+            metadata.getMetadata();
             Assert.isTrue(false);
         }catch (Exception e){
             Assert.isTrue(true);
         }
-    }
-
-    @Test
-    public void testGetMetadataNode() throws Exception {
-
-        String web_mnemonic = "bicycle balcony prefer kid flower pole goose crouch century lady worry flavor";
-        String web_seedHex = "15e23aa73d25994f1921a1256f93f72c";
-        String web_address = "12sC9tqHzAhdoukhCbTnyx2MjYXNXBGHnF";
-
-        PayloadManager payloadManager = PayloadManager.getInstance();
-        payloadManager.restoreHDWallet("", web_mnemonic, "Account 1");
-
-        //Ensure web_wallet and this restore wallet is same
-        Assert.isTrue(web_seedHex.equals(payloadManager.getHDSeedHex()));
-        String web_priv = "xprv9s21ZrQH143K2qnxcoP1RnRkxYvHT5ZDamV4B4UYTmAuANBnyWwVP7e3GYmEkt1chPWq264tiUxo21FiRKx3kVTpHLkkP65NRzHSAjS8nHA";
-        Assert.isTrue(web_priv.equals(payloadManager.getMasterKey().serializePrivB58(MainNetParams.get())));
-
-        Metadata metadata = new Metadata(payloadManager.getMasterKey(), 2, isEncrypted);
-        Assert.isTrue(metadata.getAddress().equals(web_address));
-        payloadManager.wipe();
-    }
-
-    @Test
-    public void testFetchExistingMagicHash() throws Exception {
-
-        DeterministicKey key = getRandomECKey();
-
-        Metadata metadata = new Metadata(key, 2, isEncrypted);
-        metadata.putMetadata("Yolo");
-
-        metadata = new Metadata(key, 2, isEncrypted);
-        metadata.putMetadata("Yolo2");
-
-        metadata = new Metadata(key, 2, isEncrypted);
-        metadata.putMetadata("Yolo3");
-    }
-
-    @Test
-    public void testGetMetaData() throws Exception {
-
-        String mnemonic = "iron permit matter upset various access scorpion drip tree best viable chuckle";
-        PayloadManager payloadManager = PayloadManager.getInstance();
-        payloadManager.restoreHDWallet("", mnemonic, "Account 1");
-        DeterministicKey key = payloadManager.getMasterKey();
-
-        Metadata metadata = new Metadata(key, 2048, true);
-
-        Assert.isTrue(metadata.getMetadata().equals("{\"whats up\":\"my ninja\"}"));
-    }
-
-    @Test
-    public void test() throws Exception {
-
-        String mnemonic = "iron permit matter upset various access scorpion drip tree best viable chuckle";
-        PayloadManager payloadManager = PayloadManager.getInstance();
-        payloadManager.restoreHDWallet("", mnemonic, "Account 1");
-        DeterministicKey key = payloadManager.getMasterKey();
-
-//        DeterministicKey key = getRandomECKey();
-
-        Metadata metadata = new Metadata(key, 2048, true);
-        metadata.putMetadata("{\"whats up\":\"my ninja\"}");
-
-        System.out.println(metadata.getMetadata());
-
     }
 }

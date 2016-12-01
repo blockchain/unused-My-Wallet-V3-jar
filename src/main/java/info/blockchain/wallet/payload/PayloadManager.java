@@ -9,7 +9,12 @@ import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
-import info.blockchain.wallet.exceptions.*;
+import info.blockchain.wallet.exceptions.AccountLockedException;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
+import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
@@ -25,7 +30,6 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 
@@ -691,9 +695,11 @@ public class PayloadManager {
         return getXpubToAccountIndexMap().inverse();
     }
 
-    public void registerMdid() throws Exception {
+    public void unregisterMdid(ECKey node) throws Exception {
+        walletApi.unregisterMdid(node, payload.getGuid(), payload.getSharedKey());
+    }
 
-        DeterministicKey walletKey = HDKeyDerivation.createMasterPrivateKey(wallet.getSeed());
-        walletApi.registerMdid(walletKey, payload.getGuid(), payload.getSharedKey());
+    public void registerMdid(ECKey node) throws Exception {
+        walletApi.registerMdid(node, payload.getGuid(), payload.getSharedKey());
     }
 }

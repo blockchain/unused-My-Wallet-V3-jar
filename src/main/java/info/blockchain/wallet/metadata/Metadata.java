@@ -1,5 +1,7 @@
 package info.blockchain.wallet.metadata;
 
+import com.google.gson.Gson;
+
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
@@ -12,12 +14,8 @@ import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
 
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Metadata {
 
@@ -45,20 +43,9 @@ public class Metadata {
     /**
      * Constructor for metadata service
      */
-    public Metadata(DeterministicKey masterHDNode, int type, boolean isEncrypted) throws Exception{
+    public Metadata(MetadataEndpoints endpoints, DeterministicKey masterHDNode, int type, boolean isEncrypted) throws Exception{
 
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MetadataEndpoints.API_URL)
-//                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        endpoints = retrofit.create(MetadataEndpoints.class);
-
+        this.endpoints = endpoints;
         this.isEncrypted = isEncrypted;
         setMetadataNode(type, masterHDNode);
         fetch();
@@ -131,8 +118,13 @@ public class Metadata {
 
     /**
      * Put new metadata entry
+     * @param payload JSON Stringified object
+     * @throws Exception
      */
     public void putMetadata(String payload) throws Exception {
+
+        //Ensure json syntax is correct
+        new Gson().fromJson(payload, String.class);
 
         byte[] encryptedPayloadBytes;
 
@@ -184,7 +176,12 @@ public class Metadata {
                 return new String(Base64.decode(exe.body().getPayload()));
             }
         } else {
-            throw new Exception(exe.code() + " " + exe.message());
+
+            if (exe.code() == 404) {
+                return null;
+            } else {
+                throw new Exception(exe.code() + " " + exe.message());
+            }
         }
     }
 
