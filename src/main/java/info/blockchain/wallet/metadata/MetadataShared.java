@@ -81,7 +81,7 @@ public class MetadataShared {
      */
     private void setMetadataNode(DeterministicKey masterHDNode) throws Exception{
 
-        int purpose = MetadataUtil.getPurpose();
+        int purpose = MetadataUtil.getPurposeMdid();
 
         DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(masterHDNode, purpose);
 

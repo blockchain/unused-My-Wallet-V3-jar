@@ -62,7 +62,7 @@ public class Metadata {
      */
     private void setMetadataNode(int type, DeterministicKey masterHDNode) throws Exception{
 
-        int purpose = MetadataUtil.getPurpose();
+        int purpose = MetadataUtil.getPurposeMetadata();
 
         DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(masterHDNode, purpose);
         DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);

@@ -63,14 +63,22 @@ public class MetadataUtil {
         return Sha256Hash.hashTwice(messageBytes);
     }
 
+    public static int getPurposeMetadata() throws Exception {
+        return getPurpose("metadata");
+    }
+
+    public static int getPurposeMdid() throws Exception {
+        return getPurpose("mdid");
+    }
+
     /**
      * BIP 43 purpose needs to be 31 bit or less. For lack of a BIP number we take the first 31 bits
      * of the SHA256 hash of a reverse domain.
      */
-    public static int getPurpose() throws Exception {
+    private static int getPurpose(String sub) throws Exception {
 
         MessageDigest md = MessageDigest.getInstance("SHA-256");
-        String text = "info.blockchain.metadata";
+        String text = "info.blockchain."+sub;
         md.update(text.getBytes("UTF-8"));
         byte[] hash = md.digest();
         byte[] slice = Arrays.copyOfRange(hash, 0, 4);
