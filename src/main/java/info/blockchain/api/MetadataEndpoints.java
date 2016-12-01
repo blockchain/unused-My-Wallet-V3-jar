@@ -23,7 +23,8 @@ import retrofit2.http.Query;
 
 public interface MetadataEndpoints {
 
-    String API_URL = "https://api.dev.blockchain.co.uk/metadata/";
+    // TODO: 01/12/2016  
+    String API_URL = "https://api.dev.blockchain.info/metadata/";
 
     @GET("auth")
     Call<Auth> getNonce();

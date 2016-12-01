@@ -62,6 +62,13 @@ public class MetadataShared {
     }
 
     /**
+     * @return Metadata derived key
+     */
+    public DeterministicKey getNode() {
+        return node;
+    }
+
+    /**
      * Set shared metadata node and address
      * Set encryption key:
      * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authenticate
@@ -71,7 +78,7 @@ public class MetadataShared {
      */
     public void setMetadataNode(DeterministicKey masterHDNode) throws Exception{
 
-        int purpose = MetadataUtil.getPurpose();
+        int purpose = MetadataUtil.getPurposeMdid();
 
         DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(masterHDNode, purpose);
 

@@ -2,19 +2,18 @@ package info.blockchain.wallet.metadata;
 
 import com.google.gson.Gson;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
 import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.util.MetadataUtil;
+import info.blockchain.wallet.util.CharSequenceX;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Before;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
-import java.security.KeyPair;
 import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
@@ -22,7 +21,7 @@ import io.jsonwebtoken.lang.Assert;
 /**
  * Integration Test
  */
-public class MetadataSharedTest {
+public class MetadataSharedIT {
 
     private MetadataShared senderMetadata;
     private MetadataShared recipientMetadata;
@@ -33,29 +32,46 @@ public class MetadataSharedTest {
     @Before
     public void setup() throws Exception {
 
+        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
+        PersistentUrls.getInstance().setWalletPayloadUrl("https://explorer.dev.blockchain.info/wallet");
+
+        //Instantiate existing wallets
         //Sender metadata
         PayloadManager payloadManager = PayloadManager.getInstance();
-        payloadManager.createHDWallet("", "Account 1");
+        payloadManager.initiatePayload("bc73239b-d3d9-4bee-a1f9-80248e179486", "014fb9fc-64f9-4cf5-b76b-d927d7619717", new CharSequenceX("MyTestWallet"), new PayloadManager.InitiatePayloadListener() {
+            public void onSuccess() {
+                System.out.println("Sender onSuccess");
+            }
+        });
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+        }
+
         DeterministicKey senderKey = payloadManager.getMasterKey();
+        System.out.println("senderKey: "+senderKey);
         senderMetadata = new MetadataShared();
         senderMetadata.setMetadataNode(senderKey);
-        payloadManager.wipe();
         senderToken = senderMetadata.getToken();
+//        payloadManager.registerMdid(senderMetadata.getNode());
 
         //Recipient metadata
         recipientPayloadManager = PayloadManager.getInstance();
-        recipientPayloadManager.createHDWallet("", "Account 1");
+        recipientPayloadManager.initiatePayload("49e58bdb-5a66-4353-923a-3b49054603d6", "6fbe154a-35e0-46fb-a22b-699dc7cba87c", new CharSequenceX("MyTestWallet"), new PayloadManager.InitiatePayloadListener() {
+            public void onSuccess() {
+                System.out.println("Recipient onSuccess");
+            }
+        });
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+        }
+
         DeterministicKey recipientKey = recipientPayloadManager.getMasterKey();
         recipientMetadata = new MetadataShared();
         recipientMetadata.setMetadataNode(recipientKey);
         recipientToken = recipientMetadata.getToken();
-    }
-
-    private DeterministicKey getRandomECKey() throws Exception {
-
-        PayloadManager payloadManager = PayloadManager.getInstance();
-        payloadManager.createHDWallet("", "Account 1");
-        return payloadManager.getMasterKey();
+//        recipientPayloadManager.registerMdid(recipientMetadata.getNode());
     }
 
     @Test
@@ -169,22 +185,5 @@ public class MetadataSharedTest {
         System.out.println("Bitcoin URL: '" + paymentRequestResponses.get(0).toBitcoinURI() + "'");
 
         System.out.println("Marking payment as processed...");
-    }
-
-    @Test
-    public void testSharedSecret() throws Exception {
-
-        // Generate ephemeral ECDH keypair
-        KeyPair keyPairA = MetadataUtil.getKeyPair(getRandomECKey());
-        byte[] publicKeyA = keyPairA.getPublic().getEncoded();
-
-        // Read other's public key:
-        KeyPair keyPairB = MetadataUtil.getKeyPair(getRandomECKey());
-        byte[] publicKeyB = keyPairB.getPublic().getEncoded();
-
-        byte[] secretA = MetadataUtil.getSharedSecret(keyPairA, publicKeyB);
-        byte[] secretB = MetadataUtil.getSharedSecret(keyPairB, publicKeyA);
-
-        Assert.isTrue(Hex.toHexString(secretA).equals(Hex.toHexString(secretB)));
     }
 }
