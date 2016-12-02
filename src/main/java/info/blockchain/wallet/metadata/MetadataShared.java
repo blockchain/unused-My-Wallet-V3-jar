@@ -2,6 +2,7 @@ package info.blockchain.wallet.metadata;
 
 import com.google.gson.Gson;
 
+import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
@@ -20,7 +21,8 @@ import info.blockchain.wallet.util.MetadataUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.util.encoders.*;
+import org.spongycastle.util.encoders.Base64;
+import org.spongycastle.util.encoders.Hex;
 
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -28,12 +30,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MetadataShared {
 
@@ -48,17 +46,7 @@ public class MetadataShared {
     private byte[] magicHash;
 
     public MetadataShared() {
-
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MetadataEndpoints.API_URL)
-//                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        endpoints = retrofit.create(MetadataEndpoints.class);
+        endpoints = BlockchainFramework.getRetrofitApiInstance().create(MetadataEndpoints.class);
     }
 
     /**

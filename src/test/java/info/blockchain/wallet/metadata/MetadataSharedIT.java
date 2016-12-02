@@ -2,6 +2,9 @@ package info.blockchain.wallet.metadata;
 
 import com.google.gson.Gson;
 
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
+import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
@@ -17,6 +20,8 @@ import org.junit.Test;
 import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Integration Test
@@ -31,9 +36,28 @@ public class MetadataSharedIT {
 
     @Before
     public void setup() throws Exception {
-
         PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-        PersistentUrls.getInstance().setWalletPayloadUrl("https://explorer.dev.blockchain.info/wallet");
+        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
+
+        BlockchainFramework.init(new FrameworkInterface() {
+            @Override
+            public Retrofit getRetrofitApiInstance() {
+                return new Retrofit.Builder()
+                        .baseUrl(MetadataEndpoints.API_URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+            }
+
+            @Override
+            public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public Gson getGsonInstance() {
+                return null;
+            }
+        });
 
         //Instantiate existing wallets
         //Sender metadata

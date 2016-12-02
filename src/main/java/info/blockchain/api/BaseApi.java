@@ -5,12 +5,6 @@ import javax.annotation.Nonnull;
 
 public abstract class BaseApi {
 
-    public final static String PROTOCOL = "https://";
-
-    public final static String API_SUBDOMAIN = "api.";
-
-    public final static String SERVER_ADDRESS = "blockchain.info/";
-
     private final static String API_CODE = "25a6ad13-1633-4dfb-b6ee-9b91cdf0b5c3";
 
     @Nonnull
@@ -18,4 +12,6 @@ public abstract class BaseApi {
         return PersistentUrls.getInstance().getCurrentEnvironment() == PersistentUrls.Environment.PRODUCTION
                 ? "&api_code=" + API_CODE : "";
     }
+
+    public abstract String getRestUrl();
 }

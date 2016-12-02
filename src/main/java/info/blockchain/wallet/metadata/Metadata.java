@@ -36,10 +36,6 @@ public class Metadata {
     private byte[] encryptionKey;
     private byte[] magicHash;
 
-    public Metadata() {
-        //no op
-    }
-
     /**
      * Constructor for metadata service
      */

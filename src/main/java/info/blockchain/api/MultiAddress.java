@@ -8,17 +8,21 @@ import org.json.JSONObject;
 public class MultiAddress extends BaseApi {
 
     private static final String MULTI_ADDRESS = "multiaddr?active=";
-    public static final String PROD_MULTIADDR_URL = PROTOCOL + SERVER_ADDRESS + MULTI_ADDRESS;
 
     public MultiAddress() {
         // No-op
+    }
+
+    @Override
+    public String getRestUrl() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + MULTI_ADDRESS;
     }
 
     public JSONObject getLegacy(String[] addresses, boolean simple) throws Exception {
 
         JSONObject jsonObject;
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getMultiAddressUrl());
+        StringBuilder url = new StringBuilder(getRestUrl());
         url.append(StringUtils.join(addresses, "|"));
         if (simple) {
             url.append("&simple=true&format=json");
@@ -35,11 +39,10 @@ public class MultiAddress extends BaseApi {
 
     public JSONObject getXPUB(String[] xpubs) throws Exception {
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getMultiAddressUrl());
-        url.append(StringUtils.join(xpubs, "|"));
-        url.append(getApiCode());
+        final String url = getRestUrl() + StringUtils.join(xpubs, "|") +
+                getApiCode();
 
-        String response = WebUtil.getInstance().getURL(url.toString());
+        String response = WebUtil.getInstance().getURL(url);
 
         return new JSONObject(response);
     }

@@ -9,15 +9,16 @@ import org.json.JSONObject;
 public class TransactionDetails extends BaseApi {
 
     private static final String TX = "tx/";
-    public static final String PROD_TRANSACTION_URL = PROTOCOL + SERVER_ADDRESS + TX;
 
-    public TransactionDetails() {
-        // No-op
+    @Override
+    public String getRestUrl() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + TX;
     }
 
     public Transaction getTransactionDetails(String hash) throws Exception {
 
-        String response = WebUtil.getInstance().getURL(PersistentUrls.getInstance().getTransactionDetailsUrl() + hash + "?format=json");
+        String response = WebUtil.getInstance().getURL(
+                getRestUrl() + hash + "?format=json");
 
         if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
             return new Transaction(new JSONObject(response));

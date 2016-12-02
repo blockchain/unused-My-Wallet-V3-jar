@@ -1,5 +1,6 @@
 package info.blockchain.api;
 
+import info.blockchain.BlockchainFramework;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
 
@@ -13,14 +14,10 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WalletPayload extends BaseApi {
 
     private static final String WALLET = "wallet";
-//    public static final String PROD_PAYLOAD_URL = "https://explorer.dev.blockchain.co.uk/wallet";
-    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
 
     private String sessionId;
     public static final String KEY_AUTH_REQUIRED = "Authorization Required";
@@ -28,24 +25,14 @@ public class WalletPayload extends BaseApi {
     WalletEndpoints api;
 
     public WalletPayload() {
-
-//        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-//        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-//        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(WalletEndpoints.API_URL)
-//                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        api = retrofit.create(WalletEndpoints.class);
+        api = BlockchainFramework.getRetrofitApiInstance().create(WalletEndpoints.class);
     }
 
     public String getSessionId(String guid) throws Exception {
 
         if (sessionId == null) {
             sessionId = WebUtil.getInstance().getCookie(
-                    PersistentUrls.getInstance().getWalletPayloadUrl()
+                    getRestUrl()
                             + "/"
                             + guid
                             + "?format=json&"
@@ -56,19 +43,25 @@ public class WalletPayload extends BaseApi {
         return sessionId;
     }
 
+    @Override
+    public String getRestUrl() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + WALLET;
+    }
+
     public String getPairingEncryptionPassword(final String guid) throws Exception {
         StringBuilder args = new StringBuilder();
 
         args.append("guid=").append(guid);
         args.append("&method=pairing-encryption-password");
 
-        return WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
+        return WebUtil.getInstance().postURL(
+                getRestUrl(), args.toString());
     }
 
     public String getEncryptedPayload(final String guid, final String sessionId) throws Exception {
 
         String response = WebUtil.getInstance().getURL(
-                PersistentUrls.getInstance().getWalletPayloadUrl()
+                PersistentUrls.getInstance().getCurrentBaseServerUrl() + WALLET
                         + "/" + guid
                         + "?format=json&resend_code=false",
                 "SID=" + sessionId);
@@ -97,7 +90,7 @@ public class WalletPayload extends BaseApi {
     public String fetchWalletData(String guid, String sharedKey) throws Exception {
 
         String response = WebUtil.getInstance().postURL(
-                PersistentUrls.getInstance().getWalletPayloadUrl(),
+                getRestUrl(),
                 "method=wallet.aes.json&guid="
                         + guid
                         + "&sharedKey="
@@ -114,8 +107,8 @@ public class WalletPayload extends BaseApi {
     }
 
     public void savePayloadToServer(String method, String guid, String sharedKey,
-                                       List<LegacyAddress> legacyAddresses, JSONObject encryptedPayload,
-                                       boolean syncPubkeys, String newChecksum, String oldChecksum, String email) throws Exception{
+                                    List<LegacyAddress> legacyAddresses, JSONObject encryptedPayload,
+                                    boolean syncPubkeys, String newChecksum, String oldChecksum, String email) throws Exception {
 
         StringBuilder args = new StringBuilder();
 
@@ -160,10 +153,9 @@ public class WalletPayload extends BaseApi {
             args.append(oldChecksum);
         }
 
-        // TODO: 15/11/16 Add this after metadata testing on dev is complete
-//        args.append(getApiCode());
+        args.append(getApiCode());
 
-        String response = WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
+        WebUtil.getInstance().postURL(getRestUrl(), args.toString());
     }
 
     public boolean registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
@@ -186,8 +178,8 @@ public class WalletPayload extends BaseApi {
 
         Response<Void> result = call.execute();
 
-        if(!result.isSuccessful())
-            throw new Exception(result.code()+" "+result.message());
+        if (!result.isSuccessful())
+            throw new Exception(result.code() + " " + result.message());
 
         return true;
     }
