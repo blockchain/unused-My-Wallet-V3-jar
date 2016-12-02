@@ -13,14 +13,16 @@ public class RestClient {
     public static MetadataEndpoints getClient(OkHttpClient client) {
 
         if (restService == null) {
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(MetadataEndpoints.API_URL)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            restService = retrofit.create(MetadataEndpoints.class);
+            restService = getRetrofitInstance(client).create(MetadataEndpoints.class);
         }
         return restService;
+    }
+
+    public static Retrofit getRetrofitInstance(OkHttpClient client) {
+        return new Retrofit.Builder()
+                .baseUrl(MetadataEndpoints.API_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
     }
 }

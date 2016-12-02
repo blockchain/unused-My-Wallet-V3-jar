@@ -54,8 +54,7 @@ public class WalletPayload extends BaseApi {
         args.append("guid=").append(guid);
         args.append("&method=pairing-encryption-password");
 
-        return WebUtil.getInstance().postURL(
-                getRestUrl(), args.toString());
+        return WebUtil.getInstance().postURL(getRestUrl(), args.toString());
     }
 
     public String getEncryptedPayload(final String guid, final String sessionId) throws Exception {
