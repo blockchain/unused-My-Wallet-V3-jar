@@ -4,16 +4,16 @@ import info.blockchain.wallet.util.WebUtil;
 
 public class ExchangeTicker extends BaseApi {
 
-    public static final String TICKER = "ticker?_=";
+    private static final String TICKER = "ticker?_=";
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getDefaultBaseServerUrl() + TICKER;
     }
 
     public String getExchangeRate() throws Exception {
 
-        String response = WebUtil.getInstance().getURL(getRestUrl());
+        String response = WebUtil.getInstance().getURL(getRoute());
         if (response == null) {
             throw new Exception("Failed to get exchange rate");
         }

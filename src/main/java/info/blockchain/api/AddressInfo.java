@@ -13,13 +13,13 @@ public class AddressInfo extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + ADDRESS;
     }
 
     public JSONObject getAddressInfo(String address, String parameter) throws Exception {
 
-        StringBuilder url = new StringBuilder(getRestUrl());
+        StringBuilder url = new StringBuilder(getRoute());
         url.append(address);
         url.append("?format=json");
         if (parameter != null && !parameter.isEmpty())

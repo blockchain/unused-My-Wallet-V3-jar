@@ -11,10 +11,10 @@ public class PersistentUrls {
     private static final String BASE_API_URL = "https://api.blockchain.info/";
     private static final String BASE_SERVER_URL = "https://blockchain.info/";
 
-    // Current API urls, set to default to production
-    private String currentApiUrl = BASE_API_URL;
-    private String currentServerUrl = BASE_SERVER_URL;
-    private Environment currentEnvironment = Environment.PRODUCTION;
+    // Current API urls
+    private String currentApiUrl;
+    private String currentServerUrl;
+    private Environment currentEnvironment;
 
     // Instance
     private static PersistentUrls instance;
@@ -48,7 +48,8 @@ public class PersistentUrls {
     }
 
     private PersistentUrls() {
-        // No-op
+        // Default to production on first invocation
+        setProductionEnvironment();
     }
 
     public static PersistentUrls getInstance() {

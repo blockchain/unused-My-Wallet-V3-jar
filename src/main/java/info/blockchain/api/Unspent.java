@@ -13,7 +13,7 @@ public class Unspent extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + UNSPENT;
     }
 
@@ -21,7 +21,7 @@ public class Unspent extends BaseApi {
 
         address += getApiCode();
         String response = WebUtil.getInstance().getURL(
-                getRestUrl() + address);
+                getRoute() + address);
 
         if (response != null && !response.equals("No free outputs to spend")) {
             return new JSONObject(response);

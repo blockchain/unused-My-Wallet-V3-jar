@@ -11,14 +11,14 @@ public class TransactionDetails extends BaseApi {
     private static final String TX = "tx/";
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + TX;
     }
 
     public Transaction getTransactionDetails(String hash) throws Exception {
 
         String response = WebUtil.getInstance().getURL(
-                getRestUrl() + hash + "?format=json");
+                getRoute() + hash + "?format=json");
 
         if (response != null && FormatsUtil.getInstance().isValidJson(response)) {
             return new Transaction(new JSONObject(response));

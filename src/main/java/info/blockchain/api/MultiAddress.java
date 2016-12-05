@@ -14,7 +14,7 @@ public class MultiAddress extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + MULTI_ADDRESS;
     }
 
@@ -22,7 +22,7 @@ public class MultiAddress extends BaseApi {
 
         JSONObject jsonObject;
 
-        StringBuilder url = new StringBuilder(getRestUrl());
+        StringBuilder url = new StringBuilder(getRoute());
         url.append(StringUtils.join(addresses, "|"));
         if (simple) {
             url.append("&simple=true&format=json");
@@ -39,7 +39,7 @@ public class MultiAddress extends BaseApi {
 
     public JSONObject getXPUB(String[] xpubs) throws Exception {
 
-        final String url = getRestUrl() + StringUtils.join(xpubs, "|") +
+        final String url = getRoute() + StringUtils.join(xpubs, "|") +
                 getApiCode();
 
         String response = WebUtil.getInstance().getURL(url);

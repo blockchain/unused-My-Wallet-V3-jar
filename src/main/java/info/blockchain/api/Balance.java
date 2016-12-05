@@ -25,7 +25,7 @@ public class Balance extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + BALANCE;
     }
 
@@ -39,7 +39,7 @@ public class Balance extends BaseApi {
 
     private JSONObject getBalanceAPICall(List<String> addresses, int filter) throws Exception {
 
-        StringBuilder url = new StringBuilder(getRestUrl());
+        StringBuilder url = new StringBuilder(getRoute());
         url.append(StringUtils.join(addresses, "|"));
         if (filter > 0) url.append("&filter=").append(filter);
         url.append(getApiCode());

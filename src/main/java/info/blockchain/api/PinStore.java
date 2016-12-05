@@ -13,7 +13,7 @@ public class PinStore extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + PIN_STORE;
     }
 
@@ -26,7 +26,7 @@ public class PinStore extends BaseApi {
                 getApiCode();
 
         String response = WebUtil.getInstance().postURL(
-                getRestUrl(), args, 1);
+                getRoute(), args, 1);
 
         if (response == null || response.length() == 0)
             throw new Exception("Invalid Server Response");
@@ -43,7 +43,7 @@ public class PinStore extends BaseApi {
                 "&method=put" +
                 getApiCode();
 
-        String response = WebUtil.getInstance().postURL(getRestUrl(), args);
+        String response = WebUtil.getInstance().postURL(getRoute(), args);
 
         if (response == null || response.length() == 0)
             throw new Exception("Invalid Server Response");

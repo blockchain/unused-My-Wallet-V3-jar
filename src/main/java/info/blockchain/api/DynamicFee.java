@@ -19,13 +19,13 @@ public class DynamicFee extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getDefaultBaseApiUrl() + FEES;
     }
 
     public SuggestedFee getDynamicFee() throws Exception {
 
-        String response = WebUtil.getInstance().getRequest(getRestUrl());
+        String response = WebUtil.getInstance().getRequest(getRoute());
 
         if (response != null) {
 

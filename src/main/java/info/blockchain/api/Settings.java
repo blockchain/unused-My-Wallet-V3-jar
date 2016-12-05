@@ -16,7 +16,7 @@ public class Settings extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + WALLET;
     }
 
@@ -141,7 +141,7 @@ public class Settings extends BaseApi {
         args.append(getApiCode());
         args.append("&format=plain");
 
-        return WebUtil.getInstance().postURL(getRestUrl(), args.toString());
+        return WebUtil.getInstance().postURL(getRoute(), args.toString());
     }
 
     public String getInfo() throws Exception {

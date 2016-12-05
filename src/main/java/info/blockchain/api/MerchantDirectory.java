@@ -12,16 +12,16 @@ import java.util.ArrayList;
 
 public class MerchantDirectory extends BaseApi {
 
-    public static final String MERCHANT = "merchant";
+    private static final String MERCHANT = "merchant";
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseApiUrl() + MERCHANT;
     }
 
     public ArrayList<Merchant> getAllMerchants() throws Exception {
 
-        String result = WebUtil.getInstance().getURL(getRestUrl());
+        String result = WebUtil.getInstance().getURL(getRoute());
 
         if (result == null || !FormatsUtil.getInstance().isValidJson(result)) {
             throw new Exception("Merchant api call returned null or empty");

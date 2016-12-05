@@ -15,13 +15,13 @@ public class Notifications extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + UPDATE_FIREBASE;
     }
 
     public void updateFirebaseNotificationToken(String token, String guid, String sharedKey) throws Exception {
 
-        String url = getRestUrl() + token;
+        String url = getRoute() + token;
 
         String urlParams = "&guid=" + guid
                 + "&payload=" + token + "&format=json"

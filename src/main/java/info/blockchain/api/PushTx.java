@@ -7,10 +7,10 @@ import org.bitcoinj.core.Transaction;
 
 public class PushTx extends BaseApi {
 
-    public static final String PROD_SPEND_URL = "pushtx";
+    private static final String PROD_SPEND_URL = "pushtx";
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + PROD_SPEND_URL;
     }
 
@@ -19,7 +19,7 @@ public class PushTx extends BaseApi {
         hexString += getApiCode();
 
         return WebUtil.getInstance().postURL(
-                getRestUrl(),
+                getRoute(),
                 "tx=" + hexString);
     }
 
@@ -29,7 +29,7 @@ public class PushTx extends BaseApi {
         encoded += getApiCode();
 
         return WebUtil.getInstance().postURL(
-                getRestUrl(),
+                getRoute(),
                 "tx=" + encoded);
     }
 }

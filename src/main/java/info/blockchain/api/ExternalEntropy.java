@@ -9,13 +9,13 @@ public class ExternalEntropy extends BaseApi {
     private static final String RANDOM_BYTES = "v2/randombytes?bytes=32&format=hex";
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getDefaultBaseApiUrl() + RANDOM_BYTES;
     }
 
     public byte[] getRandomBytes() throws Exception {
 
-        String result = WebUtil.getInstance().getURL(getRestUrl());
+        String result = WebUtil.getInstance().getURL(getRoute());
         if (result == null || !result.matches("^[A-Fa-f0-9]{64}$")) {
             throw new Exception("Failed to get random bytes");
         }

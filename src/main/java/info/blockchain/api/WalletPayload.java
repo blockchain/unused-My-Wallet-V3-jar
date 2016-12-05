@@ -32,7 +32,7 @@ public class WalletPayload extends BaseApi {
 
         if (sessionId == null) {
             sessionId = WebUtil.getInstance().getCookie(
-                    getRestUrl()
+                    getRoute()
                             + "/"
                             + guid
                             + "?format=json&"
@@ -44,7 +44,7 @@ public class WalletPayload extends BaseApi {
     }
 
     @Override
-    public String getRestUrl() {
+    String getRoute() {
         return PersistentUrls.getInstance().getCurrentBaseServerUrl() + WALLET;
     }
 
@@ -54,7 +54,7 @@ public class WalletPayload extends BaseApi {
         args.append("guid=").append(guid);
         args.append("&method=pairing-encryption-password");
 
-        return WebUtil.getInstance().postURL(getRestUrl(), args.toString());
+        return WebUtil.getInstance().postURL(getRoute(), args.toString());
     }
 
     public String getEncryptedPayload(final String guid, final String sessionId) throws Exception {
@@ -89,7 +89,7 @@ public class WalletPayload extends BaseApi {
     public String fetchWalletData(String guid, String sharedKey) throws Exception {
 
         String response = WebUtil.getInstance().postURL(
-                getRestUrl(),
+                getRoute(),
                 "method=wallet.aes.json&guid="
                         + guid
                         + "&sharedKey="
@@ -154,7 +154,7 @@ public class WalletPayload extends BaseApi {
 
         args.append(getApiCode());
 
-        WebUtil.getInstance().postURL(getRestUrl(), args.toString());
+        WebUtil.getInstance().postURL(getRoute(), args.toString());
     }
 
     public boolean registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
