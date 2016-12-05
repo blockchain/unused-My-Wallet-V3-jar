@@ -3,13 +3,12 @@ package info.blockchain.wallet.util;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 
-import org.apache.commons.codec.binary.Base64;
+import org.spongycastle.util.encoders.Base64;
+import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
 import java.security.KeyPair;
-
-import io.jsonwebtoken.lang.Assert;
 
 public class MetadataUtilTest {
 
@@ -20,11 +19,13 @@ public class MetadataUtilTest {
         String expected1 = "eyJoZWxsbyI6IndvcmxkIn0=";
         String expected2 = "LxR+2CipfgdIdi4EZgNOKTT+96WbppXnPZZjdZJ2vwCTojlxqRTl6svwqNJRVM2jCcPBxy+7mRTUfGDzy2gViA==";
 
-        byte[] result = MetadataUtil.message(message.getBytes(), null);
-        Assert.isTrue(expected1.equals(Base64.encodeBase64String(result)));
+        byte[] result = MetadataUtil.message(message.getBytes("utf-8"), null);
+
+        Assert.assertEquals(expected1, new String(Base64.encode(result)));
+
         byte[] magic = MetadataUtil.magic(message.getBytes(), null);
         byte[] nextResult = MetadataUtil.message(message.getBytes(), magic);
-        Assert.isTrue(expected2.equals(Base64.encodeBase64String(nextResult)));
+        Assert.assertEquals(expected2, new String(Base64.encode(nextResult)));
     }
 
     @Test
@@ -35,10 +36,10 @@ public class MetadataUtilTest {
         String expected2 = "skkJOHg9L6/1OVztbUohjcvVR3cNdRDZ/OJOUdQI41M=";
 
         byte[] magic = MetadataUtil.magic(message.getBytes(), null);
-        Assert.isTrue(expected1.equals(Base64.encodeBase64String(magic)));
+        Assert.assertEquals(expected1, new String(Base64.encode(magic)));
 
         byte[] nextMagic = MetadataUtil.magic(message.getBytes(), magic);
-        Assert.isTrue(expected2.equals(Base64.encodeBase64String(nextMagic)));
+        Assert.assertEquals(expected2, new String(Base64.encode(nextMagic)));
     }
 
     @Test
@@ -61,6 +62,6 @@ public class MetadataUtilTest {
         byte[] secretA = MetadataUtil.getSharedSecret(keyPairA, publicKeyB);
         byte[] secretB = MetadataUtil.getSharedSecret(keyPairB, publicKeyA);
 
-        Assert.isTrue(Hex.toHexString(secretA).equals(Hex.toHexString(secretB)));
+        Assert.assertEquals(Hex.toHexString(secretA), Hex.toHexString(secretB));
     }
 }

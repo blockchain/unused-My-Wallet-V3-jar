@@ -4,7 +4,7 @@ import info.blockchain.api.MetadataEndpoints;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class RestClient {
 
@@ -17,7 +17,7 @@ public class RestClient {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(MetadataEndpoints.API_URL)
                     .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(JacksonConverterFactory.create())
                     .build();
             restService = retrofit.create(MetadataEndpoints.class);
         }

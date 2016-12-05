@@ -4,7 +4,7 @@ import retrofit2.Call;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
-interface WalletEndpoints {
+public interface WalletEndpoints {
 
     // TODO: 01/12/2016  
     String API_URL = "https://explorer.dev.blockchain.info/";

@@ -19,23 +19,23 @@ public class MockInterceptor implements Interceptor {
         responseCode = 404;
     }
 
-    public void setResponse_PUT_hello_world(){
-        responseString = "{\"version\":1,\"payload\":\"IntoZWxsbzogXHUwMDI3d29ybGRcdTAwMjd9Ig==\",\"signature\":\"HwIx4Cs+1pB+8iCDREC1PiDqkDnEDhfcto6bQjxzo3RrHB562kg8nTjbFoaydlUI6tDkl3WnZahrmFZ8ErNqmBY=\",\"type_id\":1}";
+    public void setResponse_PUT_rage(){
+        responseString = "{\"version\":1,\"payload\":\"UmFnZSByYWdl\",\"signature\":\"HwIx4Cs+1pB+8iCDREC1PiDqkDnEDhfcto6bQjxzo3RrHB562kg8nTjbFoaydlUI6tDkl3WnZahrmFZ8ErNqmBY=\",\"type_id\":1}";
         responseCode = 200;
     }
 
-    public void setResponse_GET_hello_world(){
-        responseString = "{\"payload\":\"IntoZWxsbzogXHUwMDI3d29ybGRcdTAwMjd9Ig==\",\"version\":1,\"type_id\":1,\"signature\":\"HwIx4Cs+1pB+8iCDREC1PiDqkDnEDhfcto6bQjxzo3RrHB562kg8nTjbFoaydlUI6tDkl3WnZahrmFZ8ErNqmBY=\",\"created_at\":1480592845000,\"updated_at\":1480592845000,\"address\":\"1ErzrzB1FE1YyQ7LADMzye9J3Q8QeR1mja\"}";
+    public void setResponse_GET_rage(){
+        responseString = "{\"payload\":\"UmFnZSByYWdl\",\"version\":1,\"type_id\":1,\"signature\":\"HwIx4Cs+1pB+8iCDREC1PiDqkDnEDhfcto6bQjxzo3RrHB562kg8nTjbFoaydlUI6tDkl3WnZahrmFZ8ErNqmBY=\",\"created_at\":1480592845000,\"updated_at\":1480592845000,\"address\":\"1ErzrzB1FE1YyQ7LADMzye9J3Q8QeR1mja\"}";
         responseCode = 200;
     }
 
-    public void setResponse_PUT_hello_mars(){
-        responseString = "{\"version\":1,\"payload\":\"IntoZWxsbzogXHUwMDI3bWFyc1x1MDAyN30i\",\"signature\":\"H7zIO7fzkb8t+zdbiEzlKt/8InFjH5N2ja+SaJPcAuheP3soAJwxVrnzG0tDQpxyJKSgYn/9il6XsLW3rmm3a+g=\",\"prev_magic_hash\":\"73d03136dfdadf66b4048f938ad8acf6084134a84ac6f542e0144b29999a6836\",\"type_id\":1}";
+    public void setResponse_PUT_more_rage(){
+        responseString = "{\"version\":1,\"payload\":\"UmFnZSByYWdlIHNvbWUgbW9yZQ==\",\"signature\":\"H7zIO7fzkb8t+zdbiEzlKt/8InFjH5N2ja+SaJPcAuheP3soAJwxVrnzG0tDQpxyJKSgYn/9il6XsLW3rmm3a+g=\",\"prev_magic_hash\":\"73d03136dfdadf66b4048f938ad8acf6084134a84ac6f542e0144b29999a6836\",\"type_id\":1}";
         responseCode = 200;
     }
 
-    public void setResponse_GET_hello_mars(){
-        responseString = "{\"payload\":\"IntoZWxsbzogXHUwMDI3bWFyc1x1MDAyN30i\",\"version\":1,\"type_id\":1,\"signature\":\"H7zIO7fzkb8t+zdbiEzlKt/8InFjH5N2ja+SaJPcAuheP3soAJwxVrnzG0tDQpxyJKSgYn/9il6XsLW3rmm3a+g=\",\"prev_magic_hash\":\"73d03136dfdadf66b4048f938ad8acf6084134a84ac6f542e0144b29999a6836\",\"created_at\":1480592845000,\"updated_at\":1480592845000,\"address\":\"1ErzrzB1FE1YyQ7LADMzye9J3Q8QeR1mja\"}";
+    public void setResponse_GET_more_rage(){
+        responseString = "{\"payload\":\"UmFnZSByYWdlIHNvbWUgbW9yZQ==\",\"version\":1,\"type_id\":1,\"signature\":\"H7zIO7fzkb8t+zdbiEzlKt/8InFjH5N2ja+SaJPcAuheP3soAJwxVrnzG0tDQpxyJKSgYn/9il6XsLW3rmm3a+g=\",\"prev_magic_hash\":\"73d03136dfdadf66b4048f938ad8acf6084134a84ac6f542e0144b29999a6836\",\"created_at\":1480592845000,\"updated_at\":1480592845000,\"address\":\"1ErzrzB1FE1YyQ7LADMzye9J3Q8QeR1mja\"}";
         responseCode = 200;
     }
 
@@ -75,12 +75,12 @@ public class MockInterceptor implements Interceptor {
         final String query = uri.query();
         final String method = chain.request().method();
 
-        System.out.println(uri);
-        System.out.println(query);
-        System.out.println(method);
-
-        System.out.println("responseCode: "+responseCode);
-        System.out.println("responseString: "+responseString);
+//        System.out.println(uri);
+//        System.out.println(query);
+//        System.out.println(method);
+//
+//        System.out.println("responseCode: "+responseCode);
+//        System.out.println("responseString: "+responseString);
 
         Response response = new Response.Builder()
                 .code(responseCode)

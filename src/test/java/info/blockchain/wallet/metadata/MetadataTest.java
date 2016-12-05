@@ -1,6 +1,6 @@
 package info.blockchain.wallet.metadata;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.bip44.Wallet;
@@ -20,6 +20,8 @@ public class MetadataTest {
 
     MetadataEndpoints httpClient;
     MockInterceptor mockInterceptor;
+
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Before
     public void setup() throws Exception {
@@ -66,25 +68,25 @@ public class MetadataTest {
         mockInterceptor.setResponse_404();//New metadata response
         Metadata metadata = new Metadata(httpClient, key, Metadata.PAYLOAD_TYPE_RESERVED, isEncrypted);
 
-        String message = new Gson().toJson("{hello: 'world'}");
+        String msg = "Rage rage";
+        mockInterceptor.setResponse_PUT_rage();
+        metadata.putMetadata(mapper.writeValueAsString(msg));
 
-        mockInterceptor.setResponse_PUT_hello_world();
-        metadata.putMetadata(message);
-
-        mockInterceptor.setResponse_GET_hello_world();
+        mockInterceptor.setResponse_GET_rage();
         String result1 = metadata.getMetadata();
-        Assert.isTrue(message.equals(result1));
 
-        mockInterceptor.setResponse_PUT_hello_mars();
-        message = new Gson().toJson("{hello: 'mars'}");
-        metadata.putMetadata(message);
+        Assert.isTrue(msg.equals(result1));
 
-        mockInterceptor.setResponse_GET_hello_mars();
+        mockInterceptor.setResponse_PUT_more_rage();
+        msg = "Rage rage some more";
+        metadata.putMetadata(mapper.writeValueAsString(msg));
+
+        mockInterceptor.setResponse_GET_more_rage();
         String result2 = metadata.getMetadata();
-        Assert.isTrue(message.equals(result2));
+        Assert.isTrue(msg.equals(result2));
 
         mockInterceptor.setResponse_DELETE_ok();
-        metadata.deleteMetadata(message);
+        metadata.deleteMetadata(msg);
 
         mockInterceptor.setResponse_404();
         try {
