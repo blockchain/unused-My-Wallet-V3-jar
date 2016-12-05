@@ -1,7 +1,5 @@
 package info.blockchain;
 
-import com.google.gson.Gson;
-
 import retrofit2.Retrofit;
 
 /**
@@ -22,9 +20,4 @@ public final class BlockchainFramework {
     public static Retrofit getRetrofitServerInstance() {
         return blockchainInterface.getRetrofitServerInstance();
     }
-
-    public static Gson getGsonInstance() {
-        return blockchainInterface.getGsonInstance();
-    }
-
 }

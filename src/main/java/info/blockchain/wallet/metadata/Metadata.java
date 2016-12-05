@@ -1,6 +1,6 @@
 package info.blockchain.wallet.metadata;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.crypto.AESUtil;
@@ -35,6 +35,12 @@ public class Metadata {
     private DeterministicKey node;
     private byte[] encryptionKey;
     private byte[] magicHash;
+
+    private ObjectMapper mapper = new ObjectMapper();
+
+    public Metadata() {
+        //no op
+    }
 
     /**
      * Constructor for metadata service
@@ -120,7 +126,7 @@ public class Metadata {
     public void putMetadata(String payload) throws Exception {
 
         //Ensure json syntax is correct
-        new Gson().fromJson(payload, String.class);
+        mapper.readValue(payload, String.class);
 
         byte[] encryptedPayloadBytes;
 
@@ -139,7 +145,7 @@ public class Metadata {
 
         MetadataRequest body = new MetadataRequest();
         body.setVersion(METADATA_VERSION);
-        body.setPayload(new String(Base64.encode(encryptedPayloadBytes)));//working
+        body.setPayload(new String(Base64.encode(encryptedPayloadBytes)));
         body.setSignature(signature);
         body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
         body.setType_id(type);

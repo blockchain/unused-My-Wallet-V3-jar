@@ -1,6 +1,6 @@
 package info.blockchain.wallet.metadata;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.bip44.Wallet;
@@ -21,6 +21,8 @@ public class MetadataIT {
     boolean isEncrypted = false;
 
     MetadataEndpoints httpClient;
+
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Before
     public void setup() throws Exception {
@@ -53,13 +55,13 @@ public class MetadataIT {
         DeterministicKey key = wallet.getMasterKey();
 
         Metadata metadata = new Metadata(httpClient, key, 2, isEncrypted);
-        metadata.putMetadata(new Gson().toJson("Yolo1"));
+        metadata.putMetadata(mapper.writeValueAsString("Yolo1"));
 
         metadata = new Metadata(httpClient, key, 2, isEncrypted);
-        metadata.putMetadata(new Gson().toJson("Yolo2"));
+        metadata.putMetadata(mapper.writeValueAsString("Yolo2"));
 
         metadata = new Metadata(httpClient, key, 2, isEncrypted);
-        metadata.putMetadata(new Gson().toJson("Yolo3"));
+        metadata.putMetadata(mapper.writeValueAsString("Yolo3"));
     }
 
 //    @Test
@@ -73,7 +75,7 @@ public class MetadataIT {
 ////        DeterministicKey key = getRandomECKey();
 //
 //        Metadata metadata = new Metadata(httpClient, key, 2048, true);
-//        metadata.putMetadata(new Gson().toJson("{\"whats up\":\"my ninja\"}"));
+//        metadata.putMetadata(mapper.writeValueAsString("{\"whats up\":\"my ninja\"}"));
 //
 //        System.out.println(metadata.getMetadata());
 //    }

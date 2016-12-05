@@ -9,10 +9,12 @@ import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
@@ -63,11 +65,11 @@ public class MetadataUtil {
         return Sha256Hash.hashTwice(messageBytes);
     }
 
-    public static int getPurposeMetadata() throws Exception {
+    public static int getPurposeMetadata() throws UnsupportedEncodingException, NoSuchAlgorithmException {
         return getPurpose("metadata");
     }
 
-    public static int getPurposeMdid() throws Exception {
+    public static int getPurposeMdid() throws UnsupportedEncodingException, NoSuchAlgorithmException {
         return getPurpose("mdid");
     }
 
@@ -75,7 +77,7 @@ public class MetadataUtil {
      * BIP 43 purpose needs to be 31 bit or less. For lack of a BIP number we take the first 31 bits
      * of the SHA256 hash of a reverse domain.
      */
-    private static int getPurpose(String sub) throws Exception {
+    private static int getPurpose(String sub) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         String text = "info.blockchain."+sub;
@@ -90,7 +92,7 @@ public class MetadataUtil {
         return HDKeyDerivation.deriveChildKey(node, type | ChildNumber.HARDENED_BIT);
     }
 
-    public static KeyPair getKeyPair(ECKey ecKey) throws Exception {
+    public static KeyPair getKeyPair(ECKey ecKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidParameterSpecException {
 
         return new KeyPair(getPublicKey(ecKey), getPrivateKey(ecKey));
     }
@@ -147,7 +149,9 @@ public class MetadataUtil {
         return hash.digest();
     }
 
-    public static byte[] encryptFor(ECKey myKey, String theirXpub, String message) throws Exception {
+    public static byte[] encryptFor(ECKey myKey, String theirXpub, String message) throws NoSuchAlgorithmException,
+            InvalidKeySpecException, NoSuchProviderException, InvalidParameterSpecException, InvalidKeyException,
+            UnsupportedEncodingException, InvalidCipherTextException {
 
         // Read other's public key:
         DeterministicKey otherKey = DeterministicKey.deserializeB58(null, theirXpub, MainNetParams.get());
@@ -170,7 +174,9 @@ public class MetadataUtil {
         return AESUtil.encryptWithKey(keyBuffer, message);
     }
 
-    public static String decryptFrom(DeterministicKey myKey, String theirXpub, String message) throws Exception {
+    public static String decryptFrom(DeterministicKey myKey, String theirXpub, String message) throws NoSuchAlgorithmException,
+            InvalidKeySpecException, NoSuchProviderException, InvalidParameterSpecException, InvalidKeyException,
+            UnsupportedEncodingException, InvalidCipherTextException {
 
         // Read other's public key:
         DeterministicKey otherKey = DeterministicKey.deserializeB58(null, theirXpub, MainNetParams.get());

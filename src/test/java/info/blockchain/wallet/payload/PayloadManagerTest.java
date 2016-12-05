@@ -1,7 +1,10 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.metadata.RestClient;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
@@ -12,6 +15,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -36,6 +42,18 @@ public class PayloadManagerTest {
 
         payloadManager = PayloadManager.getInstance();
         payload = payloadManager.createHDWallet(password, label);
+
+        BlockchainFramework.init(new FrameworkInterface() {
+            @Override
+            public Retrofit getRetrofitApiInstance() {
+                return RestClient.getRetrofitInstance(new OkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+        });
     }
 
     @After

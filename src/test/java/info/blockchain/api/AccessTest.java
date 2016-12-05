@@ -1,7 +1,5 @@
 package info.blockchain.api;
 
-import com.google.gson.Gson;
-
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
 import info.blockchain.wallet.metadata.RestClient;
@@ -28,11 +26,6 @@ public class AccessTest {
 
             @Override
             public Retrofit getRetrofitServerInstance() {
-                return null;
-            }
-
-            @Override
-            public Gson getGsonInstance() {
                 return null;
             }
         });

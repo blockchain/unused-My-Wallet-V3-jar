@@ -6,6 +6,8 @@ public class Invitation {
     String mdid;//mdid of sender
     String contact;//mdid of recipient
 
+    Contact contactInfo;
+
     public String getId() {
         return id;
     }
@@ -16,6 +18,21 @@ public class Invitation {
 
     public String getContact() {
         return contact;
+    }
+
+    public Contact getContactInfo() {
+        return contactInfo;
+    }
+
+    public void setContactInfo(Contact contactInfo) {
+        this.contactInfo = contactInfo;
+    }
+
+    // TODO: 05/12/2016 This needs changing to a fully-formed URL
+    public String getURI() {
+
+        String scheme = "blockchain://invite?from=Matt&mdid_hash=123";
+        return scheme;
     }
 
     @Override
