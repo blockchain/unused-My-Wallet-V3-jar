@@ -55,12 +55,12 @@ public class MetadataSharedIT {
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
             public Retrofit getRetrofitApiInstance() {
-                return null;
+                return RestClient.getRetrofitInstance(new OkHttpClient());
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
-                return RestClient.getRetrofitInstance(new OkHttpClient());
+                return null;
             }
         });
 
