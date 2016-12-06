@@ -5,12 +5,12 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
-import info.blockchain.wallet.metadata.data.Status;
 import info.blockchain.wallet.metadata.data.Trusted;
 
 import java.util.HashMap;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -43,7 +43,7 @@ public interface MetadataEndpoints {
     Call<Trusted> putTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
     @DELETE("trusted/{mdid}")
-    Call<Status> deleteTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
+    Call<ResponseBody> deleteTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
 
     @POST("messages")

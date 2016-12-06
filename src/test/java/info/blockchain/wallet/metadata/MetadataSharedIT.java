@@ -66,17 +66,23 @@ public class MetadataSharedIT {
 
         //Init wallets
         a_wallet = new WalletFactory().restoreWallet(wallet_A_seedHex,"",1);
-        a_Metadata = new MetadataShared(httpClient, a_wallet.getMasterKey());
+        a_Metadata = new MetadataBuilder(httpClient)
+                .setRootNode(a_wallet.getMasterKey())
+                .setPurpose(MetadataBuilder.PURPOSE_SHARED)
+                .build();
 
         System.out.println("--------------Register mdid-----------------");
-//        registerMdid(a_Metadata.getNode(), wallet_A_guid, wallet_A_sharedKey);
+        registerMdid(a_Metadata.getNode(), wallet_A_guid, wallet_A_sharedKey);
         System.out.println("mdid - "+a_Metadata.getAddress());
 
         b_wallet = new WalletFactory().restoreWallet(wallet_B_seedHex,"",1);
-        b_Metadata = new MetadataShared(httpClient, b_wallet.getMasterKey());
+        b_Metadata = new MetadataBuilder(httpClient)
+                .setRootNode(b_wallet.getMasterKey())
+                .setPurpose(MetadataBuilder.PURPOSE_SHARED)
+                .build();
 
         System.out.println("--------------Register mdid-----------------");
-//        registerMdid(b_Metadata.getNode(), wallet_B_guid, wallet_B_sharedKey);
+        registerMdid(b_Metadata.getNode(), wallet_B_guid, wallet_B_sharedKey);
         System.out.println("mdid should be - "+b_Metadata.getAddress());
         System.out.println("--------------------------------------------");
     }

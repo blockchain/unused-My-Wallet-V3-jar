@@ -8,9 +8,7 @@ import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.MetadataUtil;
 
-import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
 
@@ -27,57 +25,54 @@ public class Metadata {
 
     final static int METADATA_VERSION = 1;
 
-    boolean isEncrypted;
+    boolean isEncrypted = true;
 
-    private MetadataEndpoints endpoints;
-    private int type;
-    private String address;
-    private DeterministicKey node;
-    private byte[] encryptionKey;
-    private byte[] magicHash;
+    MetadataEndpoints endpoints;
+    int type;
+    String address;
+    DeterministicKey node;
+    byte[] encryptionKey;
+    byte[] magicHash;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = new ObjectMapper();
 
     public Metadata() {
         //no op
     }
 
-    /**
-     * Constructor for metadata service
-     */
-    public Metadata(MetadataEndpoints endpoints, DeterministicKey masterHDNode, int type, boolean isEncrypted) throws Exception{
-
+    public void setEndpoints(MetadataEndpoints endpoints) {
         this.endpoints = endpoints;
-        this.isEncrypted = isEncrypted;
-        setMetadataNode(type, masterHDNode);
-        fetch();
     }
 
-    /**
-     * Set original metadata node and address
-     * Set encryption key:
-     * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authenticate
-     * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
-     * @param type
-     * @param masterHDNode
-     * @throws Exception
-     */
-    private void setMetadataNode(int type, DeterministicKey masterHDNode) throws Exception{
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-        int purpose = MetadataUtil.getPurposeMetadata();
-
-        DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(masterHDNode, purpose);
-        DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
-        DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);
-
-        this.type = type;
-        this.address = node.toAddress(MainNetParams.get()).toString();
+    public void setNode(DeterministicKey node) {
         this.node = node;
-        byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
-        this.encryptionKey = Sha256Hash.hash(privateKeyBuffer);
     }
 
-    private void fetch() throws Exception{
+    public void setEncryptionKey(byte[] encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.isEncrypted = encrypted;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public DeterministicKey getNode() {
+        return this.node;
+    }
+
+    public void fetchMagic() throws Exception{
 
         Call<MetadataResponse> response = endpoints.getMetadata(address);
 
@@ -102,20 +97,6 @@ public class Metadata {
                 throw new Exception(exe.code() + " " + exe.message());
             }
         }
-    }
-
-    /**
-     * @return address
-     */
-    public String getAddress() {
-        return this.address;
-    }
-
-    /**
-     * @return Either metadataNode or masterNode - depending on constructor used
-     */
-    public DeterministicKey getNode() {
-        return this.node;
     }
 
     /**
@@ -161,10 +142,18 @@ public class Metadata {
         }
     }
 
+    public String getMetadata() throws Exception {
+        return getMetadataEntry(address);
+    }
+
+    public String getMetadata(String address) throws Exception {
+        return getMetadataEntry(address);
+    }
+
     /**
      * Get metadata entry
      */
-    public String getMetadata() throws Exception {
+    private String getMetadataEntry(String address) throws Exception {
 
         Call<MetadataResponse> response = endpoints.getMetadata(address);
 

@@ -54,29 +54,30 @@ public class MetadataIT {
         Wallet wallet = getWallet();
         DeterministicKey key = wallet.getMasterKey();
 
-        Metadata metadata = new Metadata(httpClient, key, 2, isEncrypted);
+        Metadata metadata = new MetadataBuilder(httpClient)
+                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
+                .setRootNode(getWallet().getMasterKey())
+                .setType(2)
+                .setEncrypted(true)
+                .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo1"));
 
-        metadata = new Metadata(httpClient, key, 2, isEncrypted);
+        metadata = new MetadataBuilder(httpClient)
+                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
+                .setRootNode(getWallet().getMasterKey())
+                .setType(2)
+                .setEncrypted(true)
+                .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo2"));
 
-        metadata = new Metadata(httpClient, key, 2, isEncrypted);
+        metadata = new MetadataBuilder(httpClient)
+                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
+                .setRootNode(getWallet().getMasterKey())
+                .setType(2)
+                .setEncrypted(true)
+                .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo3"));
-    }
 
-//    @Test
-//    public void test() throws Exception {
-//
-//        String mnemonic = "iron permit matter upset various access scorpion drip tree best viable chuckle";
-//        PayloadManager payloadManager = PayloadManager.getInstance();
-//        payloadManager.restoreHDWallet("", mnemonic, "Account 1");
-//        DeterministicKey key = payloadManager.getMasterKey();
-//
-////        DeterministicKey key = getRandomECKey();
-//
-//        Metadata metadata = new Metadata(httpClient, key, 2048, true);
-//        metadata.putMetadata(mapper.writeValueAsString("{\"whats up\":\"my ninja\"}"));
-//
-//        System.out.println(metadata.getMetadata());
-//    }
+
+    }
 }

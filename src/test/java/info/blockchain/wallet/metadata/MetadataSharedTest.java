@@ -6,7 +6,6 @@ import info.blockchain.bip44.WalletFactory;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Before;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -39,12 +38,6 @@ public class MetadataSharedTest {
     @Test
     public void getNode() throws Exception {
 
-        MetadataShared m = new MetadataShared(httpClient, key);
-        DeterministicKey node = m.getNode();
-
-        System.out.println(Hex.toHexString(node.getPrivKeyBytes()));
-
-//        Assert.assertTrue();
     }
 
     @Test

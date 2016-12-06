@@ -1,7 +1,5 @@
 package info.blockchain.wallet.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
@@ -9,121 +7,75 @@ import info.blockchain.wallet.metadata.data.Auth;
 import info.blockchain.wallet.metadata.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.metadata.data.MetadataRequest;
-import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
 import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.PublicContactDetails;
-import info.blockchain.wallet.metadata.data.Status;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class MetadataShared {
+public class MetadataShared extends Metadata{
 
     final int TYPE_PAYMENT_REQUEST = 1;
     final int TYPE_PAYMENT_REQUEST_RESPONSE = 2;
 
-    private MetadataEndpoints endpoints;
-    private String token;
-    private String publicXpub;
-    private String address;
-    private DeterministicKey node;
+    String token;
+    String xpub;
 
-    private byte[] magicHash;
-
-    private ObjectMapper mapper = new ObjectMapper();
-
-    public MetadataShared(MetadataEndpoints endpoints, DeterministicKey masterHDNode) throws Exception {
-
-        this.endpoints = endpoints;
-        setMetadataNode(masterHDNode);
-        this.token = getToken();
+    public MetadataShared() {
+        //noop
     }
 
-    /**
-     * @return Metadata derived key
-     */
+    public void setEndpoints(MetadataEndpoints endpoints) {
+        this.endpoints = endpoints;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setNode(DeterministicKey node) {
+        this.node = node;
+    }
+
+    public void setXpub(String xpub) {
+        this.xpub = xpub;
+    }
+
     public DeterministicKey getNode() {
         return node;
     }
 
-    /**
-     * Set shared metadata node and address
-     * Set encryption key:
-     * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authenticate
-     * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
-     * @param masterHDNode
-     * @throws Exception
-     */
-    private void setMetadataNode(DeterministicKey masterHDNode) throws IOException, NoSuchAlgorithmException,
-            SharedMetadataConnectionException {
-
-        int purpose = MetadataUtil.getPurposeMdid();
-
-        DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(masterHDNode, purpose);
-
-        this.address = metaDataHDNode.toAddress(MainNetParams.get()).toString();
-        this.node = metaDataHDNode;
-        this.publicXpub = metaDataHDNode.serializePubB58(MainNetParams.get());
-        fetch();
-        publishXpub(publicXpub);
-    }
-
-    private void fetch() throws SharedMetadataConnectionException, IOException {
-
-        Call<MetadataResponse> response = endpoints.getMetadata(address);
-
-        Response<MetadataResponse> exe = response.execute();
-
-        if (exe.isSuccessful()) {
-            MetadataResponse body = exe.body();
-
-            byte[] encryptedPayloadBytes = new String(Base64.decode(exe.body().getPayload())).getBytes("utf-8");
-
-            if(body.getPrev_magic_hash() != null){
-                byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
-                magicHash = MetadataUtil.magic(encryptedPayloadBytes, prevMagicBytes);
-            } else {
-                magicHash = MetadataUtil.magic(encryptedPayloadBytes, null);
-            }
-
-        } else {
-            // TODO: 02/12/2016 Backend guys might have changed this 404 code to 200 but return 'address not found message'
-            if(exe.code() == 404) {
-                magicHash = null;
-            } else {
-                throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
-            }
-        }
-    }
-
-    /**
-     * @return address
-     */
     public String getAddress() {
         return this.address;
+    }
+
+    public String getXpub() {
+        return xpub;
+    }
+
+    /**
+     * Do auth challenge
+     * @throws SharedMetadataConnectionException
+     * @throws IOException
+     */
+    public void authorize() throws SharedMetadataConnectionException, IOException {
+        this.token = getToken();
     }
 
     /**
@@ -145,7 +97,7 @@ public class MetadataShared {
     /**
      * Get JSON Web Token if signed nonce is correct. Signed.
      */
-    protected String getToken() throws SharedMetadataConnectionException, IOException {
+    private String getToken() throws SharedMetadataConnectionException, IOException {
 
         String nonce = getNonce();
         String sig = node.signMessage(nonce);
@@ -218,9 +170,9 @@ public class MetadataShared {
      */
     public boolean deleteTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
 
-        Call<Status> response = endpoints.deleteTrusted("Bearer " + token, mdid);
+        Call<ResponseBody> response = endpoints.deleteTrusted("Bearer " + token, mdid);
 
-        Response<Status> exe = response.execute();
+        Response<ResponseBody> exe = response.execute();
 
         if (exe.isSuccessful()) {
             return true;
@@ -232,9 +184,7 @@ public class MetadataShared {
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
-    private Message postMessage(String mdidRecipient, String message, int type) throws IOException, SharedMetadataConnectionException,
-            InvalidCipherTextException, NoSuchAlgorithmException, InvalidParameterSpecException,
-            NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
+    private Message postMessage(String mdidRecipient, String message, int type) throws Exception {
 
         String recipientXpub = getPublicXpubFromMdid(mdidRecipient);
 
@@ -249,6 +199,9 @@ public class MetadataShared {
         request.setType(type);
         request.setPayload(b64Msg);
         request.setSignature(signature);
+
+        System.out.println("Bearer " + token);
+        System.out.println(mapper.writeValueAsString(request));
 
         Call<Message> response = endpoints.postMessage("Bearer " + token, request);
 
@@ -265,10 +218,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(boolean onlyProcessed) throws SharedMetadataConnectionException,
-            IOException, InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException,
-            ValidationException, SignatureException, NoSuchProviderException,
-            InvalidCipherTextException, InvalidParameterSpecException {
+    private List<Message> getMessages(boolean onlyProcessed) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, onlyProcessed);
 
@@ -289,10 +239,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(String lastMessageId) throws SharedMetadataConnectionException,
-            IOException, InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException,
-            ValidationException, SignatureException, NoSuchProviderException,
-            InvalidCipherTextException, InvalidParameterSpecException {
+    private List<Message> getMessages(String lastMessageId) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, lastMessageId);
 
@@ -313,10 +260,7 @@ public class MetadataShared {
     /**
      * Get message from message id. Authenticated.
      */
-    private Message getMessage(String messageId) throws SharedMetadataConnectionException, IOException,
-            InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException, ValidationException,
-            SignatureException, NoSuchProviderException, InvalidCipherTextException,
-            InvalidParameterSpecException {
+    private Message getMessage(String messageId) throws Exception {
 
         Call<Message> response = endpoints.getMessage("Bearer " + token, messageId);
 
@@ -332,16 +276,12 @@ public class MetadataShared {
         }
     }
 
-    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws IOException,
-            InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException,
-            InvalidParameterSpecException, InvalidCipherTextException, SharedMetadataConnectionException {
+    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
 
         return postMessage(mdid, mapper.writeValueAsString(paymentRequest), TYPE_PAYMENT_REQUEST);
     }
 
-    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws IOException,
-            InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException,
-            InvalidParameterSpecException, InvalidCipherTextException, SharedMetadataConnectionException {
+    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
 
         PaymentRequestResponse response = new PaymentRequestResponse();
         response.setAmount(paymentRequest.getAmount());
@@ -352,10 +292,7 @@ public class MetadataShared {
     }
 
 
-    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws IOException, NoSuchAlgorithmException,
-            ValidationException, InvalidKeyException, SignatureException, NoSuchProviderException,
-            SharedMetadataConnectionException, InvalidParameterSpecException, InvalidKeySpecException,
-            InvalidCipherTextException {
+    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
 
         List<PaymentRequest> requests = new ArrayList<>();
 
@@ -371,10 +308,7 @@ public class MetadataShared {
         return requests;
     }
 
-    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws IOException,
-            NoSuchAlgorithmException, ValidationException, InvalidKeyException, SignatureException,
-            NoSuchProviderException, SharedMetadataConnectionException, InvalidParameterSpecException,
-            InvalidKeySpecException, InvalidCipherTextException {
+    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws Exception {
 
         List<PaymentRequestResponse> responses = new ArrayList<>();
 
@@ -396,10 +330,7 @@ public class MetadataShared {
      * @return
      * @throws Exception
      */
-    private void verifiedAndDecryptMessage(Message msg) throws ValidationException, SignatureException,
-            IOException, SharedMetadataConnectionException, InvalidCipherTextException,
-            NoSuchAlgorithmException, InvalidParameterSpecException, NoSuchProviderException,
-            InvalidKeyException, InvalidKeySpecException {
+    private void verifiedAndDecryptMessage(Message msg) throws Exception {
 
         validateSignature(msg);
 
@@ -493,49 +424,19 @@ public class MetadataShared {
     /**
      * Publish xpub (public readable)
      */
-    public void publishXpub(String xpub) throws IOException, SharedMetadataConnectionException {
+    public void publishXpub() throws Exception {
 
-        PublicContactDetails publicXpub = new PublicContactDetails();
-        publicXpub.setXpub(xpub);
-
-        byte[] xpubBytes = mapper.writeValueAsString(publicXpub).getBytes("utf-8");
-        byte[] nextMagicHash = MetadataUtil.magic(xpubBytes, magicHash);
-
-        byte[] message = MetadataUtil.message(xpubBytes, magicHash);
-
-        String signature = node.signMessage(new String(Base64.encode(message)));
-
-        MetadataRequest body = new MetadataRequest();
-        body.setPayload(new String(Base64.encode(xpubBytes)));
-        body.setSignature(signature);
-        body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
-
-        Call<Void> response = endpoints.putMetadata(address, body);
-
-        Response<Void> exe = response.execute();
-
-        if (!exe.isSuccessful()) {
-            throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
-        } else {
-            magicHash = nextMagicHash;
-        }
+        setEncrypted(false);
+        fetchMagic();
+        putMetadata(mapper.writeValueAsString(xpub));
     }
 
     /**
      * Get public xpub for specified mdid
      */
-    public String getPublicXpubFromMdid(String mdid) throws IOException, SharedMetadataConnectionException {
+    public String getPublicXpubFromMdid(String mdid) throws Exception {
 
-        Call<MetadataResponse> response = endpoints.getMetadata(mdid);
-
-        Response<MetadataResponse> exe = response.execute();
-
-        if (exe.isSuccessful()) {
-            String payload = new String(Base64.decode(exe.body().getPayload()));
-            PublicContactDetails publicXpub = mapper.readValue(payload, PublicContactDetails.class);
-            return publicXpub.getXpub();
-        } else {
-            throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
-        }
+        PublicContactDetails publicXpub = mapper.readValue(getMetadata(mdid), PublicContactDetails.class);
+        return publicXpub.getXpub();
     }
 }

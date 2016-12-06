@@ -77,7 +77,7 @@ public class MetadataUtil {
      * BIP 43 purpose needs to be 31 bit or less. For lack of a BIP number we take the first 31 bits
      * of the SHA256 hash of a reverse domain.
      */
-    private static int getPurpose(String sub) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static int getPurpose(String sub) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         String text = "info.blockchain."+sub;

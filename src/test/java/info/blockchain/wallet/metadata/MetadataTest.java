@@ -6,7 +6,6 @@ import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 
-import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,22 +50,29 @@ public class MetadataTest {
 
         String address = "12sC9tqHzAhdoukhCbTnyx2MjYXNXBGHnF";
 
-        Wallet wallet = getWallet();
-        DeterministicKey key = wallet.getMasterKey();
-
         mockInterceptor.setResponse_404();//New metadata response
-        Metadata metadata = new Metadata(httpClient, key, 2, isEncrypted);
+
+        Metadata metadata = new MetadataBuilder(httpClient)
+                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
+                .setRootNode(getWallet().getMasterKey())
+                .setType(2)
+                .setEncrypted(true)
+                .build();
+
         Assert.isTrue(metadata.getAddress().equals(address));
     }
 
     @Test
     public void testMetadata() throws Exception{
 
-        Wallet wallet = getWallet();
-        DeterministicKey key = wallet.getMasterKey();
-
         mockInterceptor.setResponse_404();//New metadata response
-        Metadata metadata = new Metadata(httpClient, key, Metadata.PAYLOAD_TYPE_RESERVED, isEncrypted);
+
+        Metadata metadata = new MetadataBuilder(httpClient)
+                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
+                .setRootNode(getWallet().getMasterKey())
+                .setType(Metadata.PAYLOAD_TYPE_RESERVED)
+                .setEncrypted(isEncrypted)
+                .build();
 
         String msg = "Rage rage";
         mockInterceptor.setResponse_PUT_rage();
