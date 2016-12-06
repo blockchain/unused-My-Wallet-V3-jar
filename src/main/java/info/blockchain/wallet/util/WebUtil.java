@@ -76,11 +76,9 @@ public class WebUtil {
                 connection.setInstanceFollowRedirects(false);
 
                 if (connection.getResponseCode() == 200) {
-//					Log.d("postURL", "return code 200");
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
                 } else {
                     error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
-//					Log.d("postURL", "return code " + error);
                 }
 
                 // Sleep unless last request

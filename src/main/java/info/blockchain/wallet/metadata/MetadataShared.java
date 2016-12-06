@@ -2,6 +2,7 @@ package info.blockchain.wallet.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
@@ -16,6 +17,7 @@ import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.metadata.data.Status;
 import info.blockchain.wallet.metadata.data.Trusted;
+import info.blockchain.wallet.util.Base64Util;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.core.ECKey;
@@ -46,20 +48,15 @@ public class MetadataShared {
     final int TYPE_PAYMENT_REQUEST_RESPONSE = 2;
 
     private MetadataEndpoints endpoints;
-    private String token;
     private String publicXpub;
     private String address;
     private DeterministicKey node;
 
     private byte[] magicHash;
-
     private ObjectMapper mapper = new ObjectMapper();
 
-    public MetadataShared(MetadataEndpoints endpoints, DeterministicKey masterHDNode) throws Exception {
-
-        this.endpoints = endpoints;
-        setMetadataNode(masterHDNode);
-        this.token = getToken();
+    public MetadataShared() {
+        endpoints = BlockchainFramework.getRetrofitApiInstance().create(MetadataEndpoints.class);
     }
 
     /**
@@ -70,14 +67,11 @@ public class MetadataShared {
     }
 
     /**
-     * Set shared metadata node and address
-     * Set encryption key:
-     * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authenticate
-     * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
-     * @param masterHDNode
-     * @throws Exception
+     * Set shared metadata node and address Set encryption key: purpose' / type' / 0' :
+     * https://meta.blockchain.info/{address} - signature used to authenticate purpose' / type' / 1'
+     * : sha256(private key) used as 256 bit AES key
      */
-    private void setMetadataNode(DeterministicKey masterHDNode) throws IOException, NoSuchAlgorithmException,
+    public void setMetadataNode(DeterministicKey masterHDNode) throws IOException, NoSuchAlgorithmException,
             SharedMetadataConnectionException {
 
         int purpose = MetadataUtil.getPurposeMdid();
@@ -100,9 +94,9 @@ public class MetadataShared {
         if (exe.isSuccessful()) {
             MetadataResponse body = exe.body();
 
-            byte[] encryptedPayloadBytes = new String(Base64.decode(exe.body().getPayload())).getBytes("utf-8");
+            byte[] encryptedPayloadBytes = Base64Util.decodeBase64(exe.body().getPayload());
 
-            if(body.getPrev_magic_hash() != null){
+            if (body.getPrev_magic_hash() != null) {
                 byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
                 magicHash = MetadataUtil.magic(encryptedPayloadBytes, prevMagicBytes);
             } else {
@@ -111,7 +105,7 @@ public class MetadataShared {
 
         } else {
             // TODO: 02/12/2016 Backend guys might have changed this 404 code to 200 but return 'address not found message'
-            if(exe.code() == 404) {
+            if (exe.code() == 404) {
                 magicHash = null;
             } else {
                 throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
@@ -145,7 +139,7 @@ public class MetadataShared {
     /**
      * Get JSON Web Token if signed nonce is correct. Signed.
      */
-    protected String getToken() throws SharedMetadataConnectionException, IOException {
+    public String getToken() throws SharedMetadataConnectionException, IOException {
 
         String nonce = getNonce();
         String sig = node.signMessage(nonce);
@@ -168,7 +162,7 @@ public class MetadataShared {
     /**
      * Get list of all trusted MDIDs. Authenticated.
      */
-    public Trusted getTrustedList() throws SharedMetadataConnectionException, IOException {
+    public Trusted getTrustedList(String token) throws SharedMetadataConnectionException, IOException {
 
         Call<Trusted> response = endpoints.getTrustedList("Bearer " + token);
 
@@ -184,7 +178,7 @@ public class MetadataShared {
     /**
      * Check if a contact is on trusted list of mdid. Authenticated.
      */
-    public boolean getTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+    public boolean getTrusted(String token, String mdid) throws SharedMetadataConnectionException, IOException {
 
         Call<Trusted> response = endpoints.getTrusted("Bearer " + token, mdid);
 
@@ -200,7 +194,7 @@ public class MetadataShared {
     /**
      * Add a contact to trusted list of mdid. Authenticated.
      */
-    public boolean putTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+    public boolean putTrusted(String token, String mdid) throws SharedMetadataConnectionException, IOException {
 
         Call<Trusted> response = endpoints.putTrusted("Bearer " + token, mdid);
 
@@ -216,7 +210,7 @@ public class MetadataShared {
     /**
      * Delete a contact from trusted list of mdid. Authenticated.
      */
-    public boolean deleteTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+    public boolean deleteTrusted(String token, String mdid) throws SharedMetadataConnectionException, IOException {
 
         Call<Status> response = endpoints.deleteTrusted("Bearer " + token, mdid);
 
@@ -232,7 +226,7 @@ public class MetadataShared {
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
-    private Message postMessage(String mdidRecipient, String message, int type) throws IOException, SharedMetadataConnectionException,
+    private Message postMessage(String token, String mdidRecipient, String message, int type) throws IOException, SharedMetadataConnectionException,
             InvalidCipherTextException, NoSuchAlgorithmException, InvalidParameterSpecException,
             NoSuchProviderException, InvalidKeyException, InvalidKeySpecException {
 
@@ -265,7 +259,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(boolean onlyProcessed) throws SharedMetadataConnectionException,
+    private List<Message> getMessages(String token, boolean onlyProcessed) throws SharedMetadataConnectionException,
             IOException, InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException,
             ValidationException, SignatureException, NoSuchProviderException,
             InvalidCipherTextException, InvalidParameterSpecException {
@@ -276,7 +270,7 @@ public class MetadataShared {
 
         if (exe.isSuccessful()) {
 
-            for(Message msg : exe.body()){
+            for (Message msg : exe.body()) {
                 verifiedAndDecryptMessage(msg);
             }
 
@@ -289,7 +283,7 @@ public class MetadataShared {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(String lastMessageId) throws SharedMetadataConnectionException,
+    private List<Message> getMessages(String token, String lastMessageId) throws SharedMetadataConnectionException,
             IOException, InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException,
             ValidationException, SignatureException, NoSuchProviderException,
             InvalidCipherTextException, InvalidParameterSpecException {
@@ -300,7 +294,7 @@ public class MetadataShared {
 
         if (exe.isSuccessful()) {
 
-            for(Message msg : exe.body()){
+            for (Message msg : exe.body()) {
                 verifiedAndDecryptMessage(msg);
             }
 
@@ -313,7 +307,7 @@ public class MetadataShared {
     /**
      * Get message from message id. Authenticated.
      */
-    private Message getMessage(String messageId) throws SharedMetadataConnectionException, IOException,
+    private Message getMessage(String token, String messageId) throws SharedMetadataConnectionException, IOException,
             InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException, ValidationException,
             SignatureException, NoSuchProviderException, InvalidCipherTextException,
             InvalidParameterSpecException {
@@ -332,14 +326,14 @@ public class MetadataShared {
         }
     }
 
-    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws IOException,
+    public Message sendPaymentRequest(String token, String mdid, PaymentRequest paymentRequest) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException,
             InvalidParameterSpecException, InvalidCipherTextException, SharedMetadataConnectionException {
 
-        return postMessage(mdid, mapper.writeValueAsString(paymentRequest), TYPE_PAYMENT_REQUEST);
+        return postMessage(token, mdid, mapper.writeValueAsString(paymentRequest), TYPE_PAYMENT_REQUEST);
     }
 
-    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws IOException,
+    public Message acceptPaymentRequest(String token, String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws IOException,
             InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException,
             InvalidParameterSpecException, InvalidCipherTextException, SharedMetadataConnectionException {
 
@@ -348,22 +342,21 @@ public class MetadataShared {
         response.setNote(note);
         response.setAddress(receiveAddress);
 
-        return postMessage(mdid, mapper.writeValueAsString(response), TYPE_PAYMENT_REQUEST_RESPONSE);
+        return postMessage(token, mdid, mapper.writeValueAsString(response), TYPE_PAYMENT_REQUEST_RESPONSE);
     }
 
-
-    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws IOException, NoSuchAlgorithmException,
+    public List<PaymentRequest> getPaymentRequests(String token, boolean onlyProcessed) throws IOException, NoSuchAlgorithmException,
             ValidationException, InvalidKeyException, SignatureException, NoSuchProviderException,
             SharedMetadataConnectionException, InvalidParameterSpecException, InvalidKeySpecException,
             InvalidCipherTextException {
 
         List<PaymentRequest> requests = new ArrayList<>();
 
-        List<Message> messages = getMessages(onlyProcessed);
+        List<Message> messages = getMessages(token, onlyProcessed);
 
-        for(Message message : messages){
+        for (Message message : messages) {
 
-            if(message.getType() == TYPE_PAYMENT_REQUEST) {
+            if (message.getType() == TYPE_PAYMENT_REQUEST) {
                 requests.add(mapper.readValue(message.getPayload(), PaymentRequest.class));
             }
         }
@@ -371,18 +364,18 @@ public class MetadataShared {
         return requests;
     }
 
-    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws IOException,
+    public List<PaymentRequestResponse> getPaymentRequestResponses(String token, boolean onlyProcessed) throws IOException,
             NoSuchAlgorithmException, ValidationException, InvalidKeyException, SignatureException,
             NoSuchProviderException, SharedMetadataConnectionException, InvalidParameterSpecException,
             InvalidKeySpecException, InvalidCipherTextException {
 
         List<PaymentRequestResponse> responses = new ArrayList<>();
 
-        List<Message> messages = getMessages(onlyProcessed);
+        List<Message> messages = getMessages(token, onlyProcessed);
 
-        for (Message message : messages){
+        for (Message message : messages) {
 
-            if(message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
+            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
                 responses.add(mapper.readValue(message.getPayload(), PaymentRequestResponse.class));
             }
         }
@@ -392,9 +385,6 @@ public class MetadataShared {
 
     /**
      * Verify message signature and return decrypted.
-     * @param msg
-     * @return
-     * @throws Exception
      */
     private void verifiedAndDecryptMessage(Message msg) throws ValidationException, SignatureException,
             IOException, SharedMetadataConnectionException, InvalidCipherTextException,
@@ -418,7 +408,7 @@ public class MetadataShared {
         String senderAddress = msg.getSender();
         String addressFromSignature = key.toAddress(MainNetParams.get()).toString();
 
-        if(!senderAddress.equals(addressFromSignature)) {
+        if (!senderAddress.equals(addressFromSignature)) {
             throw new ValidationException("Signature is not well-formed");
         }
     }
@@ -426,7 +416,7 @@ public class MetadataShared {
     /**
      * Obtains a one-time UUID for key sharing Gets MDID of sender from one-time UUID
      */
-    public Invitation createInvitation(Contact contactInfo) throws IOException, SharedMetadataConnectionException {
+    public Invitation createInvitation(String token, Contact contactInfo) throws IOException, SharedMetadataConnectionException {
 
         Call<Invitation> response = endpoints.postShare("Bearer " + token);
 
@@ -445,8 +435,8 @@ public class MetadataShared {
     /**
      * Sets the MDID of the recipient
      */
-    public Invitation acceptInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
-        System.out.println("POST share/{uuid} - token: "+token);
+    public Invitation acceptInvitation(String token, String uuid) throws SharedMetadataConnectionException, IOException {
+
         Call<Invitation> response = endpoints.postToShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
@@ -461,8 +451,8 @@ public class MetadataShared {
     /**
      * Gets MDID of sender from one-time UUID
      */
-    public Invitation readInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
-        System.out.println("GET share/{uuid} - token: "+token);
+    public Invitation readInvitation(String token, String uuid) throws SharedMetadataConnectionException, IOException {
+
         Call<Invitation> response = endpoints.getShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
@@ -477,7 +467,7 @@ public class MetadataShared {
     /**
      * Deletes one-time UUID
      */
-    public boolean deleteInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
+    public boolean deleteInvitation(String token, String uuid) throws SharedMetadataConnectionException, IOException {
 
         Call<Invitation> response = endpoints.deleteShare("Bearer " + token, uuid);
 

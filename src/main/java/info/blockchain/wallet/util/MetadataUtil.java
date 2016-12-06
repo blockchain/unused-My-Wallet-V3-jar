@@ -61,7 +61,7 @@ public class MetadataUtil {
     }
 
     private static byte[] magicHash(byte[] message) {
-        byte[] messageBytes = Utils.formatMessageForSigning(new String(Base64.encode(message)));
+        byte[] messageBytes = Utils.formatMessageForSigning(Base64Util.encodeBase64String(message));
         return Sha256Hash.hashTwice(messageBytes);
     }
 
@@ -146,9 +146,7 @@ public class MetadataUtil {
         hash.update(keys.get(0));
         hash.update(keys.get(1));
 
-        byte[] derivedKey = hash.digest();
-
-        return derivedKey;
+        return hash.digest();
     }
 
     public static byte[] encryptFor(ECKey myKey, String theirXpub, String message) throws NoSuchAlgorithmException,
@@ -170,10 +168,10 @@ public class MetadataUtil {
         System.out.println("Shared Secret: "+ Hex.toHexString(secret));
 
         System.out.println("Encrypting message with secret...");
-        byte[] keyBuffer = Sha256Hash.hash(secret);
-        byte[] encryptedMessage = AESUtil.encryptWithKey(keyBuffer, message);
 
-        return encryptedMessage;
+        byte[] keyBuffer = Sha256Hash.hash(secret);
+
+        return AESUtil.encryptWithKey(keyBuffer, message);
     }
 
     public static String decryptFrom(DeterministicKey myKey, String theirXpub, String message) throws NoSuchAlgorithmException,

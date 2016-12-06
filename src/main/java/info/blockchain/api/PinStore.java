@@ -7,22 +7,26 @@ import org.json.JSONObject;
 public class PinStore extends BaseApi {
 
     private static final String PIN_STORE = "pin-store";
-    public static final String PROD_PIN_STORE_URL = PROTOCOL + SERVER_ADDRESS + PIN_STORE;
 
     public PinStore() {
         // No-op
     }
 
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + PIN_STORE;
+    }
+
     public JSONObject validateAccess(String key, String pin) throws Exception {
 
-        StringBuilder args = new StringBuilder();
+        final String args = "key="
+                + key +
+                "&pin=" + pin +
+                "&method=get" +
+                getApiCode();
 
-        args.append("key=").append(key);
-        args.append("&pin=").append(pin);
-        args.append("&method=get");
-        args.append(getApiCode());
-
-        String response = WebUtil.getInstance().postURL(PersistentUrls.getInstance().getPinstoreUrl(), args.toString(), 1);
+        String response = WebUtil.getInstance().postURL(
+                getRoute(), args, 1);
 
         if (response == null || response.length() == 0)
             throw new Exception("Invalid Server Response");
@@ -32,15 +36,14 @@ public class PinStore extends BaseApi {
 
     public JSONObject setAccess(String key, String value, String pin) throws Exception {
 
-        StringBuilder args = new StringBuilder();
+        final String args = "key="
+                + key +
+                "&value=" + value +
+                "&pin=" + pin +
+                "&method=put" +
+                getApiCode();
 
-        args.append("key=").append(key);
-        args.append("&value=").append(value);
-        args.append("&pin=").append(pin);
-        args.append("&method=put");
-        args.append(getApiCode());
-
-        String response = WebUtil.getInstance().postURL(PersistentUrls.getInstance().getPinstoreUrl(), args.toString());
+        String response = WebUtil.getInstance().postURL(getRoute(), args);
 
         if (response == null || response.length() == 0)
             throw new Exception("Invalid Server Response");
