@@ -2,8 +2,8 @@ package info.blockchain.wallet.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.api.MetadataEndpoints;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
 import info.blockchain.api.WalletEndpoints;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
@@ -21,7 +21,6 @@ import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -34,39 +33,42 @@ public class MetadataSharedIT {
 
     //dev wallets
     //riaanjvos@hotmail.com
-    String wallet_A_guid = "014fb9fc-64f9-4cf5-b76b-d927d7619717";
-    String wallet_A_sharedKey = "bc73239b-d3d9-4bee-a1f9-80248e179486";
-    String wallet_A_seedHex = "20e3939d08ddf727f34a130704cd925e";
-    Wallet a_wallet;
-    MetadataShared a_Metadata;
+    private String wallet_A_guid = "014fb9fc-64f9-4cf5-b76b-d927d7619717";
+    private String wallet_A_sharedKey = "bc73239b-d3d9-4bee-a1f9-80248e179486";
+    private String wallet_A_seedHex = "20e3939d08ddf727f34a130704cd925e";
+    private Wallet a_wallet;
+    private MetadataShared a_Metadata;
+    private String wallet_A_token;
 
     //riaanjvos@gmail.com (verified)
-    String wallet_B_guid = "6fbe154a-35e0-46fb-a22b-699dc7cba87c";
-    String wallet_B_sharedKey = "49e58bdb-5a66-4353-923a-3b49054603d6";
-    String wallet_B_seedHex = "b88d0d894c19ad1d8e7f1563b7455f7c";
-    Wallet b_wallet;
-    MetadataShared b_Metadata;
+    private String wallet_B_guid = "6fbe154a-35e0-46fb-a22b-699dc7cba87c";
+    private String wallet_B_sharedKey = "49e58bdb-5a66-4353-923a-3b49054603d6";
+    private String wallet_B_seedHex = "b88d0d894c19ad1d8e7f1563b7455f7c";
+    private Wallet b_wallet;
+    private MetadataShared b_Metadata;
+    private String wallet_B_token;
 
     @Before
     public void setup() throws Exception {
 
         //Set environment
-        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-        PersistentUrls.getInstance().setWalletPayloadUrl("https://explorer.dev.blockchain.info/wallet");
+        BlockchainFramework.init(new FrameworkInterface() {
+            @Override
+            public Retrofit getRetrofitApiInstance() {
+                return RestClient.getRetrofitInstance(new OkHttpClient());
+            }
 
-        //Logging
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            @Override
+            public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+        });
 
-        //Http client
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-//                .addInterceptor(loggingInterceptor)//Extensive logging
-                .build();
-        MetadataEndpoints httpClient = RestClient.getClient(okHttpClient);
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
 
         //Init wallets
         a_wallet = new WalletFactory().restoreWallet(wallet_A_seedHex,"",1);
-        a_Metadata = new MetadataBuilder(httpClient)
+        a_Metadata = new MetadataBuilder(RestClient.getClient(okHttpClient))
                 .setRootNode(a_wallet.getMasterKey())
                 .setPurpose(MetadataBuilder.PURPOSE_SHARED)
                 .build();
@@ -76,7 +78,7 @@ public class MetadataSharedIT {
         System.out.println("mdid - "+a_Metadata.getAddress());
 
         b_wallet = new WalletFactory().restoreWallet(wallet_B_seedHex,"",1);
-        b_Metadata = new MetadataBuilder(httpClient)
+        b_Metadata = new MetadataBuilder(RestClient.getClient(okHttpClient))
                 .setRootNode(b_wallet.getMasterKey())
                 .setPurpose(MetadataBuilder.PURPOSE_SHARED)
                 .build();
@@ -84,7 +86,6 @@ public class MetadataSharedIT {
         System.out.println("--------------Register mdid-----------------");
         registerMdid(b_Metadata.getNode(), wallet_B_guid, wallet_B_sharedKey);
         System.out.println("mdid should be - "+b_Metadata.getAddress());
-        System.out.println("--------------------------------------------");
     }
 
     private void registerMdid(ECKey key, String guid, String sharedKey) throws Exception {
@@ -95,7 +96,7 @@ public class MetadataSharedIT {
                 .build();
         WalletEndpoints api = retrofit.create(WalletEndpoints.class);
 
-        System.out.println("key hex: "+Hex.toHexString(key.getPrivKeyBytes()));
+        System.out.println("key hex: " + Hex.toHexString(key.getPrivKeyBytes()));
 
         String signedGuid = key.signMessage(guid);
 
@@ -109,10 +110,10 @@ public class MetadataSharedIT {
 
         Response<Void> result = call.execute();
 
-        if(!result.isSuccessful())
-            throw new Exception(result.code()+" "+result.message());
+        if (!result.isSuccessful())
+            throw new Exception(result.code() + " " + result.message());
 
-        System.out.println("GUID: "+guid);
+        System.out.println("GUID: " + guid);
     }
 
     @Test
@@ -204,7 +205,7 @@ public class MetadataSharedIT {
         paymentRequest.setNote("I owe you £15.50 for the Honest burger.");
         paymentRequest.setAmount(2637310);
 
-        System.out.println("Sending payment request: " +new ObjectMapper().writeValueAsString(paymentRequest));
+        System.out.println("Sending payment request: " + new ObjectMapper().writeValueAsString(paymentRequest));
         a_Metadata.sendPaymentRequest(invitation.getContact(), paymentRequest);
 
         System.out.println("\n--Recipient--");
@@ -212,7 +213,7 @@ public class MetadataSharedIT {
         String receivingAddress = b_wallet.getAccount(0).getReceive().getAddressAt(0).getAddressString();
         System.out.println("Checking payment requests and found " + paymentRequests.size() + " new request.");
         System.out.println("Received payment request: '" + paymentRequests.get(0).getNote() + "'");
-        System.out.println("Accepting payment request and responding with address '"+receivingAddress+"'");
+        System.out.println("Accepting payment request and responding with address '" + receivingAddress + "'");
         b_Metadata.acceptPaymentRequest(invitation.getMdid(), paymentRequests.get(0), "Send coins here please.", receivingAddress);
 
         System.out.println("\n--Sender--");

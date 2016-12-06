@@ -1,5 +1,8 @@
 package info.blockchain.wallet.metadata.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Invitation {
 
     String id;//one-time UUID
@@ -28,6 +31,7 @@ public class Invitation {
         this.contactInfo = contactInfo;
     }
 
+    // TODO: 05/12/2016 This needs changing to a fully-formed URL
     public String getURI() {
 
         String scheme = "blockchain://invite?from=Matt&mdid_hash=123";

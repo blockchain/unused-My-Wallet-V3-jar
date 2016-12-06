@@ -29,6 +29,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
+
 public class MetadataShared extends Metadata{
 
     final int TYPE_PAYMENT_REQUEST = 1;
@@ -71,8 +72,6 @@ public class MetadataShared extends Metadata{
 
     /**
      * Do auth challenge
-     * @throws SharedMetadataConnectionException
-     * @throws IOException
      */
     public void authorize() throws SharedMetadataConnectionException, IOException {
         this.token = getToken();
@@ -226,7 +225,7 @@ public class MetadataShared extends Metadata{
 
         if (exe.isSuccessful()) {
 
-            for(Message msg : exe.body()){
+            for (Message msg : exe.body()) {
                 verifiedAndDecryptMessage(msg);
             }
 
@@ -247,7 +246,7 @@ public class MetadataShared extends Metadata{
 
         if (exe.isSuccessful()) {
 
-            for(Message msg : exe.body()){
+            for (Message msg : exe.body()) {
                 verifiedAndDecryptMessage(msg);
             }
 
@@ -277,7 +276,6 @@ public class MetadataShared extends Metadata{
     }
 
     public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
-
         return postMessage(mdid, mapper.writeValueAsString(paymentRequest), TYPE_PAYMENT_REQUEST);
     }
 
@@ -291,16 +289,15 @@ public class MetadataShared extends Metadata{
         return postMessage(mdid, mapper.writeValueAsString(response), TYPE_PAYMENT_REQUEST_RESPONSE);
     }
 
-
     public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
 
         List<PaymentRequest> requests = new ArrayList<>();
 
         List<Message> messages = getMessages(onlyProcessed);
 
-        for(Message message : messages){
+        for (Message message : messages) {
 
-            if(message.getType() == TYPE_PAYMENT_REQUEST) {
+            if (message.getType() == TYPE_PAYMENT_REQUEST) {
                 requests.add(mapper.readValue(message.getPayload(), PaymentRequest.class));
             }
         }
@@ -314,9 +311,9 @@ public class MetadataShared extends Metadata{
 
         List<Message> messages = getMessages(onlyProcessed);
 
-        for (Message message : messages){
+        for (Message message : messages) {
 
-            if(message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
+            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
                 responses.add(mapper.readValue(message.getPayload(), PaymentRequestResponse.class));
             }
         }
@@ -326,9 +323,6 @@ public class MetadataShared extends Metadata{
 
     /**
      * Verify message signature and return decrypted.
-     * @param msg
-     * @return
-     * @throws Exception
      */
     private void verifiedAndDecryptMessage(Message msg) throws Exception {
 
@@ -349,7 +343,7 @@ public class MetadataShared extends Metadata{
         String senderAddress = msg.getSender();
         String addressFromSignature = key.toAddress(MainNetParams.get()).toString();
 
-        if(!senderAddress.equals(addressFromSignature)) {
+        if (!senderAddress.equals(addressFromSignature)) {
             throw new ValidationException("Signature is not well-formed");
         }
     }
@@ -377,7 +371,7 @@ public class MetadataShared extends Metadata{
      * Sets the MDID of the recipient
      */
     public Invitation acceptInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
-        System.out.println("POST share/{uuid} - token: "+token);
+
         Call<Invitation> response = endpoints.postToShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
@@ -393,7 +387,7 @@ public class MetadataShared extends Metadata{
      * Gets MDID of sender from one-time UUID
      */
     public Invitation readInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
-        System.out.println("GET share/{uuid} - token: "+token);
+
         Call<Invitation> response = endpoints.getShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
