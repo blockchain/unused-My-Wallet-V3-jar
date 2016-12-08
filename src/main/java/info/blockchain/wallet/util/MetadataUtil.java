@@ -1,7 +1,12 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.metadata.data.Contact;
+import info.blockchain.wallet.metadata.data.Invitation;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Utils;
@@ -10,11 +15,14 @@ import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.crypto.InvalidCipherTextException;
-import org.spongycastle.util.encoders.*;
+import org.spongycastle.util.encoders.Hex;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
@@ -35,7 +43,9 @@ import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.KeyAgreement;
 
@@ -198,5 +208,37 @@ public class MetadataUtil {
         System.out.println("Decrypting message with secret...");
 
         return decryptedMessage;
+    }
+
+    // TODO: 05/12/2016 This needs changing to a fully-formed URL
+    public static String createURI(Contact contact, Invitation invitation) throws URISyntaxException {
+
+        List<NameValuePair> qparams = contact.toQueryParameters();
+
+        qparams.add(new BasicNameValuePair("id", invitation.getId()));
+
+        URIBuilder builder = new URIBuilder()
+                .setScheme("blockchain")
+                .setHost("")
+                .setPath("invite")
+                .setParameters(qparams);
+
+        return builder.build().toString();
+    }
+
+    public static Map<String, String> getQueryParams(String uri) throws UnsupportedEncodingException {
+
+        URI a = URI.create(uri);
+
+        Map<String, String> params = new HashMap<String, String>();
+
+        for (String param : a.getQuery().split("&")) {
+            String[] pair = param.split("=");
+            String key = URLDecoder.decode(pair[0], "UTF-8");
+            String value = URLDecoder.decode(pair[1], "UTF-8");
+            params.put(key, value);
+        }
+
+        return params;
     }
 }

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -343,16 +344,14 @@ public class SharedMetadata extends Metadata{
     /**
      * Obtains a one-time UUID for key sharing Gets MDID of sender from one-time UUID
      */
-    public Invitation createInvitation(Contact contactInfo) throws IOException, SharedMetadataConnectionException {
+    public Invitation createInvitation() throws IOException, SharedMetadataConnectionException {
 
         Call<Invitation> response = endpoints.postShare("Bearer " + token);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
-
             Invitation invitation = exe.body();
-            invitation.setContactInfo(contactInfo);
             return invitation;
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
@@ -360,16 +359,22 @@ public class SharedMetadata extends Metadata{
     }
 
     /**
-     * Sets the MDID of the recipient
+     * Returns contact details of accepted invitation
      */
-    public Invitation acceptInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
+    public Contact acceptInvitation(String uri) throws SharedMetadataConnectionException, IOException {
 
-        Call<Invitation> response = endpoints.postToShare("Bearer " + token, uuid);
+        Map<String, String> queryParams = MetadataUtil.getQueryParams(uri);
+
+        Call<Invitation> response = endpoints.postToShare("Bearer " + token, queryParams.get("id"));
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            return exe.body();
+            Invitation inv = exe.body();
+
+            Contact contact = new Contact().fromQueryParameters(queryParams);
+            contact.mdid = inv.getContact();
+            return contact;
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
         }
@@ -378,14 +383,17 @@ public class SharedMetadata extends Metadata{
     /**
      * Gets MDID of sender from one-time UUID
      */
-    public Invitation readInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
+    public Contact readInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
 
         Call<Invitation> response = endpoints.getShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            return exe.body();
+
+            Contact contact = new Contact();// TODO: 08/12/2016 I have no further contact details here?
+            contact.mdid = exe.body().getContact();
+            return contact;
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
         }
