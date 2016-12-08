@@ -13,13 +13,14 @@ import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.Trusted;
 
 import org.bitcoinj.core.ECKey;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
 import java.util.List;
 
-import io.jsonwebtoken.lang.Assert;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -29,23 +30,22 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Integration Test
  */
-public class MetadataSharedIT {
+@Ignore
+public class SharedMetadataIT {
 
     //dev wallets
-    //riaanjvos@hotmail.com
     private String wallet_A_guid = "014fb9fc-64f9-4cf5-b76b-d927d7619717";
     private String wallet_A_sharedKey = "bc73239b-d3d9-4bee-a1f9-80248e179486";
     private String wallet_A_seedHex = "20e3939d08ddf727f34a130704cd925e";
     private Wallet a_wallet;
-    private MetadataShared a_Metadata;
+    private SharedMetadata a_Metadata;
     private String wallet_A_token;
 
-    //riaanjvos@gmail.com (verified)
     private String wallet_B_guid = "6fbe154a-35e0-46fb-a22b-699dc7cba87c";
     private String wallet_B_sharedKey = "49e58bdb-5a66-4353-923a-3b49054603d6";
     private String wallet_B_seedHex = "b88d0d894c19ad1d8e7f1563b7455f7c";
     private Wallet b_wallet;
-    private MetadataShared b_Metadata;
+    private SharedMetadata b_Metadata;
     private String wallet_B_token;
 
     @Before
@@ -68,9 +68,7 @@ public class MetadataSharedIT {
 
         //Init wallets
         a_wallet = new WalletFactory().restoreWallet(wallet_A_seedHex,"",1);
-        a_Metadata = new MetadataBuilder(RestClient.getClient(okHttpClient))
-                .setRootNode(a_wallet.getMasterKey())
-                .setPurpose(MetadataBuilder.PURPOSE_SHARED)
+        a_Metadata = new SharedMetadata.Builder(RestClient.getClient(okHttpClient), a_wallet.getMasterKey())
                 .build();
 
         System.out.println("--------------Register mdid-----------------");
@@ -78,9 +76,7 @@ public class MetadataSharedIT {
         System.out.println("mdid - "+a_Metadata.getAddress());
 
         b_wallet = new WalletFactory().restoreWallet(wallet_B_seedHex,"",1);
-        b_Metadata = new MetadataBuilder(RestClient.getClient(okHttpClient))
-                .setRootNode(b_wallet.getMasterKey())
-                .setPurpose(MetadataBuilder.PURPOSE_SHARED)
+        b_Metadata = new SharedMetadata.Builder(RestClient.getClient(okHttpClient), b_wallet.getMasterKey())
                 .build();
 
         System.out.println("--------------Register mdid-----------------");
@@ -123,18 +119,18 @@ public class MetadataSharedIT {
 
         //PUT assert
         boolean result = a_Metadata.putTrusted(recipientMdid);
-        Assert.isTrue(result);
+        Assert.assertTrue(result);
 
         //GET assert
         boolean isTrusted = a_Metadata.getTrusted(recipientMdid);
-        Assert.isTrue(isTrusted);
+        Assert.assertTrue(isTrusted);
 
         Trusted list = a_Metadata.getTrustedList();
-        Assert.hasText(list.getMdid());
-        Assert.isTrue(list.getContacts().length > 0);
+        Assert.assertTrue(list.getMdid() != null);
+        Assert.assertTrue(list.getContacts().length > 0);
 
         result = a_Metadata.deleteTrusted(recipientMdid);
-        Assert.isTrue(result);
+        Assert.assertTrue(result);
     }
 
     @Test
@@ -142,30 +138,30 @@ public class MetadataSharedIT {
 
         //Sender - Create invitation
         Invitation invitation = a_Metadata.createInvitation(null);
-        Assert.notNull(invitation.getId());
-        Assert.notNull(invitation.getMdid());
+        Assert.assertNotNull(invitation.getId());
+        Assert.assertNotNull(invitation.getMdid());
 
         //Recipient - Accept invitation and check if sender mdid is included
         Invitation acceptedInvitation = b_Metadata.acceptInvitation(invitation.getId());
         System.out.println(acceptedInvitation);
-        Assert.isTrue(invitation.getId().equals(acceptedInvitation.getId()));
-        Assert.isTrue(a_Metadata.getAddress().equals(acceptedInvitation.getMdid()));
+        Assert.assertTrue(invitation.getId().equals(acceptedInvitation.getId()));
+        Assert.assertTrue(a_Metadata.getAddress().equals(acceptedInvitation.getMdid()));
 
         //Sender - Check if invitation was accepted
         //If it has been accepted the recipient mdid will be included in invitation contact
         Invitation checkInvitation = a_Metadata.readInvitation(invitation.getId());
         System.out.println(checkInvitation.toString());
-        Assert.isTrue(invitation.getId().equals(checkInvitation.getId()));
-        Assert.isTrue(b_Metadata.getAddress().equals(checkInvitation.getContact()));
+        Assert.assertTrue(invitation.getId().equals(checkInvitation.getId()));
+        Assert.assertTrue(b_Metadata.getAddress().equals(checkInvitation.getContact()));
 
         //delete one-time UUID
         System.out.println("deleting "+invitation.getId());
         boolean success = a_Metadata.deleteInvitation(invitation.getId());
-        Assert.isTrue(success);
+        Assert.assertTrue(success);
 
         //make sure one-time UUID is deleted
         Invitation invitationDel = a_Metadata.readInvitation(invitation.getId());
-        Assert.isNull(invitationDel);
+        Assert.assertNull(invitationDel);
     }
 
     @Test
@@ -178,7 +174,7 @@ public class MetadataSharedIT {
         System.out.println("\n--Sender--");
         invitation = a_Metadata.readInvitation(invitation.getId());
         System.out.println("Check if accepted...");
-        Assert.isNull(invitation.getContact());
+        Assert.assertNull(invitation.getContact());
         System.out.println("not yet");
 
         System.out.println("\n--Recipient--");

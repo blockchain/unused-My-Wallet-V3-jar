@@ -1,5 +1,8 @@
 package info.blockchain.wallet.metadata.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class MetadataResponse {
 
     int version;
@@ -73,5 +76,10 @@ public class MetadataResponse {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
     }
 }

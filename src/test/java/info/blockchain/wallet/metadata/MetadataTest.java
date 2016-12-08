@@ -9,7 +9,7 @@ import info.blockchain.bip44.WalletFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.jsonwebtoken.lang.Assert;
+import org.junit.Assert;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -32,7 +32,7 @@ public class MetadataTest {
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(mockInterceptor)//Mock responses
-//                .addInterceptor(loggingInterceptor)//Extensive logging
+                .addInterceptor(loggingInterceptor)//Extensive logging
                 .build();
 
         httpClient = RestClient.getClient(okHttpClient);
@@ -52,14 +52,11 @@ public class MetadataTest {
 
         mockInterceptor.setResponse_404();//New metadata response
 
-        Metadata metadata = new MetadataBuilder(httpClient)
-                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
-                .setRootNode(getWallet().getMasterKey())
-                .setType(2)
-                .setEncrypted(true)
+        Metadata metadata = new Metadata.Builder(httpClient, getWallet().getMasterKey(), 2)
+                .setEncrypted(isEncrypted)
                 .build();
 
-        Assert.isTrue(metadata.getAddress().equals(address));
+        Assert.assertTrue(metadata.getAddress().equals(address));
     }
 
     @Test
@@ -67,10 +64,7 @@ public class MetadataTest {
 
         mockInterceptor.setResponse_404();//New metadata response
 
-        Metadata metadata = new MetadataBuilder(httpClient)
-                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
-                .setRootNode(getWallet().getMasterKey())
-                .setType(Metadata.PAYLOAD_TYPE_RESERVED)
+        Metadata metadata = new Metadata.Builder(httpClient, getWallet().getMasterKey(), Metadata.PAYLOAD_TYPE_RESERVED)
                 .setEncrypted(isEncrypted)
                 .build();
 
@@ -81,7 +75,7 @@ public class MetadataTest {
         mockInterceptor.setResponse_GET_rage();
         String result1 = metadata.getMetadata();
 
-        Assert.isTrue(msg.equals(result1));
+        Assert.assertTrue(msg.equals(result1));
 
         mockInterceptor.setResponse_PUT_more_rage();
         msg = "Rage rage some more";
@@ -89,17 +83,12 @@ public class MetadataTest {
 
         mockInterceptor.setResponse_GET_more_rage();
         String result2 = metadata.getMetadata();
-        Assert.isTrue(msg.equals(result2));
+        Assert.assertTrue(msg.equals(result2));
 
         mockInterceptor.setResponse_DELETE_ok();
         metadata.deleteMetadata(msg);
 
         mockInterceptor.setResponse_404();
-        try {
-            metadata.getMetadata();
-            Assert.isTrue(false);
-        }catch (Exception e){
-            Assert.isTrue(true);
-        }
+        Assert.assertNull(metadata.getMetadata());
     }
 }

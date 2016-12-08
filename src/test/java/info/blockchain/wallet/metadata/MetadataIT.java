@@ -8,6 +8,7 @@ import info.blockchain.bip44.WalletFactory;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import okhttp3.OkHttpClient;
@@ -16,6 +17,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 /**
  * Integration Test
  */
+@Ignore
 public class MetadataIT {
 
     boolean isEncrypted = false;
@@ -54,27 +56,15 @@ public class MetadataIT {
         Wallet wallet = getWallet();
         DeterministicKey key = wallet.getMasterKey();
 
-        Metadata metadata = new MetadataBuilder(httpClient)
-                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
-                .setRootNode(getWallet().getMasterKey())
-                .setType(2)
-                .setEncrypted(true)
+        Metadata metadata = new Metadata.Builder(httpClient, getWallet().getMasterKey(), 2)
                 .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo1"));
 
-        metadata = new MetadataBuilder(httpClient)
-                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
-                .setRootNode(getWallet().getMasterKey())
-                .setType(2)
-                .setEncrypted(true)
+        metadata = new Metadata.Builder(httpClient, getWallet().getMasterKey(), 2)
                 .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo2"));
 
-        metadata = new MetadataBuilder(httpClient)
-                .setPurpose(MetadataBuilder.PURPOSE_BASIC)
-                .setRootNode(getWallet().getMasterKey())
-                .setType(2)
-                .setEncrypted(true)
+        metadata = new Metadata.Builder(httpClient, getWallet().getMasterKey(), 2)
                 .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo3"));
 

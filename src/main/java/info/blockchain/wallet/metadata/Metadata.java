@@ -1,14 +1,15 @@
 package info.blockchain.wallet.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
+import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.MetadataUtil;
 
+import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
 
@@ -33,8 +34,6 @@ public class Metadata {
     DeterministicKey node;
     byte[] encryptionKey;
     byte[] magicHash;
-
-    ObjectMapper mapper = new ObjectMapper();
 
     public Metadata() {
         //no op
@@ -107,7 +106,7 @@ public class Metadata {
     public void putMetadata(String payload) throws Exception {
 
         //Ensure json syntax is correct
-        mapper.readValue(payload, String.class);
+        FormatsUtil.getInstance().isValidJson(payload);
 
         byte[] encryptedPayloadBytes;
 
@@ -202,6 +201,54 @@ public class Metadata {
             throw new Exception(exe.code() + " " + exe.message());
         } else {
             magicHash = null;
+        }
+    }
+
+    static class Builder{
+
+        //Required
+        private MetadataEndpoints endpoints;
+        private int type;
+        private DeterministicKey rootNode;
+
+        //Optional
+        private boolean isEncrypted = true;//default
+
+        public Builder(MetadataEndpoints endpoints, DeterministicKey rootNode, int type){
+            this.endpoints = endpoints;
+            this.rootNode = rootNode;
+            this.type = type;
+        }
+
+        public Builder setEncrypted(boolean isEncrypted){
+            this.isEncrypted = isEncrypted;
+            return this;
+        }
+
+        /**
+         * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authorize
+         * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
+         */
+        public Metadata build() throws Exception {
+
+            int purposeI = MetadataUtil.getPurposeMetadata();
+
+            DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(rootNode, purposeI);
+            DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
+            DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);
+
+            byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
+
+            Metadata metadata = new Metadata();
+            metadata.setEndpoints(endpoints);
+            metadata.setEncrypted(isEncrypted);
+            metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
+            metadata.setNode(node);
+            metadata.setEncryptionKey(Sha256Hash.hash(privateKeyBuffer));
+            metadata.setType(type);// TODO: 05/12/2016 Not sure if this type relates to PUT body type
+            metadata.fetchMagic();
+
+            return metadata;
         }
     }
 }

@@ -1,6 +1,7 @@
 package info.blockchain.wallet.metadata.data;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Trusted {
 
@@ -20,12 +21,7 @@ public class Trusted {
         return contact;
     }
 
-    @Override
-    public String toString() {
-        return "Trusted{" +
-                "mdid='" + mdid + '\'' +
-                ", contacts=" + Arrays.toString(contacts) +
-                ", contact='" + contact + '\'' +
-                '}';
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
     }
 }

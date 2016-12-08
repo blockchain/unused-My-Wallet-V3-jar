@@ -1,5 +1,8 @@
 package info.blockchain.wallet.metadata.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class Auth {
 
     String nonce;
@@ -13,11 +16,7 @@ public class Auth {
         return token;
     }
 
-    @Override
-    public String toString() {
-        return "Auth{" +
-                "nonce='" + nonce + '\'' +
-                ", token='" + token + '\'' +
-                '}';
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
     }
 }

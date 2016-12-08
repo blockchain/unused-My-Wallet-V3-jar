@@ -1,5 +1,8 @@
 package info.blockchain.wallet.metadata.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class Message {
 
     String payload;//base64 encoded
@@ -84,18 +87,8 @@ public class Message {
         this.type = type;
     }
 
-    @Override
-    public String toString() {
-        return "Message{" +
-                "payload='" + payload + '\'' +
-                ", signature='" + signature + '\'' +
-                ", recipient='" + recipient + '\'' +
-                ", id='" + id + '\'' +
-                ", sender='" + sender + '\'' +
-                ", sent=" + sent +
-                ", processed=" + processed +
-                ", notified=" + notified +
-                ", type=" + type +
-                '}';
+
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
     }
 }

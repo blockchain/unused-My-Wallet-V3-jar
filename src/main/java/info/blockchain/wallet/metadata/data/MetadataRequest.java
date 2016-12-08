@@ -1,5 +1,8 @@
 package info.blockchain.wallet.metadata.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class MetadataRequest {
     int version;
     String payload;
@@ -45,5 +48,10 @@ public class MetadataRequest {
 
     public void setType_id(int type_id) {
         this.type_id = type_id;
+    }
+
+
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
     }
 }

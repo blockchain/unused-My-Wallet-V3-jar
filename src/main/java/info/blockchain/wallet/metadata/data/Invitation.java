@@ -1,6 +1,8 @@
 package info.blockchain.wallet.metadata.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Invitation {
@@ -38,12 +40,7 @@ public class Invitation {
         return scheme;
     }
 
-    @Override
-    public String toString() {
-        return "Invitation{" +
-                "id='" + id + '\'' +
-                ", mdid='" + mdid + '\'' +
-                ", contact='" + contact + '\'' +
-                '}';
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
     }
 }

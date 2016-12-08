@@ -1,5 +1,8 @@
 package info.blockchain.wallet.metadata.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class Messages {
     String[] messages;
 
@@ -7,10 +10,8 @@ public class Messages {
         return messages;
     }
 
-    @Override
-    public String toString() {
-        return "Messages{" +
-                "messages='" + messages + '\'' +
-                '}';
+
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(this);
     }
 }

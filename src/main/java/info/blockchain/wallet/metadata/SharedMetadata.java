@@ -30,15 +30,14 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 
-public class MetadataShared extends Metadata{
+public class SharedMetadata extends Metadata{
 
     final int TYPE_PAYMENT_REQUEST = 1;
     final int TYPE_PAYMENT_REQUEST_RESPONSE = 2;
 
     String token;
-    String xpub;
 
-    public MetadataShared() {
+    public SharedMetadata() {
         //noop
     }
 
@@ -54,10 +53,6 @@ public class MetadataShared extends Metadata{
         this.node = node;
     }
 
-    public void setXpub(String xpub) {
-        this.xpub = xpub;
-    }
-
     public DeterministicKey getNode() {
         return node;
     }
@@ -67,7 +62,7 @@ public class MetadataShared extends Metadata{
     }
 
     public String getXpub() {
-        return xpub;
+        return node.serializePubB58(MainNetParams.get());
     }
 
     /**
@@ -199,9 +194,6 @@ public class MetadataShared extends Metadata{
         request.setPayload(b64Msg);
         request.setSignature(signature);
 
-        System.out.println("Bearer " + token);
-        System.out.println(mapper.writeValueAsString(request));
-
         Call<Message> response = endpoints.postMessage("Bearer " + token, request);
 
         Response<Message> exe = response.execute();
@@ -276,7 +268,7 @@ public class MetadataShared extends Metadata{
     }
 
     public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
-        return postMessage(mdid, mapper.writeValueAsString(paymentRequest), TYPE_PAYMENT_REQUEST);
+        return postMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST);
     }
 
     public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
@@ -286,7 +278,7 @@ public class MetadataShared extends Metadata{
         response.setNote(note);
         response.setAddress(receiveAddress);
 
-        return postMessage(mdid, mapper.writeValueAsString(response), TYPE_PAYMENT_REQUEST_RESPONSE);
+        return postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
     }
 
     public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
@@ -298,7 +290,7 @@ public class MetadataShared extends Metadata{
         for (Message message : messages) {
 
             if (message.getType() == TYPE_PAYMENT_REQUEST) {
-                requests.add(mapper.readValue(message.getPayload(), PaymentRequest.class));
+                requests.add(new PaymentRequest().fromJson(message.getPayload()));
             }
         }
 
@@ -314,7 +306,7 @@ public class MetadataShared extends Metadata{
         for (Message message : messages) {
 
             if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
-                responses.add(mapper.readValue(message.getPayload(), PaymentRequestResponse.class));
+                responses.add(new PaymentRequestResponse().fromJson(message.getPayload()));
             }
         }
 
@@ -422,7 +414,7 @@ public class MetadataShared extends Metadata{
 
         setEncrypted(false);
         fetchMagic();
-        putMetadata(mapper.writeValueAsString(xpub));
+        putMetadata(new PublicContactDetails(getXpub()).toJson());
     }
 
     /**
@@ -430,7 +422,39 @@ public class MetadataShared extends Metadata{
      */
     public String getPublicXpubFromMdid(String mdid) throws Exception {
 
-        PublicContactDetails publicXpub = mapper.readValue(getMetadata(mdid), PublicContactDetails.class);
+        PublicContactDetails publicXpub = new PublicContactDetails().fromJson(getMetadata(mdid));
         return publicXpub.getXpub();
+    }
+
+    static class Builder{
+
+        //Required
+        private MetadataEndpoints endpoints;
+        private DeterministicKey rootNode;
+
+        public Builder(MetadataEndpoints endpoints, DeterministicKey rootNode){
+            this.endpoints = endpoints;
+            this.rootNode = rootNode;
+        }
+
+        /**
+         * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authorize
+         * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
+         */
+        public SharedMetadata build() throws Exception {
+
+            int purposeI = MetadataUtil.getPurposeMdid();
+
+            DeterministicKey node = MetadataUtil.deriveHardened(rootNode, purposeI);
+
+            SharedMetadata metadata = new SharedMetadata();
+            metadata.setEndpoints(endpoints);
+            metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
+            metadata.setNode(node);
+            metadata.authorize();
+            metadata.publishXpub();
+
+            return metadata;
+        }
     }
 }
