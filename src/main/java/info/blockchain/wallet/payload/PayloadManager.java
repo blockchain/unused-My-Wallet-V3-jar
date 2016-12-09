@@ -695,11 +695,11 @@ public class PayloadManager {
         return getXpubToAccountIndexMap().inverse();
     }
 
-    public void unregisterMdid(ECKey node) throws Exception {
-        walletApi.unregisterMdid(node, payload.getGuid(), payload.getSharedKey());
+    public void unregisterMdid(String guid, String sharedKey, ECKey node) throws Exception {
+        walletApi.unregisterMdid(node, guid, sharedKey);
     }
 
-    public void registerMdid(ECKey node) throws Exception {
-        walletApi.registerMdid(node, payload.getGuid(), payload.getSharedKey());
+    public void registerMdid(String guid, String sharedKey, ECKey node) throws Exception {
+        walletApi.registerMdid(node, guid, sharedKey);
     }
 }

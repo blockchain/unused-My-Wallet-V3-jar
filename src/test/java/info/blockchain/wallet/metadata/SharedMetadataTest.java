@@ -1,7 +1,9 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
 import info.blockchain.bip44.WalletFactory;
+import info.blockchain.util.RestClient;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Before;
@@ -9,28 +11,40 @@ import org.junit.Test;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
 
 public class SharedMetadataTest {
 
     DeterministicKey key;
 
     MockInterceptor mockInterceptor;
-    MetadataEndpoints httpClient;
 
     @Before
     public void setUp() throws Exception {
 
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
         mockInterceptor = new MockInterceptor();
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(mockInterceptor)//Mock responses
-//                .addInterceptor(loggingInterceptor)//Extensive logging
-                .build();
+        //Set environment
+        BlockchainFramework.init(new FrameworkInterface() {
+            @Override
+            public Retrofit getRetrofitApiInstance() {
 
-        httpClient = RestClient.getClient(okHttpClient);
+                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+                OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                        .addInterceptor(mockInterceptor)//Mock responses
+                        .addInterceptor(loggingInterceptor)//Extensive logging
+                        .build();
+
+                return RestClient.getRetrofitInstance(okHttpClient);
+            }
+
+            @Override
+            public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+        });
 
         key = new WalletFactory().restoreWallet("009e63e95eeabdbe080ead5a707bdac2","",1).getMasterKey();
     }

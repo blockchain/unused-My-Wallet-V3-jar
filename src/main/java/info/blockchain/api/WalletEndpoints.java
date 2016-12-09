@@ -6,8 +6,7 @@ import retrofit2.http.Query;
 
 public interface WalletEndpoints {
 
-    // TODO: 01/12/2016  
-    String API_URL = "https://explorer.dev.blockchain.info/";
+    String API_URL = PersistentUrls.getInstance().getCurrentBaseApiUrl();
 
     @POST("wallet")
     Call<Void> postMdidRegistration(@Query("method") String method,

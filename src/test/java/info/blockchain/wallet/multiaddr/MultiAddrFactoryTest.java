@@ -2,7 +2,7 @@ package info.blockchain.wallet.multiaddr;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
-import info.blockchain.wallet.metadata.RestClient;
+import info.blockchain.util.RestClient;
 
 import org.junit.Before;
 import org.junit.Test;

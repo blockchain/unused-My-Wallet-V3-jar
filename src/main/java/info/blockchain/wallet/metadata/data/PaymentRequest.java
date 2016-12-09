@@ -7,8 +7,17 @@ import java.io.IOException;
 
 public class PaymentRequest {
 
+    String mdid;
     long amount;
     String note;
+
+    public String getMdid() {
+        return mdid;
+    }
+
+    public void setMdid(String mdid) {
+        this.mdid = mdid;
+    }
 
     public long getAmount() {
         return amount;

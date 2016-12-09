@@ -2,22 +2,24 @@ package info.blockchain.wallet.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
+import info.blockchain.util.RestClient;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.junit.Assert;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
 
 public class MetadataTest {
 
     boolean isEncrypted = false;
 
-    MetadataEndpoints httpClient;
     MockInterceptor mockInterceptor;
 
     private ObjectMapper mapper = new ObjectMapper();
@@ -25,17 +27,29 @@ public class MetadataTest {
     @Before
     public void setup() throws Exception {
 
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
         mockInterceptor = new MockInterceptor();
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(mockInterceptor)//Mock responses
-                .addInterceptor(loggingInterceptor)//Extensive logging
-                .build();
+        //Set environment
+        BlockchainFramework.init(new FrameworkInterface() {
+            @Override
+            public Retrofit getRetrofitApiInstance() {
 
-        httpClient = RestClient.getClient(okHttpClient);
+                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+                OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                        .addInterceptor(mockInterceptor)//Mock responses
+                        .addInterceptor(loggingInterceptor)//Extensive logging
+                        .build();
+
+                return RestClient.getRetrofitInstance(okHttpClient);
+            }
+
+            @Override
+            public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+        });
     }
 
     private Wallet getWallet() throws Exception {
@@ -52,7 +66,7 @@ public class MetadataTest {
 
         mockInterceptor.setResponse_404();//New metadata response
 
-        Metadata metadata = new Metadata.Builder(httpClient, getWallet().getMasterKey(), 2)
+        Metadata metadata = new Metadata.Builder(getWallet().getMasterKey(), 2)
                 .setEncrypted(isEncrypted)
                 .build();
 
@@ -64,7 +78,7 @@ public class MetadataTest {
 
         mockInterceptor.setResponse_404();//New metadata response
 
-        Metadata metadata = new Metadata.Builder(httpClient, getWallet().getMasterKey(), Metadata.PAYLOAD_TYPE_RESERVED)
+        Metadata metadata = new Metadata.Builder(getWallet().getMasterKey(), 2)
                 .setEncrypted(isEncrypted)
                 .build();
 

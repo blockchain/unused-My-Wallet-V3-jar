@@ -1,7 +1,7 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.metadata.data.Contact;
+import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
 
 import org.apache.http.NameValuePair;

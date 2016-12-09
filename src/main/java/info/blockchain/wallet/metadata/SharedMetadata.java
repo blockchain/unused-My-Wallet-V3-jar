@@ -4,7 +4,7 @@ import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
-import info.blockchain.wallet.metadata.data.Contact;
+import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.PaymentRequest;
@@ -151,6 +151,9 @@ public class SharedMetadata extends Metadata{
 
         Call<Trusted> response = endpoints.putTrusted("Bearer " + token, mdid);
 
+        System.out.println(response.request().url());
+        System.out.println("Bearer " + token);
+
         Response<Trusted> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -181,7 +184,11 @@ public class SharedMetadata extends Metadata{
      */
     private Message postMessage(String mdidRecipient, String message, int type) throws Exception {
 
+        if(mdidRecipient == null) throw new Exception("Recipient mdid null.");
+
         String recipientXpub = getPublicXpubFromMdid(mdidRecipient);
+
+        if(recipientXpub == null) throw new Exception("No public xpub for mdid.");
 
         byte[] encryptedMessage = MetadataUtil.encryptFor(node, recipientXpub, message);
 
@@ -373,7 +380,8 @@ public class SharedMetadata extends Metadata{
             Invitation inv = exe.body();
 
             Contact contact = new Contact().fromQueryParameters(queryParams);
-            contact.mdid = inv.getContact();
+            contact.setMdid(inv.getMdid());
+
             return contact;
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
@@ -392,7 +400,7 @@ public class SharedMetadata extends Metadata{
         if (exe.isSuccessful()) {
 
             Contact contact = new Contact();// TODO: 08/12/2016 I have no further contact details here?
-            contact.mdid = exe.body().getContact();
+            contact.setMdid(exe.body().getContact());
             return contact;
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
@@ -430,18 +438,22 @@ public class SharedMetadata extends Metadata{
      */
     public String getPublicXpubFromMdid(String mdid) throws Exception {
 
-        PublicContactDetails publicXpub = new PublicContactDetails().fromJson(getMetadata(mdid));
-        return publicXpub.getXpub();
+        String data = getMetadata(mdid);
+
+        if(data != null) {
+            PublicContactDetails publicXpub = new PublicContactDetails().fromJson(data);
+            return publicXpub.getXpub();
+        } else {
+            return null;
+        }
     }
 
     static class Builder{
 
         //Required
-        private MetadataEndpoints endpoints;
         private DeterministicKey rootNode;
 
-        public Builder(MetadataEndpoints endpoints, DeterministicKey rootNode){
-            this.endpoints = endpoints;
+        public Builder(DeterministicKey rootNode){
             this.rootNode = rootNode;
         }
 
@@ -456,7 +468,6 @@ public class SharedMetadata extends Metadata{
             DeterministicKey node = MetadataUtil.deriveHardened(rootNode, purposeI);
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setEndpoints(endpoints);
             metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
             metadata.setNode(node);
             metadata.authorize();

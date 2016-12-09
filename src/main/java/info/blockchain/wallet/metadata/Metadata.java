@@ -1,5 +1,6 @@
 package info.blockchain.wallet.metadata;
 
+import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
@@ -18,12 +19,6 @@ import retrofit2.Response;
 
 public class Metadata {
 
-    public final static int PAYLOAD_TYPE_GUID = 0;
-    public final static int PAYLOAD_TYPE_RESERVED = 1;
-    public final static int PAYLOAD_TYPE_WHATS_NEW = 2;
-    public final static int PAYLOAD_TYPE_BUY_SELL = 3;
-    public final static int PAYLOAD_TYPE_CONTACT = 4;
-
     final static int METADATA_VERSION = 1;
 
     boolean isEncrypted = true;
@@ -36,11 +31,9 @@ public class Metadata {
     byte[] magicHash;
 
     public Metadata() {
-        //no op
-    }
-
-    public void setEndpoints(MetadataEndpoints endpoints) {
-        this.endpoints = endpoints;
+        this.endpoints = BlockchainFramework
+                .getRetrofitApiInstance()
+                .create(MetadataEndpoints.class);
     }
 
     public void setAddress(String address) {
@@ -204,18 +197,16 @@ public class Metadata {
         }
     }
 
-    static class Builder{
+    public static class Builder{
 
         //Required
-        private MetadataEndpoints endpoints;
         private int type;
         private DeterministicKey rootNode;
 
         //Optional
         private boolean isEncrypted = true;//default
 
-        public Builder(MetadataEndpoints endpoints, DeterministicKey rootNode, int type){
-            this.endpoints = endpoints;
+        public Builder(DeterministicKey rootNode, int type){
             this.rootNode = rootNode;
             this.type = type;
         }
@@ -240,12 +231,11 @@ public class Metadata {
             byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
 
             Metadata metadata = new Metadata();
-            metadata.setEndpoints(endpoints);
             metadata.setEncrypted(isEncrypted);
             metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
             metadata.setNode(node);
             metadata.setEncryptionKey(Sha256Hash.hash(privateKeyBuffer));
-            metadata.setType(type);// TODO: 05/12/2016 Not sure if this type relates to PUT body type
+            metadata.setType(type);
             metadata.fetchMagic();
 
             return metadata;

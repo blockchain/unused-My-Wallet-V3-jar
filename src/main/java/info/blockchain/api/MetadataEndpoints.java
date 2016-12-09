@@ -23,8 +23,7 @@ import retrofit2.http.Query;
 
 public interface MetadataEndpoints {
 
-    // TODO: 01/12/2016  
-    String API_URL = "https://api.dev.blockchain.info/metadata/";
+    String API_URL = PersistentUrls.getInstance().getCurrentBaseApiUrl()+"metadata/";
 
     @GET("auth")
     Call<Auth> getNonce();

@@ -2,9 +2,9 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
+import info.blockchain.util.RestClient;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
-import info.blockchain.wallet.metadata.RestClient;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
