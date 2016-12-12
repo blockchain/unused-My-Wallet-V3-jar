@@ -11,8 +11,7 @@ import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.Contacts;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
+import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -73,6 +72,9 @@ public class SharedMetadataIT {
     @Test
     public void testSendPayment() throws Exception {
 
+        /*
+        Create wallets
+         */
         Pair<SharedMetadata, Wallet> pair = setupWallet(wallet_A_seedHex, wallet_A_guid, wallet_A_sharedKey);
         SharedMetadata a_shared_Metadata = pair.getLeft();
         System.out.println("Sender mdid = "+a_shared_Metadata.getAddress());
@@ -83,18 +85,18 @@ public class SharedMetadataIT {
         System.out.println("Recipient mdid = "+b_shared_Metadata.getAddress());
         Wallet b_wallet = pair.getRight();
 
-
+        /*
+        Send invite
+         */
         System.out.println("\n--Sender--");
         System.out.println("createInvitation");
         Invitation invitationSent = a_shared_Metadata.createInvitation();
-        a_shared_Metadata.readInvitation(invitationSent.getId());
 
-        //Prompt to fill in your name
-        Contact recipientContact = new Contact();
-        recipientContact.setName("John");
-        String oneTimeUri = MetadataUtil.createURI(recipientContact, invitationSent);
+        //Prompt to fill in your name - just temp for the invite url/message
+        Contact tempInviteDetails = new Contact();
+        tempInviteDetails.setName("John");
+        String oneTimeUri = MetadataUtil.createURI(tempInviteDetails, invitationSent);
         System.out.println("createURI: "+oneTimeUri);
-        addToContactList(a_wallet, recipientContact);
 
 
         System.out.println("\n--Recipient--");
@@ -103,17 +105,24 @@ public class SharedMetadataIT {
 
 
         System.out.println("\n--Sender--");
+        if(invitationSent.getMdid() == null) throw new Exception("Recipient hasn't accepted invite...");
+        Contact recipientDetails = a_shared_Metadata.readInvitation(invitationSent.getId());
         readAndTrustAcceptedInvite(a_shared_Metadata, invitationSent);
-        sendPaymentRequest(a_shared_Metadata, invitationSent);
+        addToContactList(a_wallet, recipientDetails);
+
+        a_shared_Metadata.postMessage(recipientDetails.getMdid(),
+                new ObjectMapper().writeValueAsString("Hello dude"),
+                66);
 
 
         System.out.println("\n--Recipient--");
-        PaymentRequest paymentRequest = checkPaymentRequests(b_shared_Metadata);
-        acceptPaymentRequest(b_shared_Metadata, paymentRequest);
+        Message message = checkMessages(b_shared_Metadata);
+        System.out.println("Received message: '" + message.toJson() + "'");
 
 
-        System.out.println("\n--Sender--");
-        checkPaymentResponse(a_shared_Metadata);
+//        acceptPaymentRequest(b_shared_Metadata, message);
+//        System.out.println("\n--Sender--");
+//        checkPaymentResponse(a_shared_Metadata);
     }
 
     private Pair<SharedMetadata, Wallet> setupWallet(String hex, String guid, String sharedKey) throws Exception {
@@ -143,7 +152,7 @@ public class SharedMetadataIT {
 
     private Contact acceptAndTrustInvite(SharedMetadata sharedMetadata, String link) throws Exception{
 
-        Contact inviteContactDetails = sharedMetadata.acceptInvitation(link);
+        Contact inviteContactDetails = sharedMetadata.acceptInvitationFromLink(link);
         sharedMetadata.putTrusted(inviteContactDetails.getMdid());
         System.out.println("acceptAndTrustInvite: " + inviteContactDetails.toJson());
         return inviteContactDetails;
@@ -153,55 +162,45 @@ public class SharedMetadataIT {
         System.out.println("Check if accepted");
         Contact recipientDetails = sharedMetadata.readInvitation(invitation.getId());
 
-        System.out.println("Fill in some details manually...");
+        System.out.println("Fill in recipient details manually...");
         recipientDetails.setName("Dave");
         System.out.println(recipientDetails.toJson() + " accepted the invite");
 
         //Add recipient address to trusted list
-        System.out.println("Adding recipient to my trusted list...");
+        System.out.println("Adding recipient to my trusted list..."+recipientDetails.getMdid());
         sharedMetadata.putTrusted(recipientDetails.getMdid());
     }
 
-    private void sendPaymentRequest(SharedMetadata sharedMetadata, Invitation invitation) throws Exception{
-        PaymentRequest paymentRequest = new PaymentRequest();
-        paymentRequest.setMdid(sharedMetadata.getAddress());
-        paymentRequest.setNote("I owe you £15.50 for the Honest burger.");
-        paymentRequest.setAmount(2637310);
-
-        System.out.println("Sending payment request: " + new ObjectMapper().writeValueAsString(paymentRequest));
-        sharedMetadata.sendPaymentRequest(invitation.getMdid(), paymentRequest);
-    }
-
-    private PaymentRequest checkPaymentRequests(SharedMetadata sharedMetadata) throws Exception{
+    private Message checkMessages(SharedMetadata sharedMetadata) throws Exception{
 
         boolean onlyProcessed = false;
 
-        List<PaymentRequest> paymentRequests = sharedMetadata.getPaymentRequests(onlyProcessed);
-        System.out.println("Checking payment requests and found " + paymentRequests.size() + " unprocessed requests.");
+        List<Message> messages = sharedMetadata.getMessages(onlyProcessed);
+        System.out.println("Checking messages and found " + messages.size() + " unprocessed.");
 
         //For test purpose let's just return the 1 we created.
-        return paymentRequests.get(0);
+        return messages.get(0);
     }
 
-    private void acceptPaymentRequest(SharedMetadata sharedMetadata, PaymentRequest paymentRequest) throws Exception{
-
-        // TODO: 09/12/2016 - send reserved address
-        String receivingAddress = "1GYkgRtJmEp355xUtVFfHSFjFdbqjiwKmb";
-        System.out.println("Received payment request: '" + paymentRequest.toJson() + "'");
-        System.out.println("Accepting and attaching receive address '" + receivingAddress + "'");
-        sharedMetadata.acceptPaymentRequest(paymentRequest.getMdid(), paymentRequest, "Send coins here please.", receivingAddress);
-    }
-
-    private void checkPaymentResponse(SharedMetadata sharedMetadata) throws Exception{
-        List<PaymentRequestResponse> paymentRequestResponses = sharedMetadata.getPaymentRequestResponses(true);
-        System.out.println("Checking payment requests responses and found " + paymentRequestResponses.size() + " new responses.");
-        System.out.println("Received payment request response with address: '" + paymentRequestResponses.get(0).getAddress() + "'");
-
-        //Use this URI for SendActivity
-        System.out.println("Bitcoin URL: '" + paymentRequestResponses.get(0).toBitcoinURI() + "'");
-
-        System.out.println("Marking payment as processed...");
-    }
+//    private void acceptPaymentRequest(SharedMetadata sharedMetadata, PaymentRequest paymentRequest) throws Exception{
+//
+//        // TODO: 09/12/2016 - send reserved address
+//        String receivingAddress = "1GYkgRtJmEp355xUtVFfHSFjFdbqjiwKmb";
+//        System.out.println("Received payment request: '" + paymentRequest.toJson() + "'");
+//        System.out.println("Accepting and attaching receive address '" + receivingAddress + "'");
+//        sharedMetadata.acceptPaymentRequest(paymentRequest.getMdid(), paymentRequest, "Send coins here please.", receivingAddress);
+//    }
+//
+//    private void checkPaymentResponse(SharedMetadata sharedMetadata) throws Exception{
+//        List<PaymentRequestResponse> paymentRequestResponses = sharedMetadata.getPaymentRequestResponses(true);
+//        System.out.println("Checking payment requests responses and found " + paymentRequestResponses.size() + " new responses.");
+//        System.out.println("Received payment request response with address: '" + paymentRequestResponses.get(0).getAddress() + "'");
+//
+//        //Use this URI for SendActivity
+//        System.out.println("Bitcoin URL: '" + paymentRequestResponses.get(0).toBitcoinURI() + "'");
+//
+//        System.out.println("Marking payment as processed...");
+//    }
 
     private void addToContactList(Wallet wallet, Contact contact) throws Exception{
         System.out.println("Adding to contact list");

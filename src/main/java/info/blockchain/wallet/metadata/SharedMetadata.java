@@ -1,14 +1,12 @@
 package info.blockchain.wallet.metadata;
 
 import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
-import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
@@ -20,7 +18,6 @@ import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.security.SignatureException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -151,9 +148,6 @@ public class SharedMetadata extends Metadata{
 
         Call<Trusted> response = endpoints.putTrusted("Bearer " + token, mdid);
 
-        System.out.println(response.request().url());
-        System.out.println("Bearer " + token);
-
         Response<Trusted> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -182,7 +176,7 @@ public class SharedMetadata extends Metadata{
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
-    private Message postMessage(String mdidRecipient, String message, int type) throws Exception {
+    public Message postMessage(String mdidRecipient, String message, int type) throws Exception {
 
         if(mdidRecipient == null) throw new Exception("Recipient mdid null.");
 
@@ -198,6 +192,7 @@ public class SharedMetadata extends Metadata{
 
         Message request = new Message();
         request.setRecipient(mdidRecipient);
+        request.setSender(getAddress());
         request.setType(type);
         request.setPayload(b64Msg);
         request.setSignature(signature);
@@ -217,7 +212,7 @@ public class SharedMetadata extends Metadata{
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(boolean onlyProcessed) throws Exception {
+    public List<Message> getMessages(boolean onlyProcessed) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, onlyProcessed);
 
@@ -238,7 +233,7 @@ public class SharedMetadata extends Metadata{
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(String lastMessageId) throws Exception {
+    public List<Message> getMessages(String lastMessageId) throws Exception {
 
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, lastMessageId);
 
@@ -259,7 +254,7 @@ public class SharedMetadata extends Metadata{
     /**
      * Get message from message id. Authenticated.
      */
-    private Message getMessage(String messageId) throws Exception {
+    public Message getMessage(String messageId) throws Exception {
 
         Call<Message> response = endpoints.getMessage("Bearer " + token, messageId);
 
@@ -273,52 +268,6 @@ public class SharedMetadata extends Metadata{
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
         }
-    }
-
-    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
-        return postMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST);
-    }
-
-    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
-
-        PaymentRequestResponse response = new PaymentRequestResponse();
-        response.setAmount(paymentRequest.getAmount());
-        response.setNote(note);
-        response.setAddress(receiveAddress);
-
-        return postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
-    }
-
-    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
-
-        List<PaymentRequest> requests = new ArrayList<>();
-
-        List<Message> messages = getMessages(onlyProcessed);
-
-        for (Message message : messages) {
-
-            if (message.getType() == TYPE_PAYMENT_REQUEST) {
-                requests.add(new PaymentRequest().fromJson(message.getPayload()));
-            }
-        }
-
-        return requests;
-    }
-
-    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws Exception {
-
-        List<PaymentRequestResponse> responses = new ArrayList<>();
-
-        List<Message> messages = getMessages(onlyProcessed);
-
-        for (Message message : messages) {
-
-            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
-                responses.add(new PaymentRequestResponse().fromJson(message.getPayload()));
-            }
-        }
-
-        return responses;
     }
 
     /**
@@ -368,18 +317,27 @@ public class SharedMetadata extends Metadata{
     /**
      * Returns contact details of accepted invitation
      */
-    public Contact acceptInvitation(String uri) throws SharedMetadataConnectionException, IOException {
+    public Contact acceptInvitationFromLink(String uri) throws SharedMetadataConnectionException, IOException {
 
         Map<String, String> queryParams = MetadataUtil.getQueryParams(uri);
 
-        Call<Invitation> response = endpoints.postToShare("Bearer " + token, queryParams.get("id"));
+        Contact accepted = acceptInvitation(queryParams.get("id"));
+        Contact contact = new Contact().fromQueryParameters(queryParams);
+        contact.setMdid(accepted.getMdid());//only accepted invite will have recipient mdid
+
+        return contact;
+    }
+
+    public Contact acceptInvitation(String inviteId) throws IOException, SharedMetadataConnectionException {
+
+        Call<Invitation> response = endpoints.postToShare("Bearer " + token, inviteId);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
             Invitation inv = exe.body();
 
-            Contact contact = new Contact().fromQueryParameters(queryParams);
+            Contact contact = new Contact();
             contact.setMdid(inv.getMdid());
 
             return contact;
@@ -476,4 +434,53 @@ public class SharedMetadata extends Metadata{
             return metadata;
         }
     }
+
+
+    // TODO: 09/12/2016 Make SharedMetada more abstract by removing payment requests
+//    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
+//        return postMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST);
+//    }
+//
+//    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
+//
+//        PaymentRequestResponse response = new PaymentRequestResponse();
+//        response.setAmount(paymentRequest.getAmount());
+//        response.setNote(note);
+//        response.setAddress(receiveAddress);
+//
+//        return postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
+//    }
+//
+//    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
+//
+//        List<PaymentRequest> requests = new ArrayList<>();
+//
+//        List<Message> messages = getMessages(onlyProcessed);
+//
+//        for (Message message : messages) {
+//
+//            if (message.getType() == TYPE_PAYMENT_REQUEST) {
+//                requests.add(new PaymentRequest().fromJson(message.getPayload()));
+//            }
+//        }
+//
+//        return requests;
+//    }
+//
+//    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws Exception {
+//
+//        List<PaymentRequestResponse> responses = new ArrayList<>();
+//
+//        List<Message> messages = getMessages(onlyProcessed);
+//
+//        for (Message message : messages) {
+//
+//            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
+//                responses.add(new PaymentRequestResponse().fromJson(message.getPayload()));
+//            }
+//        }
+//
+//        return responses;
+//    }
+
 }
