@@ -5,6 +5,8 @@ import info.blockchain.wallet.util.WebUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class MultiAddress extends BaseApi {
 
     private static final String MULTI_ADDRESS = "multiaddr?active=";
@@ -27,7 +29,7 @@ public class MultiAddress extends BaseApi {
         }
         url.append(getApiCode());
 
-        String response = WebUtil.getInstance().getURL(url.toString());
+        String response = WebUtil.getInstance().getRequest(url.toString());
         jsonObject = new JSONObject(response);
 
         return jsonObject;
@@ -35,11 +37,22 @@ public class MultiAddress extends BaseApi {
 
     public JSONObject getXPUB(String[] xpubs) throws Exception {
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getMultiAddressUrl());
-        url.append(StringUtils.join(xpubs, "|"));
-        url.append(getApiCode());
+        final String url = PersistentUrls.getInstance().getMultiAddressUrl()
+                + StringUtils.join(xpubs, "|")
+                + getApiCode();
 
-        String response = WebUtil.getInstance().getURL(url.toString());
+        String response = WebUtil.getInstance().getRequest(url);
+
+        return new JSONObject(response);
+    }
+
+    public JSONObject getAddresses(List<String> addresses) throws Exception {
+
+        final String url = PersistentUrls.getInstance().getMultiAddressUrl()
+                + StringUtils.join(addresses, "|")
+                + getApiCode();
+
+        String response = WebUtil.getInstance().getRequest(url);
 
         return new JSONObject(response);
     }

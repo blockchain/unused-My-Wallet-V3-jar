@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.jws.WebMethod;
+
 public class MultiAddrFactory {
 
     private static long legacy_balance = 0L;
@@ -85,6 +87,31 @@ public class MultiAddrFactory {
         if (jsonObject != null) {
             parseLegacy(jsonObject);
         }
+    }
+
+    /**
+     * Returns a map of address/corresponding final balance
+     *
+     * @param addresses A List of addresses (HD)
+     */
+    @WebMethod
+    public HashMap<String, Long> getAddressBalance(List<String> addresses) throws Exception {
+        HashMap<String, Long> map = new HashMap<String, Long>();
+
+        MultiAddress api = new MultiAddress();
+        JSONObject jsonObject = api.getAddresses(addresses);
+
+        if (jsonObject.has("addresses")) {
+            JSONArray addressList = jsonObject.getJSONArray("addresses");
+            for (int i = 0; i < addressList.length(); i++) {
+                JSONObject object = addressList.getJSONObject(i);
+                if (object.has("address") && object.has("final_balance")) {
+                    map.put(object.getString("address"), object.getLong("final_balance"));
+                }
+            }
+        }
+
+        return map;
     }
 
     private void parseXPUB(JSONObject jsonObject) throws JSONException {
