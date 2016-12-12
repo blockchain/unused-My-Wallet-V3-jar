@@ -91,12 +91,20 @@ public class Metadata {
         }
     }
 
+    public void putMetadata(String payload) throws Exception {
+        putMetadataEntry(address, payload, isEncrypted);
+    }
+
+    public void putMetadata(String mdid, String payload, boolean isEncrypted) throws Exception {
+        putMetadataEntry(mdid, payload, isEncrypted);
+    }
+
     /**
      * Put new metadata entry
      * @param payload JSON Stringified object
      * @throws Exception
      */
-    public void putMetadata(String payload) throws Exception {
+    public void putMetadataEntry(String address, String payload, boolean isEncrypted) throws Exception {
 
         //Ensure json syntax is correct
         FormatsUtil.getInstance().isValidJson(payload);
@@ -135,17 +143,17 @@ public class Metadata {
     }
 
     public String getMetadata() throws Exception {
-        return getMetadataEntry(address);
+        return getMetadataEntry(address, isEncrypted);
     }
 
-    public String getMetadata(String address) throws Exception {
-        return getMetadataEntry(address);
+    public String getMetadata(String address, boolean isEncrypted) throws Exception {
+        return getMetadataEntry(address, isEncrypted);
     }
 
     /**
      * Get metadata entry
      */
-    private String getMetadataEntry(String address) throws Exception {
+    private String getMetadataEntry(String address, boolean isEncrypted) throws Exception {
 
         Call<MetadataResponse> response = endpoints.getMetadata(address);
 

@@ -1,6 +1,6 @@
 package info.blockchain.util;
 
-import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.api.PersistentUrls;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -10,7 +10,7 @@ public class RestClient {
 
     public static Retrofit getRetrofitInstance(OkHttpClient client) {
         return new Retrofit.Builder()
-                .baseUrl(MetadataEndpoints.API_URL)
+                .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl()+"metadata/")
                 .client(client)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();

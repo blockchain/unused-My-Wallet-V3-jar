@@ -6,8 +6,6 @@ import retrofit2.http.Query;
 
 public interface WalletEndpoints {
 
-    String API_URL = PersistentUrls.getInstance().getCurrentBaseApiUrl();
-
     @POST("wallet")
     Call<Void> postMdidRegistration(@Query("method") String method,
                                     @Query("guid") String guid,
