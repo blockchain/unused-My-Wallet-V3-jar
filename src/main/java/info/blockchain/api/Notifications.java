@@ -8,17 +8,20 @@ import org.json.JSONObject;
  */
 public class Notifications extends BaseApi {
 
-    private static final String UPDATE_FIREBASE = "?method=update-firebase&payload=";
-    private static final String WALLET = "wallet";
-    public static final String PROD_FIREBASE_URL = PROTOCOL + SERVER_ADDRESS + WALLET + UPDATE_FIREBASE;
+    private static final String UPDATE_FIREBASE = "wallet?method=update-firebase&payload=";
 
     public Notifications() {
         // No-op
     }
 
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + UPDATE_FIREBASE;
+    }
+
     public void updateFirebaseNotificationToken(String token, String guid, String sharedKey) throws Exception {
 
-        String url = PersistentUrls.getInstance().getWalletPayloadUrl() + UPDATE_FIREBASE + token;
+        String url = getRoute() + token;
 
         String urlParams = "&guid=" + guid
                 + "&payload=" + token + "&format=json"

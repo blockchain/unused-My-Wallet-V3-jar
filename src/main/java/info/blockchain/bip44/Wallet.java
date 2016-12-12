@@ -186,6 +186,11 @@ public class Wallet {
         return strPath;
     }
 
+
+    public DeterministicKey getMasterKey() {
+        return dkKey;
+    }
+
     /**
      * Write entire wallet to JSONObject. For debugging only.
      *

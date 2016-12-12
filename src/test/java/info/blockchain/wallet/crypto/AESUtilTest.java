@@ -2,6 +2,7 @@ package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.util.CharSequenceX;
 
+import org.bitcoinj.core.Sha256Hash;
 import org.junit.Test;
 import org.spongycastle.crypto.paddings.ISO10126d2Padding;
 import org.spongycastle.crypto.paddings.ISO7816d4Padding;
@@ -171,5 +172,18 @@ public class AESUtilTest {
         } catch (Exception e) {
             assertThat("Decryption failed as expected.", true);
         }
+    }
+
+    @Test
+    public void decrypt_withKey() throws Exception {
+
+        String key = "80a150a8aae2c159cdad74fd675f03238fe5b8c884b976f8abfe56e621fd7ee1";//"Dylan Thomas";
+        String data = "Do not go gentle into that good night.";
+
+        byte[] keyBytes = Sha256Hash.hash(key.getBytes());
+        byte[] encrypted = AESUtil.encryptWithKey(keyBytes, data);
+        String decrypted = AESUtil.decryptWithKey(keyBytes, new String(encrypted));
+
+        assertThat("Decryption", decrypted.equals(data));
     }
 }

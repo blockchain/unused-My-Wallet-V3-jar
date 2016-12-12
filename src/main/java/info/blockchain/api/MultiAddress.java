@@ -10,17 +10,21 @@ import java.util.List;
 public class MultiAddress extends BaseApi {
 
     private static final String MULTI_ADDRESS = "multiaddr?active=";
-    public static final String PROD_MULTIADDR_URL = PROTOCOL + SERVER_ADDRESS + MULTI_ADDRESS;
 
     public MultiAddress() {
         // No-op
+    }
+
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + MULTI_ADDRESS;
     }
 
     public JSONObject getLegacy(String[] addresses, boolean simple) throws Exception {
 
         JSONObject jsonObject;
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getMultiAddressUrl());
+        StringBuilder url = new StringBuilder(getRoute());
         url.append(StringUtils.join(addresses, "|"));
         if (simple) {
             url.append("&simple=true&format=json");
@@ -37,7 +41,7 @@ public class MultiAddress extends BaseApi {
 
     public JSONObject getXPUB(String[] xpubs) throws Exception {
 
-        final String url = PersistentUrls.getInstance().getMultiAddressUrl()
+        final String url = getRoute()
                 + StringUtils.join(xpubs, "|")
                 + getApiCode();
 
@@ -48,7 +52,7 @@ public class MultiAddress extends BaseApi {
 
     public JSONObject getAddresses(List<String> addresses) throws Exception {
 
-        final String url = PersistentUrls.getInstance().getMultiAddressUrl()
+        final String url = getRoute()
                 + StringUtils.join(addresses, "|")
                 + getApiCode();
 

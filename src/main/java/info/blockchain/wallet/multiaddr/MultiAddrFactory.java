@@ -13,9 +13,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-
-import javax.jws.WebMethod;
 
 public class MultiAddrFactory {
 
@@ -94,9 +93,13 @@ public class MultiAddrFactory {
      *
      * @param addresses A List of addresses (HD)
      */
-    @WebMethod
-    public HashMap<String, Long> getAddressBalance(List<String> addresses) throws Exception {
-        HashMap<String, Long> map = new HashMap<String, Long>();
+    public HashMap<String, Long> getAddressBalanceFromApi(List<String> addresses) throws Exception {
+        LinkedHashMap<String, Long> map = new LinkedHashMap<>();
+
+        // Place into map to maintain order, as API may return them in a random order
+        for (String address : addresses) {
+            map.put(address, 0L);
+        }
 
         MultiAddress api = new MultiAddress();
         JSONObject jsonObject = api.getAddresses(addresses);

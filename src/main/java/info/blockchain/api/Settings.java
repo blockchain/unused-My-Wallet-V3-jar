@@ -10,10 +10,14 @@ import java.util.ArrayList;
 public class Settings extends BaseApi {
 
     private static final String WALLET = "wallet";
-    public static final String PROD_PAYLOAD_URL = PROTOCOL + SERVER_ADDRESS + WALLET;
 
     public Settings() {
         // No-op
+    }
+
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + WALLET;
     }
 
     //API methods
@@ -137,7 +141,7 @@ public class Settings extends BaseApi {
         args.append(getApiCode());
         args.append("&format=plain");
 
-        return WebUtil.getInstance().postURL(PersistentUrls.getInstance().getWalletPayloadUrl(), args.toString());
+        return WebUtil.getInstance().postURL(getRoute(), args.toString());
     }
 
     public String getInfo() throws Exception {

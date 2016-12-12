@@ -29,6 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 
@@ -64,12 +65,14 @@ public class PayloadManager {
     private HDPayloadBridge hdPayloadBridge;
     private info.blockchain.bip44.Wallet wallet;
     private PrivateKeyFactory privateKeyFactory;
+    private WalletPayload walletApi;
 
     private PayloadManager() {
         hdPayloadBridge = new HDPayloadBridge();
         payload = new Payload();
         cached_payload = "";
         privateKeyFactory = new PrivateKeyFactory();
+        walletApi = new WalletPayload();
     }
 
     /**
@@ -114,7 +117,7 @@ public class PayloadManager {
 
         String walletData;
         try {
-            walletData = new WalletPayload().fetchWalletData(guid, sharedKey);
+            walletData = walletApi.fetchWalletData(guid, sharedKey);
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -627,8 +630,16 @@ public class PayloadManager {
         return ecKey;
     }
 
-    public String getHDSeed() {
+    public byte[] getHDSeed() {
+        return wallet.getSeed();
+    }
+
+    public String getHDSeedHex() {
         return wallet.getSeedHex();
+    }
+
+    public DeterministicKey getMasterKey() {
+        return wallet.getMasterKey();
     }
 
     public String[] getMnemonic(String secondPassword) throws Exception {
@@ -703,4 +714,11 @@ public class PayloadManager {
         return getXpubToAccountIndexMap().inverse();
     }
 
+    public void unregisterMdid(String guid, String sharedKey, ECKey node) throws Exception {
+        walletApi.unregisterMdid(node, guid, sharedKey);
+    }
+
+    public void registerMdid(String guid, String sharedKey, ECKey node) throws Exception {
+        walletApi.registerMdid(node, guid, sharedKey);
+    }
 }
