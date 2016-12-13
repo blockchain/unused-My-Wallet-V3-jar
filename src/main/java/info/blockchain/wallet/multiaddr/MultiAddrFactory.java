@@ -93,7 +93,7 @@ public class MultiAddrFactory {
      *
      * @param addresses A List of addresses (HD)
      */
-    public HashMap<String, Long> getAddressBalanceFromApi(List<String> addresses) throws Exception {
+    public LinkedHashMap<String, Long> getAddressBalanceFromApi(List<String> addresses) throws Exception {
         LinkedHashMap<String, Long> map = new LinkedHashMap<>();
 
         // Place into map to maintain order, as API may return them in a random order
