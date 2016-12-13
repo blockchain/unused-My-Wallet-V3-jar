@@ -9,8 +9,9 @@ import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.PaymentRequest;
+import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.PublicContactDetails;
-import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.util.encoders.Base64;
@@ -156,16 +157,18 @@ public class Contacts {
 
     public void sendMessage(String mdid, String message, int type, boolean encrypted) throws Exception {
 
+        String b64Message;
+
         if(encrypted) {
             String recipientXpub = fetchXpub(mdid);
             if (recipientXpub == null) throw new Exception("No public xpub for mdid.");
-            byte[] encryptedMessage = MetadataUtil.encryptFor(sharedMetadata.getNode(), recipientXpub, message);
-            message = new String(encryptedMessage);
+
+            b64Message = sharedMetadata.encryptFor(recipientXpub, message);
         } else {
-            message = new String(Base64.encode(message.getBytes("utf-8")));
+            b64Message = new String(Base64.encode(message.getBytes("utf-8")));
         }
 
-        sharedMetadata.postMessage(mdid, message, type);
+        sharedMetadata.postMessage(mdid, b64Message, type);
     }
 
     public List<Message> getMessages(boolean onlyNew) throws Exception {
@@ -184,8 +187,8 @@ public class Contacts {
 
         String xpub = fetchXpub(mdid);
         String payload = new String(Base64.decode(message.getPayload()));
-        message.setPayload(MetadataUtil.decryptFrom(sharedMetadata.getNode(), xpub, payload));
-
+        String decryptedPayload = sharedMetadata.decryptFrom(xpub, payload);
+        message.setPayload(decryptedPayload);
         return message;
     }
 
@@ -205,4 +208,48 @@ public class Contacts {
         return params;
     }
 
+    public void sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception{
+        sendMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST, true);
+    }
+
+    public List<PaymentRequest> getPaymentRequests() throws Exception {
+
+        List<PaymentRequest> result = new ArrayList<>();
+
+        List<Message> messages = getMessages(true);
+
+        for(Message message : messages) {
+            if(message.getType() == TYPE_PAYMENT_REQUEST){
+                result.add(new PaymentRequest().fromJson(message.getPayload()));
+            }
+        }
+
+        return result;
+    }
+
+    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyNew) throws Exception {
+
+        List<PaymentRequestResponse> responses = new ArrayList<>();
+
+        List<Message> messages = getMessages(onlyNew);
+
+        for (Message message : messages) {
+
+            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
+                responses.add(new PaymentRequestResponse().fromJson(message.getPayload()));
+            }
+        }
+
+        return responses;
+    }
+
+    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
+
+        PaymentRequestResponse response = new PaymentRequestResponse();
+        response.setAmount(paymentRequest.getAmount());
+        response.setNote(note);
+        response.setAddress(receiveAddress);
+
+        return sharedMetadata.postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
+    }
 }
