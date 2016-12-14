@@ -78,7 +78,10 @@ public class WebUtil {
                 if (connection.getResponseCode() == 200) {
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
                 } else {
-                    error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
+                    error = "Error code:"
+                            + connection.getResponseCode()
+                            + "\n"
+                            + IOUtils.toString(connection.getErrorStream(), "UTF-8");
                 }
 
                 // Sleep unless last request
@@ -185,7 +188,10 @@ public class WebUtil {
                 if (connection.getResponseCode() == 200) {
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
                 } else {
-                    error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
+                    error = "Error code:"
+                            + connection.getResponseCode()
+                            + "\n"
+                            + IOUtils.toString(connection.getErrorStream(), "UTF-8");
                 }
 
             } catch (Exception e) {
