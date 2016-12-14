@@ -6,10 +6,10 @@ import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.network.NetworkParams;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.params.MainNetParams;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +89,7 @@ public class HDPayloadBridge {
     }
 
     public Wallet getHDWatchOnlyWalletFromXpubs(String[] xpubs) throws Exception {
-        return new Wallet(MainNetParams.get(), xpubs);
+        return new Wallet(NetworkParams.getInstance().getCurrentParams(), xpubs);
     }
 
     public Wallet decryptWatchOnlyWallet(Payload payload, String decrypted_hex) throws Exception {
@@ -207,7 +207,7 @@ public class HDPayloadBridge {
 
     public Address getAddressAt(String xpub, int chain, int addressIndex) throws AddressFormatException {
 
-        info.blockchain.bip44.Account account = new info.blockchain.bip44.Account(MainNetParams.get(), xpub);
+        info.blockchain.bip44.Account account = new info.blockchain.bip44.Account(NetworkParams.getInstance().getCurrentParams(), xpub);
         return account.getChain(chain).getAddressAt(addressIndex);
     }
 }

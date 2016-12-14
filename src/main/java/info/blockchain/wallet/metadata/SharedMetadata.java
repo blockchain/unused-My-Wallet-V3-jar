@@ -13,10 +13,10 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
+import info.blockchain.wallet.network.NetworkParams;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class SharedMetadata {
     }
 
     public String getXpub() {
-        return node.serializePubB58(MainNetParams.get());
+        return node.serializePubB58(NetworkParams.getInstance().getCurrentParams());
     }
 
     /**
@@ -318,7 +318,7 @@ public class SharedMetadata {
                 msg.getSignature());
 
         String senderAddress = msg.getSender();
-        String addressFromSignature = key.toAddress(MainNetParams.get()).toString();
+        String addressFromSignature = key.toAddress(NetworkParams.getInstance().getCurrentParams()).toString();
 
         if (!senderAddress.equals(addressFromSignature)) {
             throw new ValidationException("Signature is not well-formed");
@@ -418,7 +418,7 @@ public class SharedMetadata {
 //            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setAddress(sharedMetaDataHDNode.toAddress(MainNetParams.get()).toString());
+            metadata.setAddress(sharedMetaDataHDNode.toAddress(NetworkParams.getInstance().getCurrentParams()).toString());
             metadata.setNode(sharedMetaDataHDNode);
 
             return metadata;

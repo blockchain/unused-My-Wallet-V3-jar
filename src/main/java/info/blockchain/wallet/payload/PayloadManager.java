@@ -22,6 +22,7 @@ import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.network.NetworkParams;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
 
@@ -31,7 +32,6 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
@@ -595,7 +595,7 @@ public class PayloadManager {
 
         final LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setEncryptedKey(encryptedKey);
-        legacyAddress.setAddress(ecKey.toAddress(MainNetParams.get()).toString());
+        legacyAddress.setAddress(ecKey.toAddress(NetworkParams.getInstance().getCurrentParams()).toString());
         legacyAddress.setCreatedDeviceName(deviceName);
         legacyAddress.setCreated(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(deviceVersion);

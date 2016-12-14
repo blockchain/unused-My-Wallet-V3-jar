@@ -1,6 +1,7 @@
 package info.blockchain.wallet.send;
 
 import info.blockchain.wallet.util.Hash;
+import info.blockchain.wallet.network.NetworkParams;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.Coin;
@@ -12,7 +13,6 @@ import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.crypto.TransactionSignature;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.spongycastle.util.encoders.Hex;
@@ -75,7 +75,7 @@ public class SendCoins {
         }
 
         // Construct a new transaction
-        Transaction tx = new Transaction(MainNetParams.get());
+        Transaction tx = new Transaction(NetworkParams.getInstance().getCurrentParams());
         List<MyTransactionInput> inputs = new ArrayList<MyTransactionInput>();
         List<TransactionOutput> outputs = new ArrayList<TransactionOutput>();
         BigInteger outputValueSum = BigInteger.ZERO;
@@ -95,7 +95,7 @@ public class SendCoins {
             outputValueSum = outputValueSum.add(amount);
             // Add the output
             BitcoinScript toOutputScript = BitcoinScript.createSimpleOutBitcoinScript(new BitcoinAddress(toAddress));
-            TransactionOutput output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(amount.longValue()), toOutputScript.getProgram());
+            TransactionOutput output = new TransactionOutput(NetworkParams.getInstance().getCurrentParams(), null, Coin.valueOf(amount.longValue()), toOutputScript.getProgram());
             outputs.add(output);
         }
 
@@ -120,7 +120,7 @@ public class SendCoins {
                 continue;
             }
 
-            MyTransactionInput input = new MyTransactionInput(MainNetParams.get(), null, new byte[0], outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
+            MyTransactionInput input = new MyTransactionInput(NetworkParams.getInstance().getCurrentParams(), null, new byte[0], outPoint, outPoint.getTxHash().toString(), outPoint.getTxOutputN());
             inputs.add(input);
             valueSelected = valueSelected.add(outPoint.getValue());
             priority += outPoint.getValue().longValue() * outPoint.getConfirmations();
@@ -151,7 +151,7 @@ public class SendCoins {
                 } else {
                     throw new Exception("Change address null");
                 }
-                TransactionOutput change_output = new TransactionOutput(MainNetParams.get(), null, Coin.valueOf(change.longValue()), change_script.getProgram());
+                TransactionOutput change_output = new TransactionOutput(NetworkParams.getInstance().getCurrentParams(), null, Coin.valueOf(change.longValue()), change_script.getProgram());
                 outputs.add(change_output);
             }
         }

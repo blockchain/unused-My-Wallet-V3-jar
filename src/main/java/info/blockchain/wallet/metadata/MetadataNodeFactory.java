@@ -3,10 +3,10 @@ package info.blockchain.wallet.metadata;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.RemoteMetadataNodes;
 import info.blockchain.wallet.util.MetadataUtil;
+import info.blockchain.wallet.network.NetworkParams;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.params.MainNetParams;
 
 import java.security.MessageDigest;
 
@@ -52,8 +52,8 @@ public class MetadataNodeFactory {
             return false;
         }
 
-        sharedMetadataNode = DeterministicKey.deserializeB58(remoteMetadataNodes.getMdid(), MainNetParams.get());
-        metadataNode = DeterministicKey.deserializeB58(remoteMetadataNodes.getMetadata(), MainNetParams.get());
+        sharedMetadataNode = DeterministicKey.deserializeB58(remoteMetadataNodes.getMdid(), NetworkParams.getInstance().getCurrentParams());
+        metadataNode = DeterministicKey.deserializeB58(remoteMetadataNodes.getMetadata(), NetworkParams.getInstance().getCurrentParams());
         return true;
     }
 
@@ -65,8 +65,8 @@ public class MetadataNodeFactory {
 
         //Save nodes hex on 2nd pw metadata
         RemoteMetadataNodes remoteMetadataNodes = new RemoteMetadataNodes();
-        remoteMetadataNodes.setMdid(smd.serializePrivB58(MainNetParams.get()));
-        remoteMetadataNodes.setMetadata(md.serializePrivB58(MainNetParams.get()));
+        remoteMetadataNodes.setMdid(smd.serializePrivB58(NetworkParams.getInstance().getCurrentParams()));
+        remoteMetadataNodes.setMetadata(md.serializePrivB58(NetworkParams.getInstance().getCurrentParams()));
         secondPwNode.putMetadata(remoteMetadataNodes.toJson());
 
         return loadNodes(remoteMetadataNodes);
