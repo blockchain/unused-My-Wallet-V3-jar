@@ -30,7 +30,7 @@ public class Metadata {
     byte[] encryptionKey;
     byte[] magicHash;
 
-    public Metadata() {
+    private Metadata() {
         this.endpoints = BlockchainFramework
                 .getRetrofitApiInstance()
                 .create(MetadataEndpoints.class);
@@ -91,12 +91,20 @@ public class Metadata {
         }
     }
 
+    public void putMetadata(String payload) throws Exception {
+        putMetadataEntry(address, payload, isEncrypted);
+    }
+
+    public void putMetadata(String mdid, String payload, boolean isEncrypted) throws Exception {
+        putMetadataEntry(mdid, payload, isEncrypted);
+    }
+
     /**
      * Put new metadata entry
      * @param payload JSON Stringified object
      * @throws Exception
      */
-    public void putMetadata(String payload) throws Exception {
+    public void putMetadataEntry(String address, String payload, boolean isEncrypted) throws Exception {
 
         //Ensure json syntax is correct
         FormatsUtil.getInstance().isValidJson(payload);
@@ -135,17 +143,17 @@ public class Metadata {
     }
 
     public String getMetadata() throws Exception {
-        return getMetadataEntry(address);
+        return getMetadataEntry(address, isEncrypted);
     }
 
-    public String getMetadata(String address) throws Exception {
-        return getMetadataEntry(address);
+    public String getMetadata(String address, boolean isEncrypted) throws Exception {
+        return getMetadataEntry(address, isEncrypted);
     }
 
     /**
      * Get metadata entry
      */
-    private String getMetadataEntry(String address) throws Exception {
+    private String getMetadataEntry(String address, boolean isEncrypted) throws Exception {
 
         Call<MetadataResponse> response = endpoints.getMetadata(address);
 
@@ -201,18 +209,25 @@ public class Metadata {
 
         //Required
         private int type;
-        private DeterministicKey rootNode;
+        private DeterministicKey metaDataHDNode;
 
-        //Optional
+        //Optional Override
         private boolean isEncrypted = true;//default
+        private byte[] encryptionKey;
 
-        public Builder(DeterministicKey rootNode, int type){
-            this.rootNode = rootNode;
+
+        public Builder(DeterministicKey metaDataHDNode, int type){
+            this.metaDataHDNode = metaDataHDNode;
             this.type = type;
         }
 
         public Builder setEncrypted(boolean isEncrypted){
             this.isEncrypted = isEncrypted;
+            return this;
+        }
+
+        public Builder setEncryptionKey(byte[] encryptionKey){
+            this.encryptionKey = encryptionKey;
             return this;
         }
 
@@ -222,19 +237,19 @@ public class Metadata {
          */
         public Metadata build() throws Exception {
 
-            int purposeI = MetadataUtil.getPurposeMetadata();
-
-            DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(rootNode, purposeI);
             DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
             DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);
 
-            byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
+            if(encryptionKey == null){
+                byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
+                encryptionKey = Sha256Hash.hash(privateKeyBuffer);
+            }
 
             Metadata metadata = new Metadata();
             metadata.setEncrypted(isEncrypted);
             metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
             metadata.setNode(node);
-            metadata.setEncryptionKey(Sha256Hash.hash(privateKeyBuffer));
+            metadata.setEncryptionKey(encryptionKey);
             metadata.setType(type);
             metadata.fetchMagic();
 

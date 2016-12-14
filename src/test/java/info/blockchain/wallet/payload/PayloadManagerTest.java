@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,6 +38,31 @@ public class PayloadManagerTest {
 
     @Before
     public void setUp() throws Exception {
+
+        //Set environment
+//        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
+//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
+//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
+
+        BlockchainFramework.init(new FrameworkInterface() {
+            @Override
+            public Retrofit getRetrofitApiInstance() {
+
+                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+                OkHttpClient okHttpClient = new OkHttpClient.Builder()
+//                        .addInterceptor(loggingInterceptor)//Extensive logging
+                        .build();
+
+                return RestClient.getRetrofitInstance(okHttpClient);
+            }
+
+            @Override
+            public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+        });
 
         MockitoAnnotations.initMocks(this);
 

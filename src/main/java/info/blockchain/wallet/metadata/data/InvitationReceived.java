@@ -8,18 +8,18 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Trusted {
+public class InvitationReceived {
 
-    String mdid;
-    String[] contacts;
-    String contact;
+    String id;//one-time UUID
+    String mdid;//me
+    String contact;//other user
+
+    public String getId() {
+        return id;
+    }
 
     public String getMdid() {
         return mdid;
-    }
-
-    public String[] getContacts() {
-        return contacts;
     }
 
     public String getContact() {

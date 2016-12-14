@@ -23,8 +23,6 @@ import retrofit2.http.Query;
 
 public interface MetadataEndpoints {
 
-    String API_URL = PersistentUrls.getInstance().getCurrentBaseApiUrl()+"metadata/";
-
     @GET("auth")
     Call<Auth> getNonce();
 
@@ -56,6 +54,9 @@ public interface MetadataEndpoints {
 
     @GET("message/{uuid}")
     Call<Message> getMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId);
+
+    @PUT("message/{uuid}/processed")
+    Call<Void> processMessage(@Header("Authorization") String jwToken, @Query("uuid") String messageId);
 
 
     @POST("share")

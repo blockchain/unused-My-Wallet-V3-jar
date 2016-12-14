@@ -15,6 +15,7 @@ import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
@@ -66,6 +67,7 @@ public class PayloadManager {
     private info.blockchain.bip44.Wallet wallet;
     private PrivateKeyFactory privateKeyFactory;
     private WalletPayload walletApi;
+    private MetadataNodeFactory metadataNodeFactory;
 
     private PayloadManager() {
         hdPayloadBridge = new HDPayloadBridge();
@@ -720,5 +722,30 @@ public class PayloadManager {
 
     public void registerMdid(String guid, String sharedKey, ECKey node) throws Exception {
         walletApi.registerMdid(node, guid, sharedKey);
+    }
+
+    public void loadNodes(String guid, String sharedKey, String walletPassword, @Nullable String secondPassword) throws Exception {
+
+        metadataNodeFactory = new MetadataNodeFactory(guid, sharedKey, walletPassword);
+
+        boolean usable = metadataNodeFactory.isMetadataUsable();
+        if(!usable){
+
+            Wallet wallet;
+            if (payload.isDoubleEncrypted()) {
+                wallet = getDecryptedWallet(secondPassword);
+            } else {
+                wallet = this.wallet;
+            }
+
+            boolean success = metadataNodeFactory.saveMetadataHdNodes(wallet.getMasterKey());
+            if(!success){
+                throw new Exception("All Metadata nodes might not have saved.");
+            }
+        }
+    }
+
+    public MetadataNodeFactory getMetadataNodeFactory() {
+        return metadataNodeFactory;
     }
 }

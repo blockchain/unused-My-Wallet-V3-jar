@@ -1,15 +1,16 @@
 package info.blockchain.wallet.metadata;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
-import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
-import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
 
@@ -20,26 +21,27 @@ import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
 import java.security.SignatureException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
 
-public class SharedMetadata extends Metadata{
-
-    final int TYPE_PAYMENT_REQUEST = 1;
-    final int TYPE_PAYMENT_REQUEST_RESPONSE = 2;
+public class SharedMetadata {
 
     String token;
 
+    MetadataEndpoints endpoints;
+    String address;
+    DeterministicKey node;
+
     public SharedMetadata() {
-        //noop
+        this.endpoints = BlockchainFramework
+                .getRetrofitApiInstance()
+                .create(MetadataEndpoints.class);
     }
 
     public void setEndpoints(MetadataEndpoints endpoints) {
@@ -70,7 +72,31 @@ public class SharedMetadata extends Metadata{
      * Do auth challenge
      */
     public void authorize() throws SharedMetadataConnectionException, IOException {
-        this.token = getToken();
+
+        if(token == null || !isValidToken(token)) {
+            token = getToken();
+        }
+    }
+
+    private boolean isValidToken(String token) throws IOException {
+
+        try {
+            String tokenParamsJsonB64 = new String(token.split("\\.")[1] + "=");
+            String tokenParamsJson = new String(Base64.decode(tokenParamsJsonB64.getBytes("utf-8")));
+
+            JsonFactory factory = new JsonFactory();
+
+            ObjectMapper mapper = new ObjectMapper(factory);
+            JsonNode rootNode = mapper.readTree(tokenParamsJson);
+
+            long expDate = rootNode.get("exp").asLong() * 1000;
+            long now = System.currentTimeMillis();
+
+            return now < expDate;
+
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -117,6 +143,7 @@ public class SharedMetadata extends Metadata{
      */
     public Trusted getTrustedList() throws SharedMetadataConnectionException, IOException {
 
+        authorize();
         Call<Trusted> response = endpoints.getTrustedList("Bearer " + token);
 
         Response<Trusted> exe = response.execute();
@@ -133,6 +160,7 @@ public class SharedMetadata extends Metadata{
      */
     public boolean getTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
 
+        authorize();
         Call<Trusted> response = endpoints.getTrusted("Bearer " + token, mdid);
 
         Response<Trusted> exe = response.execute();
@@ -147,12 +175,10 @@ public class SharedMetadata extends Metadata{
     /**
      * Add a contact to trusted list of mdid. Authenticated.
      */
-    public boolean putTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+    public boolean addTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
 
+        authorize();
         Call<Trusted> response = endpoints.putTrusted("Bearer " + token, mdid);
-
-        System.out.println(response.request().url());
-        System.out.println("Bearer " + token);
 
         Response<Trusted> exe = response.execute();
 
@@ -168,6 +194,7 @@ public class SharedMetadata extends Metadata{
      */
     public boolean deleteTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
 
+        authorize();
         Call<ResponseBody> response = endpoints.deleteTrusted("Bearer " + token, mdid);
 
         Response<ResponseBody> exe = response.execute();
@@ -182,26 +209,20 @@ public class SharedMetadata extends Metadata{
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
-    private Message postMessage(String mdidRecipient, String message, int type) throws Exception {
+    public Message postMessage(String mdidRecipient, String b64Msg, int type) throws Exception {
 
         if(mdidRecipient == null) throw new Exception("Recipient mdid null.");
-
-        String recipientXpub = getPublicXpubFromMdid(mdidRecipient);
-
-        if(recipientXpub == null) throw new Exception("No public xpub for mdid.");
-
-        byte[] encryptedMessage = MetadataUtil.encryptFor(node, recipientXpub, message);
-
-        String b64Msg = new String(Base64.encode(encryptedMessage));
 
         String signature = node.signMessage(b64Msg);
 
         Message request = new Message();
         request.setRecipient(mdidRecipient);
+        request.setSender(getAddress());
         request.setType(type);
         request.setPayload(b64Msg);
         request.setSignature(signature);
 
+        authorize();
         Call<Message> response = endpoints.postMessage("Bearer " + token, request);
 
         Response<Message> exe = response.execute();
@@ -217,8 +238,9 @@ public class SharedMetadata extends Metadata{
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(boolean onlyProcessed) throws Exception {
+    public List<Message> getMessages(boolean onlyProcessed) throws Exception {
 
+        authorize();
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, onlyProcessed);
 
         Response<List<Message>> exe = response.execute();
@@ -226,7 +248,7 @@ public class SharedMetadata extends Metadata{
         if (exe.isSuccessful()) {
 
             for (Message msg : exe.body()) {
-                verifiedAndDecryptMessage(msg);
+                validateSignature(msg);
             }
 
             return exe.body();
@@ -238,8 +260,9 @@ public class SharedMetadata extends Metadata{
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    private List<Message> getMessages(String lastMessageId) throws Exception {
+    public List<Message> getMessages(String lastMessageId) throws Exception {
 
+        authorize();
         Call<List<Message>> response = endpoints.getMessages("Bearer " + token, lastMessageId);
 
         Response<List<Message>> exe = response.execute();
@@ -247,7 +270,7 @@ public class SharedMetadata extends Metadata{
         if (exe.isSuccessful()) {
 
             for (Message msg : exe.body()) {
-                verifiedAndDecryptMessage(msg);
+                validateSignature(msg);
             }
 
             return exe.body();
@@ -259,8 +282,9 @@ public class SharedMetadata extends Metadata{
     /**
      * Get message from message id. Authenticated.
      */
-    private Message getMessage(String messageId) throws Exception {
+    public Message getMessage(String messageId) throws Exception {
 
+        authorize();
         Call<Message> response = endpoints.getMessage("Bearer " + token, messageId);
 
         Response<Message> exe = response.execute();
@@ -268,70 +292,23 @@ public class SharedMetadata extends Metadata{
         if (exe.isSuccessful()) {
 
             Message msg = exe.body();
-            verifiedAndDecryptMessage(msg);
+            validateSignature(msg);
             return msg;
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
         }
     }
 
-    public Message sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception {
-        return postMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST);
-    }
+    public void processMessage(String messageId) throws Exception{
 
-    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
+        authorize();
+        Call<Void> response = endpoints.processMessage("Bearer " + token, messageId);
 
-        PaymentRequestResponse response = new PaymentRequestResponse();
-        response.setAmount(paymentRequest.getAmount());
-        response.setNote(note);
-        response.setAddress(receiveAddress);
+        Response<Void> exe = response.execute();
 
-        return postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
-    }
-
-    public List<PaymentRequest> getPaymentRequests(boolean onlyProcessed) throws Exception {
-
-        List<PaymentRequest> requests = new ArrayList<>();
-
-        List<Message> messages = getMessages(onlyProcessed);
-
-        for (Message message : messages) {
-
-            if (message.getType() == TYPE_PAYMENT_REQUEST) {
-                requests.add(new PaymentRequest().fromJson(message.getPayload()));
-            }
+        if (!exe.isSuccessful()) {
+            throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
         }
-
-        return requests;
-    }
-
-    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyProcessed) throws Exception {
-
-        List<PaymentRequestResponse> responses = new ArrayList<>();
-
-        List<Message> messages = getMessages(onlyProcessed);
-
-        for (Message message : messages) {
-
-            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
-                responses.add(new PaymentRequestResponse().fromJson(message.getPayload()));
-            }
-        }
-
-        return responses;
-    }
-
-    /**
-     * Verify message signature and return decrypted.
-     */
-    private void verifiedAndDecryptMessage(Message msg) throws Exception {
-
-        validateSignature(msg);
-
-        String senderXpub = getPublicXpubFromMdid(msg.getSender());
-
-        String message = new String(Base64.decode(msg.getPayload()));
-        msg.setPayload(MetadataUtil.decryptFrom(node, senderXpub, message));
     }
 
     private void validateSignature(Message msg) throws ValidationException, SignatureException {
@@ -353,6 +330,7 @@ public class SharedMetadata extends Metadata{
      */
     public Invitation createInvitation() throws IOException, SharedMetadataConnectionException {
 
+        authorize();
         Call<Invitation> response = endpoints.postShare("Bearer " + token);
 
         Response<Invitation> exe = response.execute();
@@ -365,24 +343,15 @@ public class SharedMetadata extends Metadata{
         }
     }
 
-    /**
-     * Returns contact details of accepted invitation
-     */
-    public Contact acceptInvitation(String uri) throws SharedMetadataConnectionException, IOException {
+    public Invitation acceptInvitation(String inviteId) throws IOException, SharedMetadataConnectionException {
 
-        Map<String, String> queryParams = MetadataUtil.getQueryParams(uri);
-
-        Call<Invitation> response = endpoints.postToShare("Bearer " + token, queryParams.get("id"));
+        authorize();
+        Call<Invitation> response = endpoints.postToShare("Bearer " + token, inviteId);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            Invitation inv = exe.body();
-
-            Contact contact = new Contact().fromQueryParameters(queryParams);
-            contact.setMdid(inv.getMdid());
-
-            return contact;
+            return exe.body();
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
         }
@@ -391,17 +360,15 @@ public class SharedMetadata extends Metadata{
     /**
      * Gets MDID of sender from one-time UUID
      */
-    public Contact readInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
+    public String readInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
 
+        authorize();
         Call<Invitation> response = endpoints.getShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
-
-            Contact contact = new Contact();// TODO: 08/12/2016 I have no further contact details here?
-            contact.setMdid(exe.body().getContact());
-            return contact;
+            return exe.body().getContact();
         } else {
             throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
         }
@@ -412,6 +379,7 @@ public class SharedMetadata extends Metadata{
      */
     public boolean deleteInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
 
+        authorize();
         Call<Invitation> response = endpoints.deleteShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
@@ -423,38 +391,22 @@ public class SharedMetadata extends Metadata{
         }
     }
 
-    /**
-     * Publish xpub (public readable)
-     */
-    public void publishXpub() throws Exception {
-
-        setEncrypted(false);
-        fetchMagic();
-        putMetadata(new PublicContactDetails(getXpub()).toJson());
+    public String encryptFor(String xpub, String payload) throws Exception {
+        byte[] encryptedMessage = MetadataUtil.encryptFor(getNode(), xpub, payload);
+        return new String(encryptedMessage);
     }
 
-    /**
-     * Get public xpub for specified mdid
-     */
-    public String getPublicXpubFromMdid(String mdid) throws Exception {
-
-        String data = getMetadata(mdid);
-
-        if(data != null) {
-            PublicContactDetails publicXpub = new PublicContactDetails().fromJson(data);
-            return publicXpub.getXpub();
-        } else {
-            return null;
-        }
+    public String decryptFrom(String xpub, String payload) throws Exception{
+        return MetadataUtil.decryptFrom(getNode(), xpub, payload);
     }
 
-    static class Builder{
+    public static class Builder{
 
         //Required
-        private DeterministicKey rootNode;
+        private DeterministicKey sharedMetaDataHDNode;
 
-        public Builder(DeterministicKey rootNode){
-            this.rootNode = rootNode;
+        public Builder(DeterministicKey sharedMetaDataHDNode){
+            this.sharedMetaDataHDNode = sharedMetaDataHDNode;
         }
 
         /**
@@ -463,15 +415,11 @@ public class SharedMetadata extends Metadata{
          */
         public SharedMetadata build() throws Exception {
 
-            int purposeI = MetadataUtil.getPurposeMdid();
-
-            DeterministicKey node = MetadataUtil.deriveHardened(rootNode, purposeI);
+//            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
-            metadata.setNode(node);
-            metadata.authorize();
-            metadata.publishXpub();
+            metadata.setAddress(sharedMetaDataHDNode.toAddress(MainNetParams.get()).toString());
+            metadata.setNode(sharedMetaDataHDNode);
 
             return metadata;
         }

@@ -36,6 +36,7 @@ public class AESUtil {
     public static final int MODE_OFB = 1;
 
     private static final int AESBlockSize = 4;
+    private static final int KEY_BIT_LEN = 256;
 
     private static byte[] copyOfRange(byte[] source, int from, int to) {
         byte[] range = new byte[to - from];
@@ -255,5 +256,16 @@ public class AESUtil {
         System.arraycopy(buf, 0, out, 0, len);
 
         return new String(out, "UTF-8");
+    }
+
+    public static byte[] stringToKey(String string, int iterations) throws UnsupportedEncodingException {
+
+        byte[] salt = new String("salt").getBytes("utf-8");
+
+        PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
+        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(string.toString().toCharArray()), salt, iterations);
+        KeyParameter keyParam = (KeyParameter) generator.generateDerivedParameters(KEY_BIT_LEN);
+
+        return  keyParam.getKey();
     }
 }

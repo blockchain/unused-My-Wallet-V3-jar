@@ -7,7 +7,10 @@ import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.util.MetadataUtil;
 
+import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -25,6 +28,15 @@ import retrofit2.Retrofit;
  */
 @Ignore
 public class ContactsIT {
+
+    //dev wallets
+    private String wallet_A_guid = "014fb9fc-64f9-4cf5-b76b-d927d7619717";
+    private String wallet_A_sharedKey = "bc73239b-d3d9-4bee-a1f9-80248e179486";
+    private String wallet_A_seedHex = "20e3939d08ddf727f34a130704cd925e";
+
+    private String wallet_B_guid = "6fbe154a-35e0-46fb-a22b-699dc7cba87c";
+    private String wallet_B_sharedKey = "49e58bdb-5a66-4353-923a-3b49054603d6";
+    private String wallet_B_seedHex = "b88d0d894c19ad1d8e7f1563b7455f7c";
 
     @Before
     public void setup() throws Exception {
@@ -63,12 +75,15 @@ public class ContactsIT {
     }
 
     @Test
-    public void testIntegration() throws Exception {
+    public void testMetadataIntegration() throws Exception {
 
-        Contacts contacts = new Contacts(getWallet().getMasterKey());
+        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(getWallet().getMasterKey());
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(getWallet().getMasterKey());
+
+        Contacts contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         contacts.wipe();
         contacts.fetch();
-        Assert.assertTrue(contacts.getContacts().size() == 0);
+        Assert.assertTrue(contacts.getContactList().size() == 0);
 
         List<Contact> contactList = new ArrayList<>();
         Contact contact = new Contact();
@@ -83,27 +98,94 @@ public class ContactsIT {
         contact.setCompany("Blockchain");
         contactList.add(contact);
 
-        contacts.setContacts(contactList);
-        Assert.assertTrue(contacts.getContacts().size() == 2);
+        contacts.setContactList(contactList);
+        Assert.assertTrue(contacts.getContactList().size() == 2);
 
         contacts.save();
 
-        contacts = new Contacts(getWallet().getMasterKey());
+        contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         contacts.fetch();
-        Assert.assertTrue(contacts.getContacts().size() == 2);
+        Assert.assertTrue(contacts.getContactList().size() == 2);
 
-        Assert.assertEquals(contacts.getContacts().get(0).getName(), "John");
-        Assert.assertEquals(contacts.getContacts().get(0).getSurname(), "Doe");
-        Assert.assertEquals(contacts.getContacts().get(0).getCompany(), "Blockchain");
-        Assert.assertEquals(contacts.getContacts().get(1).getName(), "Bill");
-        Assert.assertEquals(contacts.getContacts().get(1).getSurname(), "Clark");
-        Assert.assertEquals(contacts.getContacts().get(1).getCompany(), "Blockchain");
+        Assert.assertEquals(contacts.getContactList().get(0).getName(), "John");
+        Assert.assertEquals(contacts.getContactList().get(0).getSurname(), "Doe");
+        Assert.assertEquals(contacts.getContactList().get(0).getCompany(), "Blockchain");
+        Assert.assertEquals(contacts.getContactList().get(1).getName(), "Bill");
+        Assert.assertEquals(contacts.getContactList().get(1).getSurname(), "Clark");
+        Assert.assertEquals(contacts.getContactList().get(1).getCompany(), "Blockchain");
 
         contacts.wipe();
 
-        contacts = new Contacts(getWallet().getMasterKey());
+        contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         contacts.fetch();
-        Assert.assertTrue(contacts.getContacts().size() == 0);
+        Assert.assertTrue(contacts.getContactList().size() == 0);
 
+    }
+
+    @Test
+    public void testSharedMetadataIntegration() throws Exception {
+
+        /*
+        Create wallets
+         */
+        Wallet a_wallet = setupWallet(wallet_A_seedHex, wallet_A_guid, wallet_A_sharedKey);
+        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(a_wallet.getMasterKey());
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(a_wallet.getMasterKey());
+        Contacts a_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
+        a_contacts.fetch();
+
+        Wallet b_wallet = setupWallet(wallet_B_seedHex, wallet_B_guid, wallet_B_sharedKey);
+        sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
+        metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
+        Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
+        b_contacts.fetch();
+
+        /*
+        Pair
+         */
+        System.out.println("\n--Sender--");
+        Contact me = new Contact();
+        me.setName("Riaan");
+        Contact him = new Contact();
+        him.setName("Jaume");
+        Contact myInvite = a_contacts.createInvitation(me, him);
+        String oneTimeUri = myInvite.createURI();
+        System.out.println("createInvitation: "+oneTimeUri);
+
+        System.out.println("\n--Recipient--");
+        Contact senderDetails = b_contacts.acceptInvitationLink(oneTimeUri);
+        System.out.println("accept Invitation: "+senderDetails.toJson());
+
+        System.out.println("\n--Sender--");
+        boolean accepted = a_contacts.readInvitationSent(myInvite);
+        System.out.println("Accepted: "+accepted);
+        a_contacts.sendMessage(myInvite.getMdid(), "Hey hey", 66, true);
+
+        /*
+        Already in trusted contact list
+         */
+//      Contact senderDetails = a_contacts.getContactList().get...
+
+
+        /*
+        Send messages
+         */
+        System.out.println("\n--Recipient--");
+        List<Message> messages = b_contacts.getMessages(true);
+        System.out.println("Received messages: '" + messages.size() + "'");
+
+        Message message = messages.get(messages.size()-1);
+        b_contacts.readMessage(message.getId());
+        System.out.println("ECDH Encrypted: "+message.getPayload());
+        System.out.println("Decrypted: "+b_contacts.decryptMessageFrom(message, senderDetails.getMdid()).getPayload());
+        ////b_contacts.markMessageAsRead(message);// TODO: 12/12/2016 This API call hasn't been working at all
+    }
+
+    private Wallet setupWallet(String hex, String guid, String sharedKey) throws Exception {
+        System.out.println("\n--Start Wallet " + guid + "--");
+        Wallet wallet = new WalletFactory().restoreWallet(hex, "", 1);
+        //DEV is down, a lot, so skip this
+//        PayloadManager.getInstance().registerMdid(guid, sharedKey, sharedMetadata.getNode());
+        return wallet;
     }
 }

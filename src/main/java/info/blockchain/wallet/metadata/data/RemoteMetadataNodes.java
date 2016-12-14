@@ -6,28 +6,45 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.io.IOException;
+
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Trusted {
+public class RemoteMetadataNodes {
 
+    //private bytes as HEX
+    String metadata;
     String mdid;
-    String[] contacts;
-    String contact;
+    //Add any future metadata node derivations here
+
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
 
     public String getMdid() {
         return mdid;
     }
 
-    public String[] getContacts() {
-        return contacts;
+    public void setMdid(String mdid) {
+        this.mdid = mdid;
     }
 
-    public String getContact() {
-        return contact;
+    @JsonIgnore
+    public RemoteMetadataNodes fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, RemoteMetadataNodes.class);
     }
 
     @JsonIgnore
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
+    }
+
+    @JsonIgnore
+    public boolean isAllNodesAvailable() {
+        return (metadata != null && mdid != null);
     }
 }

@@ -140,7 +140,7 @@ public class SendCoins {
         }
 
         BigInteger change = valueSelected.subtract(outputValueSum).subtract(fee);
-        // Now add the change if there is any
+        // Now addContact the change if there is any
         if (change.compareTo(BigInteger.ZERO) > 0) {
 
             // Consume the change if it would create a very small none standard output
