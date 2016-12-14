@@ -14,6 +14,10 @@ public class MockInterceptor implements Interceptor {
     String responseString = "";
     int responseCode = 200;
 
+    public void setResponseString(String response) {
+        responseString = response;
+    }
+
     public void setResponse_404() {
         responseString = "{\"message\":\"Not Found\"}";
         responseCode = 404;

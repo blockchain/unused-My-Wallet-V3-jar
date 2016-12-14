@@ -8,6 +8,7 @@ import info.blockchain.api.PersistentUrls;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
+import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Before;
@@ -68,19 +69,17 @@ public class MetadataIT {
         /*
         Magic hash need to be computed correctly otherwise consecutive PUT will fail
          */
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(getWallet().getMasterKey());
 
-        Wallet wallet = getWallet();
-        DeterministicKey key = wallet.getMasterKey();
-
-        Metadata metadata = new Metadata.Builder(getWallet().getMasterKey(), 2)
+        Metadata metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo1"));
 
-        metadata = new Metadata.Builder(getWallet().getMasterKey(), 2)
+        metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo2"));
 
-        metadata = new Metadata.Builder(getWallet().getMasterKey(), 2)
+        metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
         metadata.putMetadata(mapper.writeValueAsString("Yolo3"));
 

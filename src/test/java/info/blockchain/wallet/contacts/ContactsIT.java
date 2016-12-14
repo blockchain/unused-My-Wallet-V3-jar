@@ -8,7 +8,9 @@ import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.util.MetadataUtil;
 
+import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -75,7 +77,10 @@ public class ContactsIT {
     @Test
     public void testMetadataIntegration() throws Exception {
 
-        Contacts contacts = new Contacts(getWallet().getMasterKey());
+        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(getWallet().getMasterKey());
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(getWallet().getMasterKey());
+
+        Contacts contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         contacts.wipe();
         contacts.fetch();
         Assert.assertTrue(contacts.getContactList().size() == 0);
@@ -98,7 +103,7 @@ public class ContactsIT {
 
         contacts.save();
 
-        contacts = new Contacts(getWallet().getMasterKey());
+        contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         contacts.fetch();
         Assert.assertTrue(contacts.getContactList().size() == 2);
 
@@ -111,7 +116,7 @@ public class ContactsIT {
 
         contacts.wipe();
 
-        contacts = new Contacts(getWallet().getMasterKey());
+        contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         contacts.fetch();
         Assert.assertTrue(contacts.getContactList().size() == 0);
 
@@ -124,11 +129,15 @@ public class ContactsIT {
         Create wallets
          */
         Wallet a_wallet = setupWallet(wallet_A_seedHex, wallet_A_guid, wallet_A_sharedKey);
-        Contacts a_contacts = new Contacts(a_wallet.getMasterKey());
+        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(a_wallet.getMasterKey());
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(a_wallet.getMasterKey());
+        Contacts a_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         a_contacts.fetch();
 
         Wallet b_wallet = setupWallet(wallet_B_seedHex, wallet_B_guid, wallet_B_sharedKey);
-        Contacts b_contacts = new Contacts(b_wallet.getMasterKey());
+        sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
+        metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
+        Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         b_contacts.fetch();
 
         /*

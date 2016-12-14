@@ -30,7 +30,7 @@ public class Metadata {
     byte[] encryptionKey;
     byte[] magicHash;
 
-    public Metadata() {
+    private Metadata() {
         this.endpoints = BlockchainFramework
                 .getRetrofitApiInstance()
                 .create(MetadataEndpoints.class);
@@ -209,18 +209,25 @@ public class Metadata {
 
         //Required
         private int type;
-        private DeterministicKey rootNode;
+        private DeterministicKey metaDataHDNode;
 
-        //Optional
+        //Optional Override
         private boolean isEncrypted = true;//default
+        private byte[] encryptionKey;
 
-        public Builder(DeterministicKey rootNode, int type){
-            this.rootNode = rootNode;
+
+        public Builder(DeterministicKey metaDataHDNode, int type){
+            this.metaDataHDNode = metaDataHDNode;
             this.type = type;
         }
 
         public Builder setEncrypted(boolean isEncrypted){
             this.isEncrypted = isEncrypted;
+            return this;
+        }
+
+        public Builder setEncryptionKey(byte[] encryptionKey){
+            this.encryptionKey = encryptionKey;
             return this;
         }
 
@@ -230,19 +237,19 @@ public class Metadata {
          */
         public Metadata build() throws Exception {
 
-            int purposeI = MetadataUtil.getPurposeMetadata();
-
-            DeterministicKey metaDataHDNode = MetadataUtil.deriveHardened(rootNode, purposeI);
             DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
             DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);
 
-            byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
+            if(encryptionKey == null){
+                byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
+                encryptionKey = Sha256Hash.hash(privateKeyBuffer);
+            }
 
             Metadata metadata = new Metadata();
             metadata.setEncrypted(isEncrypted);
             metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
             metadata.setNode(node);
-            metadata.setEncryptionKey(Sha256Hash.hash(privateKeyBuffer));
+            metadata.setEncryptionKey(encryptionKey);
             metadata.setType(type);
             metadata.fetchMagic();
 

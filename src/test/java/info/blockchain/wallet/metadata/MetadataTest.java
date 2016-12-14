@@ -7,7 +7,9 @@ import info.blockchain.FrameworkInterface;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
+import info.blockchain.wallet.util.MetadataUtil;
 
+import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +68,9 @@ public class MetadataTest {
 
         mockInterceptor.setResponse_404();//New metadata response
 
-        Metadata metadata = new Metadata.Builder(getWallet().getMasterKey(), 2)
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(getWallet().getMasterKey());
+
+        Metadata metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .setEncrypted(isEncrypted)
                 .build();
 
@@ -78,7 +82,9 @@ public class MetadataTest {
 
         mockInterceptor.setResponse_404();//New metadata response
 
-        Metadata metadata = new Metadata.Builder(getWallet().getMasterKey(), 2)
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(getWallet().getMasterKey());
+
+        Metadata metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .setEncrypted(isEncrypted)
                 .build();
 

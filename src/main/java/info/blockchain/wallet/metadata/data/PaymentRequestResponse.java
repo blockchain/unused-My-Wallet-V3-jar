@@ -1,13 +1,18 @@
 package info.blockchain.wallet.metadata.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.uri.BitcoinURI;
 
 import java.io.IOException;
 
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentRequestResponse {
 
     long amount;
@@ -39,14 +44,17 @@ public class PaymentRequestResponse {
         this.address = address;
     }
 
+    @JsonIgnore
     public String toBitcoinURI() {
         return BitcoinURI.convertToBitcoinURI(address, Coin.valueOf(amount), label, note);
     }
 
+    @JsonIgnore
     public PaymentRequestResponse fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, PaymentRequestResponse.class);
     }
 
+    @JsonIgnore
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }

@@ -64,19 +64,19 @@ public class MetadataUtil {
         return Sha256Hash.hashTwice(messageBytes);
     }
 
-    public static int getPurposeMetadata() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        return getPurpose("metadata");
+    public static DeterministicKey deriveMetadataNode(DeterministicKey node) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        return HDKeyDerivation.deriveChildKey(node, getPurpose("metadata") | ChildNumber.HARDENED_BIT);
     }
 
-    public static int getPurposeMdid() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-        return getPurpose("mdid");
+    public static DeterministicKey deriveSharedMetadataNode(DeterministicKey node) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        return HDKeyDerivation.deriveChildKey(node, getPurpose("mdid") | ChildNumber.HARDENED_BIT);
     }
 
     /**
      * BIP 43 purpose needs to be 31 bit or less. For lack of a BIP number we take the first 31 bits
      * of the SHA256 hash of a reverse domain.
      */
-    public static int getPurpose(String sub) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    private static int getPurpose(String sub) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         String text = "info.blockchain."+sub;

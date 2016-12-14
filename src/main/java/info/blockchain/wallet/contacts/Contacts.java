@@ -36,10 +36,10 @@ public class Contacts {
     private List<Contact> contacts;
     private ObjectMapper mapper = new ObjectMapper();
 
-    public Contacts(DeterministicKey masterKey) throws Exception {
+    public Contacts(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws Exception {
 
-        metadata = new Metadata.Builder(masterKey, METADATA_TYPE_EXTERNAL).build();
-        sharedMetadata = new SharedMetadata.Builder(masterKey).build();
+        metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
+        sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
         contacts = new ArrayList<>();
     }
 

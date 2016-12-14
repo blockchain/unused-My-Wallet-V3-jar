@@ -403,10 +403,10 @@ public class SharedMetadata {
     public static class Builder{
 
         //Required
-        private DeterministicKey rootNode;
+        private DeterministicKey sharedMetaDataHDNode;
 
-        public Builder(DeterministicKey rootNode){
-            this.rootNode = rootNode;
+        public Builder(DeterministicKey sharedMetaDataHDNode){
+            this.sharedMetaDataHDNode = sharedMetaDataHDNode;
         }
 
         /**
@@ -415,13 +415,11 @@ public class SharedMetadata {
          */
         public SharedMetadata build() throws Exception {
 
-            int purposeI = MetadataUtil.getPurposeMdid();
-
-            DeterministicKey node = MetadataUtil.deriveHardened(rootNode, purposeI);
+//            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
-            metadata.setNode(node);
+            metadata.setAddress(sharedMetaDataHDNode.toAddress(MainNetParams.get()).toString());
+            metadata.setNode(sharedMetaDataHDNode);
 
             return metadata;
         }
