@@ -10,6 +10,10 @@ import org.bitcoinj.params.MainNetParams;
 
 import java.security.MessageDigest;
 
+/**
+ * Restores derived metadata nodes from a metadata node derived from user credentials.
+ * This is to avoid repeatedly asking user for second password.
+ */
 public class MetadataNodeFactory {
 
     private DeterministicKey sharedMetadataNode;
@@ -23,14 +27,21 @@ public class MetadataNodeFactory {
 
     public boolean isMetadataUsable() throws Exception{
 
-        String nodesJson = secondPwNode.getMetadata();
-        if (nodesJson == null) {
-            //no record
-            //prompt for second pw if need then saveMetadataHdNodes()
+        try {
+            String nodesJson = secondPwNode.getMetadata();
+            if (nodesJson == null) {
+                //no record
+                //prompt for second pw if need then saveMetadataHdNodes()
+                return false;
+            } else {
+                //Yes load nodes from stored metadata.
+                return loadNodes(new RemoteMetadataNodes().fromJson(nodesJson));
+            }
+
+        }catch (Exception e){
+            //Metadata decryption will fail if user changes wallet password.
+            e.printStackTrace();
             return false;
-        } else {
-            //Yes load nodes from stored metadata.
-            return loadNodes(new RemoteMetadataNodes().fromJson(nodesJson));
         }
     }
 
