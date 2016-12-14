@@ -7,15 +7,19 @@ import org.json.JSONObject;
 public class AddressInfo extends BaseApi {
 
     private static final String ADDRESS = "address/";
-    public static final String PROD_ADDRESS_INFO_URL = PROTOCOL + SERVER_ADDRESS + ADDRESS;
 
     public AddressInfo() {
         // No-op
     }
 
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + ADDRESS;
+    }
+
     public JSONObject getAddressInfo(String address, String parameter) throws Exception {
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getAddressInfoUrl());
+        StringBuilder url = new StringBuilder(getRoute());
         url.append(address);
         url.append("?format=json");
         if (parameter != null && !parameter.isEmpty())

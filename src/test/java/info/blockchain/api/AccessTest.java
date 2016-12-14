@@ -1,6 +1,13 @@
 package info.blockchain.api;
 
+import info.blockchain.BlockchainFramework;
+import info.blockchain.FrameworkInterface;
+import info.blockchain.util.RestClient;
+
 import org.junit.Test;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -10,6 +17,18 @@ public class AccessTest {
 
     @Test
     public void getEncryptedPayload_whenBadString_shouldPass() throws Exception {
+
+        BlockchainFramework.init(new FrameworkInterface() {
+            @Override
+            public Retrofit getRetrofitApiInstance() {
+                return RestClient.getRetrofitInstance(new OkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+        });
 
         WalletPayload access = new WalletPayload();
         String sessionId = access.getSessionId(guid);

@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class MultiAddrFactory {
@@ -85,6 +86,35 @@ public class MultiAddrFactory {
         if (jsonObject != null) {
             parseLegacy(jsonObject);
         }
+    }
+
+    /**
+     * Returns a map of address/corresponding final balance
+     *
+     * @param addresses A List of addresses (HD)
+     */
+    public LinkedHashMap<String, Long> getAddressBalanceFromApi(List<String> addresses) throws Exception {
+        LinkedHashMap<String, Long> map = new LinkedHashMap<>();
+
+        // Place into map to maintain order, as API may return them in a random order
+        for (String address : addresses) {
+            map.put(address, 0L);
+        }
+
+        MultiAddress api = new MultiAddress();
+        JSONObject jsonObject = api.getAddresses(addresses);
+
+        if (jsonObject.has("addresses")) {
+            JSONArray addressList = jsonObject.getJSONArray("addresses");
+            for (int i = 0; i < addressList.length(); i++) {
+                JSONObject object = addressList.getJSONObject(i);
+                if (object.has("address") && object.has("final_balance")) {
+                    map.put(object.getString("address"), object.getLong("final_balance"));
+                }
+            }
+        }
+
+        return map;
     }
 
     private void parseXPUB(JSONObject jsonObject) throws JSONException {

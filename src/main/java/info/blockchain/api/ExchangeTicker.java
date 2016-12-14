@@ -4,11 +4,16 @@ import info.blockchain.wallet.util.WebUtil;
 
 public class ExchangeTicker extends BaseApi {
 
-    public static final String PROD_EXCHANGE_URL = PROTOCOL + SERVER_ADDRESS + "ticker?_=";
+    private static final String TICKER = "ticker?_=";
+
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getDefaultBaseServerUrl() + TICKER;
+    }
 
     public String getExchangeRate() throws Exception {
 
-        String response = WebUtil.getInstance().getURL(PROD_EXCHANGE_URL);
+        String response = WebUtil.getInstance().getURL(getRoute());
         if (response == null) {
             throw new Exception("Failed to get exchange rate");
         }
@@ -27,8 +32,7 @@ public class ExchangeTicker extends BaseApi {
      */
     public String getHistoricPrice(long satoshis, String currency, long timeInMillis) throws Exception {
         String response = WebUtil.getInstance().getURL(
-                PROTOCOL
-                        + SERVER_ADDRESS
+                PersistentUrls.getInstance().getDefaultBaseServerUrl()
                         + "frombtc?value="
                         + satoshis
                         + "&currency="
