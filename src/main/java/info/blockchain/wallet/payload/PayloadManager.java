@@ -5,6 +5,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import info.blockchain.api.ExternalEntropy;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
@@ -22,7 +23,6 @@ import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import info.blockchain.wallet.network.NetworkParams;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
 
@@ -595,7 +595,7 @@ public class PayloadManager {
 
         final LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setEncryptedKey(encryptedKey);
-        legacyAddress.setAddress(ecKey.toAddress(NetworkParams.getInstance().getCurrentParams()).toString());
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
         legacyAddress.setCreatedDeviceName(deviceName);
         legacyAddress.setCreated(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(deviceVersion);

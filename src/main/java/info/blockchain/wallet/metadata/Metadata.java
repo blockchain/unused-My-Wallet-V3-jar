@@ -2,12 +2,12 @@ package info.blockchain.wallet.metadata;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.MetadataUtil;
-import info.blockchain.wallet.network.NetworkParams;
 
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -247,7 +247,7 @@ public class Metadata {
 
             Metadata metadata = new Metadata();
             metadata.setEncrypted(isEncrypted);
-            metadata.setAddress(node.toAddress(NetworkParams.getInstance().getCurrentParams()).toString());
+            metadata.setAddress(node.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
             metadata.setNode(node);
             metadata.setEncryptionKey(encryptionKey);
             metadata.setType(type);

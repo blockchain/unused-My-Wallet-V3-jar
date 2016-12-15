@@ -1,9 +1,9 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import info.blockchain.wallet.network.NetworkParams;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
@@ -224,7 +224,7 @@ public class LegacyAddress {
         ECKey ecKey = getECKey(secondPassword);
 
         if (ecKey != null) {
-            return ecKey.getPrivateKeyEncoded(NetworkParams.getInstance().getCurrentParams()).toString();
+            return ecKey.getPrivateKeyEncoded(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
         } else {
             return null;
         }
@@ -265,9 +265,9 @@ public class LegacyAddress {
             keyUnCompressed = ECKey.fromPrivate(priv2, false);
         }
 
-        if (keyCompressed.toAddress(NetworkParams.getInstance().getCurrentParams()).toString().equals(this.strAddress)) {
+        if (keyCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString().equals(this.strAddress)) {
             ecKey = keyCompressed;
-        } else if (keyUnCompressed.toAddress(NetworkParams.getInstance().getCurrentParams()).toString().equals(this.strAddress)) {
+        } else if (keyUnCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString().equals(this.strAddress)) {
             ecKey = keyUnCompressed;
         } else {
             ecKey = null;

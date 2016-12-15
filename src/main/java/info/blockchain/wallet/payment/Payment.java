@@ -1,5 +1,6 @@
 package info.blockchain.wallet.payment;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.PushTx;
 import info.blockchain.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
@@ -8,7 +9,6 @@ import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.Hash;
-import info.blockchain.wallet.network.NetworkParams;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
@@ -224,7 +224,7 @@ public class Payment {
         Transaction tx = pair.getLeft();
         Long priority = pair.getRight();
 
-        Wallet wallet = new Wallet(NetworkParams.getInstance().getCurrentParams());
+        Wallet wallet = new Wallet(PersistentUrls.getInstance().getCurrentNetworkParams());
         wallet.importKeys(keys);
 
         SendCoins.getInstance().signTx(tx, wallet);

@@ -1,8 +1,8 @@
 package info.blockchain.bip44;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.network.NetworkParams;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -91,7 +91,7 @@ public class WalletFactory {
             passphrase = "";
         }
 
-        NetworkParameters params = NetworkParams.getInstance().getCurrentParams();
+        NetworkParameters params = PersistentUrls.getInstance().getCurrentNetworkParams();
 
         SecureRandom random = new SecureRandom();
         byte seed[] = new byte[len];
@@ -128,7 +128,7 @@ public class WalletFactory {
             passphrase = "";
         }
 
-        NetworkParameters params = NetworkParams.getInstance().getCurrentParams();
+        NetworkParameters params = PersistentUrls.getInstance().getCurrentNetworkParams();
 
         InputStream wis = this.getClass().getClassLoader().getResourceAsStream("wordlist/" + locale.toString() + ".txt");
         if (wis != null) {
@@ -173,7 +173,7 @@ public class WalletFactory {
 
         Wallet hdw = null;
 
-        NetworkParameters params = NetworkParams.getInstance().getCurrentParams();
+        NetworkParameters params = PersistentUrls.getInstance().getCurrentNetworkParams();
 
         JSONObject obj;
         try {

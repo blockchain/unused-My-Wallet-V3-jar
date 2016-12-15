@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
@@ -13,7 +14,6 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
-import info.blockchain.wallet.network.NetworkParams;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -65,7 +65,7 @@ public class SharedMetadata {
     }
 
     public String getXpub() {
-        return node.serializePubB58(NetworkParams.getInstance().getCurrentParams());
+        return node.serializePubB58(PersistentUrls.getInstance().getCurrentNetworkParams());
     }
 
     /**
@@ -318,7 +318,7 @@ public class SharedMetadata {
                 msg.getSignature());
 
         String senderAddress = msg.getSender();
-        String addressFromSignature = key.toAddress(NetworkParams.getInstance().getCurrentParams()).toString();
+        String addressFromSignature = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
 
         if (!senderAddress.equals(addressFromSignature)) {
             throw new ValidationException("Signature is not well-formed");
@@ -418,7 +418,7 @@ public class SharedMetadata {
 //            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setAddress(sharedMetaDataHDNode.toAddress(NetworkParams.getInstance().getCurrentParams()).toString());
+            metadata.setAddress(sharedMetaDataHDNode.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
             metadata.setNode(sharedMetaDataHDNode);
 
             return metadata;
