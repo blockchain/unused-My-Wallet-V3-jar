@@ -8,6 +8,7 @@ import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.MetadataUtil;
 
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
@@ -26,11 +27,11 @@ public class Metadata {
     MetadataEndpoints endpoints;
     int type;
     String address;
-    DeterministicKey node;
+    ECKey node;
     byte[] encryptionKey;
     byte[] magicHash;
 
-    private Metadata() {
+    public Metadata() {
         this.endpoints = BlockchainFramework
                 .getRetrofitApiInstance()
                 .create(MetadataEndpoints.class);
@@ -40,7 +41,7 @@ public class Metadata {
         this.address = address;
     }
 
-    public void setNode(DeterministicKey node) {
+    public void setNode(ECKey node) {
         this.node = node;
     }
 
@@ -60,7 +61,7 @@ public class Metadata {
         return this.address;
     }
 
-    public DeterministicKey getNode() {
+    public ECKey getNode() {
         return this.node;
     }
 

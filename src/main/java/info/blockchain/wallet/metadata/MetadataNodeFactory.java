@@ -4,10 +4,11 @@ import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.RemoteMetadataNodes;
 import info.blockchain.wallet.util.MetadataUtil;
 
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 
+import java.math.BigInteger;
 import java.security.MessageDigest;
 
 /**
@@ -77,11 +78,22 @@ public class MetadataNodeFactory {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         String text = guid + sharedkey;
         md.update(text.getBytes("UTF-8"));
-        byte[] hash = md.digest();
+        byte[] entropy = md.digest();
+        BigInteger bi = new BigInteger(1, entropy);
 
-        DeterministicKey key = HDKeyDerivation.createMasterPrivateKey(hash);
+        ECKey key = ECKey.fromPrivate(bi);
+
         byte[] enc = AESUtil.stringToKey(password + sharedkey, 5000);
-        return new Metadata.Builder(key, -1).setEncryptionKey(enc).build();
+
+        Metadata metadata = new Metadata();
+        metadata.setEncrypted(true);
+        metadata.setAddress(key.toAddress(MainNetParams.get()).toString());
+        metadata.setNode(key);
+        metadata.setEncryptionKey(enc);
+        metadata.setType(-1);
+        metadata.fetchMagic();
+
+        return metadata;
     }
 
     public DeterministicKey getSharedMetadataNode() {
