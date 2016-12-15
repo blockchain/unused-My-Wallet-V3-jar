@@ -156,9 +156,9 @@ public class Contact {
         qparams.add(new BasicNameValuePair("id", outgoingInvitation.getId()));
 
         URIBuilder builder = new URIBuilder()
-                .setScheme("blockchain")
-                .setHost("")
-                .setPath("invite")
+                .setScheme("http")
+                .setHost("blockchain.info")
+                .setPath("/invite")
                 .setParameters(qparams);
 
         return builder.build().toString();

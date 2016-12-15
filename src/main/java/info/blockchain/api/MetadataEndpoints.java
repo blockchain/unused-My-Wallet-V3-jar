@@ -5,6 +5,7 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
+import info.blockchain.wallet.metadata.data.MessageProcessRequest;
 import info.blockchain.wallet.metadata.data.Trusted;
 
 import java.util.HashMap;
@@ -49,14 +50,11 @@ public interface MetadataEndpoints {
     @GET("messages")
     Call<List<Message>> getMessages(@Header("Authorization") String jwToken, @Query("new") Boolean onlyProcessed);
 
-    @GET("messages")
-    Call<List<Message>> getMessages(@Header("Authorization") String jwToken, @Query("uuid") String messageId);
-
     @GET("message/{uuid}")
     Call<Message> getMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId);
 
     @PUT("message/{uuid}/processed")
-    Call<Void> processMessage(@Header("Authorization") String jwToken, @Query("uuid") String messageId);
+    Call<Void> processMessage(@Header("Authorization") String jwToken, @Path("uuid") String id, @Body MessageProcessRequest body);
 
 
     @POST("share")

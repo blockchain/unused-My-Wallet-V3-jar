@@ -11,6 +11,7 @@ import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
+import info.blockchain.wallet.metadata.data.MessageProcessRequest;
 import info.blockchain.wallet.metadata.data.Trusted;
 import info.blockchain.wallet.util.MetadataUtil;
 
@@ -258,28 +259,6 @@ public class SharedMetadata {
     }
 
     /**
-     * Get messages sent to my MDID. Authenticated.
-     */
-    public List<Message> getMessages(String lastMessageId) throws Exception {
-
-        authorize();
-        Call<List<Message>> response = endpoints.getMessages("Bearer " + token, lastMessageId);
-
-        Response<List<Message>> exe = response.execute();
-
-        if (exe.isSuccessful()) {
-
-            for (Message msg : exe.body()) {
-                validateSignature(msg);
-            }
-
-            return exe.body();
-        } else {
-            throw new SharedMetadataConnectionException(exe.code() + " " + exe.message());
-        }
-    }
-
-    /**
      * Get message from message id. Authenticated.
      */
     public Message getMessage(String messageId) throws Exception {
@@ -299,10 +278,14 @@ public class SharedMetadata {
         }
     }
 
-    public void processMessage(String messageId) throws Exception{
+    public void processMessage(String messageId, boolean processed) throws Exception{
 
         authorize();
-        Call<Void> response = endpoints.processMessage("Bearer " + token, messageId);
+
+        MessageProcessRequest requestBody = new MessageProcessRequest();
+        requestBody.setProcessed(processed);
+
+        Call<Void> response = endpoints.processMessage("Bearer " + token, messageId, requestBody);
 
         Response<Void> exe = response.execute();
 
