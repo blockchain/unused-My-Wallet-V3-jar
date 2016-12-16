@@ -69,6 +69,10 @@ public class SharedMetadata {
         return node.serializePubB58(PersistentUrls.getInstance().getCurrentNetworkParams());
     }
 
+    public void setToken(String token){
+        this.token = token;
+    }
+
     /**
      * Do auth challenge
      */

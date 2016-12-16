@@ -36,6 +36,16 @@ public class Contacts {
     private List<Contact> contacts;
     private ObjectMapper mapper = new ObjectMapper();
 
+    public Contacts() {
+        //Empty constructor for dagger injection client side
+    }
+
+    public void init(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws Exception {
+        metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
+        sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
+        contacts = new ArrayList<>();
+    }
+
     public Contacts(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws Exception {
 
         metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
@@ -62,6 +72,14 @@ public class Contacts {
 
     public void wipe() throws Exception {
         metadata.putMetadata(mapper.writeValueAsString(new ArrayList<Contact>()));
+    }
+
+    public void invalidateToken() {
+        sharedMetadata.setToken(null);
+    }
+
+    public void authorize() throws SharedMetadataConnectionException, IOException {
+        sharedMetadata.authorize();
     }
 
     public List<Contact> getContactList() {

@@ -2,10 +2,12 @@ package info.blockchain.wallet.metadata;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 
 import org.bitcoinj.crypto.DeterministicKey;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +27,11 @@ public class SharedMetadataTest {
         mockInterceptor = new MockInterceptor();
 
         //Set environment
+        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
+        PersistentUrls.getInstance().setCurrentApiUrl("https://api.staging.blockchain.info/");
+        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.staging.blockchain.info/");
+
+
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
             public Retrofit getRetrofitApiInstance() {
@@ -33,8 +40,8 @@ public class SharedMetadataTest {
                 loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
                 OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                        .addInterceptor(mockInterceptor)//Mock responses
-                        .addInterceptor(loggingInterceptor)//Extensive logging
+//                        .addInterceptor(mockInterceptor)//Mock responses
+//                        .addInterceptor(loggingInterceptor)//Extensive logging
                         .build();
 
                 return RestClient.getRetrofitInstance(okHttpClient);
@@ -46,32 +53,33 @@ public class SharedMetadataTest {
             }
         });
 
-        key = new WalletFactory().restoreWallet("009e63e95eeabdbe080ead5a707bdac2","",1).getMasterKey();
+        key = new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c","",1).getMasterKey();
     }
 
     @Test
     public void getNode() throws Exception {
-
+        SharedMetadata sharedMetadata = new SharedMetadata.Builder(key).build();
+        Assert.assertTrue(sharedMetadata.getNode().getPrivateKeyAsHex().equals("c89bf844c4e949646dd5a620c1d6a4d2898f0e13ea9cbcbe5f6cf59fc70ce4c7"));
     }
 
     @Test
     public void getAddress() throws Exception {
-
-    }
-
-    @Test
-    public void getToken() throws Exception {
-
+        SharedMetadata sharedMetadata = new SharedMetadata.Builder(key).build();
+        Assert.assertTrue(sharedMetadata.getAddress().equals("1Q8wTYwXRfEW9qKfpwbZKo7kAXFdRhR9s9"));
     }
 
     @Test
     public void getTrustedList() throws Exception {
-
+        mockInterceptor.setResponseString("{\"mdid\":\"1Q8wTYwXRfEW9qKfpwbZKo7kAXFdRhR9s9\",\"contacts\":[{\"name\" : \"John1\"} , {\"name\" : \"John2\"}]}");
+        SharedMetadata sharedMetadata = new SharedMetadata.Builder(key).build();
+        System.out.println(sharedMetadata.getTrustedList().getContacts().length);
+//        Assert.assertTrue(sharedMetadata.getTrustedList().equals("1Q8wTYwXRfEW9qKfpwbZKo7kAXFdRhR9s9"));
     }
 
     @Test
     public void getTrusted() throws Exception {
-
+        SharedMetadata sharedMetadata = new SharedMetadata.Builder(key).build();
+        sharedMetadata.getTrustedList();
     }
 
     @Test
