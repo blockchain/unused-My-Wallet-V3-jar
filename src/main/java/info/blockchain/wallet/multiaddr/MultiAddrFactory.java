@@ -185,6 +185,7 @@ public class MultiAddrFactory {
                     List<String> moveToAddrArray = new ArrayList<String>();
                     String o_addr;
                     boolean isMove = false;
+                    boolean isDoubleSpend = false;
 
                     if (txObj.has("block_height")) {
                         height = txObj.getLong("block_height");
@@ -195,6 +196,8 @@ public class MultiAddrFactory {
                     hash = (String) txObj.get("hash");
                     amount = txObj.getLong("result");
                     ts = txObj.getLong("time");
+
+                    isDoubleSpend = txObj.has("double_spend") && txObj.getBoolean("double_spend");
 
                     JSONArray inputArray = (JSONArray) txObj.get("inputs");
                     JSONObject inputObj;
@@ -286,6 +289,7 @@ public class MultiAddrFactory {
                         }
 
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
+                        tx.setDoubleSpend(isDoubleSpend);
 
                         if (isMove) {
                             if (!xpub_txs.containsKey(mf_addr)) {
@@ -377,6 +381,7 @@ public class MultiAddrFactory {
                     String outputAddr;
                     boolean isMove = false;
                     boolean isWatchOnly = false;
+                    boolean isDoubleSpend = false;
                     ArrayList<String> ownInput = new ArrayList<String>();
                     ArrayList<String> ownOutput = new ArrayList<String>();
 
@@ -398,6 +403,8 @@ public class MultiAddrFactory {
                     if (txObj.has("time")) {
                         ts = txObj.getLong("time");
                     }
+
+                    isDoubleSpend = txObj.has("double_spend") && txObj.getBoolean("double_spend");
 
                     List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
                     List<String> watchOnlyLegacyAddresses = PayloadManager.getInstance().getPayload().getWatchOnlyAddressStringList();
@@ -495,6 +502,7 @@ public class MultiAddrFactory {
                         tx.setDirection(mode);
 
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
+                        tx.setDoubleSpend(isDoubleSpend);
 
                         List<Tx> containedLegacyTx = address_legacy_txs.get(address);
 

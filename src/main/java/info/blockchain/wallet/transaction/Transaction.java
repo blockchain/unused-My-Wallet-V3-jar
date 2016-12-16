@@ -26,6 +26,7 @@ public class Transaction {
     private long result = 0L;
     private long fee = 0L;
     private String relayed_by = null;
+    private boolean doubleSpend;
 
     private ArrayList<xPut> inputs = null;
     private ArrayList<xPut> outputs = null;
@@ -68,6 +69,10 @@ public class Transaction {
         return relayed_by;
     }
 
+    public boolean isDoubleSpend() {
+        return doubleSpend;
+    }
+
     public ArrayList<xPut> getInputs() {
         return inputs;
     }
@@ -101,6 +106,7 @@ public class Transaction {
                 hash = tx.getString("hash");
                 time = tx.getLong("time");
                 relayed_by = tx.getString("relayed_by");
+                doubleSpend = tx.getBoolean("double_spend");
 
                 long total_input = 0L;
                 long total_output = 0L;
