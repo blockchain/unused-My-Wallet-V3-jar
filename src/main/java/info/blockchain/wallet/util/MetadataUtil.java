@@ -1,5 +1,6 @@
 package info.blockchain.wallet.util;
 
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 
 import org.bitcoinj.core.ECKey;
@@ -8,7 +9,6 @@ import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
 import java.io.ByteArrayOutputStream;
@@ -153,7 +153,7 @@ public class MetadataUtil {
             UnsupportedEncodingException, InvalidCipherTextException {
 
         // Read other's public key:
-        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, theirXpub, MainNetParams.get());
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, theirXpub, PersistentUrls.getInstance().getCurrentNetworkParams());
         PublicKey otherPublicKey = MetadataUtil.getPublicKey(otherKey);
 
         // Generate ephemeral ECDH keypair
@@ -178,7 +178,7 @@ public class MetadataUtil {
             UnsupportedEncodingException, InvalidCipherTextException {
 
         // Read other's public key:
-        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, theirXpub, MainNetParams.get());
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, theirXpub, PersistentUrls.getInstance().getCurrentNetworkParams());
         PublicKey otherPublicKey = MetadataUtil.getPublicKey(otherKey);
 
         // Generate ephemeral ECDH keypair

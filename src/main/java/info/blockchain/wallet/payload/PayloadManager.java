@@ -5,6 +5,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import info.blockchain.api.ExternalEntropy;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
@@ -31,7 +32,6 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
@@ -595,7 +595,7 @@ public class PayloadManager {
 
         final LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setEncryptedKey(encryptedKey);
-        legacyAddress.setAddress(ecKey.toAddress(MainNetParams.get()).toString());
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
         legacyAddress.setCreatedDeviceName(deviceName);
         legacyAddress.setCreated(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(deviceVersion);

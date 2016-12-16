@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
@@ -17,7 +18,6 @@ import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class SharedMetadata {
     }
 
     public String getXpub() {
-        return node.serializePubB58(MainNetParams.get());
+        return node.serializePubB58(PersistentUrls.getInstance().getCurrentNetworkParams());
     }
 
     /**
@@ -301,7 +301,7 @@ public class SharedMetadata {
                 msg.getSignature());
 
         String senderAddress = msg.getSender();
-        String addressFromSignature = key.toAddress(MainNetParams.get()).toString();
+        String addressFromSignature = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
 
         if (!senderAddress.equals(addressFromSignature)) {
             throw new ValidationException("Signature is not well-formed");
@@ -401,7 +401,7 @@ public class SharedMetadata {
 //            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setAddress(sharedMetaDataHDNode.toAddress(MainNetParams.get()).toString());
+            metadata.setAddress(sharedMetaDataHDNode.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
             metadata.setNode(sharedMetaDataHDNode);
 
             return metadata;

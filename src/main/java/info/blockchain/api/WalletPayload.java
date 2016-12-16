@@ -136,7 +136,7 @@ public class WalletPayload extends BaseApi {
                 }
             }
 
-            args.append(StringUtils.join(addrs.toArray(new String[addrs.size()]), "|"));
+            args.append(StringUtils.join(addrs.toArray(new String[addrs.size()]), "%7C"));
         }
 
         if (email != null && email.length() > 0) {

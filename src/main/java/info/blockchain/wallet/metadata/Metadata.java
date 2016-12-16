@@ -2,6 +2,7 @@ package info.blockchain.wallet.metadata;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
+import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
@@ -11,7 +12,6 @@ import info.blockchain.wallet.util.MetadataUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
 
@@ -248,7 +248,7 @@ public class Metadata {
 
             Metadata metadata = new Metadata();
             metadata.setEncrypted(isEncrypted);
-            metadata.setAddress(node.toAddress(MainNetParams.get()).toString());
+            metadata.setAddress(node.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
             metadata.setNode(node);
             metadata.setEncryptionKey(encryptionKey);
             metadata.setType(type);

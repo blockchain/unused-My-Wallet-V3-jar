@@ -25,7 +25,7 @@ public class MultiAddress extends BaseApi {
         JSONObject jsonObject;
 
         StringBuilder url = new StringBuilder(getRoute());
-        url.append(StringUtils.join(addresses, "|"));
+        url.append(StringUtils.join(addresses, "%7C"));
         if (simple) {
             url.append("&simple=true&format=json");
         } else {
@@ -42,7 +42,7 @@ public class MultiAddress extends BaseApi {
     public JSONObject getXPUB(String[] xpubs) throws Exception {
 
         final String url = getRoute()
-                + StringUtils.join(xpubs, "|")
+                + StringUtils.join(xpubs, "%7C")
                 + getApiCode();
 
         String response = WebUtil.getInstance().getRequest(url);
@@ -53,7 +53,7 @@ public class MultiAddress extends BaseApi {
     public JSONObject getAddresses(List<String> addresses) throws Exception {
 
         final String url = getRoute()
-                + StringUtils.join(addresses, "|")
+                + StringUtils.join(addresses, "%7C")
                 + getApiCode();
 
         String response = WebUtil.getInstance().getRequest(url);

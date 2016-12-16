@@ -1,11 +1,12 @@
 package info.blockchain.wallet.send;
 
+import info.blockchain.api.PersistentUrls;
+
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.params.MainNetParams;
 
 import java.math.BigInteger;
 
@@ -20,7 +21,7 @@ public class MyTransactionOutPoint extends TransactionOutPoint {
     private String path;
 
     public MyTransactionOutPoint(Sha256Hash txHash, int txOutputN, BigInteger value, byte[] scriptBytes) throws ProtocolException {
-        super(MainNetParams.get(), txOutputN, Sha256Hash.wrap(txHash.getBytes()));
+        super(PersistentUrls.getInstance().getCurrentNetworkParams(), txOutputN, Sha256Hash.wrap(txHash.getBytes()));
         this.scriptBytes = scriptBytes;
         this.value = value;
         this.txOutputN = txOutputN;

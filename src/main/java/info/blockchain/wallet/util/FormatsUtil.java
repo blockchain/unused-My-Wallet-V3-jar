@@ -1,10 +1,11 @@
 package info.blockchain.wallet.util;
 
+import info.blockchain.api.PersistentUrls;
+
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.WrongNetworkException;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 import org.json.JSONArray;
@@ -117,7 +118,7 @@ public class FormatsUtil {
         boolean ret;
 
         try {
-            new Address(MainNetParams.get(), address);
+            new Address(PersistentUrls.getInstance().getCurrentNetworkParams(), address);
             ret = true;
         } catch (WrongNetworkException wne) {
             ret = false;
