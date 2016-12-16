@@ -204,8 +204,7 @@ public class Contacts {
     public Message decryptMessageFrom(Message message, String mdid) throws Exception {
 
         String xpub = fetchXpub(mdid);
-        String payload = new String(Base64.decode(message.getPayload()));
-        String decryptedPayload = sharedMetadata.decryptFrom(xpub, payload);
+        String decryptedPayload = sharedMetadata.decryptFrom(xpub, message.getPayload());
         message.setPayload(decryptedPayload);
         return message;
     }

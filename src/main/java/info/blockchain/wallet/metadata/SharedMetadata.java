@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.data.Auth;
@@ -14,9 +15,9 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.MessageProcessRequest;
 import info.blockchain.wallet.metadata.data.Trusted;
-import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.util.encoders.Base64;
 
@@ -379,12 +380,23 @@ public class SharedMetadata {
     }
 
     public String encryptFor(String xpub, String payload) throws Exception {
-        byte[] encryptedMessage = MetadataUtil.encryptFor(getNode(), xpub, payload);
-        return new String(encryptedMessage);
+
+        ECKey myKey = getNode();
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getCurrentNetworkParams());
+
+        byte[] sharedSecret = otherKey.getPubKeyPoint().multiply(myKey.getPrivKey()).getEncoded();
+        byte[] sharedKey = Sha256Hash.hash(sharedSecret);
+        return new String(AESUtil.encryptWithKey(sharedKey, payload));
     }
 
     public String decryptFrom(String xpub, String payload) throws Exception{
-        return MetadataUtil.decryptFrom(getNode(), xpub, payload);
+
+        ECKey myKey = getNode();
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getCurrentNetworkParams());
+
+        byte[] sharedSecret = otherKey.getPubKeyPoint().multiply(myKey.getPrivKey()).getEncoded();
+        byte[] sharedKey = Sha256Hash.hash(sharedSecret);
+        return AESUtil.decryptWithKey(sharedKey, payload);
     }
 
     public static class Builder{
