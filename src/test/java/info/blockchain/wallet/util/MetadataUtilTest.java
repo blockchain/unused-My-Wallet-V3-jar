@@ -1,14 +1,8 @@
 package info.blockchain.wallet.util;
 
-import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
-
-import org.spongycastle.util.encoders.Base64;
 import org.junit.Assert;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
-
-import java.security.KeyPair;
+import org.spongycastle.util.encoders.Base64;
 
 public class MetadataUtilTest {
 
@@ -40,28 +34,5 @@ public class MetadataUtilTest {
 
         byte[] nextMagic = MetadataUtil.magic(message.getBytes(), magic);
         Assert.assertEquals(expected2, new String(Base64.encode(nextMagic)));
-    }
-
-    @Test
-    public void testSharedSecret() throws Exception {
-
-        // Generate ephemeral ECDH keypair
-        Wallet walletA = new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c",
-                "",
-                1);
-        KeyPair keyPairA = MetadataUtil.getKeyPair(walletA.getMasterKey());
-        byte[] publicKeyA = keyPairA.getPublic().getEncoded();
-
-        // Read other's public key:
-        Wallet walletB = new WalletFactory().restoreWallet("0660cc198330660cc198330660cc1983",
-                "",
-                1);
-        KeyPair keyPairB = MetadataUtil.getKeyPair(walletB.getMasterKey());
-        byte[] publicKeyB = keyPairB.getPublic().getEncoded();
-
-        byte[] secretA = MetadataUtil.getSharedSecret(keyPairA, publicKeyB);
-        byte[] secretB = MetadataUtil.getSharedSecret(keyPairB, publicKeyA);
-
-        Assert.assertEquals(Hex.toHexString(secretA), Hex.toHexString(secretB));
     }
 }

@@ -142,4 +142,17 @@ public class SharedMetadataTest {
 
     }
 
+    @Test
+    public void decryptFrom() throws Exception {
+
+        DeterministicKey a_key = new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c","",1).getMasterKey();
+        SharedMetadata a_sharedMetadata = new SharedMetadata.Builder(a_key).build();
+
+        DeterministicKey b_key = new WalletFactory().restoreWallet("20e3939d08ddf727f34a130704cd925e","",1).getMasterKey();
+        SharedMetadata b_sharedMetadata = new SharedMetadata.Builder(b_key).build();
+
+        String encryptedMessage = a_sharedMetadata.encryptFor(b_sharedMetadata.getXpub(), "Water is wet");
+        String decryptedMessage = b_sharedMetadata.decryptFrom(a_sharedMetadata.getXpub(), encryptedMessage);
+        System.out.println(decryptedMessage);
+    }
 }
