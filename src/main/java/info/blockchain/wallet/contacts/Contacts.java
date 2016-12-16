@@ -179,8 +179,8 @@ public class Contacts {
         return sharedMetadata.getMessage(messageId);
     }
 
-    public void markMessageAsRead(Message message) throws Exception {
-        sharedMetadata.processMessage(message.getId());// TODO: 12/12/2016 This API call hasn't been working
+    public void markMessageAsRead(String messageId, boolean markAsRead) throws Exception {
+        sharedMetadata.processMessage(messageId, markAsRead);
     }
 
     public Message decryptMessageFrom(Message message, String mdid) throws Exception {

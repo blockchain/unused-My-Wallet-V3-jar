@@ -150,15 +150,15 @@ public class ContactsIT {
         him.setName("Jaume");
         Contact myInvite = a_contacts.createInvitation(me, him);
         String oneTimeUri = myInvite.createURI();
-        System.out.println("createInvitation: "+oneTimeUri);
+        System.out.println("createInvitation: " + oneTimeUri);
 
         System.out.println("\n--Recipient--");
         Contact senderDetails = b_contacts.acceptInvitationLink(oneTimeUri);
-        System.out.println("accept Invitation: "+senderDetails.toJson());
+        System.out.println("accept Invitation: " + senderDetails.toJson());
 
         System.out.println("\n--Sender--");
         boolean accepted = a_contacts.readInvitationSent(myInvite);
-        System.out.println("Accepted: "+accepted);
+        System.out.println("Accepted: " + accepted);
         a_contacts.sendMessage(myInvite.getMdid(), "Hey hey", 66, true);
 
         /*
@@ -174,18 +174,38 @@ public class ContactsIT {
         List<Message> messages = b_contacts.getMessages(true);
         System.out.println("Received messages: '" + messages.size() + "'");
 
-        Message message = messages.get(messages.size()-1);
+        Message message = messages.get(messages.size() - 1);
         b_contacts.readMessage(message.getId());
-        System.out.println("ECDH Encrypted: "+message.getPayload());
-        System.out.println("Decrypted: "+b_contacts.decryptMessageFrom(message, senderDetails.getMdid()).getPayload());
-        ////b_contacts.markMessageAsRead(message);// TODO: 12/12/2016 This API call hasn't been working at all
+        System.out.println("ECDH Encrypted: " + message.getPayload());
+        System.out.println("Decrypted: " + b_contacts.decryptMessageFrom(message, senderDetails.getMdid()).getPayload());
+        b_contacts.markMessageAsRead(message.getId(), true);
     }
 
     private Wallet setupWallet(String hex, String guid, String sharedKey) throws Exception {
         System.out.println("\n--Start Wallet " + guid + "--");
         Wallet wallet = new WalletFactory().restoreWallet(hex, "", 1);
-        //DEV is down, a lot, so skip this
-//        PayloadManager.getInstance().registerMdid(guid, sharedKey, sharedMetadata.getNode());
+        //If you want notifications to fire register mdid
+        //PayloadManager.getInstance().registerMdid(guid, sharedKey, sharedMetadata.getNode());
         return wallet;
+    }
+
+    @Test
+    public void testProc() throws Exception {
+
+        Wallet b_wallet = setupWallet(wallet_B_seedHex, wallet_B_guid, wallet_B_sharedKey);
+        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
+        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
+        Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
+        b_contacts.fetch();
+
+        List<Message> messages = b_contacts.getMessages(true);
+
+        for(int i = 0; i < messages.size(); i++){
+            Message message = messages.get(i);
+            b_contacts.markMessageAsRead(message.getId(), true);
+        }
+
+        messages = b_contacts.getMessages(true);
+        Assert.assertTrue(messages.size() == 0);
     }
 }

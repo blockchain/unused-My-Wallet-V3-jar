@@ -8,9 +8,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Status {
+public class MessageProcessRequest {
 
-    String status;
+    private boolean isProcessed;
+
+    public boolean isProcessed() {
+        return isProcessed;
+    }
+
+    public void setProcessed(boolean processed) {
+        isProcessed = processed;
+    }
 
     @JsonIgnore
     public String toJson() throws JsonProcessingException {

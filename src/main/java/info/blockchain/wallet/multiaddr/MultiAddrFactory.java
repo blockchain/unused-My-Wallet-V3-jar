@@ -444,7 +444,7 @@ public class MultiAddrFactory {
 
                                 long amountOutput = outObj.getLong("value");
 
-                                //Don't addContact change coming back
+                                //Don't add change coming back
                                 if (inputAddr != null && !inputAddr.equals(outputAddr))
                                     move_amount += amountOutput;
 
