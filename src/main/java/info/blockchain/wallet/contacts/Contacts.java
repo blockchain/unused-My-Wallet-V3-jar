@@ -78,10 +78,6 @@ public class Contacts {
         sharedMetadata.setToken(null);
     }
 
-    public void authorize() throws SharedMetadataConnectionException, IOException {
-        sharedMetadata.authorize();
-    }
-
     public List<Contact> getContactList() {
         return contacts;
     }

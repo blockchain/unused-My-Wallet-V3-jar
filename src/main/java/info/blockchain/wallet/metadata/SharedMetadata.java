@@ -34,16 +34,14 @@ import retrofit2.Response;
 
 public class SharedMetadata {
 
-    String token;
+    private String token;
 
-    MetadataEndpoints endpoints;
-    String address;
-    DeterministicKey node;
+    private MetadataEndpoints endpoints;
+    private String address;
+    private DeterministicKey node;
 
     public SharedMetadata() {
-        this.endpoints = BlockchainFramework
-                .getRetrofitApiInstance()
-                .create(MetadataEndpoints.class);
+        // Empty constructor
     }
 
     public void setEndpoints(MetadataEndpoints endpoints) {
@@ -74,10 +72,19 @@ public class SharedMetadata {
         this.token = token;
     }
 
+    private MetadataEndpoints getApiInstance() {
+        if (endpoints == null) {
+            endpoints = BlockchainFramework
+                    .getRetrofitApiInstance()
+                    .create(MetadataEndpoints.class);
+        }
+        return endpoints;
+    }
+
     /**
      * Do auth challenge
      */
-    public void authorize() throws SharedMetadataConnectionException, IOException {
+    private void authorize() throws SharedMetadataConnectionException, IOException {
 
         if(token == null || !isValidToken(token)) {
             token = getToken();
@@ -110,7 +117,7 @@ public class SharedMetadata {
      */
     private String getNonce() throws SharedMetadataConnectionException, IOException {
 
-        Call<Auth> response = endpoints.getNonce();
+        Call<Auth> response = getApiInstance().getNonce();
 
         Response<Auth> exe = response.execute();
 
@@ -133,7 +140,7 @@ public class SharedMetadata {
         map.put("mdid", address);
         map.put("signature", sig);
         map.put("nonce", nonce);
-        Call<Auth> response = endpoints.getToken(map);
+        Call<Auth> response = getApiInstance().getToken(map);
 
         Response<Auth> exe = response.execute();
 
@@ -150,7 +157,7 @@ public class SharedMetadata {
     public Trusted getTrustedList() throws SharedMetadataConnectionException, IOException {
 
         authorize();
-        Call<Trusted> response = endpoints.getTrustedList("Bearer " + token);
+        Call<Trusted> response = getApiInstance().getTrustedList("Bearer " + token);
 
         Response<Trusted> exe = response.execute();
 
@@ -167,7 +174,7 @@ public class SharedMetadata {
     public boolean getTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
 
         authorize();
-        Call<Trusted> response = endpoints.getTrusted("Bearer " + token, mdid);
+        Call<Trusted> response = getApiInstance().getTrusted("Bearer " + token, mdid);
 
         Response<Trusted> exe = response.execute();
 
@@ -184,7 +191,7 @@ public class SharedMetadata {
     public boolean addTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
 
         authorize();
-        Call<Trusted> response = endpoints.putTrusted("Bearer " + token, mdid);
+        Call<Trusted> response = getApiInstance().putTrusted("Bearer " + token, mdid);
 
         Response<Trusted> exe = response.execute();
 
@@ -201,7 +208,7 @@ public class SharedMetadata {
     public boolean deleteTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
 
         authorize();
-        Call<ResponseBody> response = endpoints.deleteTrusted("Bearer " + token, mdid);
+        Call<ResponseBody> response = getApiInstance().deleteTrusted("Bearer " + token, mdid);
 
         Response<ResponseBody> exe = response.execute();
 
@@ -229,7 +236,7 @@ public class SharedMetadata {
         request.setSignature(signature);
 
         authorize();
-        Call<Message> response = endpoints.postMessage("Bearer " + token, request);
+        Call<Message> response = getApiInstance().postMessage("Bearer " + token, request);
 
         Response<Message> exe = response.execute();
 
@@ -247,7 +254,7 @@ public class SharedMetadata {
     public List<Message> getMessages(boolean onlyProcessed) throws Exception {
 
         authorize();
-        Call<List<Message>> response = endpoints.getMessages("Bearer " + token, onlyProcessed);
+        Call<List<Message>> response = getApiInstance().getMessages("Bearer " + token, onlyProcessed);
 
         Response<List<Message>> exe = response.execute();
 
@@ -269,7 +276,7 @@ public class SharedMetadata {
     public Message getMessage(String messageId) throws Exception {
 
         authorize();
-        Call<Message> response = endpoints.getMessage("Bearer " + token, messageId);
+        Call<Message> response = getApiInstance().getMessage("Bearer " + token, messageId);
 
         Response<Message> exe = response.execute();
 
@@ -290,7 +297,7 @@ public class SharedMetadata {
         MessageProcessRequest requestBody = new MessageProcessRequest();
         requestBody.setProcessed(processed);
 
-        Call<Void> response = endpoints.processMessage("Bearer " + token, messageId, requestBody);
+        Call<Void> response = getApiInstance().processMessage("Bearer " + token, messageId, requestBody);
 
         Response<Void> exe = response.execute();
 
@@ -319,7 +326,7 @@ public class SharedMetadata {
     public Invitation createInvitation() throws IOException, SharedMetadataConnectionException {
 
         authorize();
-        Call<Invitation> response = endpoints.postShare("Bearer " + token);
+        Call<Invitation> response = getApiInstance().postShare("Bearer " + token);
 
         Response<Invitation> exe = response.execute();
 
@@ -334,7 +341,7 @@ public class SharedMetadata {
     public Invitation acceptInvitation(String inviteId) throws IOException, SharedMetadataConnectionException {
 
         authorize();
-        Call<Invitation> response = endpoints.postToShare("Bearer " + token, inviteId);
+        Call<Invitation> response = getApiInstance().postToShare("Bearer " + token, inviteId);
 
         Response<Invitation> exe = response.execute();
 
@@ -351,7 +358,7 @@ public class SharedMetadata {
     public String readInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
 
         authorize();
-        Call<Invitation> response = endpoints.getShare("Bearer " + token, uuid);
+        Call<Invitation> response = getApiInstance().getShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
 
@@ -368,7 +375,7 @@ public class SharedMetadata {
     public boolean deleteInvitation(String uuid) throws SharedMetadataConnectionException, IOException {
 
         authorize();
-        Call<Invitation> response = endpoints.deleteShare("Bearer " + token, uuid);
+        Call<Invitation> response = getApiInstance().deleteShare("Bearer " + token, uuid);
 
         Response<Invitation> exe = response.execute();
 

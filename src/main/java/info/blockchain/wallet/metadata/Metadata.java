@@ -20,21 +20,19 @@ import retrofit2.Response;
 
 public class Metadata {
 
-    final static int METADATA_VERSION = 1;
+    public static final int METADATA_VERSION = 1;
 
-    boolean isEncrypted = true;
+    private boolean isEncrypted = true;
 
-    MetadataEndpoints endpoints;
-    int type;
-    String address;
-    ECKey node;
-    byte[] encryptionKey;
-    byte[] magicHash;
+    private MetadataEndpoints endpoints;
+    private int type;
+    private String address;
+    private ECKey node;
+    private byte[] encryptionKey;
+    private byte[] magicHash;
 
     public Metadata() {
-        this.endpoints = BlockchainFramework
-                .getRetrofitApiInstance()
-                .create(MetadataEndpoints.class);
+        // Empty constructor
     }
 
     public void setAddress(String address) {
@@ -65,9 +63,18 @@ public class Metadata {
         return this.node;
     }
 
+    private MetadataEndpoints getApiInstance() {
+        if (endpoints == null) {
+            endpoints = BlockchainFramework
+                    .getRetrofitApiInstance()
+                    .create(MetadataEndpoints.class);
+        }
+        return endpoints;
+    }
+
     public void fetchMagic() throws Exception{
 
-        Call<MetadataResponse> response = endpoints.getMetadata(address);
+        Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
         Response<MetadataResponse> exe = response.execute();
 
@@ -132,7 +139,7 @@ public class Metadata {
         body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
         body.setType_id(type);
 
-        Call<Void> response = endpoints.putMetadata(address, body);
+        Call<Void> response = getApiInstance().putMetadata(address, body);
 
         Response<Void> exe = response.execute();
 
@@ -156,7 +163,7 @@ public class Metadata {
      */
     private String getMetadataEntry(String address, boolean isEncrypted) throws Exception {
 
-        Call<MetadataResponse> response = endpoints.getMetadata(address);
+        Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
         Response<MetadataResponse> exe = response.execute();
 
@@ -195,7 +202,7 @@ public class Metadata {
 
         String signature = node.signMessage(new String(Base64.encode(message)));
 
-        Call<Void> response = endpoints.deleteMetadata(address, signature);
+        Call<Void> response = getApiInstance().deleteMetadata(address, signature);
 
         Response<Void> exe = response.execute();
 
