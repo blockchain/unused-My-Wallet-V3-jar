@@ -17,15 +17,14 @@ import retrofit2.Response;
 
 public class WalletPayload extends BaseApi {
 
+    public static final String KEY_AUTH_REQUIRED = "Authorization Required";
     private static final String WALLET = "wallet";
 
     private String sessionId;
-    public static final String KEY_AUTH_REQUIRED = "Authorization Required";
-
-    WalletEndpoints api;
+    private WalletEndpoints api;
 
     public WalletPayload() {
-        api = BlockchainFramework.getRetrofitApiInstance().create(WalletEndpoints.class);
+        // Empty constructor
     }
 
     public String getSessionId(String guid) throws Exception {
@@ -41,6 +40,13 @@ public class WalletPayload extends BaseApi {
         }
 
         return sessionId;
+    }
+
+    private WalletEndpoints getApiInstance() {
+        if (api == null) {
+            api = BlockchainFramework.getRetrofitApiInstance().create(WalletEndpoints.class);
+        }
+        return api;
     }
 
     @Override
@@ -169,7 +175,7 @@ public class WalletPayload extends BaseApi {
 
         String signedGuid = walletKey.signMessage(guid);
 
-        Call<Void> call = api.postMdidRegistration(method,
+        Call<Void> call = getApiInstance().postMdidRegistration(method,
                 guid,
                 sharedKey,
                 signedGuid,
