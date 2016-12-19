@@ -102,7 +102,7 @@ public class Contacts {
             PublicContactDetails publicXpub = new PublicContactDetails().fromJson(data);
             return publicXpub.getXpub();
         } else {
-            return null;
+            throw new SharedMetadataConnectionException("Xpub not found");
         }
     }
 
@@ -161,12 +161,12 @@ public class Contacts {
         return accepted;
     }
 
-    public void addTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
-        sharedMetadata.addTrusted(mdid);
+    public boolean addTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+        return sharedMetadata.addTrusted(mdid);
     }
 
-    public void deleteTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
-        sharedMetadata.deleteTrusted(mdid);
+    public boolean deleteTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+        return sharedMetadata.deleteTrusted(mdid);
     }
 
     public void sendMessage(String mdid, String message, int type, boolean encrypted) throws Exception {
