@@ -10,7 +10,7 @@ public class RestClient {
 
     public static Retrofit getRetrofitInstance(OkHttpClient client) {
         return new Retrofit.Builder()
-                .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl()+"metadata/")
+                .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl())
                 .client(client)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
