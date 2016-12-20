@@ -19,9 +19,11 @@ import info.blockchain.wallet.metadata.data.Trusted;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -222,9 +224,9 @@ public class SharedMetadata {
     /**
      * Add new shared metadata entry. Signed. Authenticated.
      */
-    public Message postMessage(String mdidRecipient, String b64Msg, int type) throws Exception {
+    public Message postMessage(String mdidRecipient, String b64Msg, int type) throws IOException, SharedMetadataException {
 
-        if(mdidRecipient == null) throw new Exception("Recipient mdid null.");
+        if(mdidRecipient == null) throw new SharedMetadataException("Recipient mdid null.");
 
         String signature = node.signMessage(b64Msg);
 
@@ -251,7 +253,8 @@ public class SharedMetadata {
     /**
      * Get messages sent to my MDID. Authenticated.
      */
-    public List<Message> getMessages(boolean onlyProcessed) throws Exception {
+    public List<Message> getMessages(boolean onlyProcessed) throws IOException, SharedMetadataException,
+            ValidationException, SignatureException {
 
         authorize();
         Call<List<Message>> response = getApiInstance().getMessages("Bearer " + token, onlyProcessed);
@@ -273,7 +276,8 @@ public class SharedMetadata {
     /**
      * Get message from message id. Authenticated.
      */
-    public Message getMessage(String messageId) throws Exception {
+    public Message getMessage(String messageId) throws IOException, SharedMetadataException,
+            ValidationException, SignatureException {
 
         authorize();
         Call<Message> response = getApiInstance().getMessage("Bearer " + token, messageId);
@@ -290,7 +294,7 @@ public class SharedMetadata {
         }
     }
 
-    public void processMessage(String messageId, boolean processed) throws Exception{
+    public void processMessage(String messageId, boolean processed) throws IOException, SharedMetadataException {
 
         authorize();
 
@@ -386,7 +390,7 @@ public class SharedMetadata {
         }
     }
 
-    public String encryptFor(String xpub, String payload) throws Exception {
+    public String encryptFor(String xpub, String payload) throws UnsupportedEncodingException, InvalidCipherTextException {
 
         ECKey myKey = getNode();
         DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getCurrentNetworkParams());
@@ -396,7 +400,8 @@ public class SharedMetadata {
         return new String(AESUtil.encryptWithKey(sharedKey, payload));
     }
 
-    public String decryptFrom(String xpub, String payload) throws Exception{
+    public String decryptFrom(String xpub, String payload) throws UnsupportedEncodingException,
+            InvalidCipherTextException {
 
         ECKey myKey = getNode();
         DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getCurrentNetworkParams());
@@ -419,7 +424,7 @@ public class SharedMetadata {
          * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authorize
          * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
          */
-        public SharedMetadata build() throws Exception {
+        public SharedMetadata build()  {
 
 //            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 

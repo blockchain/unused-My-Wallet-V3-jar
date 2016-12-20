@@ -153,8 +153,6 @@ public class Contact {
 
         List<NameValuePair> qparams = toQueryParameters();
 
-        qparams.add(new BasicNameValuePair("id", outgoingInvitation.getId()));
-
         URIBuilder builder = new URIBuilder()
                 .setScheme("http")
                 .setHost("blockchain.info")

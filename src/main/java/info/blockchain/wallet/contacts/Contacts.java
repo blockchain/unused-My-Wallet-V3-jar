@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
+import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +37,7 @@ public class Contacts {
     private final static int METADATA_TYPE_EXTERNAL = 4;
     private Metadata metadata;
     private SharedMetadata sharedMetadata;
+    private Metadata publicContactDetailsMetadata;
     private List<Contact> contacts;
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -42,17 +45,19 @@ public class Contacts {
         //Empty constructor for dagger injection client side
     }
 
-    public void init(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws Exception {
+    public void init(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws IOException,
+            MetadataException {
         metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
         sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
+        publicContactDetailsMetadata = new Metadata.Builder(sharedMetaDataHDNode, METADATA_TYPE_EXTERNAL)
+                .setEncrypted(false)
+                .build();
         contacts = new ArrayList<>();
     }
 
-    public Contacts(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws Exception {
-
-        metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
-        sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
-        contacts = new ArrayList<>();
+    public Contacts(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws IOException,
+            MetadataException {
+        init(metaDataHDNode, sharedMetaDataHDNode);
     }
 
     public void fetch() throws MetadataException, IOException, InvalidCipherTextException {
@@ -65,15 +70,16 @@ public class Contacts {
         }
     }
 
-    public void save() throws Exception {
+    public void save() throws IOException, MetadataException, InvalidCipherTextException {
 
         if(contacts != null) {
             metadata.putMetadata(mapper.writeValueAsString(contacts));
         }
     }
 
-    public void wipe() throws Exception {
+    public void wipe() throws IOException, MetadataException, InvalidCipherTextException {
         metadata.putMetadata(mapper.writeValueAsString(new ArrayList<Contact>()));
+        contacts = new ArrayList<>();
     }
 
     public void invalidateToken() {
@@ -92,11 +98,13 @@ public class Contacts {
         contacts.add(contact);
     }
 
-    public void publishXpub() throws Exception {
-        metadata.putMetadata(sharedMetadata.getAddress(), sharedMetadata.getXpub(), false);
+    public void publishXpub() throws MetadataException, IOException, InvalidCipherTextException {
+
+        PublicContactDetails details = new PublicContactDetails(sharedMetadata.getXpub());
+        publicContactDetailsMetadata.putMetadata(details.toJson());
     }
 
-    public String fetchXpub(String mdid) throws Exception {
+    public String fetchXpub(String mdid) throws MetadataException, IOException, InvalidCipherTextException {
 
         String data = metadata.getMetadata(mdid, false);
 
@@ -111,7 +119,7 @@ public class Contacts {
     /**
      * returns a promise with the invitation and updates my contact list
      */
-    public Contact createInvitation(Contact myDetails, Contact recipientDetails) throws Exception {
+    public Contact createInvitation(Contact myDetails, Contact recipientDetails) throws IOException, SharedMetadataException {
 
         //myInfoToShare could be info that will be encoded on the QR
         Invitation invitationSent = sharedMetadata.createInvitation();
@@ -123,7 +131,7 @@ public class Contacts {
         return myDetails;
     }
 
-    public Contact readInvitationLink(String link) throws Exception{
+    public Contact readInvitationLink(String link) throws UnsupportedEncodingException {
 
         Map<String, String> queryParams = getQueryParams(link);
 
@@ -171,13 +179,14 @@ public class Contacts {
         return sharedMetadata.deleteTrusted(mdid);
     }
 
-    public void sendMessage(String mdid, String message, int type, boolean encrypted) throws Exception {
+    public void sendMessage(String mdid, String message, int type, boolean encrypted) throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         String b64Message;
 
         if(encrypted) {
             String recipientXpub = fetchXpub(mdid);
-            if (recipientXpub == null) throw new Exception("No public xpub for mdid.");
+            if (recipientXpub == null) throw new SharedMetadataException("No public xpub for mdid.");
 
             b64Message = sharedMetadata.encryptFor(recipientXpub, message);
         } else {
@@ -187,19 +196,22 @@ public class Contacts {
         sharedMetadata.postMessage(mdid, b64Message, type);
     }
 
-    public List<Message> getMessages(boolean onlyNew) throws Exception {
+    public List<Message> getMessages(boolean onlyNew) throws SharedMetadataException, ValidationException,
+            SignatureException, IOException {
         return sharedMetadata.getMessages(onlyNew);
     }
 
-    public Message readMessage(String messageId) throws Exception {
+    public Message readMessage(String messageId) throws SharedMetadataException, ValidationException,
+            SignatureException, IOException {
         return sharedMetadata.getMessage(messageId);
     }
 
-    public void markMessageAsRead(String messageId, boolean markAsRead) throws Exception {
+    public void markMessageAsRead(String messageId, boolean markAsRead) throws IOException, SharedMetadataException {
         sharedMetadata.processMessage(messageId, markAsRead);
     }
 
-    public Message decryptMessageFrom(Message message, String mdid) throws Exception {
+    public Message decryptMessageFrom(Message message, String mdid) throws IOException,
+            InvalidCipherTextException, MetadataException {
 
         String xpub = fetchXpub(mdid);
         String decryptedPayload = sharedMetadata.decryptFrom(xpub, message.getPayload());
@@ -223,11 +235,13 @@ public class Contacts {
         return params;
     }
 
-    public void sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws Exception{
+    public void sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
         sendMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST, true);
     }
 
-    public List<PaymentRequest> getPaymentRequests() throws Exception {
+    public List<PaymentRequest> getPaymentRequests() throws SharedMetadataException,
+            IOException, SignatureException, ValidationException {
 
         List<PaymentRequest> result = new ArrayList<>();
 
@@ -242,7 +256,8 @@ public class Contacts {
         return result;
     }
 
-    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyNew) throws Exception {
+    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyNew) throws
+            SharedMetadataException, IOException, SignatureException, ValidationException {
 
         List<PaymentRequestResponse> responses = new ArrayList<>();
 
@@ -258,7 +273,9 @@ public class Contacts {
         return responses;
     }
 
-    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest, String note, String receiveAddress) throws Exception {
+    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest,
+                                        String note, String receiveAddress) throws IOException,
+            SharedMetadataException {
 
         PaymentRequestResponse response = new PaymentRequestResponse();
         response.setAmount(paymentRequest.getAmount());

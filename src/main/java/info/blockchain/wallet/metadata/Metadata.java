@@ -13,6 +13,7 @@ import info.blockchain.wallet.util.MetadataUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
+import org.json.JSONException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
@@ -103,23 +104,16 @@ public class Metadata {
         }
     }
 
-    public void putMetadata(String payload) throws Exception {
-        putMetadataEntry(address, payload, isEncrypted);
-    }
-
-    public void putMetadata(String mdid, String payload, boolean isEncrypted) throws Exception {
-        putMetadataEntry(mdid, payload, isEncrypted);
-    }
-
     /**
      * Put new metadata entry
      * @param payload JSON Stringified object
      * @throws Exception
      */
-    public void putMetadataEntry(String address, String payload, boolean isEncrypted) throws Exception {
+    public void putMetadata(String payload) throws IOException, InvalidCipherTextException, MetadataException {
 
         //Ensure json syntax is correct
-        FormatsUtil.getInstance().isValidJson(payload);
+        if(!FormatsUtil.getInstance().isValidJson(payload))
+            throw new JSONException("Payload is not a valid json object.");
 
         byte[] encryptedPayloadBytes;
 
@@ -148,7 +142,7 @@ public class Metadata {
         Response<Void> exe = response.execute();
 
         if (!exe.isSuccessful()) {
-            throw new Exception(exe.code() + " " + exe.message());
+            throw new MetadataException(exe.code() + " " + exe.message());
         } else {
             magicHash = nextMagicHash;
         }
@@ -248,7 +242,7 @@ public class Metadata {
          * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authorize
          * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
          */
-        public Metadata build() throws Exception {
+        public Metadata build() throws IOException, MetadataException {
 
             DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
             DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);
