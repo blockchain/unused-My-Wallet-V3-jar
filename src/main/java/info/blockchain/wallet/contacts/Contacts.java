@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.wallet.contacts.data.Contact;
-import info.blockchain.wallet.exceptions.SharedMetadataConnectionException;
+import info.blockchain.wallet.exceptions.MetadataException;
+import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
@@ -14,6 +15,7 @@ import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
 import info.blockchain.wallet.metadata.data.PublicContactDetails;
 
 import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 
 import java.io.IOException;
@@ -53,7 +55,7 @@ public class Contacts {
         contacts = new ArrayList<>();
     }
 
-    public void fetch() throws Exception {
+    public void fetch() throws MetadataException, IOException, InvalidCipherTextException {
 
         String data = metadata.getMetadata();
         if(data != null) {
@@ -102,7 +104,7 @@ public class Contacts {
             PublicContactDetails publicXpub = new PublicContactDetails().fromJson(data);
             return publicXpub.getXpub();
         } else {
-            throw new SharedMetadataConnectionException("Xpub not found");
+            throw new MetadataException("Xpub not found");
         }
     }
 
@@ -145,7 +147,7 @@ public class Contacts {
         return contact;
     }
 
-    public boolean readInvitationSent(Contact contact) throws SharedMetadataConnectionException, IOException {
+    public boolean readInvitationSent(Contact contact) throws SharedMetadataException, IOException {
 
         boolean accepted = false;
 
@@ -161,11 +163,11 @@ public class Contacts {
         return accepted;
     }
 
-    public boolean addTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+    public boolean addTrusted(String mdid) throws SharedMetadataException, IOException {
         return sharedMetadata.addTrusted(mdid);
     }
 
-    public boolean deleteTrusted(String mdid) throws SharedMetadataConnectionException, IOException {
+    public boolean deleteTrusted(String mdid) throws SharedMetadataException, IOException {
         return sharedMetadata.deleteTrusted(mdid);
     }
 

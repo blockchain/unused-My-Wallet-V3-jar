@@ -4,6 +4,7 @@ import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.FormatsUtil;
@@ -12,8 +13,11 @@ import info.blockchain.wallet.util.MetadataUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
+
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -72,7 +76,7 @@ public class Metadata {
         return endpoints;
     }
 
-    public void fetchMagic() throws Exception{
+    public void fetchMagic() throws IOException, MetadataException {
 
         Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
@@ -94,7 +98,7 @@ public class Metadata {
             if(exe.code() == 404) {
                 magicHash = null;
             } else {
-                throw new Exception(exe.code() + " " + exe.message());
+                throw new MetadataException(exe.code() + " " + exe.message());
             }
         }
     }
@@ -150,18 +154,19 @@ public class Metadata {
         }
     }
 
-    public String getMetadata() throws Exception {
+    public String getMetadata() throws MetadataException, IOException, InvalidCipherTextException {
         return getMetadataEntry(address, isEncrypted);
     }
 
-    public String getMetadata(String address, boolean isEncrypted) throws Exception {
+    public String getMetadata(String address, boolean isEncrypted) throws MetadataException, IOException, InvalidCipherTextException {
         return getMetadataEntry(address, isEncrypted);
     }
 
     /**
      * Get metadata entry
      */
-    private String getMetadataEntry(String address, boolean isEncrypted) throws Exception {
+    private String getMetadataEntry(String address, boolean isEncrypted) throws IOException,
+            InvalidCipherTextException, MetadataException {
 
         Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
@@ -179,7 +184,7 @@ public class Metadata {
             if (exe.code() == 404) {
                 return null;
             } else {
-                throw new Exception(exe.code() + " " + exe.message());
+                throw new MetadataException(exe.code() + " " + exe.message());
             }
         }
     }

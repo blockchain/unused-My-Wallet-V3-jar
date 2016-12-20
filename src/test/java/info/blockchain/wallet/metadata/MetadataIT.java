@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PersistentUrls;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
@@ -31,9 +30,9 @@ public class MetadataIT {
     public void setup() throws Exception {
 
         //Set environment
-        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
-        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
+//        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
+//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
+//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
 
         BlockchainFramework.init(new FrameworkInterface() {
             @Override

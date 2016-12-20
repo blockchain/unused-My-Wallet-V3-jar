@@ -2,7 +2,6 @@ package info.blockchain.wallet.metadata;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PersistentUrls;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 
@@ -27,10 +26,9 @@ public class SharedMetadataTest {
         mockInterceptor = new MockInterceptor();
 
         //Set environment
-        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-        PersistentUrls.getInstance().setCurrentApiUrl("https://api.staging.blockchain.info/");
-        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.staging.blockchain.info/");
-
+//        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
+//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.staging.blockchain.info/");
+//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.staging.blockchain.info/");
 
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
@@ -59,13 +57,13 @@ public class SharedMetadataTest {
     @Test
     public void getNode() throws Exception {
         SharedMetadata sharedMetadata = new SharedMetadata.Builder(key).build();
-        Assert.assertTrue(sharedMetadata.getNode().getPrivateKeyAsHex().equals("c89bf844c4e949646dd5a620c1d6a4d2898f0e13ea9cbcbe5f6cf59fc70ce4c7"));
+        Assert.assertTrue(sharedMetadata.getNode().getPrivateKeyAsHex().equals("b3c830cde7bac6b5d2cad754ea523fb6ff51fc59da49d28ac98268d87f23b89b"));
     }
 
     @Test
     public void getAddress() throws Exception {
         SharedMetadata sharedMetadata = new SharedMetadata.Builder(key).build();
-        Assert.assertTrue(sharedMetadata.getAddress().equals("1Q8wTYwXRfEW9qKfpwbZKo7kAXFdRhR9s9"));
+        Assert.assertTrue(sharedMetadata.getAddress().equals("1B6ptXjmNHimrWNMzKSDhxTmdjhWvZE3vV"));
     }
 
     @Test
