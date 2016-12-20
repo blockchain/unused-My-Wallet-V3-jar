@@ -7,6 +7,7 @@ import info.blockchain.FrameworkInterface;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
+import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
@@ -72,15 +73,15 @@ public class MetadataIT {
 
         Metadata metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
-        metadata.putMetadata(mapper.writeValueAsString("Yolo1"));
+        metadata.putMetadata(new PublicContactDetails("Yolo1").toJson());
 
         metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
-        metadata.putMetadata(mapper.writeValueAsString("Yolo2"));
+        metadata.putMetadata(new PublicContactDetails("Yolo2").toJson());
 
         metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
-        metadata.putMetadata(mapper.writeValueAsString("Yolo3"));
+        metadata.putMetadata(new PublicContactDetails("Yolo3").toJson());
 
 
     }
