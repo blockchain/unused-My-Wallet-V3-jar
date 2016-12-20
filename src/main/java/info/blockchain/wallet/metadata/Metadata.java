@@ -4,6 +4,7 @@ import info.blockchain.BlockchainFramework;
 import info.blockchain.api.MetadataEndpoints;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.FormatsUtil;
@@ -12,8 +13,12 @@ import info.blockchain.wallet.util.MetadataUtil;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
+import org.json.JSONException;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
+
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -72,7 +77,7 @@ public class Metadata {
         return endpoints;
     }
 
-    public void fetchMagic() throws Exception{
+    public void fetchMagic() throws IOException, MetadataException {
 
         Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
@@ -94,17 +99,9 @@ public class Metadata {
             if(exe.code() == 404) {
                 magicHash = null;
             } else {
-                throw new Exception(exe.code() + " " + exe.message());
+                throw new MetadataException(exe.code() + " " + exe.message());
             }
         }
-    }
-
-    public void putMetadata(String payload) throws Exception {
-        putMetadataEntry(address, payload, isEncrypted);
-    }
-
-    public void putMetadata(String mdid, String payload, boolean isEncrypted) throws Exception {
-        putMetadataEntry(mdid, payload, isEncrypted);
     }
 
     /**
@@ -112,10 +109,11 @@ public class Metadata {
      * @param payload JSON Stringified object
      * @throws Exception
      */
-    public void putMetadataEntry(String address, String payload, boolean isEncrypted) throws Exception {
+    public void putMetadata(String payload) throws IOException, InvalidCipherTextException, MetadataException {
 
         //Ensure json syntax is correct
-        FormatsUtil.getInstance().isValidJson(payload);
+        if(!FormatsUtil.getInstance().isValidJson(payload))
+            throw new JSONException("Payload is not a valid json object.");
 
         byte[] encryptedPayloadBytes;
 
@@ -144,24 +142,25 @@ public class Metadata {
         Response<Void> exe = response.execute();
 
         if (!exe.isSuccessful()) {
-            throw new Exception(exe.code() + " " + exe.message());
+            throw new MetadataException(exe.code() + " " + exe.message());
         } else {
             magicHash = nextMagicHash;
         }
     }
 
-    public String getMetadata() throws Exception {
+    public String getMetadata() throws MetadataException, IOException, InvalidCipherTextException {
         return getMetadataEntry(address, isEncrypted);
     }
 
-    public String getMetadata(String address, boolean isEncrypted) throws Exception {
+    public String getMetadata(String address, boolean isEncrypted) throws MetadataException, IOException, InvalidCipherTextException {
         return getMetadataEntry(address, isEncrypted);
     }
 
     /**
      * Get metadata entry
      */
-    private String getMetadataEntry(String address, boolean isEncrypted) throws Exception {
+    private String getMetadataEntry(String address, boolean isEncrypted) throws IOException,
+            InvalidCipherTextException, MetadataException {
 
         Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
@@ -179,7 +178,7 @@ public class Metadata {
             if (exe.code() == 404) {
                 return null;
             } else {
-                throw new Exception(exe.code() + " " + exe.message());
+                throw new MetadataException(exe.code() + " " + exe.message());
             }
         }
     }
@@ -243,7 +242,7 @@ public class Metadata {
          * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authorize
          * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
          */
-        public Metadata build() throws Exception {
+        public Metadata build() throws IOException, MetadataException {
 
             DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
             DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);

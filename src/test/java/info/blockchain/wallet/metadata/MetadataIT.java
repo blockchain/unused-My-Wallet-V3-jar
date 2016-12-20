@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PersistentUrls;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
+import info.blockchain.wallet.metadata.data.PublicContactDetails;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
@@ -31,9 +31,9 @@ public class MetadataIT {
     public void setup() throws Exception {
 
         //Set environment
-        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
-        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
+//        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
+//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
+//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
 
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
@@ -73,15 +73,15 @@ public class MetadataIT {
 
         Metadata metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
-        metadata.putMetadata(mapper.writeValueAsString("Yolo1"));
+        metadata.putMetadata(new PublicContactDetails("Yolo1").toJson());
 
         metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
-        metadata.putMetadata(mapper.writeValueAsString("Yolo2"));
+        metadata.putMetadata(new PublicContactDetails("Yolo2").toJson());
 
         metadata = new Metadata.Builder(metaDataHDNode, 2)
                 .build();
-        metadata.putMetadata(mapper.writeValueAsString("Yolo3"));
+        metadata.putMetadata(new PublicContactDetails("Yolo3").toJson());
 
 
     }
