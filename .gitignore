@@ -8,8 +8,17 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-*.DS_Store
 .idea/
 out/
 *.iml
 src/main/java/META-INF/
+
+# Java class files
+*.class
+
+# Gradle files
+.gradle/
+build/
+
+# Mac OS X clutter
+*.DS_Store
