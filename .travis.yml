@@ -11,10 +11,10 @@ branches:
     - master
 
 script:
-  - mvn clean verify
+  - ./gradlew clean
 
 after_success:
-  - mvn clean test jacoco:report coveralls:report
+  - ./gradlew build jacoco:report coveralls:report
 
 notifications:
   slack:
