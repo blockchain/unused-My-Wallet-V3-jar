@@ -6,8 +6,8 @@ Encapsulation of basic Blockchain HD Wallet utilities.
 
 ## Prerequisites
 
-Java 7
-[Gradle](https://gradle.org)
+* Java 7
+* [Gradle](https://gradle.org)
 
 
 ## Clean and build
