@@ -2,19 +2,24 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'info.blockchain.wallet'
-version = '2.3'
-
-description = """MyWalletHD"""
+version = '6.1.40'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
+
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
 repositories {
 
-     maven { url "http://repo.maven.apache.org/maven2" }
+    maven {
+        url nexusUrl + '/repository/maven-public/'
+        credentials(PasswordCredentials) {
+            username nexusUsername
+            password nexusPassword
+        }
+    }
 }
 
 dependencies {
