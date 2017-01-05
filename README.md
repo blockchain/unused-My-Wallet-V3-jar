@@ -4,31 +4,18 @@
 
 Encapsulation of basic Blockchain HD Wallet utilities.
 
-## Getting started
+## Prerequisites
 
-Install Maven 3.2 or higher.
+Java 7
+[Gradle](https://gradle.org)
 
-## Clean
 
-Clean generated files:
-
-```sh
-mvn clean
-```
-
-## Build
+## Clean and build
 
 ```sh
-mvn package
+gradle clean build
 ```
 
-The build process will create MyWalletHD.jar in ./target : Can be included in any Java project 'as is' but requires inclusion of dependencies.
-
-## Tests
-
-```sh
-mvn test
-```
 
 ## Security
 
