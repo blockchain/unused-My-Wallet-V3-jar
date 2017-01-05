@@ -604,10 +604,61 @@ public class PayloadManager {
     }
 
     public boolean addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
+
         List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddressList();
         updatedLegacyAddresses.add(legacyAddress);
         payload.setLegacyAddressList(updatedLegacyAddresses);
-        return savePayloadToServer();
+        
+        boolean success = savePayloadToServer();
+
+        if(!success){
+            //revert on sync fail
+            updatedLegacyAddresses.remove(legacyAddress);
+            payload.setLegacyAddressList(updatedLegacyAddresses);
+        }
+
+        return success;
+    }
+
+    /**
+     * Sets a private key for a {@link LegacyAddress}
+     *
+     * @param key            The {@link ECKey} for the address
+     * @param secondPassword An optional double encryption password
+     */
+    public boolean setKeyForLegacyAddress(ECKey key, @Nullable CharSequenceX secondPassword) throws Exception {
+
+        String address = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
+        int index = payload.getLegacyAddressStringList().indexOf(address);
+
+        LegacyAddress legacyAddress = payload.getLegacyAddressList().get(index);
+
+        // If double encrypted, save encrypted in payload
+        if (!payload.isDoubleEncrypted()) {
+            legacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
+        } else {
+            String encryptedKey = Base58.encode(key.getPrivKeyBytes());
+            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
+                    payload.getSharedKey(),
+                    secondPassword != null ? secondPassword.toString() : null,
+                    payload.getOptions().getIterations());
+
+            legacyAddress.setEncryptedKey(encrypted2);
+        }
+
+        legacyAddress.setWatchOnly(false);
+
+        setPayload(payload);
+
+        boolean success =  savePayloadToServer();
+
+        if(!success){
+            //revert on sync fail
+            legacyAddress.setEncryptedKey(null);
+            legacyAddress.setWatchOnly(true);
+        }
+
+        return success;
     }
 
     ECKey getRandomECKey() throws Exception {

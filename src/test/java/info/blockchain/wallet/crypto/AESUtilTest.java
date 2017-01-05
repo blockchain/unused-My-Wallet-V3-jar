@@ -50,7 +50,7 @@ public class AESUtilTest {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
             String decrypted = AESUtil.decrypt(encrypted, new CharSequenceX("bogus"), iterations);
 
-            assertThat("Decryption (cleartext 'test data') successful with incorrect password as : " + decrypted, false);
+            assertThat("Decryption (cleartext 'test data') successful with incorrect password as : " + decrypted, !decrypted.equals("bogus"));
         } catch (Exception e) {
             assertThat("Encryption failed as expected.", true);
         }
