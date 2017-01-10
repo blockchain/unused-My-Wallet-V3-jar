@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 public class Contacts {
 
     private final int TYPE_PAYMENT_REQUEST = 1;
@@ -63,8 +65,9 @@ public class Contacts {
     public void fetch() throws MetadataException, IOException, InvalidCipherTextException {
 
         String data = metadata.getMetadata();
-        if(data != null) {
-            contacts = mapper.readValue(data, new TypeReference<List<Contact>>(){});
+        if (data != null) {
+            contacts = mapper.readValue(data, new TypeReference<List<Contact>>() {
+            });
         } else {
             contacts = new ArrayList<>();
         }
@@ -72,7 +75,7 @@ public class Contacts {
 
     public void save() throws IOException, MetadataException, InvalidCipherTextException {
 
-        if(contacts != null) {
+        if (contacts != null) {
             metadata.putMetadata(mapper.writeValueAsString(contacts));
         }
     }
@@ -86,15 +89,16 @@ public class Contacts {
         sharedMetadata.setToken(null);
     }
 
+    @Nonnull
     public List<Contact> getContactList() {
-        return contacts;
+        return contacts != null ? contacts : new ArrayList<Contact>();
     }
 
-    public void setContactList(List<Contact> contacts){
+    public void setContactList(List<Contact> contacts) {
         this.contacts = contacts;
     }
 
-    public void addContact(Contact contact){
+    public void addContact(Contact contact) {
         contacts.add(contact);
     }
 
@@ -108,7 +112,7 @@ public class Contacts {
 
         String data = metadata.getMetadata(mdid, false);
 
-        if(data != null) {
+        if (data != null) {
             PublicContactDetails publicXpub = new PublicContactDetails().fromJson(data);
             return publicXpub.getXpub();
         } else {
@@ -141,7 +145,7 @@ public class Contacts {
         return contact;
     }
 
-    public Contact acceptInvitationLink(String link) throws Exception{
+    public Contact acceptInvitationLink(String link) throws Exception {
 
         Map<String, String> queryParams = getQueryParams(link);
 
@@ -161,7 +165,7 @@ public class Contacts {
 
         String contactMdid = sharedMetadata.readInvitation(contact.getOutgoingInvitation().getId());
 
-        if(contactMdid != null){
+        if (contactMdid != null) {
             //Contact accepted invite, we can update and delete invite now
             contact.setMdid(contactMdid);
             sharedMetadata.deleteInvitation(contact.getOutgoingInvitation().getId());
@@ -184,9 +188,10 @@ public class Contacts {
 
         String b64Message;
 
-        if(encrypted) {
+        if (encrypted) {
             String recipientXpub = fetchXpub(mdid);
-            if (recipientXpub == null) throw new SharedMetadataException("No public xpub for mdid.");
+            if (recipientXpub == null)
+                throw new SharedMetadataException("No public xpub for mdid.");
 
             b64Message = sharedMetadata.encryptFor(recipientXpub, message);
         } else {
@@ -247,8 +252,8 @@ public class Contacts {
 
         List<Message> messages = getMessages(true);
 
-        for(Message message : messages) {
-            if(message.getType() == TYPE_PAYMENT_REQUEST){
+        for (Message message : messages) {
+            if (message.getType() == TYPE_PAYMENT_REQUEST) {
                 result.add(new PaymentRequest().fromJson(message.getPayload()));
             }
         }

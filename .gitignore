@@ -17,3 +17,4 @@ log/
 target/
 src/main/java/META-INF/
 classes/
+out/
