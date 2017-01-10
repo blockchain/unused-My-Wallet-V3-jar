@@ -2,7 +2,9 @@ package info.blockchain.wallet.util;
 
 import com.lambdaworks.codec.Base64;
 
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.codec.Charsets;
+
+import java.nio.charset.Charset;
 
 import javax.annotation.Nonnull;
 
@@ -23,7 +25,7 @@ public final class Base64Util {
      * @return A String in UTF-8
      */
     public static String encodeBase64String(byte[] input) {
-        return StringUtils.newStringUtf8(getStringToBytes(encode(input)));
+        return newUtf8String(getStringToBytes(encode(input)));
     }
 
     /**
@@ -34,7 +36,7 @@ public final class Base64Util {
      * @return A decoded byte array
      */
     public static byte[] decodeBase64(@Nonnull String input) {
-        return StringUtils.newStringUtf8(decode(input)).getBytes();
+        return newUtf8String(decode(input)).getBytes();
     }
 
     private static byte[] decode(@Nonnull String input) {
@@ -47,5 +49,13 @@ public final class Base64Util {
 
     private static byte[] getStringToBytes(char[] chars) {
         return new String(chars).getBytes();
+    }
+
+    private static String newUtf8String(final byte[] bytes) {
+        return newString(bytes, Charsets.UTF_8);
+    }
+
+    private static String newString(final byte[] bytes, final Charset charset) {
+        return bytes == null ? null : new String(bytes, charset);
     }
 }
