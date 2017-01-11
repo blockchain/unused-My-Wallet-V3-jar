@@ -1,11 +1,13 @@
 package info.blockchain.wallet.contacts.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import info.blockchain.wallet.metadata.data.Invitation;
 
+import java.util.Arrays;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -30,7 +32,7 @@ public class Contact {
     private String mdid;
     private Invitation outgoingInvitation; // I invited somebody
     private Invitation incomingInvitation;// Somebody invited me
-    private FacilitatedTransaction[] facilitatedTransaction;
+    private List<FacilitatedTransaction> facilitatedTransaction;
 
     public Contact() {
         this.id = new ECKey().getPrivateKeyAsHex();
@@ -116,12 +118,17 @@ public class Contact {
         this.incomingInvitation = incomingInvitation;
     }
 
-    public FacilitatedTransaction[] getFacilitatedTransaction() {
+    public List<FacilitatedTransaction> getFacilitatedTransaction() {
         return facilitatedTransaction;
     }
 
+    @JsonIgnore
+    public void addFacilitatedTransaction(FacilitatedTransaction facilitatedTransaction) {
+        this.facilitatedTransaction.add(facilitatedTransaction);
+    }
+
     public void setFacilitatedTransaction(
-        FacilitatedTransaction[] facilitatedTransaction) {
+        List<FacilitatedTransaction> facilitatedTransaction) {
         this.facilitatedTransaction = facilitatedTransaction;
     }
 

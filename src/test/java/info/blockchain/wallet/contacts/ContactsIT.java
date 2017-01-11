@@ -7,9 +7,11 @@ import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 
+import java.util.Arrays;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
@@ -128,16 +130,18 @@ public class ContactsIT {
         /*
         Create wallets
          */
-        Wallet a_wallet = setupWallet(wallet_A_seedHex, wallet_A_guid, wallet_A_sharedKey);
+        Wallet a_wallet = new WalletFactory().newWallet(12,"",1);
         DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(a_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(a_wallet.getMasterKey());
         Contacts a_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
+        a_contacts.publishXpub();
         a_contacts.fetch();
 
-        Wallet b_wallet = setupWallet(wallet_B_seedHex, wallet_B_guid, wallet_B_sharedKey);
+        Wallet b_wallet = new WalletFactory().newWallet(12,"",1);
         sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
         Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
+        b_contacts.publishXpub();
         b_contacts.fetch();
 
         /*
@@ -162,12 +166,6 @@ public class ContactsIT {
         a_contacts.sendMessage(myInvite.getMdid(), "Hey hey", 66, true);
 
         /*
-        Already in trusted contact list
-         */
-//      Contact senderDetails = a_contacts.getContactList().get...
-
-
-        /*
         Send messages
          */
         System.out.println("\n--Recipient--");
@@ -176,36 +174,18 @@ public class ContactsIT {
 
         Message message = messages.get(messages.size() - 1);
         b_contacts.readMessage(message.getId());
-        System.out.println("ECDH Encrypted: " + message.getPayload());
-        System.out.println("Decrypted: " + b_contacts.decryptMessageFrom(message, senderDetails.getMdid()).getPayload());
+        System.out.println("Decrypted: " + message.getPayload());
         b_contacts.markMessageAsRead(message.getId(), true);
-    }
 
-    private Wallet setupWallet(String hex, String guid, String sharedKey) throws Exception {
-        System.out.println("\n--Start Wallet " + guid + "--");
-        Wallet wallet = new WalletFactory().restoreWallet(hex, "", 1);
-        //If you want notifications to fire register mdid
-        //PayloadManager.getInstance().registerMdid(guid, sharedKey, sharedMetadata.getNode());
-        return wallet;
-    }
 
-    @Test
-    public void testProc() throws Exception {
-
-        Wallet b_wallet = setupWallet(wallet_B_seedHex, wallet_B_guid, wallet_B_sharedKey);
-        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
-        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
-        Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
-        b_contacts.fetch();
-
-        List<Message> messages = b_contacts.getMessages(true);
-
-        for(int i = 0; i < messages.size(); i++){
-            Message message = messages.get(i);
-            b_contacts.markMessageAsRead(message.getId(), true);
-        }
-
-        messages = b_contacts.getMessages(true);
-        Assert.assertTrue(messages.size() == 0);
+        /*
+        Send Payment Request
+         */
+        System.out.println("\n--Sender--");
+        FacilitatedTransaction tx = new FacilitatedTransaction();
+        tx.setIntendedAmount(5000);
+        tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
+        a_contacts.sendPaymentRequest(myInvite.getMdid(), tx);
+        System.out.println("sending payment request: "+tx.toJson());
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.exceptions.ValidationException;
@@ -35,7 +36,6 @@ public class Contacts {
     private final static int METADATA_TYPE_EXTERNAL = 4;
     private Metadata metadata;
     private SharedMetadata sharedMetadata;
-    private Metadata publicContactDetailsMetadata;
     private List<Contact> contacts;
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -47,9 +47,6 @@ public class Contacts {
             MetadataException {
         metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
         sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
-        publicContactDetailsMetadata = new Metadata.Builder(sharedMetaDataHDNode, METADATA_TYPE_EXTERNAL)
-                .setEncrypted(false)
-                .build();
         contacts = new ArrayList<>();
     }
 
@@ -99,7 +96,14 @@ public class Contacts {
     public void publishXpub() throws MetadataException, IOException, InvalidCipherTextException {
 
         PublicContactDetails details = new PublicContactDetails(sharedMetadata.getXpub());
-        publicContactDetailsMetadata.putMetadata(details.toJson());
+
+        Metadata publicMet = new Metadata();
+        publicMet.setEncrypted(false);
+        publicMet.setAddress(sharedMetadata.getAddress());
+        publicMet.setNode(sharedMetadata.getNode());
+        publicMet.setType(METADATA_TYPE_EXTERNAL);
+        publicMet.fetchMagic();
+        publicMet.putMetadata(details.toJson());
     }
 
     public String fetchXpub(String mdid) throws MetadataException, IOException, InvalidCipherTextException {
@@ -194,9 +198,21 @@ public class Contacts {
         sharedMetadata.postMessage(mdid, b64Message, type);
     }
 
-    public List<Message> getMessages(boolean onlyNew) throws SharedMetadataException, ValidationException,
-            SignatureException, IOException {
-        return sharedMetadata.getMessages(onlyNew);
+    public List<Message> getMessages(boolean onlyNew)
+        throws SharedMetadataException, ValidationException,
+        SignatureException, IOException {
+
+        List<Message> messages =  sharedMetadata.getMessages(onlyNew);
+
+        for(Message message : messages) {
+            try {
+                decryptMessageFrom(message, message.getSender());
+            } catch (IOException | InvalidCipherTextException | MetadataException e) {
+                e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
+            }
+        }
+
+        return messages;
     }
 
     public Message readMessage(String messageId) throws SharedMetadataException, ValidationException,
@@ -233,53 +249,8 @@ public class Contacts {
         return params;
     }
 
-//    public void sendPaymentRequest(String mdid, FacilitatedTransaction paymentRequest) throws IOException,
-//            SharedMetadataException, InvalidCipherTextException, MetadataException {
-//        sendMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST, true);
-//    }
-//
-//    public List<FacilitatedTransaction> getPaymentRequests() throws SharedMetadataException,
-//            IOException, SignatureException, ValidationException {
-//
-//        List<FacilitatedTransaction> result = new ArrayList<>();
-//
-//        List<Message> messages = getMessages(true);
-//
-//        for(Message message : messages) {
-//            System.out.println(message.getPayload());
-//            if(message.getType() == TYPE_PAYMENT_REQUEST){
-//                result.add(new FacilitatedTransaction().fromJson(message.getPayload()));
-//            }
-//        }
-//
-//        return result;
-//    }
-//
-//    public List<FacilitatedTransaction> getPaymentRequestResponses(boolean onlyNew) throws
-//            SharedMetadataException, IOException, SignatureException, ValidationException {
-//
-//        List<FacilitatedTransaction> responses = new ArrayList<>();
-//
-//        List<Message> messages = getMessages(onlyNew);
-//
-//        for (Message message : messages) {
-//
-//            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
-//                responses.add(new FacilitatedTransaction().fromJson(message.getPayload()));
-//            }
-//        }
-//
-//        return responses;
-//    }
-//
-//    public Message acceptPaymentRequest(String mdid, FacilitatedTransaction paymentRequest,
-//                                        String note, String receiveAddress) throws IOException,
-//            SharedMetadataException {
-//
-//        FacilitatedTransaction response = new FacilitatedTransaction();
-//        response.setIntendedAmount(paymentRequest.getIntendedAmount());
-//        response.setAddress(receiveAddress);
-//
-//        return sharedMetadata.postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
-//    }
+    public void sendPaymentRequest(String mdid, FacilitatedTransaction paymentRequest) throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
+        sendMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST, true);
+    }
 }
