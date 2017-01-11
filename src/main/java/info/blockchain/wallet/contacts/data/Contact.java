@@ -6,18 +6,16 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import info.blockchain.wallet.metadata.data.Invitation;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicNameValuePair;
 import org.bitcoinj.core.ECKey;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
+import io.mikael.urlbuilder.UrlBuilder;
+import io.mikael.urlbuilder.util.UrlParameterMultimap;
 
-@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Contact {
 
     private String id;
@@ -119,22 +117,22 @@ public class Contact {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public List<NameValuePair> toQueryParameters(){
+    private UrlParameterMultimap toQueryParameters() {
 
-        List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
-        if (id != null) queryParams.add(new BasicNameValuePair("id", id));
-        if (name != null) queryParams.add(new BasicNameValuePair("name", name));
-        if (surname != null) queryParams.add(new BasicNameValuePair("surname", surname));
-        if (company != null) queryParams.add(new BasicNameValuePair("company", company));
-        if (email != null) queryParams.add(new BasicNameValuePair("email", email));
-        if (note != null) queryParams.add(new BasicNameValuePair("note", note));
-        if (xpub != null) queryParams.add(new BasicNameValuePair("xpub", xpub));
-        if (mdid != null) queryParams.add(new BasicNameValuePair("mdid", mdid));
+        UrlParameterMultimap queryParams = UrlParameterMultimap.newMultimap();
+        if (id != null) queryParams.add("id", id);
+        if (name != null) queryParams.add("name", name);
+        if (surname != null) queryParams.add("surname", surname);
+        if (company != null) queryParams.add("company", company);
+        if (email != null) queryParams.add("email", email);
+        if (note != null) queryParams.add("note", note);
+        if (xpub != null) queryParams.add("xpub", xpub);
+        if (mdid != null) queryParams.add("mdid", mdid);
 
         return queryParams;
     }
 
-    public Contact fromQueryParameters(Map<String, String> queryParams){
+    public Contact fromQueryParameters(Map<String, String> queryParams) {
 
         Contact contact = new Contact();
         contact.id = queryParams.get("id");
@@ -151,14 +149,14 @@ public class Contact {
 
     public String createURI() throws URISyntaxException {
 
-        List<NameValuePair> qparams = toQueryParameters();
+        UrlParameterMultimap urlParameterMultimap = toQueryParameters();
 
-        URIBuilder builder = new URIBuilder()
-                .setScheme("http")
-                .setHost("blockchain.info")
-                .setPath("/invite")
-                .setParameters(qparams);
+        UrlBuilder urlBuilder = UrlBuilder.empty()
+                .withScheme("https")
+                .withHost("blockchain.info")
+                .withPath("/invite")
+                .withParameters(urlParameterMultimap);
 
-        return builder.build().toString();
+        return urlBuilder.toUri().toString();
     }
 }

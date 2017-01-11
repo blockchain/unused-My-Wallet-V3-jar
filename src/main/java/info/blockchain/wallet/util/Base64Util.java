@@ -2,9 +2,7 @@ package info.blockchain.wallet.util;
 
 import com.lambdaworks.codec.Base64;
 
-import org.apache.commons.codec.Charsets;
-
-import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
 
 import javax.annotation.Nonnull;
 
@@ -52,10 +50,11 @@ public final class Base64Util {
     }
 
     private static String newUtf8String(final byte[] bytes) {
-        return newString(bytes, Charsets.UTF_8);
-    }
-
-    private static String newString(final byte[] bytes, final Charset charset) {
-        return bytes == null ? null : new String(bytes, charset);
+        try {
+            return bytes == null ? null : new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
