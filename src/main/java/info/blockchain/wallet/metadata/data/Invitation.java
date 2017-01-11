@@ -26,6 +26,10 @@ public class Invitation {
         return contact;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @JsonIgnore
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);

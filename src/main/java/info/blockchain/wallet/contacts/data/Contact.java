@@ -131,7 +131,7 @@ public class Contact {
 
     private UrlParameterMultimap toQueryParameters() {
         UrlParameterMultimap queryParams = UrlParameterMultimap.newMultimap();
-        if (id != null) queryParams.add("id", id);
+        if (id != null) queryParams.add("id", outgoingInvitation.getId());
         if (name != null) queryParams.add("name", name);
         if (surname != null) queryParams.add("surname", surname);
         if (company != null) queryParams.add("company", company);
@@ -146,7 +146,8 @@ public class Contact {
     public Contact fromQueryParameters(Map<String, String> queryParams) {
 
         Contact contact = new Contact();
-        contact.id = queryParams.get("id");
+        contact.incomingInvitation = new Invitation();
+        contact.incomingInvitation.setId(queryParams.get("id"));
         contact.name = queryParams.get("name");
         contact.surname = queryParams.get("surname");
 
