@@ -11,9 +11,7 @@ import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.metadata.data.PaymentRequest;
-import info.blockchain.wallet.metadata.data.PaymentRequestResponse;
-import info.blockchain.wallet.metadata.data.PublicContactDetails;
+import info.blockchain.wallet.contacts.data.PublicContactDetails;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
@@ -235,53 +233,53 @@ public class Contacts {
         return params;
     }
 
-    public void sendPaymentRequest(String mdid, PaymentRequest paymentRequest) throws IOException,
-            SharedMetadataException, InvalidCipherTextException, MetadataException {
-        sendMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST, true);
-    }
-
-    public List<PaymentRequest> getPaymentRequests() throws SharedMetadataException,
-            IOException, SignatureException, ValidationException {
-
-        List<PaymentRequest> result = new ArrayList<>();
-
-        List<Message> messages = getMessages(true);
-
-        for(Message message : messages) {
-            if(message.getType() == TYPE_PAYMENT_REQUEST){
-                result.add(new PaymentRequest().fromJson(message.getPayload()));
-            }
-        }
-
-        return result;
-    }
-
-    public List<PaymentRequestResponse> getPaymentRequestResponses(boolean onlyNew) throws
-            SharedMetadataException, IOException, SignatureException, ValidationException {
-
-        List<PaymentRequestResponse> responses = new ArrayList<>();
-
-        List<Message> messages = getMessages(onlyNew);
-
-        for (Message message : messages) {
-
-            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
-                responses.add(new PaymentRequestResponse().fromJson(message.getPayload()));
-            }
-        }
-
-        return responses;
-    }
-
-    public Message acceptPaymentRequest(String mdid, PaymentRequest paymentRequest,
-                                        String note, String receiveAddress) throws IOException,
-            SharedMetadataException {
-
-        PaymentRequestResponse response = new PaymentRequestResponse();
-        response.setAmount(paymentRequest.getAmount());
-        response.setNote(note);
-        response.setAddress(receiveAddress);
-
-        return sharedMetadata.postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
-    }
+//    public void sendPaymentRequest(String mdid, FacilitatedTransaction paymentRequest) throws IOException,
+//            SharedMetadataException, InvalidCipherTextException, MetadataException {
+//        sendMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST, true);
+//    }
+//
+//    public List<FacilitatedTransaction> getPaymentRequests() throws SharedMetadataException,
+//            IOException, SignatureException, ValidationException {
+//
+//        List<FacilitatedTransaction> result = new ArrayList<>();
+//
+//        List<Message> messages = getMessages(true);
+//
+//        for(Message message : messages) {
+//            System.out.println(message.getPayload());
+//            if(message.getType() == TYPE_PAYMENT_REQUEST){
+//                result.add(new FacilitatedTransaction().fromJson(message.getPayload()));
+//            }
+//        }
+//
+//        return result;
+//    }
+//
+//    public List<FacilitatedTransaction> getPaymentRequestResponses(boolean onlyNew) throws
+//            SharedMetadataException, IOException, SignatureException, ValidationException {
+//
+//        List<FacilitatedTransaction> responses = new ArrayList<>();
+//
+//        List<Message> messages = getMessages(onlyNew);
+//
+//        for (Message message : messages) {
+//
+//            if (message.getType() == TYPE_PAYMENT_REQUEST_RESPONSE) {
+//                responses.add(new FacilitatedTransaction().fromJson(message.getPayload()));
+//            }
+//        }
+//
+//        return responses;
+//    }
+//
+//    public Message acceptPaymentRequest(String mdid, FacilitatedTransaction paymentRequest,
+//                                        String note, String receiveAddress) throws IOException,
+//            SharedMetadataException {
+//
+//        FacilitatedTransaction response = new FacilitatedTransaction();
+//        response.setIntendedAmount(paymentRequest.getIntendedAmount());
+//        response.setAddress(receiveAddress);
+//
+//        return sharedMetadata.postMessage(mdid, response.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE);
+//    }
 }

@@ -30,6 +30,7 @@ public class Contact {
     private String mdid;
     private Invitation outgoingInvitation; // I invited somebody
     private Invitation incomingInvitation;// Somebody invited me
+    private FacilitatedTransaction[] facilitatedTransaction;
 
     public Contact() {
         this.id = new ECKey().getPrivateKeyAsHex();
@@ -115,6 +116,15 @@ public class Contact {
         this.incomingInvitation = incomingInvitation;
     }
 
+    public FacilitatedTransaction[] getFacilitatedTransaction() {
+        return facilitatedTransaction;
+    }
+
+    public void setFacilitatedTransaction(
+        FacilitatedTransaction[] facilitatedTransaction) {
+        this.facilitatedTransaction = facilitatedTransaction;
+    }
+
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
@@ -122,14 +132,9 @@ public class Contact {
     public List<NameValuePair> toQueryParameters(){
 
         List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
-        if (id != null) queryParams.add(new BasicNameValuePair("id", id));
+        if (id != null) queryParams.add(new BasicNameValuePair("id", outgoingInvitation.getId()));
         if (name != null) queryParams.add(new BasicNameValuePair("name", name));
         if (surname != null) queryParams.add(new BasicNameValuePair("surname", surname));
-        if (company != null) queryParams.add(new BasicNameValuePair("company", company));
-        if (email != null) queryParams.add(new BasicNameValuePair("email", email));
-        if (note != null) queryParams.add(new BasicNameValuePair("note", note));
-        if (xpub != null) queryParams.add(new BasicNameValuePair("xpub", xpub));
-        if (mdid != null) queryParams.add(new BasicNameValuePair("mdid", mdid));
 
         return queryParams;
     }
@@ -140,11 +145,6 @@ public class Contact {
         contact.id = queryParams.get("id");
         contact.name = queryParams.get("name");
         contact.surname = queryParams.get("surname");
-        contact.company = queryParams.get("company");
-        contact.email = queryParams.get("email");
-        contact.note = queryParams.get("note");
-        contact.xpub = queryParams.get("xpub");
-        contact.mdid = queryParams.get("mdid");
 
         return contact;
     }
