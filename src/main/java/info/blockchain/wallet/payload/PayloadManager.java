@@ -10,6 +10,7 @@ import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
+import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -21,10 +22,7 @@ import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.transaction.Tx;
-import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import info.blockchain.wallet.util.PrivateKeyFactory;
-import info.blockchain.wallet.util.Util;
+import info.blockchain.wallet.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,6 +31,8 @@ import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -46,6 +46,8 @@ import javax.annotation.Nullable;
  * PayloadManager.java : singleton class for reading/writing/parsing Blockchain HD JSON payload
  */
 public class PayloadManager {
+
+    private final Logger logger = LoggerFactory.getLogger(PayloadManager.class);
 
     public static final double SUPPORTED_ENCRYPTION_VERSION = 3.0;
 
@@ -225,7 +227,9 @@ public class PayloadManager {
 
     public boolean savePayloadToServer() {
 
-        if (payload == null) return false;
+        if (payload == null || !isEncryptionConsistent()){
+            return false;
+        }
 
         try {
             if (cached_payload != null && cached_payload.equals(payload.toJson().toString())) {
@@ -568,7 +572,11 @@ public class PayloadManager {
         payload.getHdWallet().setAccounts(accounts);
 
         //Save payload
-        savePayloadToServer();
+        if (!savePayloadToServer()) {
+            //Revert
+            accounts.remove(account);
+            throw new Exception("Payload failed to save to server.");
+        }
 
         return account;
     }
@@ -798,5 +806,57 @@ public class PayloadManager {
 
     public MetadataNodeFactory getMetadataNodeFactory() {
         return metadataNodeFactory;
+    }
+
+    Wallet getWallet() {
+        return wallet;
+    }
+
+    /**
+     * Checks imported address and hd keys for possible double encryption corruption
+     */
+    public boolean isEncryptionConsistent() {
+
+        ArrayList<String> keyList = new ArrayList<>();
+
+        if (payload.getLegacyAddressList() != null) {
+            List<LegacyAddress> legacyAddresses = payload.getLegacyAddressList();
+            for (LegacyAddress legacyAddress : legacyAddresses) {
+                if (!legacyAddress.isWatchOnly()) {
+                    keyList.add(legacyAddress.getEncryptedKey());
+                }
+            }
+        }
+
+        if (payload.getHdWallet() != null && payload.getHdWallet().getAccounts() != null) {
+            List<Account> accounts = payload.getHdWallet().getAccounts();
+            for (Account account : accounts) {
+                keyList.add(account.getXpriv());
+            }
+        }
+
+        return isEncryptionConsistent(payload.isDoubleEncrypted(), keyList);
+    }
+
+    boolean isEncryptionConsistent(boolean isDoubleEncrypted, List<String> keyList) {
+
+        FormatsUtil formatsUtil = FormatsUtil.getInstance();
+
+        boolean consistent = true;
+
+        for (String key : keyList) {
+
+            if (isDoubleEncrypted) {
+                consistent = formatsUtil.isKeyEncrypted(key);
+            } else {
+                consistent = formatsUtil.isKeyUnencrypted(key);
+            }
+
+            if (!consistent) {
+                break;
+            }
+        }
+
+        return consistent;
     }
 }

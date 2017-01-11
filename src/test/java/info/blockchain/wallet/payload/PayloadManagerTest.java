@@ -2,19 +2,28 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
+import info.blockchain.bip44.*;
+import info.blockchain.bip44.Account;
+import info.blockchain.test_data.PayloadTestData;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
+import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.Wallet;
+import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -429,5 +438,65 @@ public class PayloadManagerTest {
         LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar", "1.0", "second_password");
 
         assertThat("Address should be null", legacyAddress == null);
+    }
+
+    @Test
+    public void testIsEncryptionConsistent_not_doubleEncrypted() throws Exception {
+
+        ArrayList<String> keyList = new ArrayList<>();
+        keyList.add("o9azUsu8QrsjtKe54Ah3ep6FEGj6v1fA3S8nrYt6UFd");
+        keyList.add("9DWpEiXYQ9wkYQA3UpZezsATW6sP3N9fcCetgRyfWUn4");
+        keyList.add("xprv9xgDCL6n9Y3x9njMKWiLaYY3XDeEjY8duMyreHk5WhKNxVKeYjNt85SmeZYpctXAdAgodwnWpCknp5HwNB5Np1hxeqw6dMZDgcWexU4uTcH");
+        keyList.add("xprv9xgDCL6n9Y3xDRCSvsGTnub1z1z1s1vbpsS7esVELAV7166hs2m6fj5ibth9ejDyowPEau2n7FbQVZCyVhg7KSrgy5a9VoqEge387KTwjws");
+
+        Assert.assertTrue(payloadManager.isEncryptionConsistent(false, keyList));
+        Assert.assertTrue(!payloadManager.isEncryptionConsistent(true, keyList));
+    }
+
+    @Test
+    public void testIsEncryptionConsistent_doubleEncrypted() throws Exception {
+
+        ArrayList<String> keyList = new ArrayList<>();
+        keyList.add("kG4+ziqbauAwP+wbGT2UM9d5f7yGL2kazOSs4KlYempP68qTQ9YtV5od5dQg3Jxpi4t5Q4faCMqraKpnQ1Gq3Q==");
+        keyList.add("6icDz7UDWlESNqNiGEFolP3UqTVES9xIZQ9Ld4E0ND6PF/4KStmoGP9ADOV43a+KIMyR1Ook+ap7zJ8l8Wn0bA==");
+        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
+        keyList.add("NQyZWdgZmJ4k8NBZjw6n64UIiXtW3zhnnfsZnfzU6YXHovucf2pLOtHq/lxqPzxWMzZuThmWBsdI+ns/HNAGB9s6Rad5Q6R55j5wx+Gd8KvSEK57U+3VZah5oWusdMZNz2hfKIn49EoZszw9bKsEjGzRxxd1D1FLny1pci5gtD4=");
+
+        Assert.assertTrue(payloadManager.isEncryptionConsistent(true, keyList));
+        Assert.assertTrue(!payloadManager.isEncryptionConsistent(false, keyList));
+    }
+
+    @Test
+    public void testIsEncryptionConsistent_not_doubleEncrypted_corrupt() throws Exception {
+
+        ArrayList<String> keyList = new ArrayList<>();
+        keyList.add("o9azUsu8QrsjtKe54Ah3ep6FEGj6v1fA3S8nrYt6UFd");
+        keyList.add("6icDz7UDWlESNqNiGEFolP3UqTVES9xIZQ9Ld4E0ND6PF/4KStmoGP9ADOV43a+KIMyR1Ook+ap7zJ8l8Wn0bA==");
+
+        Assert.assertTrue(!payloadManager.isEncryptionConsistent(false, keyList));
+
+        keyList = new ArrayList<>();
+        keyList.add("xprv9xgDCL6n9Y3x9njMKWiLaYY3XDeEjY8duMyreHk5WhKNxVKeYjNt85SmeZYpctXAdAgodwnWpCknp5HwNB5Np1hxeqw6dMZDgcWexU4uTcH");
+        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
+
+        Assert.assertTrue(!payloadManager.isEncryptionConsistent(false, keyList));
+    }
+
+    @Test
+    public void testIsEncryptionConsistent_doubleEncrypted_corrupt() throws Exception {
+
+        ArrayList<String> keyList = new ArrayList<>();
+        keyList.add("kG4+ziqbauAwP+wbGT2UM9d5f7yGL2kazOSs4KlYempP68qTQ9YtV5od5dQg3Jxpi4t5Q4faCMqraKpnQ1Gq3Q==");
+        keyList.add("9DWpEiXYQ9wkYQA3UpZezsATW6sP3N9fcCetgRyfWUn4");
+        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
+        keyList.add("NQyZWdgZmJ4k8NBZjw6n64UIiXtW3zhnnfsZnfzU6YXHovucf2pLOtHq/lxqPzxWMzZuThmWBsdI+ns/HNAGB9s6Rad5Q6R55j5wx+Gd8KvSEK57U+3VZah5oWusdMZNz2hfKIn49EoZszw9bKsEjGzRxxd1D1FLny1pci5gtD4=");
+
+        Assert.assertTrue(!payloadManager.isEncryptionConsistent(true, keyList));
+
+        keyList = new ArrayList<>();
+        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
+        keyList.add("xprv9xgDCL6n9Y3x9njMKWiLaYY3XDeEjY8duMyreHk5WhKNxVKeYjNt85SmeZYpctXAdAgodwnWpCknp5HwNB5Np1hxeqw6dMZDgcWexU4uTcH");
+
+        Assert.assertTrue(!payloadManager.isEncryptionConsistent(true, keyList));
     }
 }
