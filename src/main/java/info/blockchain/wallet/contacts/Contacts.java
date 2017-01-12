@@ -126,6 +126,10 @@ public class Contacts {
         contactList.add(contact);
     }
 
+    public void removeContact(Contact contact) {
+        contactList.remove(contact);
+    }
+
     /**
      * Publishes your mdid-xpub pair unencrypted to metadata service
      * @throws MetadataException
