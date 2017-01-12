@@ -152,22 +152,23 @@ public class ContactsIT {
         me.setName("Riaan");
         Contact him = new Contact();
         him.setName("Jaume");
-        Contact myInvite = a_contacts.createInvitation(me, him);
-        String oneTimeUri = myInvite.createURI();
+        Contact a_invite = a_contacts.createInvitation(me, him);
+        String oneTimeUri = a_invite.createURI();
         System.out.println("createInvitation: " + oneTimeUri);
 
         System.out.println("\n--Recipient--");
-        Contact senderDetails = b_contacts.acceptInvitationLink(oneTimeUri);
-        System.out.println("accept Invitation: " + senderDetails.toJson());
+        Contact a_accepted_invite = b_contacts.acceptInvitationLink(oneTimeUri);
+        System.out.println("accept Invitation: " + a_accepted_invite.toJson());
 
         System.out.println("\n--Sender--");
-        boolean accepted = a_contacts.readInvitationSent(myInvite);
+        boolean accepted = a_contacts.readInvitationSent(a_invite);
         System.out.println("Accepted: " + accepted);
-        a_contacts.sendMessage(myInvite.getMdid(), "Hey hey", 66, true);
 
         /*
         Send messages
          */
+        a_contacts.sendMessage(a_contacts.getContactList().get(0).getMdid(), "Hey hey", 66, true);
+
         System.out.println("\n--Recipient--");
         List<Message> messages = b_contacts.getMessages(true);
         System.out.println("Received messages: '" + messages.size() + "'");
@@ -182,10 +183,7 @@ public class ContactsIT {
         Send Payment Request
          */
         System.out.println("\n--Sender--");
-        FacilitatedTransaction tx = new FacilitatedTransaction();
-        tx.setIntendedAmount(5000);
-        tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
-        a_contacts.sendPaymentRequest(myInvite.getMdid(), tx);
-        System.out.println("sending payment request: "+tx.toJson());
+        String txId = a_contacts.sendRequestPaymentRequest(a_contacts.getContactList().get(0).getMdid(), 5000);
+        System.out.println("Sent payment request: "+a_contacts.getContactList().get(0).getFacilitatedTransaction().get(txId).toJson());
     }
 }

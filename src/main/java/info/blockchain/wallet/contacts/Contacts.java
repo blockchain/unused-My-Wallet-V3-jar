@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.RequestPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.exceptions.ValidationException;
@@ -38,7 +39,7 @@ public class Contacts {
     private final static int METADATA_TYPE_EXTERNAL = 4;
     private Metadata metadata;
     private SharedMetadata sharedMetadata;
-    private List<Contact> contacts;
+    private List<Contact> contactList;
     private ObjectMapper mapper = new ObjectMapper();
 
     public Contacts() {
@@ -49,7 +50,7 @@ public class Contacts {
             MetadataException {
         metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
         sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
-        contacts = new ArrayList<>();
+        contactList = new ArrayList<>();
     }
 
     public Contacts(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws IOException,
@@ -61,40 +62,44 @@ public class Contacts {
 
         String data = metadata.getMetadata();
         if (data != null) {
-            contacts = mapper.readValue(data, new TypeReference<List<Contact>>() {
+            contactList = mapper.readValue(data, new TypeReference<List<Contact>>() {
             });
         } else {
-            contacts = new ArrayList<>();
+            contactList = new ArrayList<>();
         }
     }
 
     public void save() throws IOException, MetadataException, InvalidCipherTextException {
 
-        if (contacts != null) {
-            metadata.putMetadata(mapper.writeValueAsString(contacts));
+        if (contactList != null) {
+            metadata.putMetadata(mapper.writeValueAsString(contactList));
         }
     }
 
     public void wipe() throws IOException, MetadataException, InvalidCipherTextException {
         metadata.putMetadata(mapper.writeValueAsString(new ArrayList<Contact>()));
-        contacts = new ArrayList<>();
+        contactList = new ArrayList<>();
     }
 
     public void invalidateToken() {
         sharedMetadata.setToken(null);
     }
 
+    public String getMdid() {
+        return sharedMetadata.getAddress();
+    }
+
     @Nonnull
     public List<Contact> getContactList() {
-        return contacts != null ? contacts : new ArrayList<Contact>();
+        return contactList != null ? contactList : new ArrayList<Contact>();
     }
 
     public void setContactList(List<Contact> contacts) {
-        this.contacts = contacts;
+        this.contactList = contacts;
     }
 
     public void addContact(Contact contact) {
-        contacts.add(contact);
+        contactList.add(contact);
     }
 
     public void publishXpub() throws MetadataException, IOException, InvalidCipherTextException {
@@ -127,12 +132,19 @@ public class Contacts {
      */
     public Contact createInvitation(Contact myDetails, Contact recipientDetails) throws IOException, SharedMetadataException {
 
-        //myInfoToShare could be info that will be encoded on the QR
-        Invitation invitationSent = sharedMetadata.createInvitation();
-        myDetails.setOutgoingInvitation(invitationSent);
+        myDetails.setMdid(sharedMetadata.getAddress());
 
-        //contactInfo comes from a form that is filled before pressing invite (I am inviting James bla bla)
-        addContact(recipientDetails);
+        Invitation i = sharedMetadata.createInvitation();
+
+        Invitation sent = new Invitation();
+        sent.setId(i.getId());
+        sent.setDetails(recipientDetails);
+        myDetails.setInvitationSent(sent);
+
+        Invitation received = new Invitation();
+        received.setId(i.getId());
+        received.setDetails(myDetails);
+        myDetails.setInvitationReceived(received);
 
         return myDetails;
     }
@@ -161,16 +173,20 @@ public class Contacts {
         return contact;
     }
 
-    public boolean readInvitationSent(Contact contact) throws SharedMetadataException, IOException {
+    public boolean readInvitationSent(Contact invite) throws SharedMetadataException, IOException {
 
         boolean accepted = false;
 
-        String contactMdid = sharedMetadata.readInvitation(contact.getOutgoingInvitation().getId());
+        String contactMdid = sharedMetadata.readInvitation(invite.getInvitationSent().getId());
 
         if (contactMdid != null) {
             //Contact accepted invite, we can update and delete invite now
-            contact.setMdid(contactMdid);
-            sharedMetadata.deleteInvitation(contact.getOutgoingInvitation().getId());
+            sharedMetadata.deleteInvitation(invite.getInvitationSent().getId());
+
+            Contact cc = invite.getInvitationSent().getDetails();
+            cc.setMdid(contactMdid);
+            addContact(cc);
+
             accepted = true;
         }
 
@@ -254,8 +270,27 @@ public class Contacts {
         return params;
     }
 
-    public void sendPaymentRequest(String mdid, FacilitatedTransaction paymentRequest) throws IOException,
+    public String sendRequestPaymentRequest(final String mdid, long satoshis) throws IOException,
             SharedMetadataException, InvalidCipherTextException, MetadataException {
-        sendMessage(mdid, paymentRequest.toJson(), TYPE_PAYMENT_REQUEST, true);
+
+        RequestPaymentRequest request = new RequestPaymentRequest();
+        request.setIntendedAmount(satoshis);
+        sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST, true);
+
+        FacilitatedTransaction tx = new FacilitatedTransaction();
+        tx.setIntendedAmount(satoshis);
+        tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
+        tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
+
+        // TODO: 12/01/2017 - iteration not so great
+        for(Contact c : contactList) {
+            System.out.println(c.toJson());
+            if(c.getMdid() != null && c.getMdid().equals(mdid)) {
+                c.addFacilitatedTransaction(tx);
+                break;
+            }
+        }
+
+        return tx.getId();
     }
 }

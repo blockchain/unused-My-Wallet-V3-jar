@@ -15,15 +15,21 @@ import org.bitcoinj.uri.BitcoinURI;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FacilitatedTransaction {
 
-    public static final String STATE_WAITING_FOR_ADDRESS = "sender_waiting_for_receiver_to_provide_address";
-    public static final String STATE_WAITING_FOR_PAYMENT = "receiver_waiting_for_sender_to_send_payment";
+    public static final String STATE_WAITING_FOR_ADDRESS = "waiting_address";
+    public static final String STATE_WAITING_FOR_PAYMENT = "waiting_payment";
     public static final String STATE_PAYMENT_BROADCASTED = "payment_broadcasted";
 
-    String id;
-    String state;
-    long intended_amount;
-    String address;
-    String txHash;
+    public static final String ROLE_RPR_INITIATOR = "rpr_initiator";
+    public static final String ROLE_RPR_RECEIVER = "rpr_receiver";
+    public static final String ROLE_PR_INITIATOR = "pr_initiator";
+    public static final String ROLE_PR_RECEIVER = "pr_receiver";
+
+    private String id;
+    private String state;
+    private long intended_amount;
+    private String address;
+    private String txHash;
+    private String role;
 
     public FacilitatedTransaction() {
         this.id = new ECKey().getPrivateKeyAsHex();
@@ -63,6 +69,14 @@ public class FacilitatedTransaction {
 
     public void setTxHash(String txHash) {
         this.txHash = txHash;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     @JsonIgnore
