@@ -178,7 +178,7 @@ public class ContactsIT {
         System.out.println("Decrypted: " + message.getPayload());
         b_contacts.markMessageAsRead(message.getId(), true);
 
-
+        System.out.println(a_contacts.getContactList().size());
         /*
         Send Payment Request
          */
