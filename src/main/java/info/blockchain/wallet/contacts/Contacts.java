@@ -118,9 +118,8 @@ public class Contacts {
     }
 
     @Nonnull
-    public List<Contact> getContactList() {
-        return contactList != null ? new ArrayList<Contact>(contactList.values())
-            : new ArrayList<Contact>();
+    public HashMap<String, Contact> getContactList() {
+        return contactList != null ? contactList : new HashMap<String, Contact>();
     }
 
     /**
