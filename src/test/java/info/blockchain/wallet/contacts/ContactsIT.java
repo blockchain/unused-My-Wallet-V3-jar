@@ -10,11 +10,15 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
+import info.blockchain.wallet.exceptions.MetadataException;
+import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 
+import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,6 +30,7 @@ import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import retrofit2.Retrofit;
 
 /**
@@ -228,7 +233,7 @@ public class ContactsIT {
         //Step 2
         PaymentRequest pr = new PaymentRequest();
         pr.setId(ftx.getId());
-        pr.setIntended_amount(ftx.getIntendedAmount());
+        pr.setIntended_amount(ftx.getIntended_amount());
         pr.setAddress(b_wallet.getAccount(0).getReceive().getAddressAt(0)
             .getAddressString());//should be next available
         System.out.println("Send PR to '" + senderMdid + "': " + pr.toJson());
@@ -266,7 +271,7 @@ public class ContactsIT {
                 .entrySet();
             for (Entry<String, FacilitatedTransaction> item : set) {
                 System.out
-                    .println("Received payment broadcast tx_hash: " + item.getValue().getTxHash());
+                    .println("Received payment broadcast tx_hash: " + item.getValue().getTx_hash());
             }
         }
     }

@@ -15,8 +15,6 @@ public class Invitation {
     String mdid;//me
     String contact;//other user
 
-    Contact details;
-
     public Invitation() {
     }
 
@@ -42,16 +40,6 @@ public class Invitation {
 
     public void setContact(String contact) {
         this.contact = contact;
-    }
-
-    @JsonIgnore
-    public void setDetails(Contact details) {
-        this.details = details;
-    }
-
-    @JsonIgnore
-    public Contact getDetails() {
-        return details;
     }
 
     @JsonIgnore

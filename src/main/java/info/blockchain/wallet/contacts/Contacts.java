@@ -3,7 +3,6 @@ package info.blockchain.wallet.contacts;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.api.AddressInfo;
 import info.blockchain.api.TransactionDetails;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -39,9 +38,9 @@ import javax.annotation.Nonnull;
 
 public class Contacts {
 
-    private final int TYPE_PAYMENT_REQUEST = 1;
-    private final int TYPE_PAYMENT_REQUEST_RESPONSE = 2;
-    private final int TYPE_PAYMENT_BROADCASTED = 3;
+    private final int TYPE_PAYMENT_REQUEST = 0;
+    private final int TYPE_PAYMENT_REQUEST_RESPONSE = 1;
+    private final int TYPE_PAYMENT_BROADCASTED = 2;
 
     private final static int METADATA_TYPE_EXTERNAL = 4;
     private Metadata metadata;
@@ -78,7 +77,7 @@ public class Contacts {
             });
 
             for (Contact contact : list) {
-                contactList.put(contact.getMdid(), contact);
+                contactList.put(contact.getId(), contact);
             }
 
         } else {
@@ -124,18 +123,51 @@ public class Contacts {
             : new ArrayList<Contact>();
     }
 
-    public void setContactList(List<Contact> contacts) {
+    /**
+     * Overwrites contact list.
+     */
+    public void setContactList(List<Contact> contacts)
+        throws MetadataException, IOException, InvalidCipherTextException {
         for (Contact contact : contacts) {
-            contactList.put(contact.getMdid(), contact);
+            contactList.put(contact.getId(), contact);
         }
+
+        save();
     }
 
-    public void addContact(Contact contact) {
+    /**
+     * Adds contact to contact list.
+     */
+    public void addContact(Contact contact)
+        throws MetadataException, IOException, InvalidCipherTextException {
         contactList.put(contact.getMdid(), contact);
+        save();
     }
 
-    public void removeContact(String mdid) {
-        contactList.remove(mdid);
+    /**
+     * Removes contact from contact list.
+     */
+    public void removeContact(Contact contact)
+        throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
+
+        contactList.remove(contact.getId());
+        if (contact.getMdid() != null) {
+            sharedMetadata.deleteTrusted(contact.getMdid());
+        }
+        save();
+    }
+
+    /**
+     * Removes contact from contact list using mdid.
+     */
+    public void removeContact(String mdid)
+        throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
+
+        Contact contact = getContactFromMdid(mdid);
+
+        contactList.remove(contact.getId());
+        sharedMetadata.deleteTrusted(contact.getMdid());
+        save();
     }
 
     /**
@@ -174,7 +206,7 @@ public class Contacts {
      * Creates an invitation {@link Contact}
      */
     public Contact createInvitation(Contact myDetails, Contact recipientDetails)
-        throws IOException, SharedMetadataException {
+        throws IOException, SharedMetadataException, MetadataException, InvalidCipherTextException {
 
         myDetails.setMdid(sharedMetadata.getAddress());
 
@@ -182,13 +214,15 @@ public class Contacts {
 
         Invitation sent = new Invitation();
         sent.setId(i.getId());
-        sent.setDetails(recipientDetails);
         myDetails.setInvitationSent(sent);
 
         Invitation received = new Invitation();
         received.setId(i.getId());
-        received.setDetails(myDetails);
         myDetails.setInvitationReceived(received);
+
+        recipientDetails.setInvitationSent(sent);
+
+        addContact(recipientDetails);
 
         return myDetails;
     }
@@ -217,9 +251,12 @@ public class Contacts {
 
         Contact contact = new Contact().fromQueryParameters(queryParams);
         contact.setMdid(accepted.getMdid());
+        contact.setInvitationReceived(accepted);
 
-        addTrusted(accepted.getMdid());
+        sharedMetadata.addTrusted(accepted.getMdid());
         addContact(contact);
+        contact.setXpub(fetchXpub(accepted.getMdid()));
+        save();
 
         return contact;
     }
@@ -228,34 +265,40 @@ public class Contacts {
      * Checks if sent invitation has been accepted. If accepted, the invitee is added to contact
      * list.
      */
-    public boolean readInvitationSent(Contact invite) throws SharedMetadataException, IOException {
+    public boolean readInvitationSent(Contact invite)
+        throws SharedMetadataException, IOException, MetadataException, InvalidCipherTextException {
 
         boolean accepted = false;
 
         String contactMdid = sharedMetadata.readInvitation(invite.getInvitationSent().getId());
 
         if (contactMdid != null) {
+
+            Contact contact = getContactFromContactId(invite.getInvitationSent().getId());
+            contact.setMdid(contactMdid);
+
+            sharedMetadata.addTrusted(contactMdid);
+            addContact(contact);
+            contact.setXpub(fetchXpub(contactMdid));
+
             //Contact accepted invite, we can update and delete invite now
             sharedMetadata.deleteInvitation(invite.getInvitationSent().getId());
 
-            Contact cc = invite.getInvitationSent().getDetails();
-            cc.setMdid(contactMdid);
-
-            addTrusted(contactMdid);
-            addContact(cc);
-
             accepted = true;
+
+            save();
         }
 
         return accepted;
     }
 
-    public boolean addTrusted(String mdid) throws SharedMetadataException, IOException {
-        return sharedMetadata.addTrusted(mdid);
-    }
-
-    public boolean deleteTrusted(String mdid) throws SharedMetadataException, IOException {
-        return sharedMetadata.deleteTrusted(mdid);
+    private Contact getContactFromContactId(String id) {
+        for (Contact item : contactList.values()) {
+            if (item.getInvitationSent().getId().equals(id)) {
+                return item;
+            }
+        }
+        return null;
     }
 
     /**
@@ -268,7 +311,7 @@ public class Contacts {
         String b64Message;
 
         if (encrypted) {
-            String recipientXpub = fetchXpub(mdid);
+            String recipientXpub = getContactFromMdid(mdid).getXpub();
             if (recipientXpub == null) {
                 throw new SharedMetadataException("No public xpub for mdid.");
             }
@@ -292,7 +335,7 @@ public class Contacts {
 
         for (Message message : messages) {
             try {
-                decryptMessageFrom(message, message.getSender());
+                decryptMessageFrom(message, getContactFromMdid(message.getSender()).getXpub());
             } catch (IOException | InvalidCipherTextException | MetadataException e) {
                 e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
             }
@@ -311,17 +354,16 @@ public class Contacts {
     }
 
     /**
-     * Process message
+     * Flag message as read
      */
     public void markMessageAsRead(String messageId, boolean markAsRead)
         throws IOException, SharedMetadataException {
         sharedMetadata.processMessage(messageId, markAsRead);
     }
 
-    private Message decryptMessageFrom(Message message, String mdid) throws IOException,
+    private Message decryptMessageFrom(Message message, String xpub) throws IOException,
         InvalidCipherTextException, MetadataException {
 
-        String xpub = fetchXpub(mdid);
         String decryptedPayload = sharedMetadata.decryptFrom(xpub, message.getPayload());
         message.setPayload(decryptedPayload);
         return message;
@@ -343,6 +385,17 @@ public class Contacts {
         return params;
     }
 
+    private Contact getContactFromMdid(String mdid) {
+
+        for (Contact contact : contactList.values()) {
+            if (contact.getMdid().equals(mdid)) {
+                return contact;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Send request for payment request. (Ask recipient to send a bitcoin receive address)
      */
@@ -351,7 +404,7 @@ public class Contacts {
         SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         FacilitatedTransaction tx = new FacilitatedTransaction();
-        tx.setIntendedAmount(request.getIntended_amount());
+        tx.setIntended_amount(request.getIntended_amount());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
 
@@ -359,8 +412,9 @@ public class Contacts {
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST, true);
 
-        Contact contact = contactList.get(mdid);
+        Contact contact = getContactFromMdid(mdid);
         contact.addFacilitatedTransaction(tx);
+        save();
     }
 
     /**
@@ -372,8 +426,10 @@ public class Contacts {
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
-        contactList.get(mdid).addFacilitatedTransaction(ftx);
+        Contact contact = getContactFromMdid(mdid);
+        contact.addFacilitatedTransaction(ftx);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+        save();
     }
 
     /**
@@ -385,8 +441,12 @@ public class Contacts {
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
-        FacilitatedTransaction ftx = contactList.get(mdid).getFacilitatedTransaction().get(fTxId);
+        Contact contact = getContactFromMdid(mdid);
+
+        FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+
+        save();
     }
 
     /**
@@ -396,18 +456,22 @@ public class Contacts {
         throws IOException,
         SharedMetadataException, InvalidCipherTextException, MetadataException, MismatchValueException {
 
-        FacilitatedTransaction ftx = contactList.get(mdid).getFacilitatedTransaction().get(fTxId);
+        Contact contact = getContactFromMdid(mdid);
+        FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);
 
         if (!assertTransactionValue(ftx, txHash)) {
             throw new MismatchValueException(
                 "Transaction value does not match intended payment value.");
         }
 
-        sendMessage(mdid, new PaymentBroadcasted(fTxId, txHash).toJson(), TYPE_PAYMENT_BROADCASTED,
+        sendMessage(mdid, new PaymentBroadcasted(fTxId, txHash).toJson(),
+            TYPE_PAYMENT_BROADCASTED,
             true);
 
         ftx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
-        ftx.setTxHash(txHash);
+        ftx.setTx_hash(txHash);
+
+        save();
     }
 
     private boolean assertTransactionValue(FacilitatedTransaction ftx, String txHash)
@@ -427,7 +491,7 @@ public class Contacts {
                 e);// TODO: 13/01/2017 TransactionDetails should throw better exception
         }
 
-        return ftx.getIntendedAmount() == result;
+        return ftx.getIntended_amount() == result;
     }
 
     /**
@@ -435,7 +499,7 @@ public class Contacts {
      * FacilitatedTransaction} that need responding to.
      */
     public List<Contact> digestUnreadPaymentRequests()
-        throws SharedMetadataException, IOException, SignatureException, ValidationException {
+        throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {
         List<Message> messages = getMessages(true);
 
         List<Contact> unread = new ArrayList<>();
@@ -450,45 +514,47 @@ public class Contacts {
 
                     FacilitatedTransaction tx = new FacilitatedTransaction();
                     tx.setId(rpr.getId());
-                    tx.setIntendedAmount(rpr.getIntended_amount());
+                    tx.setIntended_amount(rpr.getIntended_amount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
 
-                    Contact contact = contactList.get(message.getSender());
+                    Contact contact = getContactFromMdid(message.getSender());
                     contact.addFacilitatedTransaction(tx);
-
                     unread.add(contact);
                     markMessageAsRead(message.getId(), true);
-
+                    save();
                     break;
 
                 case TYPE_PAYMENT_REQUEST_RESPONSE:
 
                     PaymentRequest pr = new PaymentRequest().fromJson(message.getPayload());
 
-                    contact = contactList.get(message.getSender());
-                    FacilitatedTransaction ftx = contact.getFacilitatedTransaction()
+                    contact = getContactFromMdid(message.getSender());
+                    tx = contact.getFacilitatedTransaction()
                         .get(pr.getId());
-                    ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-                    ftx.setAddress(pr.getAddress());
+
+                    tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+                    tx.setAddress(pr.getAddress());
 
                     unread.add(contact);
                     markMessageAsRead(message.getId(), true);
-
+                    save();
                     break;
 
                 case TYPE_PAYMENT_BROADCASTED:
 
                     PaymentBroadcasted pb = new PaymentBroadcasted().fromJson(message.getPayload());
 
-                    contact = contactList.get(message.getSender());
-                    ftx = contact.getFacilitatedTransaction().get(pb.getFacilitated_tx_id());
-                    ftx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
-                    ftx.setTxHash(pb.getTx_hash());
+                    contact = getContactFromMdid(message.getSender());
+
+                    tx = contact.getFacilitatedTransaction().get(pb.getId());
+
+                    tx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
+                    tx.setTx_hash(pb.getTx_hash());
 
                     unread.add(contact);
                     markMessageAsRead(message.getId(), true);
-
+                    save();
                     break;
             }
         }

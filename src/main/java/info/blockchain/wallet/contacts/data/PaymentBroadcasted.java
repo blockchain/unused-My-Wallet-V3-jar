@@ -12,19 +12,19 @@ import java.io.IOException;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentBroadcasted {
 
-    String facilitated_tx_id;
+    String id;
     String tx_hash;
 
     public PaymentBroadcasted() {
     }
 
-    public PaymentBroadcasted(String facilitated_tx_id, String tx_hash) {
-        this.facilitated_tx_id = facilitated_tx_id;
+    public PaymentBroadcasted(String id, String tx_hash) {
+        this.id = id;
         this.tx_hash = tx_hash;
     }
 
-    public String getFacilitated_tx_id() {
-        return facilitated_tx_id;
+    public String getId() {
+        return id;
     }
 
     public String getTx_hash() {

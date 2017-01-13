@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.uri.BitcoinURI;
@@ -28,11 +29,13 @@ public class FacilitatedTransaction {
     private String state;
     private long intended_amount;
     private String address;
-    private String txHash;
+    private String tx_hash;
     private String role;
+    private long created;
 
     public FacilitatedTransaction() {
-        this.id = new ECKey().getPrivateKeyAsHex();
+        this.id = UUID.randomUUID().toString();
+        this.created = System.currentTimeMillis();
     }
 
     public void setId(String id) {
@@ -51,14 +54,6 @@ public class FacilitatedTransaction {
         this.state = state;
     }
 
-    public long getIntendedAmount() {
-        return intended_amount;
-    }
-
-    public void setIntendedAmount(long satoshis) {
-        this.intended_amount = satoshis;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -67,12 +62,20 @@ public class FacilitatedTransaction {
         this.address = address;
     }
 
-    public String getTxHash() {
-        return txHash;
+    public long getIntended_amount() {
+        return intended_amount;
     }
 
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
+    public void setIntended_amount(long intended_amount) {
+        this.intended_amount = intended_amount;
+    }
+
+    public String getTx_hash() {
+        return tx_hash;
+    }
+
+    public void setTx_hash(String tx_hash) {
+        this.tx_hash = tx_hash;
     }
 
     public String getRole() {

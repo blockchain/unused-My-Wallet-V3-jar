@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import info.blockchain.wallet.metadata.data.Invitation;
 import io.mikael.urlbuilder.UrlBuilder;
 import io.mikael.urlbuilder.util.UrlParameterMultimap;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.bitcoinj.core.ECKey;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
@@ -29,7 +31,7 @@ public class Contact {
     private HashMap<String, FacilitatedTransaction> facilitatedTransaction;
 
     public Contact() {
-        this.id = new ECKey().getPrivateKeyAsHex();
+        this.id = UUID.randomUUID().toString();
         this.facilitatedTransaction = new HashMap<>();
         this.created = System.currentTimeMillis();
     }
@@ -98,14 +100,6 @@ public class Contact {
         this.mdid = mdid;
     }
 
-    public long getCreated() {
-        return created;
-    }
-
-    public void setCreated(long created) {
-        this.created = created;
-    }
-
     public Invitation getInvitationSent() {
         return invitationSent;
     }
@@ -136,6 +130,19 @@ public class Contact {
         this.facilitatedTransaction = facilitatedTransaction;
     }
 
+    public long getCreated() {
+        return created;
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
+    }
+
+    @JsonIgnore
+    public Contact fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Contact.class);
+    }
+
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
@@ -145,11 +152,11 @@ public class Contact {
         if (id != null) queryParams.add("id", invitationSent.getId());
         if (name != null) queryParams.add("name", name);
         if (surname != null) queryParams.add("surname", surname);
-        if (company != null) queryParams.add("company", company);
-        if (email != null) queryParams.add("email", email);
-        if (note != null) queryParams.add("note", note);
-        if (xpub != null) queryParams.add("xpub", xpub);
-        if (mdid != null) queryParams.add("mdid", mdid);
+//        if (company != null) queryParams.add("company", company);
+//        if (email != null) queryParams.add("email", email);
+//        if (note != null) queryParams.add("note", note);
+//        if (xpub != null) queryParams.add("xpub", xpub);
+//        if (mdid != null) queryParams.add("mdid", mdid);
 
         return queryParams;
     }
