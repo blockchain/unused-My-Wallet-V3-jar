@@ -35,6 +35,10 @@ public class FacilitatedTransaction {
         this.id = new ECKey().getPrivateKeyAsHex();
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }

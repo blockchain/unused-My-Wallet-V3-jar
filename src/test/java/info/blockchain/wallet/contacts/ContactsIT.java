@@ -8,10 +8,13 @@ import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 
-import java.util.Arrays;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
@@ -57,7 +60,7 @@ public class ContactsIT {
 
                 OkHttpClient okHttpClient = new OkHttpClient.Builder()
 //                        .addInterceptor(loggingInterceptor)//Extensive logging
-                        .build();
+                    .build();
 
                 return RestClient.getRetrofitInstance(okHttpClient);
             }
@@ -72,15 +75,17 @@ public class ContactsIT {
     private Wallet getWallet() throws Exception {
 
         return new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c",
-                "",
-                1);
+            "",
+            1);
     }
 
     @Test
     public void testMetadataIntegration() throws Exception {
 
-        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(getWallet().getMasterKey());
-        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(getWallet().getMasterKey());
+        DeterministicKey sharedMetaDataHDNode = MetadataUtil
+            .deriveSharedMetadataNode(getWallet().getMasterKey());
+        DeterministicKey metaDataHDNode = MetadataUtil
+            .deriveMetadataNode(getWallet().getMasterKey());
 
         Contacts contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         contacts.wipe();
@@ -130,23 +135,30 @@ public class ContactsIT {
         /*
         Create wallets
          */
-        Wallet a_wallet = new WalletFactory().newWallet(12,"",1);
-        DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(a_wallet.getMasterKey());
+        Wallet a_wallet = new WalletFactory().newWallet(12, "", 1);
+        DeterministicKey sharedMetaDataHDNode = MetadataUtil
+            .deriveSharedMetadataNode(a_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(a_wallet.getMasterKey());
         Contacts a_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         a_contacts.publishXpub();
         a_contacts.fetch();
 
-        Wallet b_wallet = new WalletFactory().newWallet(12,"",1);
+        Wallet b_wallet = new WalletFactory().newWallet(12, "", 1);
         sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
         Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);
         b_contacts.publishXpub();
         b_contacts.fetch();
 
+        System.out.println("Sender: " + a_contacts.getMdid());
+        System.out.println("Recipient: " + b_contacts.getMdid());
+
         /*
         Pair
          */
+        System.out.println("\n\n////////////////////////");
+        System.out.println("/////////Pairing////////");
+        System.out.println("////////////////////////");
         System.out.println("\n--Sender--");
         Contact me = new Contact();
         me.setName("Riaan");
@@ -167,23 +179,95 @@ public class ContactsIT {
         /*
         Send messages
          */
+        System.out.println("\n\n////////////////////////");
+        System.out.println("////////Messages////////");
+        System.out.println("////////////////////////");
+        System.out.println(
+            "Sending message 'Hey hey' to " + a_contacts.getContactList().get(0).getMdid());
         a_contacts.sendMessage(a_contacts.getContactList().get(0).getMdid(), "Hey hey", 66, true);
 
         System.out.println("\n--Recipient--");
         List<Message> messages = b_contacts.getMessages(true);
-        System.out.println("Received messages: '" + messages.size() + "'");
 
         Message message = messages.get(messages.size() - 1);
         b_contacts.readMessage(message.getId());
-        System.out.println("Decrypted: " + message.getPayload());
+        System.out.println("Received message: " + message.getPayload());
         b_contacts.markMessageAsRead(message.getId(), true);
+        System.out
+            .println("Sending message 'Got it' to " + b_contacts.getContactList().get(0).getMdid());
+        b_contacts.sendMessage(b_contacts.getContactList().get(0).getMdid(), "Got it", 66, true);
 
-        System.out.println(a_contacts.getContactList().size());
+
         /*
-        Send Payment Request
+        Send Request Payment Request
          */
+        System.out.println("\n////////////////////////");
+        System.out.println("////Payment Request 1///");
+        System.out.println("////////////////////////");
         System.out.println("\n--Sender--");
-        String txId = a_contacts.sendRequestPaymentRequest(a_contacts.getContactList().get(0).getMdid(), 5000);
-        System.out.println("Sent payment request: "+a_contacts.getContactList().get(0).getFacilitatedTransaction().get(txId).toJson());
+        //Step 1
+        RequestForPaymentRequest rpr = new RequestForPaymentRequest(17940000, "For the pizza");
+        a_contacts.sendRequestForPaymentRequest(a_contacts.getContactList().get(0).getMdid(), rpr);
+        System.out.println("Send RPR: " + rpr.toJson());
+
+        System.out.println("\n--Recipient--");
+        List<Contact> b_unreadList = b_contacts.digestUnreadPaymentRequests();
+
+        String senderMdid = b_unreadList.get(0).getMdid();
+        FacilitatedTransaction ftx = null;
+
+        for (Contact unread : b_unreadList) {
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+                .entrySet();
+            for (Entry<String, FacilitatedTransaction> item : set) {
+                System.out.println("Received RPR tx_id: " + item.getValue().getId());
+                ftx = item.getValue();
+            }
+        }
+
+        //Step 2
+        PaymentRequest pr = new PaymentRequest();
+        pr.setId(ftx.getId());
+        pr.setIntended_amount(ftx.getIntendedAmount());
+        pr.setAddress(b_wallet.getAccount(0).getReceive().getAddressAt(0)
+            .getAddressString());//should be next available
+        System.out.println("Send PR to '" + senderMdid + "': " + pr.toJson());
+        b_contacts.sendPaymentRequest(senderMdid, pr, ftx.getId());
+
+        //Step 3
+        System.out.println("\n--Sender--");
+        List<Contact> a_unreadList = a_contacts.digestUnreadPaymentRequests();
+
+        for (Contact unread : a_unreadList) {
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+                .entrySet();
+            for (Entry<String, FacilitatedTransaction> item : set) {
+                System.out.println("Received PR: " + item.getValue().toJson());
+                System.out.println("Making payment to " + item.getValue().getAddress());
+                System.out
+                    .println("Send payment broadcasted message ftx: " + item.getValue().getId());
+
+                try {
+                    a_contacts.sendPaymentBroadcasted(a_contacts.getContactList().get(0).getMdid(),
+                        "978acce2b1163c5b42f55e98efad345aedb451e936f667f7e35917cd555c6bd7",
+                        item.getValue().getId());
+                } catch (Exception e) {
+                    System.out
+                        .println("payment should be rejected if tx_hash doesn't belong to wallet");
+                    //hack this by changing Transactions.class line 190 from `if (our_xput) {` to `if (true) {`
+                }
+            }
+        }
+
+        System.out.println("\n--Recipient--");
+        b_unreadList = b_contacts.digestUnreadPaymentRequests();
+        for (Contact unread : b_unreadList) {
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+                .entrySet();
+            for (Entry<String, FacilitatedTransaction> item : set) {
+                System.out
+                    .println("Received payment broadcast tx_hash: " + item.getValue().getTxHash());
+            }
+        }
     }
 }
