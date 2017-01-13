@@ -170,6 +170,10 @@ public class Contacts {
         save();
     }
 
+    public void removeContact(Contact contact) {
+        contactList.remove(contact);
+    }
+
     /**
      * Publishes your mdid-xpub pair unencrypted to metadata service
      */
