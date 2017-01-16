@@ -76,6 +76,8 @@ public class Contacts {
             ArrayList<Contact> list = mapper.readValue(data, new TypeReference<List<Contact>>() {
             });
 
+            contactList.clear();
+
             for (Contact contact : list) {
                 contactList.put(contact.getId(), contact);
             }
