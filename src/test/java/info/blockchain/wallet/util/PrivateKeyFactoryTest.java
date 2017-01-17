@@ -4,6 +4,7 @@ import info.blockchain.api.Balance;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -162,5 +163,17 @@ public class PrivateKeyFactoryTest {
         //Assert
         assertThat(address.toString(), is(compressedAddress));
         Assert.assertTrue(ecKey.isCompressed());
+    }
+
+    @Test
+    public void test_HEX_KeyFormat_shouldReturnCompressed() throws Exception {
+
+        String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
+        String format = privateKeyFactory.getFormat(key);
+        ECKey key1 = privateKeyFactory.getKey(PrivateKeyFactory.HEX_COMPRESSED, key);
+
+        //Assert
+        assertThat(format, is(PrivateKeyFactory.HEX_COMPRESSED));
+        assertThat(key1.toAddress(MainNetParams.get()).toString(), is("1NLLkARpefxpXaMb7ZhHmc2DYNoVUnzBAz"));
     }
 }
