@@ -13,6 +13,7 @@ public class Tx {
     private boolean isMove = false;
     private long confirmations = 0L;
     private boolean isWatchOnly = false;
+    private boolean isDoubleSpend = false;
 
     public Tx(String hash, String note, String direction, double amount, long date, Map<Integer, String> tags) {
         strHash = hash;
@@ -77,6 +78,14 @@ public class Tx {
 
     public void setIsMove(boolean isMove) {
         this.isMove = isMove;
+    }
+
+    public boolean isDoubleSpend() {
+        return isDoubleSpend;
+    }
+
+    public void setDoubleSpend(boolean doubleSpend) {
+        isDoubleSpend = doubleSpend;
     }
 
     public Map<Integer, String> getTags() {

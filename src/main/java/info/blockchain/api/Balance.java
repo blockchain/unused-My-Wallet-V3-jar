@@ -11,7 +11,6 @@ import java.util.List;
 public class Balance extends BaseApi {
 
     private static final String BALANCE = "balance?active=";
-    public static final String PROD_BALANCE_URL = PROTOCOL + SERVER_ADDRESS + BALANCE;
 
     public static final int TxFilterSent = 1;
     public static final int TxFilterReceived = 2;
@@ -25,6 +24,11 @@ public class Balance extends BaseApi {
         // No-op
     }
 
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + BALANCE;
+    }
+
     public JSONObject getBalance(List<String> addresses) throws Exception {
         return getBalanceAPICall(addresses, -1);
     }
@@ -35,8 +39,8 @@ public class Balance extends BaseApi {
 
     private JSONObject getBalanceAPICall(List<String> addresses, int filter) throws Exception {
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getBalanceUrl());
-        url.append(StringUtils.join(addresses, "|"));
+        StringBuilder url = new StringBuilder(getRoute());
+        url.append(StringUtils.join(addresses, "%7C"));
         if (filter > 0) url.append("&filter=").append(filter);
         url.append(getApiCode());
 

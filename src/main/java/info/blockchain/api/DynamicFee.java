@@ -13,15 +13,19 @@ import java.util.ArrayList;
 public class DynamicFee extends BaseApi {
 
     private static final String FEES = "fees";
-    public static final String PROD_DYNAMIC_FEE = PROTOCOL + API_SUBDOMAIN + SERVER_ADDRESS + FEES;
 
     public DynamicFee() {
         // No-op
     }
 
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getDefaultBaseApiUrl() + FEES;
+    }
+
     public SuggestedFee getDynamicFee() throws Exception {
 
-        String response = WebUtil.getInstance().getRequest(PersistentUrls.getInstance().getDynamicFeeUrl());
+        String response = WebUtil.getInstance().getRequest(getRoute());
 
         if (response != null) {
 

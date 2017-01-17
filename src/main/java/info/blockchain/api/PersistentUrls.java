@@ -1,30 +1,40 @@
 package info.blockchain.api;
 
+import org.bitcoinj.params.AbstractBitcoinNetParams;
+import org.bitcoinj.params.MainNetParams;
+
+@SuppressWarnings("WeakerAccess")
 public class PersistentUrls {
 
+    // Env enum keys
     public static final String KEY_ENV_PROD = "env_prod";
     public static final String KEY_ENV_STAGING = "env_staging";
     public static final String KEY_ENV_DEV = "env_dev";
+    public static final String KEY_ENV_TESTNET = "env_testnet";
 
-    private String multiAddressUrl = MultiAddress.PROD_MULTIADDR_URL;
-    private String balanceUrl = Balance.PROD_BALANCE_URL;
-    private String dynamicFeeUrl = DynamicFee.PROD_DYNAMIC_FEE;
-    private String addressInfoUrl = AddressInfo.PROD_ADDRESS_INFO_URL;
-    private String pinstoreUrl = PinStore.PROD_PIN_STORE_URL;
-    private String settingsUrl = Settings.PROD_PAYLOAD_URL;
-    private String transactionDetailsUrl = TransactionDetails.PROD_TRANSACTION_URL;
-    private String unspentUrl = Unspent.PROD_UNSPENT_OUTPUTS_URL;
-    private String walletPayloadUrl = WalletPayload.PROD_PAYLOAD_URL;
+    // Base API Constants
+    private static final String BASE_API_URL = "https://api.blockchain.info/";
+    private static final String BASE_SERVER_URL = "https://blockchain.info/";
+    private static final String BASE_WEBSOCKET_URL = "wss://ws.blockchain.info/inv";
 
-    private static PersistentUrls instance = null;
+    // Current API urls
+    private String currentApiUrl;
+    private String currentServerUrl;
+    private String currentWebsocketUrl;
+    private Environment currentEnvironment;
 
-    private Environment currentEnvironment = Environment.PRODUCTION;
+    // Current Network Params
+    private AbstractBitcoinNetParams currentNetworkParams;
+
+    // Instance
+    private static PersistentUrls instance;
 
     public enum Environment {
 
         PRODUCTION(KEY_ENV_PROD),
         STAGING(KEY_ENV_STAGING),
-        DEV(KEY_ENV_DEV);
+        DEV(KEY_ENV_DEV),
+        TESTNET(KEY_ENV_TESTNET);
 
         private String name;
 
@@ -49,11 +59,11 @@ public class PersistentUrls {
     }
 
     private PersistentUrls() {
-        // No-op
+        // Default to production on first invocation
+        setProductionEnvironment();
     }
 
     public static PersistentUrls getInstance() {
-
         if (instance == null) {
             instance = new PersistentUrls();
         }
@@ -61,97 +71,82 @@ public class PersistentUrls {
         return instance;
     }
 
+    /**
+     * Resets all URLs to their production base
+     */
     public void setProductionEnvironment() {
-        setMultiAddressUrl(MultiAddress.PROD_MULTIADDR_URL);
-        setSettingsUrl(Settings.PROD_PAYLOAD_URL);
-        setWalletPayloadUrl(WalletPayload.PROD_PAYLOAD_URL);
-        setAddressInfoUrl(AddressInfo.PROD_ADDRESS_INFO_URL);
-        setBalanceUrl(Balance.PROD_BALANCE_URL);
-        setDynamicFeeUrl(DynamicFee.PROD_DYNAMIC_FEE);
-        setPinstoreUrl(PinStore.PROD_PIN_STORE_URL);
-        setTransactionDetailsUrl(TransactionDetails.PROD_TRANSACTION_URL);
-        setUnspentUrl(Unspent.PROD_UNSPENT_OUTPUTS_URL);
-
+        currentNetworkParams = MainNetParams.get();
+        setCurrentApiUrl(BASE_API_URL);
+        setCurrentServerUrl(BASE_SERVER_URL);
+        setCurrentWebsocketUrl(BASE_WEBSOCKET_URL);
         currentEnvironment = Environment.PRODUCTION;
     }
 
-    public void setMultiAddressUrl(String multiAddressUrl) {
-        this.multiAddressUrl = multiAddressUrl;
+    ///////////////////////////////////////////////////////////////////////////
+    // GET CURRENTLY SET OBJECTS
+    ///////////////////////////////////////////////////////////////////////////
+
+    public Environment getCurrentEnvironment() {
+        return currentEnvironment;
     }
 
-    public void setBalanceUrl(String balanceUrl) {
-        this.balanceUrl = balanceUrl;
+    public AbstractBitcoinNetParams getCurrentNetworkParams() {
+        return currentNetworkParams;
     }
 
-    public void setDynamicFeeUrl(String dynamicFeeUrl) {
-        this.dynamicFeeUrl = dynamicFeeUrl;
+    public String getCurrentBaseApiUrl() {
+        return currentApiUrl;
     }
 
-    public void setAddressInfoUrl(String addressInfoUrl) {
-        this.addressInfoUrl = addressInfoUrl;
+    public String getCurrentBaseServerUrl() {
+        return currentServerUrl;
     }
 
-    public void setPinstoreUrl(String pinstoreUrl) {
-        this.pinstoreUrl = pinstoreUrl;
+    public String getCurrentWebsocketUrl() {
+        return currentWebsocketUrl;
     }
 
-    public void setSettingsUrl(String settingsUrl) {
-        this.settingsUrl = settingsUrl;
+    ///////////////////////////////////////////////////////////////////////////
+    // GET DEFAULT OBJECTS
+    ///////////////////////////////////////////////////////////////////////////
+
+    public AbstractBitcoinNetParams getDefaultNetworkParams() {
+        return MainNetParams.get();
     }
 
-    public void setTransactionDetailsUrl(String transactionDetailsUrl) {
-        this.transactionDetailsUrl = transactionDetailsUrl;
+    public String getDefaultBaseApiUrl() {
+        return BASE_API_URL;
     }
 
-    public void setUnspentUrl(String unspentUrl) {
-        this.unspentUrl = unspentUrl;
+    public String getDefaultBaseServerUrl() {
+        return BASE_SERVER_URL;
     }
 
-    public void setWalletPayloadUrl(String walletPayloadUrl) {
-        this.walletPayloadUrl = walletPayloadUrl;
+    public String getDefaultBaseWebsocketUrl() {
+        return BASE_WEBSOCKET_URL;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // SET CURRENT OBJECTS
+    ///////////////////////////////////////////////////////////////////////////
+
+    public void setCurrentNetworkParams(AbstractBitcoinNetParams currentNetworkParams) {
+        this.currentNetworkParams = currentNetworkParams;
+    }
+
+    public void setCurrentApiUrl(String currentApiUrl) {
+        this.currentApiUrl = currentApiUrl;
+    }
+
+    public void setCurrentServerUrl(String currentServerUrl) {
+        this.currentServerUrl = currentServerUrl;
+    }
+
+    public void setCurrentWebsocketUrl(String currentWebsocketUrl) {
+        this.currentWebsocketUrl = currentWebsocketUrl;
     }
 
     public void setCurrentEnvironment(Environment currentEnvironment) {
         this.currentEnvironment = currentEnvironment;
-    }
-
-    public String getMultiAddressUrl() {
-        return multiAddressUrl;
-    }
-
-    public String getBalanceUrl() {
-        return balanceUrl;
-    }
-
-    public String getDynamicFeeUrl() {
-        return dynamicFeeUrl;
-    }
-
-    public String getAddressInfoUrl() {
-        return addressInfoUrl;
-    }
-
-    public String getPinstoreUrl() {
-        return pinstoreUrl;
-    }
-
-    public String getSettingsUrl() {
-        return settingsUrl;
-    }
-
-    public String getTransactionDetailsUrl() {
-        return transactionDetailsUrl;
-    }
-
-    public String getUnspentUrl() {
-        return unspentUrl;
-    }
-
-    public String getWalletPayloadUrl() {
-        return walletPayloadUrl;
-    }
-
-    public Environment getCurrentEnvironment() {
-        return currentEnvironment;
     }
 }

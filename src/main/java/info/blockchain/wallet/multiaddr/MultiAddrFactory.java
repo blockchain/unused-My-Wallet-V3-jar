@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class MultiAddrFactory {
@@ -87,6 +88,35 @@ public class MultiAddrFactory {
         }
     }
 
+    /**
+     * Returns a map of address/corresponding final balance
+     *
+     * @param addresses A List of addresses (HD)
+     */
+    public LinkedHashMap<String, Long> getAddressBalanceFromApi(List<String> addresses) throws Exception {
+        LinkedHashMap<String, Long> map = new LinkedHashMap<>();
+
+        // Place into map to maintain order, as API may return them in a random order
+        for (String address : addresses) {
+            map.put(address, 0L);
+        }
+
+        MultiAddress api = new MultiAddress();
+        JSONObject jsonObject = api.getAddresses(addresses);
+
+        if (jsonObject.has("addresses")) {
+            JSONArray addressList = jsonObject.getJSONArray("addresses");
+            for (int i = 0; i < addressList.length(); i++) {
+                JSONObject object = addressList.getJSONObject(i);
+                if (object.has("address") && object.has("final_balance")) {
+                    map.put(object.getString("address"), object.getLong("final_balance"));
+                }
+            }
+        }
+
+        return map;
+    }
+
     private void parseXPUB(JSONObject jsonObject) throws JSONException {
 
         if (jsonObject != null) {
@@ -155,6 +185,7 @@ public class MultiAddrFactory {
                     List<String> moveToAddrArray = new ArrayList<String>();
                     String o_addr;
                     boolean isMove = false;
+                    boolean isDoubleSpend = false;
 
                     if (txObj.has("block_height")) {
                         height = txObj.getLong("block_height");
@@ -165,6 +196,8 @@ public class MultiAddrFactory {
                     hash = (String) txObj.get("hash");
                     amount = txObj.getLong("result");
                     ts = txObj.getLong("time");
+
+                    isDoubleSpend = txObj.has("double_spend") && txObj.getBoolean("double_spend");
 
                     JSONArray inputArray = (JSONArray) txObj.get("inputs");
                     JSONObject inputObj;
@@ -256,6 +289,7 @@ public class MultiAddrFactory {
                         }
 
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
+                        tx.setDoubleSpend(isDoubleSpend);
 
                         if (isMove) {
                             if (!xpub_txs.containsKey(mf_addr)) {
@@ -347,6 +381,7 @@ public class MultiAddrFactory {
                     String outputAddr;
                     boolean isMove = false;
                     boolean isWatchOnly = false;
+                    boolean isDoubleSpend = false;
                     ArrayList<String> ownInput = new ArrayList<String>();
                     ArrayList<String> ownOutput = new ArrayList<String>();
 
@@ -368,6 +403,8 @@ public class MultiAddrFactory {
                     if (txObj.has("time")) {
                         ts = txObj.getLong("time");
                     }
+
+                    isDoubleSpend = txObj.has("double_spend") && txObj.getBoolean("double_spend");
 
                     List<String> ownLegacyAddresses = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
                     List<String> watchOnlyLegacyAddresses = PayloadManager.getInstance().getPayload().getWatchOnlyAddressStringList();
@@ -465,6 +502,7 @@ public class MultiAddrFactory {
                         tx.setDirection(mode);
 
                         tx.setConfirmations((latest_block > 0L && height > 0L) ? (latest_block - height) + 1 : 0);
+                        tx.setDoubleSpend(isDoubleSpend);
 
                         List<Tx> containedLegacyTx = address_legacy_txs.get(address);
 

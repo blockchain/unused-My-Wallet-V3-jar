@@ -63,7 +63,7 @@ public class LegacyAddressTest {
     public void testSetEncryptedKey1() throws Exception {
 
         LegacyAddress legacyAddress = LegacyAddress.fromJson(new JSONObject(testString));
-        legacyAddress.setEncryptedKey(Base58.decode("test"));
+        legacyAddress.setEncryptedKeyBytes(Base58.decode("test"));
 
         Assert.assertEquals(legacyAddress.getEncryptedKey(), "test");
     }

@@ -1,13 +1,13 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.api.Balance;
+import info.blockchain.api.PersistentUrls;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
@@ -83,7 +83,7 @@ public class PrivateKeyFactory {
 
     public ECKey getKey(String format, String data) throws Exception {
         if (format.equals(WIF_UNCOMPRESSED) || format.equals(WIF_COMPRESSED)) {
-            DumpedPrivateKey pk = new DumpedPrivateKey(MainNetParams.get(), data);
+            DumpedPrivateKey pk = new DumpedPrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
             return pk.getKey();
         } else if (format.equals(BASE58)) {
             return decodeBase58PK(data);
@@ -111,8 +111,8 @@ public class PrivateKeyFactory {
         ECKey compressedKey = decodeHexPK(hash.toString(), true);
 
         try {
-            String uncompressedAddress = uncompressedKey.toAddress(MainNetParams.get()).toString();
-            String compressedAddress = compressedKey.toAddress(MainNetParams.get()).toString();
+            String uncompressedAddress = uncompressedKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
+            String compressedAddress = compressedKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
 
             ArrayList<String> list = new ArrayList<String>();
             list.add(uncompressedAddress);

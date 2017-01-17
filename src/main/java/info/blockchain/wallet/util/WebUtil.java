@@ -47,6 +47,7 @@ public class WebUtil {
 
         for (int ii = 0; ii < requestRetry; ++ii) {
             URL url = new URL(request);
+
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             try {
                 connection.setDoOutput(true);
@@ -54,6 +55,7 @@ public class WebUtil {
                 connection.setInstanceFollowRedirects(false);
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", contentType);
+                connection.setRequestProperty("Origin", "http://localhost:8080");
                 connection.setRequestProperty("charset", "utf-8");
                 connection.setRequestProperty("Accept", "application/json");
                 connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
@@ -74,11 +76,12 @@ public class WebUtil {
                 connection.setInstanceFollowRedirects(false);
 
                 if (connection.getResponseCode() == 200) {
-//					Log.d("postURL", "return code 200");
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
                 } else {
-                    error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
-//					Log.d("postURL", "return code " + error);
+                    error = "Error code:"
+                            + connection.getResponseCode()
+                            + "\n"
+                            + IOUtils.toString(connection.getErrorStream(), "UTF-8");
                 }
 
                 // Sleep unless last request
@@ -126,6 +129,7 @@ public class WebUtil {
             try {
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("charset", "utf-8");
+                connection.setRequestProperty("Origin", "http://localhost:8080");
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36");
 
                 connection.setConnectTimeout(DEFAULT_REQUEST_TIMEOUT);
@@ -184,7 +188,10 @@ public class WebUtil {
                 if (connection.getResponseCode() == 200) {
                     return IOUtils.toString(connection.getInputStream(), "UTF-8");
                 } else {
-                    error = IOUtils.toString(connection.getErrorStream(), "UTF-8");
+                    error = "Error code:"
+                            + connection.getResponseCode()
+                            + "\n"
+                            + IOUtils.toString(connection.getErrorStream(), "UTF-8");
                 }
 
             } catch (Exception e) {

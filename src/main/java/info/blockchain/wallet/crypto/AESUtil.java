@@ -10,6 +10,7 @@ import org.spongycastle.crypto.CipherParameters;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.crypto.PBEParametersGenerator;
 import org.spongycastle.crypto.engines.AESEngine;
+import org.spongycastle.crypto.engines.AESFastEngine;
 import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.spongycastle.crypto.modes.CBCBlockCipher;
 import org.spongycastle.crypto.modes.OFBBlockCipher;
@@ -34,6 +35,9 @@ public class AESUtil {
     public static final int MODE_CBC = 0;
     public static final int MODE_OFB = 1;
 
+    private static final int AESBlockSize = 4;
+    private static final int KEY_BIT_LEN = 256;
+
     private static byte[] copyOfRange(byte[] source, int from, int to) {
         byte[] range = new byte[to - from];
         System.arraycopy(source, from, range, 0, range.length);
@@ -48,7 +52,6 @@ public class AESUtil {
     }
 
     public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
-        final int AESBlockSize = 4;
 
         byte[] cipherdata = Base64.decodeBase64(ciphertext.getBytes());
 
@@ -106,8 +109,6 @@ public class AESUtil {
     }
 
     public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws Exception {
-
-        final int AESBlockSize = 4;
 
         if (password == null) {
             throw  new Exception("Password null");
@@ -176,4 +177,95 @@ public class AESUtil {
         return result;
     }
 
+    /**
+     * Use secure random to generate a 16 byte iv
+     * @return
+     */
+    private static byte[] getSalt() {
+
+        SecureRandom random = new SecureRandom();
+        byte iv[] = new byte[AESBlockSize * 4];
+        random.nextBytes(iv);
+
+        return iv;
+    }
+
+    /**
+     *
+     * @param key AES key (256 bit Buffer)
+     * @param data e.g. "{'aaa':'bbb'}"
+     * @return
+     * @throws InvalidCipherTextException
+     */
+    public static byte[] encryptWithKey(byte[] key, String data) throws InvalidCipherTextException, UnsupportedEncodingException {
+
+        byte[] iv = getSalt();
+        byte[] dataBytes = data.getBytes("utf-8");
+
+        KeyParameter keyParam = new KeyParameter(key);
+        CipherParameters params = new ParametersWithIV(keyParam, iv);
+
+        BlockCipher cipherMode = new CBCBlockCipher(new AESFastEngine());
+        BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cipherMode, new ISO10126d2Padding());
+        cipher.reset();
+        cipher.init(true, params);
+
+        byte[] outBuf = cipherData(cipher, dataBytes);
+
+        // Concatenate iv
+        int len1 = iv.length;
+        int len2 = outBuf.length;
+        byte[] ivAppended = new byte[len1 + len2];
+        System.arraycopy(iv, 0, ivAppended, 0, len1);
+        System.arraycopy(outBuf, 0, ivAppended, len1, len2);
+
+        return Base64.encodeBase64(ivAppended);
+    }
+
+    /**
+     *
+     * @param key AES key (256 bit Buffer)
+     * @param ciphertext Base64 encoded concatenated payload + iv
+     * @return
+     * @throws InvalidCipherTextException
+     * @throws UnsupportedEncodingException
+     */
+    public static String decryptWithKey(byte[] key, String ciphertext) throws InvalidCipherTextException, UnsupportedEncodingException {
+
+        byte[] dataBytesB64 = Base64.decodeBase64(ciphertext.getBytes("utf-8"));
+
+        //Separate the IV and cipher data
+        byte[] iv = copyOfRange(dataBytesB64, 0, AESBlockSize * 4);
+        byte[] dataBytes = copyOfRange(dataBytesB64, AESBlockSize * 4, dataBytesB64.length);
+
+        KeyParameter keyParam = new KeyParameter(key);
+        CipherParameters params = new ParametersWithIV(keyParam, iv);
+
+        BlockCipher cipherMode = new CBCBlockCipher(new AESFastEngine());
+        BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(cipherMode, new ISO10126d2Padding());
+        cipher.reset();
+        cipher.init(false, params);
+
+        //Create a temporary buffer to decode into (includes padding)
+        byte[] buf = new byte[cipher.getOutputSize(dataBytes.length)];
+        int len = cipher.processBytes(dataBytes, 0, dataBytes.length, buf, 0);
+        len += cipher.doFinal(buf, len);
+
+        //Remove padding
+        byte[] out = new byte[len];
+        System.arraycopy(buf, 0, out, 0, len);
+
+        return new String(out, "UTF-8");
+    }
+
+    public static byte[] stringToKey(String string, int iterations) throws UnsupportedEncodingException {
+
+        byte[] salt = new String("salt").getBytes("utf-8");
+
+        PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
+        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(string.toString().toCharArray()), salt, iterations);
+        KeyParameter keyParam = (KeyParameter) generator.generateDerivedParameters(KEY_BIT_LEN);
+
+        return  keyParam.getKey();
+    }
 }

@@ -5,21 +5,27 @@ import info.blockchain.wallet.util.WebUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class MultiAddress extends BaseApi {
 
     private static final String MULTI_ADDRESS = "multiaddr?active=";
-    public static final String PROD_MULTIADDR_URL = PROTOCOL + SERVER_ADDRESS + MULTI_ADDRESS;
 
     public MultiAddress() {
         // No-op
+    }
+
+    @Override
+    String getRoute() {
+        return PersistentUrls.getInstance().getCurrentBaseServerUrl() + MULTI_ADDRESS;
     }
 
     public JSONObject getLegacy(String[] addresses, boolean simple) throws Exception {
 
         JSONObject jsonObject;
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getMultiAddressUrl());
-        url.append(StringUtils.join(addresses, "|"));
+        StringBuilder url = new StringBuilder(getRoute());
+        url.append(StringUtils.join(addresses, "%7C"));
         if (simple) {
             url.append("&simple=true&format=json");
         } else {
@@ -27,7 +33,7 @@ public class MultiAddress extends BaseApi {
         }
         url.append(getApiCode());
 
-        String response = WebUtil.getInstance().getURL(url.toString());
+        String response = WebUtil.getInstance().getRequest(url.toString());
         jsonObject = new JSONObject(response);
 
         return jsonObject;
@@ -35,11 +41,22 @@ public class MultiAddress extends BaseApi {
 
     public JSONObject getXPUB(String[] xpubs) throws Exception {
 
-        StringBuilder url = new StringBuilder(PersistentUrls.getInstance().getMultiAddressUrl());
-        url.append(StringUtils.join(xpubs, "|"));
-        url.append(getApiCode());
+        final String url = getRoute()
+                + StringUtils.join(xpubs, "%7C")
+                + getApiCode();
 
-        String response = WebUtil.getInstance().getURL(url.toString());
+        String response = WebUtil.getInstance().getRequest(url);
+
+        return new JSONObject(response);
+    }
+
+    public JSONObject getAddresses(List<String> addresses) throws Exception {
+
+        final String url = getRoute()
+                + StringUtils.join(addresses, "%7C")
+                + getApiCode();
+
+        String response = WebUtil.getInstance().getRequest(url);
 
         return new JSONObject(response);
     }

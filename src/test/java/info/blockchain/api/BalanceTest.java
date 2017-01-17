@@ -1,10 +1,12 @@
 package info.blockchain.api;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+@Ignore
 public class BalanceTest {
 
     private final String dormantAddress = "1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF";

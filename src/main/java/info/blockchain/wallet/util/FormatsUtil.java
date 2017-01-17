@@ -1,15 +1,20 @@
 package info.blockchain.wallet.util;
 
+import info.blockchain.api.PersistentUrls;
+
+import info.blockchain.wallet.payload.PayloadManager;
+import org.apache.commons.codec.binary.Base64;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.WrongNetworkException;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.regex.Pattern;
@@ -117,7 +122,7 @@ public class FormatsUtil {
         boolean ret;
 
         try {
-            new Address(MainNetParams.get(), address);
+            new Address(PersistentUrls.getInstance().getCurrentNetworkParams(), address);
             ret = true;
         } catch (WrongNetworkException wne) {
             ret = false;
@@ -198,5 +203,45 @@ public class FormatsUtil {
             }
         }
         return true;
+    }
+
+    public boolean isKeyEncrypted(String data) {
+
+        if(data != null && isBase64(data)){
+            try {
+                Base58.decode(data);
+                return false;
+            } catch (AddressFormatException e) {
+                return true;
+            }
+
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isKeyUnencrypted(String data) {
+
+        if(data == null)
+            return false;
+
+        try {
+            Base58.decode(data);
+            return true;
+        } catch (AddressFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean isBase64(String data){
+        String regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
+        return (data.matches(regex) && !containsSpaces(data));
+    }
+
+    private boolean containsSpaces(String data) {
+        return data.contains(" ") ||
+                data.contains("\n")||
+                data.contains("\r")||
+                data.contains("\t");
     }
 }
