@@ -141,7 +141,7 @@ public class Contacts {
      */
     public void addContact(Contact contact)
         throws MetadataException, IOException, InvalidCipherTextException {
-        contactList.put(contact.getMdid(), contact);
+        contactList.put(contact.getId(), contact);
         save();
     }
 
@@ -275,7 +275,7 @@ public class Contacts {
 
         if (contactMdid != null) {
 
-            Contact contact = getContactFromContactId(invite.getInvitationSent().getId());
+            Contact contact = getContactFromSentInviteId(invite.getInvitationSent().getId());
             contact.setMdid(contactMdid);
 
             sharedMetadata.addTrusted(contactMdid);
@@ -293,10 +293,10 @@ public class Contacts {
         return accepted;
     }
 
-    private Contact getContactFromContactId(String id) {
-        for (Contact item : contactList.values()) {
-            if (item.getInvitationSent().getId().equals(id)) {
-                return item;
+    private Contact getContactFromSentInviteId(String id) {
+        for (Contact contact : contactList.values()) {
+            if(contact.getInvitationSent() != null && contact.getInvitationSent().getId().equals(id)) {
+                return contact;
             }
         }
         return null;
@@ -389,7 +389,7 @@ public class Contacts {
     private Contact getContactFromMdid(String mdid) {
 
         for (Contact contact : contactList.values()) {
-            if (contact.getMdid().equals(mdid)) {
+            if (contact.getMdid() != null && contact.getMdid().equals(mdid)) {
                 return contact;
             }
         }
@@ -430,6 +430,7 @@ public class Contacts {
         Contact contact = getContactFromMdid(mdid);
         contact.addFacilitatedTransaction(ftx);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+        ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
         save();
     }
 
@@ -446,6 +447,7 @@ public class Contacts {
 
         FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+        ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
 
         save();
     }
@@ -517,7 +519,7 @@ public class Contacts {
                     tx.setId(rpr.getId());
                     tx.setIntended_amount(rpr.getIntended_amount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
-                    tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
+                    tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
 
                     Contact contact = getContactFromMdid(message.getSender());
                     contact.addFacilitatedTransaction(tx);
@@ -535,6 +537,7 @@ public class Contacts {
                         .get(pr.getId());
 
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+                    tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setAddress(pr.getAddress());
 
                     unread.add(contact);

@@ -181,6 +181,10 @@ public class ContactsIT {
         boolean accepted = a_contacts.readInvitationSent(a_invite);
         System.out.println("Accepted: " + accepted);
 
+        //Mdid's can now be retrieved from contact list
+        String RiaanMdid = b_contacts.getContactList().get(a_accepted_invite.getId()).getMdid();
+        String JaumeMdid = a_contacts.getContactList().get(him.getId()).getMdid();
+
         /*
         Send messages
          */
@@ -188,8 +192,8 @@ public class ContactsIT {
         System.out.println("////////Messages////////");
         System.out.println("////////////////////////");
         System.out.println(
-            "Sending message 'Hey hey' to " + a_contacts.getContactList().get(0).getMdid());
-        a_contacts.sendMessage(a_contacts.getContactList().get(0).getMdid(), "Hey hey", 66, true);
+            "Sending message 'Hey hey' to " + JaumeMdid);
+        a_contacts.sendMessage(JaumeMdid, "Hey hey", 66, true);
 
         System.out.println("\n--Recipient--");
         List<Message> messages = b_contacts.getMessages(true);
@@ -199,8 +203,8 @@ public class ContactsIT {
         System.out.println("Received message: " + message.getPayload());
         b_contacts.markMessageAsRead(message.getId(), true);
         System.out
-            .println("Sending message 'Got it' to " + b_contacts.getContactList().get(0).getMdid());
-        b_contacts.sendMessage(b_contacts.getContactList().get(0).getMdid(), "Got it", 66, true);
+            .println("Sending message 'Got it' to " + RiaanMdid);
+        b_contacts.sendMessage(RiaanMdid, "Got it", 66, true);
 
 
         /*
@@ -212,13 +216,12 @@ public class ContactsIT {
         System.out.println("\n--Sender--");
         //Step 1
         RequestForPaymentRequest rpr = new RequestForPaymentRequest(17940000, "For the pizza");
-        a_contacts.sendRequestForPaymentRequest(a_contacts.getContactList().get(0).getMdid(), rpr);
+        a_contacts.sendRequestForPaymentRequest(JaumeMdid, rpr);
         System.out.println("Send RPR: " + rpr.toJson());
 
         System.out.println("\n--Recipient--");
         List<Contact> b_unreadList = b_contacts.digestUnreadPaymentRequests();
 
-        String senderMdid = b_unreadList.get(0).getMdid();
         FacilitatedTransaction ftx = null;
 
         for (Contact unread : b_unreadList) {
@@ -236,8 +239,8 @@ public class ContactsIT {
         pr.setIntended_amount(ftx.getIntended_amount());
         pr.setAddress(b_wallet.getAccount(0).getReceive().getAddressAt(0)
             .getAddressString());//should be next available
-        System.out.println("Send PR to '" + senderMdid + "': " + pr.toJson());
-        b_contacts.sendPaymentRequest(senderMdid, pr, ftx.getId());
+        System.out.println("Send PR to '" + RiaanMdid + "': " + pr.toJson());
+        b_contacts.sendPaymentRequest(RiaanMdid, pr, ftx.getId());
 
         //Step 3
         System.out.println("\n--Sender--");
