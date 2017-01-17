@@ -195,20 +195,4 @@ public class PrivateKeyFactoryTest {
         assertThat(format, is(PrivateKeyFactory.HEX_COMPRESSED));
         assertThat(key1.toAddress(MainNetParams.get()).toString(), is("1NLLkARpefxpXaMb7ZhHmc2DYNoVUnzBAz"));
     }
-
-    @Test
-    public void testtttttt() throws Exception {
-
-//        String key = "5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ";
-//        String format = privateKeyFactory.getFormat(key);
-//
-//        System.out.println(format);
-
-        String b = "800C28FCA386C7A227600B2FE50B7CAE11EC86D3BF1FBE471BE89827E19D72AA1D01";
-
-        byte[] c = Sha256Hash.hashTwice(b.getBytes());
-
-        System.out.println(new String(c));
-
-    }
 }
