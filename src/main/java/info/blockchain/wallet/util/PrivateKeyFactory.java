@@ -40,13 +40,18 @@ public class PrivateKeyFactory {
 
     public String getFormat(String key) {
 
-        // 51 characters base58, always starts with a '5'
-        if (key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$")) {
+        boolean isTestnet = !(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams);
+
+        // 51 characters base58, always starts with a '5'  (or '9', for testnet)
+        if (!isTestnet && key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$") ||
+            isTestnet && key.matches("^9[1-9A-HJ-NP-Za-km-z]{50}$")) {
             return WIF_UNCOMPRESSED;
         }
-        // 52 characters, always starts with 'K' or 'L'
-        else if (key.matches("^[LK][1-9A-HJ-NP-Za-km-z]{51}$")) {
+        // 52 characters, always starts with 'K' or 'L' (or 'c' for testnet)
+        else if (!isTestnet && key.matches("^[LK][1-9A-HJ-NP-Za-km-z]{51}$") ||
+            isTestnet && key.matches("^[c][1-9A-HJ-NP-Za-km-z]{51}$")) {
             return WIF_COMPRESSED;
+
         } else if (key.matches("^[1-9A-HJ-NP-Za-km-z]{44}$") || key
             .matches("^[1-9A-HJ-NP-Za-km-z]{43}$")) {
             return BASE58;
