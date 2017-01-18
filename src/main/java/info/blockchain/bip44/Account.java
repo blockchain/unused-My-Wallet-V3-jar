@@ -1,11 +1,13 @@
 package info.blockchain.bip44;
 
+import info.blockchain.api.PersistentUrls;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
+import org.bitcoinj.params.MainNetParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,10 +111,18 @@ public class Account {
      */
     private DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
 
+        boolean isTestnet = !(this.params instanceof MainNetParams);
+
         byte[] xpubBytes = Base58.decodeChecked(xpubstr);
 
         ByteBuffer bb = ByteBuffer.wrap(xpubBytes);
-        if (bb.getInt() != 0x0488B21E) {
+
+        int prefix = bb.getInt();
+
+        if (!isTestnet && prefix != 0x0488B21E) {
+            throw new AddressFormatException("invalid xpub version");
+        }
+        if (isTestnet && prefix != 0x043587CF) {
             throw new AddressFormatException("invalid xpub version");
         }
 
