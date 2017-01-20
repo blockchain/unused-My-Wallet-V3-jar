@@ -7,7 +7,7 @@ import info.blockchain.FrameworkInterface;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
-import info.blockchain.wallet.metadata.data.PublicContactDetails;
+import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;

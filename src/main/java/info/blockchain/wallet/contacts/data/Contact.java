@@ -1,23 +1,20 @@
 package info.blockchain.wallet.contacts.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import info.blockchain.wallet.metadata.data.Invitation;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicNameValuePair;
+import io.mikael.urlbuilder.UrlBuilder;
+import io.mikael.urlbuilder.util.UrlParameterMultimap;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.bitcoinj.core.ECKey;
 
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-
-@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Contact {
 
     private String id;
@@ -28,11 +25,15 @@ public class Contact {
     private String xpub;
     private String note;
     private String mdid;
-    private Invitation outgoingInvitation; // I invited somebody
-    private Invitation incomingInvitation;// Somebody invited me
+    private long created;
+    private Invitation invitationSent; // I invited somebody
+    private Invitation invitationReceived;// Somebody invited me
+    private HashMap<String, FacilitatedTransaction> facilitatedTransaction;
 
     public Contact() {
-        this.id = new ECKey().getPrivateKeyAsHex();
+        this.id = UUID.randomUUID().toString();
+        this.facilitatedTransaction = new HashMap<>();
+        this.created = System.currentTimeMillis();
     }
 
     public String getId() {
@@ -99,66 +100,88 @@ public class Contact {
         this.mdid = mdid;
     }
 
-    public Invitation getOutgoingInvitation() {
-        return outgoingInvitation;
+    public Invitation getInvitationSent() {
+        return invitationSent;
     }
 
-    public void setOutgoingInvitation(Invitation outgoingInvitation) {
-        this.outgoingInvitation = outgoingInvitation;
+    public void setInvitationSent(Invitation invitationSent) {
+        this.invitationSent = invitationSent;
     }
 
-    public Invitation getIncomingInvitation() {
-        return incomingInvitation;
+    public Invitation getInvitationReceived() {
+        return invitationReceived;
     }
 
-    public void setIncomingInvitation(Invitation incomingInvitation) {
-        this.incomingInvitation = incomingInvitation;
+    public void setInvitationReceived(Invitation invitationReceived) {
+        this.invitationReceived = invitationReceived;
+    }
+
+    public HashMap<String, FacilitatedTransaction> getFacilitatedTransaction() {
+        return facilitatedTransaction;
+    }
+
+    @JsonIgnore
+    public void addFacilitatedTransaction(FacilitatedTransaction facilitatedTransaction) {
+        this.facilitatedTransaction.put(facilitatedTransaction.getId(), facilitatedTransaction);
+    }
+
+    public void setFacilitatedTransaction(
+        HashMap<String, FacilitatedTransaction> facilitatedTransaction) {
+        this.facilitatedTransaction = facilitatedTransaction;
+    }
+
+    public long getCreated() {
+        return created;
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
+    }
+
+    @JsonIgnore
+    public Contact fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Contact.class);
     }
 
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public List<NameValuePair> toQueryParameters(){
-
-        List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
-        if (id != null) queryParams.add(new BasicNameValuePair("id", id));
-        if (name != null) queryParams.add(new BasicNameValuePair("name", name));
-        if (surname != null) queryParams.add(new BasicNameValuePair("surname", surname));
-        if (company != null) queryParams.add(new BasicNameValuePair("company", company));
-        if (email != null) queryParams.add(new BasicNameValuePair("email", email));
-        if (note != null) queryParams.add(new BasicNameValuePair("note", note));
-        if (xpub != null) queryParams.add(new BasicNameValuePair("xpub", xpub));
-        if (mdid != null) queryParams.add(new BasicNameValuePair("mdid", mdid));
+    private UrlParameterMultimap toQueryParameters() {
+        UrlParameterMultimap queryParams = UrlParameterMultimap.newMultimap();
+        if (id != null) queryParams.add("id", invitationSent.getId());
+        if (name != null) queryParams.add("name", name);
+        if (surname != null) queryParams.add("surname", surname);
+//        if (company != null) queryParams.add("company", company);
+//        if (email != null) queryParams.add("email", email);
+//        if (note != null) queryParams.add("note", note);
+//        if (xpub != null) queryParams.add("xpub", xpub);
+//        if (mdid != null) queryParams.add("mdid", mdid);
 
         return queryParams;
     }
 
-    public Contact fromQueryParameters(Map<String, String> queryParams){
+    public Contact fromQueryParameters(Map<String, String> queryParams) {
 
         Contact contact = new Contact();
-        contact.id = queryParams.get("id");
+        contact.invitationReceived = new Invitation();
+        contact.invitationReceived.setId(queryParams.get("id"));
         contact.name = queryParams.get("name");
         contact.surname = queryParams.get("surname");
-        contact.company = queryParams.get("company");
-        contact.email = queryParams.get("email");
-        contact.note = queryParams.get("note");
-        contact.xpub = queryParams.get("xpub");
-        contact.mdid = queryParams.get("mdid");
 
         return contact;
     }
 
     public String createURI() throws URISyntaxException {
 
-        List<NameValuePair> qparams = toQueryParameters();
+        UrlParameterMultimap urlParameterMultimap = toQueryParameters();
 
-        URIBuilder builder = new URIBuilder()
-                .setScheme("http")
-                .setHost("blockchain.info")
-                .setPath("/invite")
-                .setParameters(qparams);
+        UrlBuilder urlBuilder = UrlBuilder.empty()
+                .withScheme("https")
+                .withHost("blockchain.info")
+                .withPath("/invite")
+                .withParameters(urlParameterMultimap);
 
-        return builder.build().toString();
+        return urlBuilder.toUri().toString();
     }
 }
