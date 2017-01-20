@@ -88,7 +88,7 @@ public class SendCoins {
                 throw new Exception("Invalid amount");
             }
 
-            if (amount.compareTo(bDust) < 1) {
+            if (amount.compareTo(bDust) == -1) {
                 throw new Exception("Dust amount");
             }
 
