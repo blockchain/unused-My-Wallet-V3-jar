@@ -8,6 +8,7 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.MismatchValueException;
@@ -17,9 +18,8 @@ import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.contacts.data.PublicContactDetails;
-
 import info.blockchain.wallet.transaction.Transaction;
+
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
@@ -31,6 +31,7 @@ import java.net.URLDecoder;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -329,16 +330,24 @@ public class Contacts {
      * Retrieves received messages
      */
     public List<Message> getMessages(boolean onlyNew)
-        throws SharedMetadataException, ValidationException,
-        SignatureException, IOException {
+            throws SharedMetadataException, ValidationException,
+            SignatureException, IOException {
 
         List<Message> messages = sharedMetadata.getMessages(onlyNew);
 
-        for (Message message : messages) {
-            try {
-                decryptMessageFrom(message, getContactFromMdid(message.getSender()).getXpub());
-            } catch (IOException | InvalidCipherTextException | MetadataException e) {
-                e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
+        Iterator<Message> i = messages.iterator();
+        while (i.hasNext()) {
+            Message message = i.next();
+            final Contact contactFromMdid = getContactFromMdid(message.getSender());
+            if (contactFromMdid != null) {
+                try {
+                    decryptMessageFrom(message, contactFromMdid.getXpub());
+                } catch (IOException | InvalidCipherTextException | MetadataException e) {
+                    e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
+                }
+            } else {
+                markMessageAsRead(message.getId(), true);
+                i.remove();
             }
         }
 
