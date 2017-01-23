@@ -421,16 +421,19 @@ public class Contacts {
     /**
      * Sends new payment request without need to ask for receive address.
      */
-    public void sendPaymentRequest(final String mdid, PaymentRequest request,
-        FacilitatedTransaction ftx) throws IOException,
+    public void sendPaymentRequest(final String mdid, PaymentRequest request) throws IOException,
         SharedMetadataException, InvalidCipherTextException, MetadataException {
+
+        FacilitatedTransaction facilitatedTransaction = new FacilitatedTransaction();
+        request.setId(facilitatedTransaction.getId());
+        facilitatedTransaction.setIntended_amount(request.getIntended_amount());
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
         Contact contact = getContactFromMdid(mdid);
-        contact.addFacilitatedTransaction(ftx);
-        ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-        ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
+        facilitatedTransaction.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+        facilitatedTransaction.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
+        contact.addFacilitatedTransaction(facilitatedTransaction);
         save();
     }
 
@@ -536,12 +539,23 @@ public class Contacts {
                     tx = contact.getFacilitatedTransaction()
                         .get(pr.getId());
 
+                    boolean newlyCreated = false;
+                    if (tx == null) {
+                        tx = new FacilitatedTransaction();
+                        tx.setId(pr.getId());
+                        tx.setIntended_amount(pr.getIntended_amount());
+                        newlyCreated = true;
+                    }
+
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
                     tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setAddress(pr.getAddress());
 
                     unread.add(contact);
                     markMessageAsRead(message.getId(), true);
+                    if (newlyCreated) {
+                        contact.addFacilitatedTransaction(tx);
+                    }
                     save();
                     break;
 

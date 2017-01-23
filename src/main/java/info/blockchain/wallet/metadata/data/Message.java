@@ -10,15 +10,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Message {
 
-    String payload;//base64 encoded
-    String signature;
-    String recipient;
-    String id;
-    String sender;
-    long sent;
-    boolean processed;
-    boolean notified;
-    int type;
+    private String payload;//base64 encoded
+    private String signature;
+    private String recipient;
+    private String id;
+    private String sender;
+    private long sent;
+    private boolean processed;
+    private boolean notified;
+    private int type;
 
     public String getPayload() {
         return payload;
