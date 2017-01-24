@@ -44,7 +44,7 @@ public class WalletPayload extends BaseApi {
 
     private WalletEndpoints getApiInstance() {
         if (api == null) {
-            api = BlockchainFramework.getRetrofitApiInstance().create(WalletEndpoints.class);
+            api = BlockchainFramework.getRetrofitServerInstance().create(WalletEndpoints.class);
         }
         return api;
     }
