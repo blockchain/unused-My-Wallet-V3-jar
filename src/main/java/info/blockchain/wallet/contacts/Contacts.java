@@ -19,6 +19,7 @@ import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.transaction.Transaction;
+import info.blockchain.wallet.util.TransactionUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
@@ -474,7 +475,8 @@ public class Contacts {
         Contact contact = getContactFromMdid(mdid);
         FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);
 
-        if (!assertTransactionValue(ftx, txHash)) {
+        // TODO: 25/01/2017 We probably want to broadcast anyway, regardless of whether or not the value is correct
+        if (!assertTransactionValue(ftx, txHash, ftx.getAddress())) {
             throw new MismatchValueException(
                 "Transaction value does not match intended payment value.");
         }
@@ -489,24 +491,15 @@ public class Contacts {
         save();
     }
 
-    private boolean assertTransactionValue(FacilitatedTransaction ftx, String txHash)
-        throws IOException {
-
-        long result = 0;
+    private boolean assertTransactionValue(FacilitatedTransaction ftx, String txHash, String address) throws IOException {
         try {
-            Transaction tx = new TransactionDetails()
-                .getTransactionDetails(txHash);
-            if (tx == null) {
-                return false;
-            } else {
-                result = tx.getResult();
-            }
-        } catch (Exception e) {
-            throw new IOException(
-                e);// TODO: 13/01/2017 TransactionDetails should throw better exception
-        }
+            Transaction tx = new TransactionDetails().getTransactionDetails(txHash);
+            return tx != null
+                    && ftx.getIntended_amount() == TransactionUtil.getTransactionValue(address, tx);
 
-        return ftx.getIntended_amount() == result;
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
     /**
