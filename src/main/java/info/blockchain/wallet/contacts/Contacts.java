@@ -3,7 +3,6 @@ package info.blockchain.wallet.contacts;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.api.TransactionDetails;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
@@ -18,8 +17,6 @@ import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.transaction.Transaction;
-import info.blockchain.wallet.util.TransactionUtil;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
@@ -483,31 +480,6 @@ public class Contacts {
         ftx.setTx_hash(txHash);
 
         save();
-    }
-
-    /**
-     * Returns an int which represents whether the sender of the transaction sent too much, too
-     * little or the correct amount of bitcoin.
-     *
-     * @param ftx     A {@link FacilitatedTransaction} object
-     * @param txHash  The hash of the transaction
-     * @return Returns -1 if too little bitcoin was sent, 1 if too much was sent and 0 if the value
-     * was correct
-     * @throws IOException Can throw this if the network is unavailable, for instance
-     */
-    public int checkPaymentValue(FacilitatedTransaction ftx, String txHash) throws IOException {
-        try {
-            Transaction tx = new TransactionDetails().getTransactionDetails(txHash);
-            if (tx != null) {
-                long value = TransactionUtil.getTransactionValue(ftx.getAddress(), tx) - ftx.getIntended_amount();
-                return value > 0 ? -1 : value < 0 ? 1 : 0;
-            } else {
-                throw new NullPointerException("TX not found");
-            }
-
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
     }
 
     /**
