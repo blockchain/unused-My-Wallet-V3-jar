@@ -10,7 +10,6 @@ import info.blockchain.api.WalletPayload;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Chain;
 import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -22,7 +21,11 @@ import info.blockchain.wallet.multiaddr.MultiAddrFactory;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.send.MyTransactionOutPoint;
 import info.blockchain.wallet.transaction.Tx;
-import info.blockchain.wallet.util.*;
+import info.blockchain.wallet.util.CharSequenceX;
+import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.util.FormatsUtil;
+import info.blockchain.wallet.util.PrivateKeyFactory;
+import info.blockchain.wallet.util.Util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -227,7 +230,7 @@ public class PayloadManager {
 
     public boolean savePayloadToServer() {
 
-        if (payload == null || !isEncryptionConsistent()){
+        if (payload == null || !isEncryptionConsistent()) {
             return false;
         }
 
@@ -616,10 +619,10 @@ public class PayloadManager {
         List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddressList();
         updatedLegacyAddresses.add(legacyAddress);
         payload.setLegacyAddressList(updatedLegacyAddresses);
-        
+
         boolean success = savePayloadToServer();
 
-        if(!success){
+        if (!success) {
             //revert on sync fail
             updatedLegacyAddresses.remove(legacyAddress);
             payload.setLegacyAddressList(updatedLegacyAddresses);
@@ -658,9 +661,9 @@ public class PayloadManager {
 
         setPayload(payload);
 
-        boolean success =  savePayloadToServer();
+        boolean success = savePayloadToServer();
 
-        if(!success){
+        if (!success) {
             //revert on sync fail
             legacyAddress.setEncryptedKey(null);
             legacyAddress.setWatchOnly(true);
@@ -783,24 +786,43 @@ public class PayloadManager {
         walletApi.registerMdid(node, guid, sharedKey);
     }
 
-    public void loadNodes(String guid, String sharedKey, String walletPassword, @Nullable String secondPassword) throws Exception {
+    /**
+     * Loads the metadata nodes from the metadata service. If this fails, the function returns false
+     * and they must be generated and saved using {@link this#generateNodes(String)}. This allows us
+     * to generate and prompt for a second password only once.
+     *
+     * @param guid           The user's GUID
+     * @param sharedKey      The user's shared key
+     * @param walletPassword The wallet password
+     * @return Returns true if the metadata nodes can be loaded from the service
+     * @throws Exception Can throw an Exception if there's an issue with the credentials or network
+     */
+    public boolean loadNodes(String guid, String sharedKey, String walletPassword) throws Exception {
+        if (metadataNodeFactory == null) {
+            metadataNodeFactory = new MetadataNodeFactory(guid, sharedKey, walletPassword);
+        }
+        return metadataNodeFactory.isMetadataUsable();
+    }
 
-        metadataNodeFactory = new MetadataNodeFactory(guid, sharedKey, walletPassword);
-
-        boolean usable = metadataNodeFactory.isMetadataUsable();
-        if(!usable){
-
-            Wallet wallet;
-            if (payload.isDoubleEncrypted()) {
-                wallet = getDecryptedWallet(secondPassword);
-            } else {
-                wallet = this.wallet;
-            }
-
-            boolean success = metadataNodeFactory.saveMetadataHdNodes(wallet.getMasterKey());
-            if(!success){
-                throw new Exception("All Metadata nodes might not have saved.");
-            }
+    /**
+     * Generates the nodes for the shared metadata service and saves them on the service. Takes an
+     * optional second password if set by the user. {@link this#loadNodes(String, String, String)}
+     * must be called first to avoid a {@link NullPointerException}.
+     *
+     * @param secondPassword An optional second password, if applicable
+     * @throws Exception Can throw a {@link DecryptionException} if the second password is wrong, or
+     *                   a generic Exception if saving the nodes fails
+     */
+    public void generateNodes(@Nullable String secondPassword) throws Exception {
+        Wallet wallet;
+        if (payload.isDoubleEncrypted()) {
+            wallet = getDecryptedWallet(secondPassword);
+        } else {
+            wallet = this.wallet;
+        }
+        boolean success = metadataNodeFactory.saveMetadataHdNodes(wallet.getMasterKey());
+        if (!success) {
+            throw new Exception("All Metadata nodes might not have saved.");
         }
     }
 
