@@ -2,8 +2,9 @@ package info.blockchain.wallet.contacts;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
-import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
+import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.exceptions.MetadataException;
@@ -56,7 +57,7 @@ public class ContactsTest {
 
     private Wallet getWallet() throws Exception {
 
-        return new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c",
+        return new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("15e23aa73d25994f1921a1256f93f72c",
                 "",
                 1);
     }

@@ -7,10 +7,10 @@ import com.google.common.collect.HashBiMap;
 import info.blockchain.api.ExternalEntropy;
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.api.WalletPayload;
-import info.blockchain.bip44.Address;
-import info.blockchain.bip44.Chain;
-import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
+import info.blockchain.wallet.bip44.Address;
+import info.blockchain.wallet.bip44.Chain;
+import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -66,13 +66,13 @@ public class PayloadManager {
     private BlockchainWallet bciWallet;
 
     private HDPayloadBridge hdPayloadBridge;
-    private info.blockchain.bip44.Wallet wallet;
+    private info.blockchain.wallet.bip44.Wallet wallet;
     private PrivateKeyFactory privateKeyFactory;
     private WalletPayload walletApi;
     private MetadataNodeFactory metadataNodeFactory;
 
     private PayloadManager() {
-        hdPayloadBridge = new HDPayloadBridge();
+        hdPayloadBridge = new HDPayloadBridge(PersistentUrls.getInstance().getCurrentNetworkParams());
         payload = new Payload();
         cached_payload = "";
         privateKeyFactory = new PrivateKeyFactory();
@@ -105,7 +105,7 @@ public class PayloadManager {
         email = null;
         version = 2.0;
         bciWallet = null;
-        hdPayloadBridge = new HDPayloadBridge();
+        hdPayloadBridge = new HDPayloadBridge(PersistentUrls.getInstance().getCurrentNetworkParams());
         wallet = null;
         privateKeyFactory = new PrivateKeyFactory();
     }

@@ -3,22 +3,18 @@ package info.blockchain.wallet.contacts;
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
 import info.blockchain.api.PersistentUrls;
-import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
+import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
-import info.blockchain.wallet.exceptions.MetadataException;
-import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 
-import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,7 +26,6 @@ import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import org.spongycastle.crypto.InvalidCipherTextException;
 import retrofit2.Retrofit;
 
 /**
@@ -79,7 +74,7 @@ public class ContactsIT {
 
     private Wallet getWallet() throws Exception {
 
-        return new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c",
+        return new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("15e23aa73d25994f1921a1256f93f72c",
             "",
             1);
     }
@@ -140,7 +135,7 @@ public class ContactsIT {
         /*
         Create wallets
          */
-        Wallet a_wallet = new WalletFactory().newWallet(12, "", 1);
+        Wallet a_wallet = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).newWallet(12, "", 1);
         DeterministicKey sharedMetaDataHDNode = MetadataUtil
             .deriveSharedMetadataNode(a_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(a_wallet.getMasterKey());
@@ -148,7 +143,7 @@ public class ContactsIT {
         a_contacts.publishXpub();
         a_contacts.fetch();
 
-        Wallet b_wallet = new WalletFactory().newWallet(12, "", 1);
+        Wallet b_wallet = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).newWallet(12, "", 1);
         sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
         Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);

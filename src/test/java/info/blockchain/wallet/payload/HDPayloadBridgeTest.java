@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.bip44.Wallet;
+import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.bip44.Wallet;
 
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.AddressFormatException;
@@ -21,35 +22,13 @@ public class HDPayloadBridgeTest {
     @Test
     public void getHDWalletFromPayload_shouldReturnSameWallet() throws Exception {
 
-        HDPayloadBridge hdPayloadBridge = new HDPayloadBridge();
+        HDPayloadBridge hdPayloadBridge = new HDPayloadBridge(PersistentUrls.getInstance().getCurrentNetworkParams());
 
         HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet("Account 1");
         Wallet wallet = hdPayloadBridge.getHDWalletFromPayload(pair.payload);
 
         assertThat(pair.wallet.getSeedHex(), is(wallet.getSeedHex()));
         assertThat(pair.wallet.getMnemonic(), is(wallet.getMnemonic()));
-    }
-
-    @Test
-    public void getHDWatchOnlyWalletFromPayload_shouldReturnSameXpub() throws Exception {
-
-        HDPayloadBridge hdPayloadBridge = new HDPayloadBridge();
-
-        HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet("Account 1");
-        Wallet watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true, pair.payload));
-
-        assertThat(pair.wallet.getAccount(0).xpubstr(), is(watchOnlyWallet.getAccount(0).xpubstr()));
-    }
-
-    @Test
-    public void getHDWatchOnlyWalletFromPayload_shouldReturnNoXpriv() throws Exception {
-
-        HDPayloadBridge hdPayloadBridge = new HDPayloadBridge();
-
-        HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet("Account 1");
-        Wallet watchOnlyWallet = hdPayloadBridge.getHDWatchOnlyWalletFromXpubs(getXPUBs(true, pair.payload));
-
-        assertThat("WatchOnlyWallet should not contain private key", watchOnlyWallet.getAccount(0).xprvstr() == null);
     }
 
     public String[] getXPUBs(boolean includeArchives, Payload payload) throws IOException, DecoderException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {

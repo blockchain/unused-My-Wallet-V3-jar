@@ -2,9 +2,9 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.api.Balance;
 import info.blockchain.api.PersistentUrls;
-import info.blockchain.bip44.Address;
-import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
+import info.blockchain.wallet.bip44.Address;
+import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +13,8 @@ import org.bitcoinj.core.AddressFormatException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.bitcoinj.params.AbstractBitcoinNetParams;
+import org.bitcoinj.params.MainNetParams;
 
 public class HDPayloadBridge {
 
@@ -21,9 +23,11 @@ public class HDPayloadBridge {
     private final String DEFAULT_PASSPHRASE = "";
 
     private final WalletFactory bip44WalletFactory;
+    private AbstractBitcoinNetParams networkParameters;
 
-    public HDPayloadBridge() {
-        this.bip44WalletFactory = new WalletFactory();
+    public HDPayloadBridge(AbstractBitcoinNetParams networkParameters) {
+        this.networkParameters = networkParameters;
+        this.bip44WalletFactory = new WalletFactory(networkParameters);
     }
 
     public class HDWalletPayloadPair {
@@ -87,10 +91,6 @@ public class HDPayloadBridge {
                 payload.getHdWallet().getAccounts().size());
     }
 
-    public Wallet getHDWatchOnlyWalletFromXpubs(String[] xpubs) throws Exception {
-        return new Wallet(PersistentUrls.getInstance().getCurrentNetworkParams(), xpubs);
-    }
-
     public Wallet decryptWatchOnlyWallet(Payload payload, String decrypted_hex) throws Exception {
         return bip44WalletFactory.restoreWallet(decrypted_hex, DEFAULT_PASSPHRASE, payload.getHdWallet().getAccounts().size());
     }
@@ -107,7 +107,7 @@ public class HDPayloadBridge {
         HDWallet payloadHDWallet = new HDWallet();
         payloadHDWallet.setSeedHex(hdw.getSeedHex());
 
-        List<info.blockchain.bip44.Account> hdAccounts = hdw.getAccounts();
+        List<info.blockchain.wallet.bip44.Account> hdAccounts = hdw.getAccounts();
         List<info.blockchain.wallet.payload.Account> payloadAccounts = new ArrayList<Account>();
 
         int accountNumber = 1;
@@ -206,7 +206,7 @@ public class HDPayloadBridge {
 
     public Address getAddressAt(String xpub, int chain, int addressIndex) throws AddressFormatException {
 
-        info.blockchain.bip44.Account account = new info.blockchain.bip44.Account(PersistentUrls.getInstance().getCurrentNetworkParams(), xpub);
+        info.blockchain.wallet.bip44.Account account = new info.blockchain.wallet.bip44.Account(PersistentUrls.getInstance().getCurrentNetworkParams(), xpub);
         return account.getChain(chain).getAddressAt(addressIndex);
     }
 }

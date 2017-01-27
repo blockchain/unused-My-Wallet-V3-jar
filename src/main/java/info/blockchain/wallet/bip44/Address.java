@@ -1,4 +1,4 @@
-package info.blockchain.bip44;
+package info.blockchain.wallet.bip44;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.ECKey;
@@ -7,8 +7,6 @@ import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.math.BigInteger;
 
@@ -24,9 +22,6 @@ public class Address {
     private byte[] pubKeyHash = null;
 
     private NetworkParameters params = null;
-
-    private Address() {
-    }
 
     /**
      * Constructor an HD address.
@@ -123,25 +118,4 @@ public class Address {
         return childNum;
     }
 
-    /**
-     * Write address to JSONObject. For debugging only.
-     *
-     * @return JSONObject
-     */
-    public JSONObject toJSON() {
-        try {
-            JSONObject obj = new JSONObject();
-
-            obj.put("address", getAddressString());
-            if (ecKey.hasPrivKey()) {
-                obj.put("key", getPrivateKeyString());
-            }
-
-            obj.put("path", getPath());
-
-            return obj;
-        } catch (JSONException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
 }

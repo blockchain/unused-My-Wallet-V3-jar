@@ -1,4 +1,4 @@
-package info.blockchain.bip44;
+package info.blockchain.wallet.bip44;
 
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -27,9 +27,6 @@ public class Account {
     private String strPath = null;
 
     private NetworkParameters params = null;
-
-    private Account() {
-    }
 
     /**
      * Constructor for account.
@@ -202,35 +199,8 @@ public class Account {
      *
      * @return String
      */
-    private String getPath() {
+    public String getPath() {
         return strPath;
     }
 
-    /**
-     * Write account to JSONObject. For debugging only.
-     *
-     * @return JSONObject
-     */
-    public JSONObject toJSON() {
-        try {
-            JSONObject obj = new JSONObject();
-
-            obj.put("xpub", xpubstr());
-            if (aKey.hasPrivKey()) {
-                obj.put("xprv", xprvstr());
-            }
-
-            JSONArray _chains = new JSONArray();
-            for (Chain chain : chains) {
-                _chains.put(chain.toJSON());
-            }
-            obj.put("chains", _chains);
-
-            obj.put("path", getPath());
-
-            return obj;
-        } catch (JSONException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
 }

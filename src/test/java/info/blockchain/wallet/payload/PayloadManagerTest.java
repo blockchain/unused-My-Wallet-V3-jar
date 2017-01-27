@@ -2,18 +2,12 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.BlockchainFramework;
 import info.blockchain.FrameworkInterface;
-import info.blockchain.bip44.*;
-import info.blockchain.bip44.Account;
-import info.blockchain.test_data.PayloadTestData;
+import info.blockchain.wallet.bip44.Account;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
-import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.Wallet;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;

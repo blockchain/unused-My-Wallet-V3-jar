@@ -1,11 +1,8 @@
-package info.blockchain.bip44;
+package info.blockchain.wallet.bip44;
 
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Chain.java : a chain in a BIP44 wallet account
@@ -24,9 +21,6 @@ public class Chain {
 
     public static final int RECEIVE_CHAIN = 0;
     public static final int CHANGE_CHAIN = 1;
-
-    private Chain() {
-    }
 
     /**
      * Constructor for a chain.
@@ -70,30 +64,6 @@ public class Chain {
      */
     public String getPath() {
         return strPath;
-    }
-
-    /**
-     * Write chain to JSONObject. For debugging only.
-     *
-     * @return JSONObject
-     */
-    public JSONObject toJSON() {
-        try {
-            JSONObject obj = new JSONObject();
-
-            obj.put("path", getPath());
-
-            JSONArray addresses = new JSONArray();
-            for (int i = 0; i < 2; i++) {
-                Address addr = new Address(params, cKey, i);
-                addresses.put(addr.toJSON());
-            }
-            obj.put("addresses", addresses);
-
-            return obj;
-        } catch (JSONException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
 }
