@@ -1,5 +1,6 @@
 package info.blockchain.util;
 
+import info.blockchain.wallet.util.FeeUtil;
 import org.junit.Test;
 
 import java.math.BigInteger;

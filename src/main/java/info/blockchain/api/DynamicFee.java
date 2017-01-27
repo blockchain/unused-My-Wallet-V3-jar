@@ -1,6 +1,6 @@
 package info.blockchain.api;
 
-import info.blockchain.util.FeeUtil;
+import info.blockchain.wallet.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SuggestedFee;
 import info.blockchain.wallet.util.WebUtil;
 

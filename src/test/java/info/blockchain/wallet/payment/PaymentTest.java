@@ -1,7 +1,7 @@
 package info.blockchain.wallet.payment;
 
 import info.blockchain.test_data.UnspentTestData;
-import info.blockchain.util.FeeUtil;
+import info.blockchain.wallet.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
