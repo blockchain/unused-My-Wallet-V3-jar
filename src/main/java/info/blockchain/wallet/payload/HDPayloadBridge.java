@@ -5,7 +5,6 @@ import info.blockchain.api.PersistentUrls;
 import info.blockchain.bip44.Address;
 import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -140,7 +139,7 @@ public class HDPayloadBridge {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public boolean upgradeV2PayloadToV3(Payload payload, CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName) throws Exception {
+    public boolean upgradeV2PayloadToV3(Payload payload, String secondPassword, boolean isNewlyCreated, String defaultAccountName) throws Exception {
 
         //
         // create HD wallet and sync w/ payload
@@ -177,7 +176,7 @@ public class HDPayloadBridge {
                         xpriv = DoubleEncryptionFactory.getInstance().encrypt(
                                 xpriv,
                                 payload.getSharedKey(),
-                                secondPassword.toString(),
+                                secondPassword,
                                 payload.getDoubleEncryptionPbkdf2Iterations());
                     }
                     accounts.get(0).setXpriv(xpriv);

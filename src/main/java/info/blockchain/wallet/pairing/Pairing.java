@@ -1,7 +1,6 @@
 package info.blockchain.wallet.pairing;
 
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import java.util.regex.Pattern;
 
@@ -33,7 +32,7 @@ public class Pairing {
 
     public String[] getSharedKeyAndPassword(String encryptedPairingCode, String encryptionPassword) throws Exception {
 
-        String decryptedPairingCode = AESUtil.decrypt(encryptedPairingCode, new CharSequenceX(encryptionPassword), AESUtil.QR_CODE_PBKDF_2ITERATIONS);
+        String decryptedPairingCode = AESUtil.decrypt(encryptedPairingCode, encryptionPassword, AESUtil.QR_CODE_PBKDF_2ITERATIONS);
 
         if (decryptedPairingCode == null) {
             throw new Exception("Pairing code decryption failed.");

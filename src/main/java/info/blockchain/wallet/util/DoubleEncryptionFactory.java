@@ -23,11 +23,11 @@ public class DoubleEncryptionFactory {
     }
 
     public String encrypt(String encrypted, String sharedKey, String password2, int iterations) throws Exception {
-        return AESUtil.encrypt(encrypted, new CharSequenceX(sharedKey + password2), iterations);
+        return AESUtil.encrypt(encrypted, sharedKey + password2, iterations);
     }
 
     public String decrypt(String encrypted2, String sharedKey, String password2, int iterations) throws Exception {
-        return AESUtil.decrypt(encrypted2, new CharSequenceX(sharedKey + password2), iterations);
+        return AESUtil.decrypt(encrypted2, sharedKey + password2, iterations);
     }
 
     public String getHash(String sharedKey, String password2, int iterations) {
@@ -57,8 +57,8 @@ public class DoubleEncryptionFactory {
 
     }
 
-    public boolean validateSecondPassword(String dpasswordhash, String sharedKey, CharSequenceX password2, int iterations) {
-        String dhash = getHash(sharedKey, password2.toString(), iterations);
+    public boolean validateSecondPassword(String dpasswordhash, String sharedKey, String password2, int iterations) {
+        String dhash = getHash(sharedKey, password2, iterations);
         return dpasswordhash.equals(dhash);
     }
 

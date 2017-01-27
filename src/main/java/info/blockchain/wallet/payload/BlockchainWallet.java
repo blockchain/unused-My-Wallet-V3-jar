@@ -3,7 +3,6 @@ package info.blockchain.wallet.payload;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.FormatsUtil;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -66,7 +65,7 @@ public class BlockchainWallet {
         this.payloadChecksum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(payload.toJson().toString().getBytes("UTF-8"))));
     }
 
-    public BlockchainWallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
+    public BlockchainWallet(String walletData, String password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
 
         this.unparsedWalletData = walletData;
 
@@ -77,7 +76,7 @@ public class BlockchainWallet {
         }
     }
 
-    private void parseV1Wallet(String walletData, CharSequenceX password) throws PayloadException, DecryptionException {
+    private void parseV1Wallet(String walletData, String password) throws PayloadException, DecryptionException {
 
         setVersion(1.0);
 
@@ -88,7 +87,7 @@ public class BlockchainWallet {
         payload = new Payload(decyptedPayload, pbkdf2Iterations);
     }
 
-    private void parseWallet(JSONObject walletJson, CharSequenceX password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
+    private void parseWallet(JSONObject walletJson, String password) throws PayloadException, DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
         if (walletJson.has(KEY_EXTRA_SEED)) {
             extraSeed = walletJson.getString(KEY_EXTRA_SEED);
         }
@@ -231,7 +230,7 @@ public class BlockchainWallet {
         this.version = version;
     }
 
-    public Pair decryptV1Wallet(String encryptedPayload, CharSequenceX password) throws DecryptionException {
+    public Pair decryptV1Wallet(String encryptedPayload, String password) throws DecryptionException {
 
         String decrypted;
         int succeededIterations;
@@ -269,7 +268,7 @@ public class BlockchainWallet {
         throw new DecryptionException("Failed to decrypt");
     }
 
-    public String decryptWallet(String encryptedPayload, CharSequenceX password, int pdfdf2Iterations) throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
+    public String decryptWallet(String encryptedPayload, String password, int pdfdf2Iterations) throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
 
         return AESUtil.decrypt(encryptedPayload, password, pdfdf2Iterations);
     }
@@ -278,7 +277,7 @@ public class BlockchainWallet {
         return unparsedWalletData;
     }
 
-    public Pair encryptPayload(String payloadCleartext, CharSequenceX password, int iterations, double version) throws Exception {
+    public Pair encryptPayload(String payloadCleartext, String password, int iterations, double version) throws Exception {
 
         String payloadEncrypted = AESUtil.encrypt(payloadCleartext, password, iterations);
         JSONObject rootObj = new JSONObject();

@@ -1,7 +1,5 @@
 package info.blockchain.wallet.crypto;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import org.bitcoinj.core.Sha256Hash;
 import org.junit.Test;
 import org.spongycastle.crypto.paddings.ISO10126d2Padding;
@@ -16,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class AESUtilTest {
 
     String cleartext = "test data";
-    CharSequenceX pw = new CharSequenceX("password");
+    String pw = "password";
     int iterations = AESUtil.QR_CODE_PBKDF_2ITERATIONS;
 
     @Test
@@ -48,7 +46,7 @@ public class AESUtilTest {
     public void decryptFailIncorrectPasswordTest() {
         try {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
-            String decrypted = AESUtil.decrypt(encrypted, new CharSequenceX("bogus"), iterations);
+            String decrypted = AESUtil.decrypt(encrypted, "bogus", iterations);
 
             assertThat("Decryption (cleartext 'test data') successful with incorrect password as : " + decrypted, !decrypted.equals("bogus"));
         } catch (Exception e) {

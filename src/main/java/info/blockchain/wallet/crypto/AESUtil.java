@@ -1,7 +1,6 @@
 package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import org.apache.commons.codec.binary.Base64;
 import org.spongycastle.crypto.BlockCipher;
@@ -46,12 +45,12 @@ public class AESUtil {
 
     // AES 256 PBKDF2 CBC iso10126 decryption
     // 16 byte IV must be prepended to ciphertext - Compatible with crypto-js
-    public static String decrypt(String ciphertext, CharSequenceX password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException, DecryptionException {
+    public static String decrypt(String ciphertext, String password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException, DecryptionException {
 
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
+    public static String decryptWithSetMode(String ciphertext, String password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
 
         byte[] cipherdata = Base64.decodeBase64(ciphertext.getBytes());
 
@@ -103,12 +102,12 @@ public class AESUtil {
     }
 
     // AES 256 PBKDF2 CBC iso10126 encryption
-    public static String encrypt(String cleartext, CharSequenceX password, int iterations) throws Exception {
+    public static String encrypt(String cleartext, String password, int iterations) throws Exception {
 
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws Exception {
+    public static String encryptWithSetMode(String cleartext, String password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws Exception {
 
         if (password == null) {
             throw  new Exception("Password null");
@@ -122,7 +121,7 @@ public class AESUtil {
         byte[] clearbytes = cleartext.getBytes("UTF-8");
 
         PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
-        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(password.toString().toCharArray()), iv, iterations);
+        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(password.toCharArray()), iv, iterations);
         KeyParameter keyParam = (KeyParameter) generator.generateDerivedParameters(256);
 
         CipherParameters params = new ParametersWithIV(keyParam, iv);

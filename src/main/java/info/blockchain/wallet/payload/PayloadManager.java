@@ -57,7 +57,7 @@ public class PayloadManager {
     // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
     private String cached_payload = null;
 
-    private CharSequenceX strTempPassword = null;
+    private String strTempPassword = null;
     private boolean isNew = false;
     private String email = null;
 
@@ -117,7 +117,7 @@ public class PayloadManager {
     /**
      * Downloads payload from server, decrypts, and stores as local var {@link Payload}
      */
-    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull CharSequenceX password, @Nonnull InitiatePayloadListener listener) throws Exception {
+    public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull String password, @Nonnull InitiatePayloadListener listener) throws Exception {
 
         String walletData;
         try {
@@ -166,7 +166,7 @@ public class PayloadManager {
      *
      * @return CharSequenceX
      */
-    public CharSequenceX getTempPassword() {
+    public String getTempPassword() {
         return strTempPassword;
     }
 
@@ -176,7 +176,7 @@ public class PayloadManager {
      *
      * @param temp_password Validated user password
      */
-    public void setTempPassword(CharSequenceX temp_password) {
+    public void setTempPassword(String temp_password) {
         strTempPassword = temp_password;
         clearCachedPayload();
     }
@@ -239,7 +239,7 @@ public class PayloadManager {
             String method = isNew ? "insert" : "update";
 
 
-            Pair pair = bciWallet.encryptPayload(payload.toJson().toString(), new CharSequenceX(strTempPassword), bciWallet.getPbkdf2Iterations(), getVersion());
+            Pair pair = bciWallet.encryptPayload(payload.toJson().toString(), strTempPassword, bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
             String newPayloadChecksum = (String) pair.getLeft();
@@ -299,7 +299,7 @@ public class PayloadManager {
         return DoubleEncryptionFactory.getInstance().validateSecondPassword(
                 payload.getDoublePasswordHash(),
                 payload.getSharedKey(),
-                new CharSequenceX(secondPassword),
+                secondPassword,
                 payload.getDoubleEncryptionPbkdf2Iterations());
     }
 
@@ -327,7 +327,7 @@ public class PayloadManager {
 
     public Payload createHDWallet(String payloadPassword, String defaultAccountName) throws Exception {
 
-        setTempPassword(new CharSequenceX(payloadPassword));
+        setTempPassword(payloadPassword);
         HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet(defaultAccountName);
         wallet = pair.wallet;
         payload = pair.payload;
@@ -342,7 +342,7 @@ public class PayloadManager {
 
     public Payload restoreHDWallet(String payloadPassword, String seed, String defaultAccountName) throws Exception {
 
-        setTempPassword(new CharSequenceX(payloadPassword));
+        setTempPassword(payloadPassword);
         HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.restoreHDWallet(seed, defaultAccountName);
         wallet = pair.wallet;
         payload = pair.payload;
@@ -357,7 +357,7 @@ public class PayloadManager {
 
     public Payload restoreHDWallet(String payloadPassword, String seed, String defaultAccountName, String passphrase) throws Exception {
 
-        setTempPassword(new CharSequenceX(payloadPassword));
+        setTempPassword(payloadPassword);
         HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.restoreHDWallet(seed, defaultAccountName, passphrase);
         wallet = pair.wallet;
         payload = pair.payload;
@@ -381,13 +381,13 @@ public class PayloadManager {
     /*
     When called from Android - First apply PRNGFixes
      */
-    public void upgradeV2PayloadToV3(CharSequenceX secondPassword, boolean isNewlyCreated, String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
+    public void upgradeV2PayloadToV3(String secondPassword, boolean isNewlyCreated, String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
 
         //Check if payload has 2nd password
         if (payload.isDoubleEncrypted()) {
 
             //Validate 2nd password
-            if (StringUtils.isEmpty(secondPassword) || !validateSecondPassword(secondPassword.toString())) {
+            if (StringUtils.isEmpty(secondPassword) || !validateSecondPassword(secondPassword)) {
                 listener.onDoubleEncryptionPasswordError();
             }
         }
@@ -634,7 +634,7 @@ public class PayloadManager {
      * @param key            The {@link ECKey} for the address
      * @param secondPassword An optional double encryption password
      */
-    public boolean setKeyForLegacyAddress(ECKey key, @Nullable CharSequenceX secondPassword) throws Exception {
+    public boolean setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) throws Exception {
 
         String address = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
         int index = payload.getLegacyAddressStringList().indexOf(address);
@@ -648,7 +648,7 @@ public class PayloadManager {
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
             String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
                     payload.getSharedKey(),
-                    secondPassword != null ? secondPassword.toString() : null,
+                    secondPassword != null ? secondPassword : null,
                     payload.getOptions().getIterations());
 
             legacyAddress.setEncryptedKey(encrypted2);

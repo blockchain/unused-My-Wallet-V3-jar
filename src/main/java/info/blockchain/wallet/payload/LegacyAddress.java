@@ -2,7 +2,6 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -221,7 +220,7 @@ public class LegacyAddress {
 
     public String getPrivateKey(String secondPassword) throws AddressFormatException {
 
-        ECKey ecKey = getECKey(secondPassword);
+        ECKey ecKey = getECKeyFromDecryptedKey(secondPassword);
 
         if (ecKey != null) {
             return ecKey.getPrivateKeyEncoded(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
@@ -230,26 +229,26 @@ public class LegacyAddress {
         }
     }
 
-    public ECKey getECKey(CharSequenceX secondPassword) throws Exception {
+    public ECKey getECKey(String secondPassword) throws Exception {
 
-        String encryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey,
+        String decryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey,
                 PayloadManager.getInstance().getPayload().getSharedKey(),
-                secondPassword.toString(),
+                secondPassword,
                 PayloadManager.getInstance().getPayload().getDoubleEncryptionPbkdf2Iterations());
 
-        return getECKey(encryptedKey);
+        return getECKeyFromDecryptedKey(decryptedKey);
     }
 
     public ECKey getECKey() throws AddressFormatException {
-        return getECKey(strEncryptedKey);
+        return getECKeyFromDecryptedKey(strEncryptedKey);
     }
 
-    private ECKey getECKey(String strEncryptedKey) throws AddressFormatException {
+    private ECKey getECKeyFromDecryptedKey(String decryptedKey) throws AddressFormatException {
 
-        if (strEncryptedKey == null || strEncryptedKey.isEmpty())
+        if (decryptedKey == null || decryptedKey.isEmpty())
             return null;
 
-        byte[] privBytes = Base58.decode(strEncryptedKey);
+        byte[] privBytes = Base58.decode(decryptedKey);
         ECKey ecKey;
 
         ECKey keyCompressed;

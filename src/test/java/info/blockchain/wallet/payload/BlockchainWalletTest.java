@@ -1,7 +1,5 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.wallet.util.CharSequenceX;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -85,7 +83,7 @@ public class BlockchainWalletTest {
 
             String password = credentialsJson.getString("password");
 
-            BlockchainWallet bciWallet = new BlockchainWallet(walletString, new CharSequenceX(password));
+            BlockchainWallet bciWallet = new BlockchainWallet(walletString, password);
 
 
             assertThat(bciWallet.getVersion(), is(credentialsJson.getDouble("version")));

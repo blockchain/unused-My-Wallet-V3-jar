@@ -12,7 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class DoubleEncryptionFactoryTest {
 
     String cleartext = "test data";
-    CharSequenceX pw = new CharSequenceX("password");
+    String pw = "password";
     int iterations = AESUtil.PIN_PBKDF2_ITERATIONS;
     String sharedKey = "524b5e9f-72ea-4690-b28c-8c1cfce65ca0";
 
@@ -20,7 +20,7 @@ public class DoubleEncryptionFactoryTest {
     public void validateSecondPasswordTest() {
 
         DoubleEncryptionFactory doubleEncryptionFactory = DoubleEncryptionFactory.getInstance();
-        String hash = doubleEncryptionFactory.getHash(sharedKey, pw.toString(), iterations);
+        String hash = doubleEncryptionFactory.getHash(sharedKey, pw, iterations);
         assertThat("Validate second password failed", doubleEncryptionFactory.validateSecondPassword(hash, sharedKey, pw, iterations));
     }
 

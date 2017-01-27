@@ -2,7 +2,6 @@ package info.blockchain.bip44;
 
 import info.blockchain.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.util.CharSequenceX;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -209,7 +208,7 @@ public class WalletFactory {
 
         String data;
         if (password != null) {
-            data = AESUtil.encrypt(jsonstr, new CharSequenceX(password), AESUtil.QR_CODE_PBKDF_2ITERATIONS);
+            data = AESUtil.encrypt(jsonstr, password, AESUtil.QR_CODE_PBKDF_2ITERATIONS);
         } else {
             data = jsonstr;
         }
@@ -245,7 +244,7 @@ public class WalletFactory {
         if (password == null) {
             node = new JSONObject(sb.toString());
         } else {
-            node = new JSONObject(AESUtil.decrypt(sb.toString(), new CharSequenceX(password), AESUtil.QR_CODE_PBKDF_2ITERATIONS));
+            node = new JSONObject(AESUtil.decrypt(sb.toString(), password, AESUtil.QR_CODE_PBKDF_2ITERATIONS));
         }
 
         return node;

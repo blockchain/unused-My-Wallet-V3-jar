@@ -1,3 +1,6 @@
+group = 'info.blockchain'
+version = PROJECT_VERSION
+
 plugins {
     id 'java'
     id 'maven'
@@ -5,11 +8,41 @@ plugins {
     id "com.github.kt3k.coveralls" version "2.7.1"
 }
 
-group = 'info.blockchain.wallet'
-version = '6.1.40'
-
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
+
+repositories {
+    maven {
+        url nexusUrl + '/repository/maven-public/'
+        credentials(PasswordCredentials) {
+            username nexusUsername
+            password nexusPassword
+        }
+    }
+}
+
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//
+//            artifact sourceJar {
+//                classifier "sources"
+//            }
+//        }
+//    }
+//
+//    repositories {
+//        project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
+//        maven {
+//            url "${nexusUrl}/repository/maven-${project.repo}/"
+//            credentials(PasswordCredentials) {
+//                username nexusUsername
+//                password nexusPassword
+//            }
+//        }
+//    }
+//}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -30,20 +63,7 @@ artifacts {
     archives javadocJar
 }
 
-repositories {
 
-    if (hasProperty('nexusUrl')) {
-        maven {
-            url nexusUrl + '/repository/maven-public/'
-            credentials(PasswordCredentials) {
-                username nexusUsername
-                password nexusPassword
-            }
-        }
-    } else {
-        mavenCentral()
-    }
-}
 
 dependencies {
     compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.13.1'

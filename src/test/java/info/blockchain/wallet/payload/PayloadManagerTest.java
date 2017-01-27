@@ -8,7 +8,6 @@ import info.blockchain.test_data.PayloadTestData;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
-import info.blockchain.wallet.util.CharSequenceX;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 
 import org.bitcoinj.core.AddressFormatException;
@@ -99,7 +98,7 @@ public class PayloadManagerTest {
     @Test
     public void getPayloadFromServerAndDecrypt_withValidVars_shouldPass() throws Exception {
 
-        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), password, new PayloadManager.InitiatePayloadListener() {
             public void onSuccess() {
                 assertThat("Payload successfully fetch and decrypted", true);
             }
@@ -114,7 +113,7 @@ public class PayloadManagerTest {
     public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldThrow_AuthenticationException() {
 
         try {
-            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid() + "addSomeTextToFail", new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid() + "addSomeTextToFail", password, new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
                     assertThat("onSuccess", false);
                 }
@@ -136,7 +135,7 @@ public class PayloadManagerTest {
     public void getPayloadFromServerAndDecrypt_withInvalidPassword_shouldThrow_DecryptionException() {
 
         try {
-            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password + "addSomeTextToFail"), new PayloadManager.InitiatePayloadListener() {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), password + "addSomeTextToFail", new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
                     assertThat("onSuccess", false);
                 }
@@ -154,7 +153,7 @@ public class PayloadManagerTest {
     public void getPayloadFromServerAndDecrypt_withInvalidSharedKey_shouldThrow_AuthenticationException() {
 
         try {
-            payloadManager.initiatePayload(payload.getSharedKey() + "addSomeTextToFail", payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+            payloadManager.initiatePayload(payload.getSharedKey() + "addSomeTextToFail", payload.getGuid(), password, new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
                     assertThat("onSuccess", false);
                 }
@@ -180,7 +179,7 @@ public class PayloadManagerTest {
         payloadManager.savePayloadToServer();
 
         try {
-            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
+            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), password, new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
                     assertThat("Incompatible version should not pass", false);
                 }
@@ -218,7 +217,7 @@ public class PayloadManagerTest {
         final String guidOriginal = payloadManager.getPayload().getGuid();
 
         //Now we have legacy wallet (only addresses)
-        payloadManager.upgradeV2PayloadToV3(new CharSequenceX(""), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
+        payloadManager.upgradeV2PayloadToV3("", true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
             public void onDoubleEncryptionPasswordError() {
                 assertThat("upgradeV2PayloadToV3 failed", false);
             }
@@ -269,7 +268,7 @@ public class PayloadManagerTest {
         final String guidOriginal = payloadManager.getPayload().getGuid();
 
         //Now we have legacy wallet (only addresses)
-        payloadManager.upgradeV2PayloadToV3(new CharSequenceX(secondPassword), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
+        payloadManager.upgradeV2PayloadToV3(secondPassword, true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
             public void onDoubleEncryptionPasswordError() {
                 assertThat("upgradeV2PayloadToV3 failed", false);
             }
