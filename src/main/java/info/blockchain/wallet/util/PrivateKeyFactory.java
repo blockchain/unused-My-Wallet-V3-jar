@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 
@@ -38,32 +39,40 @@ public class PrivateKeyFactory {
     }
 
     public String getFormat(String key) {
-        // 51 characters base58, always starts with a '5'
-        if (key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$")) {
+
+        boolean isTestnet = !(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams);
+
+        // 51 characters base58, always starts with a '5'  (or '9', for testnet)
+        if (!isTestnet && key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$") ||
+            isTestnet && key.matches("^9[1-9A-HJ-NP-Za-km-z]{50}$")) {
             return WIF_UNCOMPRESSED;
         }
-        // 52 characters, always starts with 'K' or 'L'
-        else if (key.matches("^[LK][1-9A-HJ-NP-Za-km-z]{51}$")) {
+        // 52 characters, always starts with 'K' or 'L' (or 'c' for testnet)
+        else if (!isTestnet && key.matches("^[LK][1-9A-HJ-NP-Za-km-z]{51}$") ||
+            isTestnet && key.matches("^[c][1-9A-HJ-NP-Za-km-z]{51}$")) {
             return WIF_COMPRESSED;
-        } else if (key.matches("^[1-9A-HJ-NP-Za-km-z]{44}$") || key.matches("^[1-9A-HJ-NP-Za-km-z]{43}$")) {
+
+        } else if (key.matches("^[1-9A-HJ-NP-Za-km-z]{44}$") || key
+            .matches("^[1-9A-HJ-NP-Za-km-z]{43}$")) {
             return BASE58;
         }
-        // assume uncompressed for hex (secret exponent)
+        //Assume compressed
         else if (key.matches("^[A-Fa-f0-9]{64}$")) {
-            return HEX_UNCOMPRESSED;
+            return HEX_COMPRESSED;
         } else if (key.matches("^[A-Za-z0-9/=+]{44}$")) {
             return BASE64;
         } else if (key.matches("^6P[1-9A-HJ-NP-Za-km-z]{56}$")) {
             return BIP38;
         } else if (key.matches("^S[1-9A-HJ-NP-Za-km-z]{21}$") ||
-                key.matches("^S[1-9A-HJ-NP-Za-km-z]{25}$") ||
-                key.matches("^S[1-9A-HJ-NP-Za-km-z]{29}$") ||
-                key.matches("^S[1-9A-HJ-NP-Za-km-z]{30}$")) {
+            key.matches("^S[1-9A-HJ-NP-Za-km-z]{25}$") ||
+            key.matches("^S[1-9A-HJ-NP-Za-km-z]{29}$") ||
+            key.matches("^S[1-9A-HJ-NP-Za-km-z]{30}$")) {
 
             byte[] testBytes;
             String data = key + "?";
             try {
-                Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
+                Hash hash = new Hash(
+                    MessageDigest.getInstance("SHA-256").digest(data.getBytes("UTF-8")));
                 testBytes = hash.getBytes();
 
                 if ((testBytes[0] == 0x00)) {

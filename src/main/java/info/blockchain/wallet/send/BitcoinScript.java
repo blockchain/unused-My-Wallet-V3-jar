@@ -348,7 +348,12 @@ public class BitcoinScript {
         // Now create the redemption script
         List<Byte> bytes = new ArrayList<Byte>();
 
-        if (address.getVersion() == 0) {
+        int P2PKH = 0;
+        int P2SH = 5;
+        int P2PKH_TESTNET = 111;
+        int P2SH_TESTNET = 196;
+
+        if (address.getVersion() == P2PKH || address.getVersion() == P2PKH_TESTNET) {
             BitcoinScript.writeOpcode(bytes, BitcoinScript.OP_DUP);
             BitcoinScript.writeOpcode(bytes, BitcoinScript.OP_HASH160);
             BitcoinScript.writeBytes(bytes, address.getHash160().getBytes());
@@ -356,14 +361,14 @@ public class BitcoinScript {
             BitcoinScript.writeOpcode(bytes, BitcoinScript.OP_CHECKSIG);
 
             return new BitcoinScript(bytes);
-        } else if (address.getVersion() == 5) {
+        } else if (address.getVersion() == P2SH || address.getVersion() == P2SH_TESTNET) {
             BitcoinScript.writeOpcode(bytes, BitcoinScript.OP_HASH160);
             BitcoinScript.writeBytes(bytes, address.getHash160().getBytes());
             BitcoinScript.writeOpcode(bytes, BitcoinScript.OP_EQUAL);
 
             return new BitcoinScript(bytes);
         } else {
-            throw new Exception("Bitcoin address version "
+                throw new Exception("Bitcoin address version "
                     + address.getVersion() + " not supported yet");
         }
     }
