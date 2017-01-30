@@ -487,8 +487,12 @@ public class Contacts {
      * FacilitatedTransaction} that need responding to.
      */
     public List<Contact> digestUnreadPaymentRequests()
+        throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {
+        return digestUnreadPaymentRequests(getMessages(true), true);
+    }
+
+    List<Contact> digestUnreadPaymentRequests(List<Message> messages, boolean markAsRead)
             throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {
-        List<Message> messages = getMessages(true);
 
         List<Contact> unread = new ArrayList<>();
 
@@ -505,11 +509,12 @@ public class Contacts {
                     tx.setIntended_amount(rpr.getIntended_amount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
+                    tx.setNote(rpr.getNote());
 
                     Contact contact = getContactFromMdid(message.getSender());
                     contact.addFacilitatedTransaction(tx);
                     unread.add(contact);
-                    markMessageAsRead(message.getId(), true);
+                    if(markAsRead)markMessageAsRead(message.getId(), true);
                     save();
                     break;
 
@@ -526,6 +531,7 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntended_amount(pr.getIntended_amount());
+                        tx.setNote(pr.getNote());
                         newlyCreated = true;
                     }
 
@@ -534,7 +540,7 @@ public class Contacts {
                     tx.setAddress(pr.getAddress());
 
                     unread.add(contact);
-                    markMessageAsRead(message.getId(), true);
+                    if(markAsRead)markMessageAsRead(message.getId(), true);
                     if (newlyCreated) {
                         contact.addFacilitatedTransaction(tx);
                     }
@@ -553,7 +559,7 @@ public class Contacts {
                     tx.setTx_hash(pb.getTx_hash());
 
                     unread.add(contact);
-                    markMessageAsRead(message.getId(), true);
+                    if(markAsRead)markMessageAsRead(message.getId(), true);
                     save();
                     break;
             }

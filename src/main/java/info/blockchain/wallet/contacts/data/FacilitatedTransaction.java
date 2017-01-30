@@ -32,6 +32,7 @@ public class FacilitatedTransaction {
     private String tx_hash;
     private String role;
     private long created;
+    private String note;
 
     public FacilitatedTransaction() {
         this.id = UUID.randomUUID().toString();
@@ -88,6 +89,14 @@ public class FacilitatedTransaction {
 
     public long getCreated() {
         return created;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     @JsonIgnore

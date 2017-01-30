@@ -6,11 +6,19 @@ import info.blockchain.bip44.Wallet;
 import info.blockchain.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.contacts.data.Contact;
+import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
+import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.metadata.MockInterceptor;
+import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
@@ -275,5 +283,123 @@ public class ContactsTest {
 
         Assert.assertTrue(receivedInvite.getName().equals("Me"));
         Assert.assertTrue(receivedInvite.getInvitationReceived().getId().equals("852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37"));
+    }
+
+    @Test
+    public void digestUnreadPaymentRequests_RPR() throws Exception{
+
+        Contacts contacts = init();
+
+        Contact contact = new Contact();
+        contact.setId("5b47394c-f0d1-416e-8e9d-d63a91709d03");
+        contact.setName("Jacob");
+        contact.setMdid("13cA57Hvs5zT8yq852aUZeoYfX9DBXCTTR");
+        contact.setFacilitatedTransaction(new HashMap<String, FacilitatedTransaction>());
+        contacts.addContact(contact);
+
+        RequestForPaymentRequest rpr = new RequestForPaymentRequest();
+        rpr.setId("a9feb110-1ae2-4242-9246-f1d6ec3e3be8");
+        rpr.setIntended_amount(17940000);
+        rpr.setNote("For the pizza");
+
+        List<Message> messages = new ArrayList<>();
+        Message message = new Message();
+        message.setPayload(rpr.toJson());
+        message.setSignature("IDNOxhoWL/gj12kNGte37e2oxzK/A9lVeH3YyjDgk4TTRO0YlkYQnHxS0qcvY8EnVMHhELUgzv/7IQrkypCuktU=");
+        message.setRecipient("17uHsZXWqXB5ChW5fNGPnxyTJQEd1ugKca");
+        message.setId("cc11e4cf-2cd4-4de5-a2fc-125c43625ec5");
+        message.setSender("13cA57Hvs5zT8yq852aUZeoYfX9DBXCTTR");
+        message.setSent(1485788921000L);
+        message.setProcessed(false);
+        message.setType(0);
+        messages.add(message);
+
+        List<Contact> unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
+        for(Contact item : unreadPaymentRequests) {
+
+            FacilitatedTransaction ftx = item.getFacilitatedTransaction().get(rpr.getId());
+
+            Assert.assertEquals(contact.getName(), item.getName());
+            Assert.assertEquals(rpr.getId(), ftx.getId());
+            Assert.assertEquals("waiting_address", ftx.getState());
+            Assert.assertEquals(17940000L, ftx.getIntended_amount());
+            Assert.assertEquals("pr_receiver", ftx.getRole());
+            Assert.assertEquals(rpr.getNote(), ftx.getNote());
+        }
+    }
+
+    @Test
+    public void digestUnreadPaymentRequests_RP() throws Exception{
+
+        Contacts contacts = init();
+
+        Contact contact = new Contact();
+        contact.setId("5b47394c-f0d1-416e-8e9d-d63a91709d03");
+        contact.setName("Jacob");
+        contact.setMdid("13cA57Hvs5zT8yq852aUZeoYfX9DBXCTTR");
+        contact.setFacilitatedTransaction(new HashMap<String, FacilitatedTransaction>());
+        contacts.addContact(contact);
+
+        /* Set up Payment Request */
+        PaymentRequest pr = new PaymentRequest();
+        pr.setId("a9feb110-1ae2-4242-9246-f1d6ec3e3be8");
+        pr.setIntended_amount(28940000);
+        pr.setNote("For the pizza");
+        pr.setAddress("15sAyHb9zBsZbVnaSXz2UivTZYxnjjrEkX");
+
+        List<Message> messages = new ArrayList<>();
+        Message message = new Message();
+        message.setPayload(pr.toJson());
+        message.setSignature("IDNOxhoWL/gj12kNGte37e2oxzK/A9lVeH3YyjDgk4TTRO0YlkYQnHxS0qcvY8EnVMHhELUgzv/7IQrkypCuktU=");
+        message.setRecipient("17uHsZXWqXB5ChW5fNGPnxyTJQEd1ugKca");
+        message.setId("cc11e4cf-2cd4-4de5-a2fc-125c43625ec5");
+        message.setSender("13cA57Hvs5zT8yq852aUZeoYfX9DBXCTTR");
+        message.setSent(1485788921000L);
+        message.setProcessed(false);
+        message.setType(1);
+        messages.add(message);
+
+        List<Contact> unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
+        for(Contact item : unreadPaymentRequests) {
+
+            FacilitatedTransaction ftx = item.getFacilitatedTransaction().get(pr.getId());
+
+            Assert.assertEquals(contact.getName(), item.getName());
+            Assert.assertEquals(pr.getId(), ftx.getId());
+            Assert.assertEquals("waiting_payment", ftx.getState());
+            Assert.assertEquals(28940000L, ftx.getIntended_amount());
+            Assert.assertEquals("rpr_receiver", ftx.getRole());
+            Assert.assertEquals(pr.getNote(), ftx.getNote());
+            Assert.assertEquals(pr.getAddress(), ftx.getAddress());
+        }
+
+        /* Complete above payment request */
+        PaymentBroadcasted b = new PaymentBroadcasted(pr.getId(), "this_will_be_the_tx_hash");
+
+        messages = new ArrayList<>();
+        message = new Message();
+        message.setPayload(b.toJson());
+        message.setSignature("IDNOxhoWL/gj12kNGte37e2oxzK/A9lVeH3YyjDgk4TTRO0YlkYQnHxS0qcvY8EnVMHhELUgzv/7IQrkypCuktU=");
+        message.setRecipient("17uHsZXWqXB5ChW5fNGPnxyTJQEd1ugKca");
+        message.setId("cc11e4cf-2cd4-4de5-a2fc-125c43625ec5");
+        message.setSender("13cA57Hvs5zT8yq852aUZeoYfX9DBXCTTR");
+        message.setSent(1485788921000L);
+        message.setProcessed(false);
+        message.setType(2);
+        messages.add(message);
+
+        unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
+        for(Contact item : unreadPaymentRequests) {
+
+            FacilitatedTransaction ftx = item.getFacilitatedTransaction().get(b.getId());
+
+            Assert.assertEquals(contact.getName(), item.getName());
+            Assert.assertEquals(b.getId(), ftx.getId());
+            Assert.assertEquals("payment_broadcasted", ftx.getState());
+            Assert.assertEquals(28940000L, ftx.getIntended_amount());
+            Assert.assertEquals("rpr_receiver", ftx.getRole());
+            Assert.assertEquals(pr.getNote(), ftx.getNote());
+            Assert.assertEquals(pr.getAddress(), ftx.getAddress());
+        }
     }
 }
