@@ -1,4 +1,4 @@
-package info.blockchain.wallet.metadata.data;
+package info.blockchain.wallet.contacts.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

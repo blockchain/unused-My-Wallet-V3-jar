@@ -1,35 +1,43 @@
-package info.blockchain.wallet.metadata.data;
+package info.blockchain.wallet.contacts.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentRequest {
 
-    String mdid;
-    long amount;
+    String id;
+    long intended_amount;
     String note;
+    String address;
 
-    public String getMdid() {
-        return mdid;
+    public PaymentRequest() {
     }
 
-    public void setMdid(String mdid) {
-        this.mdid = mdid;
+    public PaymentRequest(long amount, String note) {
+        this.intended_amount = amount;
+        this.note = note;
     }
 
-    public long getAmount() {
-        return amount;
+    public String getId() {
+        return id;
     }
 
-    public void setAmount(long satoshis) {
-        this.amount = satoshis;
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public long getIntended_amount() {
+        return intended_amount;
+    }
+
+    public void setIntended_amount(long satoshis) {
+        this.intended_amount = satoshis;
     }
 
     public String getNote() {
@@ -38,6 +46,14 @@ public class PaymentRequest {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @JsonIgnore

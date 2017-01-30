@@ -163,15 +163,15 @@ public class WalletPayload extends BaseApi {
         WebUtil.getInstance().postURL(getRoute(), args.toString());
     }
 
-    public boolean registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
-        return updateMdid("register-mdid", walletKey, guid, sharedKey);
+    public void registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
+        updateMdid("register-mdid", walletKey, guid, sharedKey);
     }
 
-    public boolean unregisterMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
-        return updateMdid("unregister-mdid", walletKey, guid, sharedKey);
+    public void unregisterMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
+        updateMdid("unregister-mdid", walletKey, guid, sharedKey);
     }
 
-    private boolean updateMdid(String method, ECKey walletKey, String guid, String sharedKey) throws Exception {
+    private void updateMdid(String method, ECKey walletKey, String guid, String sharedKey) throws Exception {
 
         String signedGuid = walletKey.signMessage(guid);
 
@@ -183,9 +183,7 @@ public class WalletPayload extends BaseApi {
 
         Response<Void> result = call.execute();
 
-        if (!result.isSuccessful())
-            throw new Exception(result.code() + " " + result.message());
+        if (!result.isSuccessful()) throw new Exception(result.code() + " " + result.message());
 
-        return true;
     }
 }

@@ -2,9 +2,16 @@ package info.blockchain.wallet.util;
 
 import info.blockchain.api.Balance;
 
+import info.blockchain.api.PersistentUrls;
+import info.blockchain.bip44.WalletFactory;
+import java.util.StringJoiner;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Wallet;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,6 +47,7 @@ public class PrivateKeyFactoryTest {
 
     @Before
     public void setUp() throws Exception {
+//        PersistentUrls.getInstance().setCurrentNetworkParams(TestNet3Params.get());
         privateKeyFactory = new PrivateKeyFactory(mock(Balance.class));
     }
 
@@ -72,17 +80,22 @@ public class PrivateKeyFactoryTest {
     }
 
     @Test
-    public void test_HEX_UNCOMPRESSED_KeyFormat() throws Exception {
+    public void test_HEX_COMPRESSED_KeyFormat() throws Exception {
 
         String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
         String format = privateKeyFactory.getFormat(key);
-        assertThat(format, is(PrivateKeyFactory.HEX_UNCOMPRESSED));
+        assertThat(format, is(PrivateKeyFactory.HEX_COMPRESSED));
     }
 
     @Test
     public void test_WIF_COMPRESSED_KeyFormat() throws Exception {
 
         String key = "KyCHxZe68e5PNfqh8Ls8DrihMuweHKxvjtm3PGTrj43MyWuvN2aE";
+
+        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof TestNet3Params) {
+            key = "cUQEjQs1kQ5MdrKfKwV3GLq5onJ7tQ2uBmMuqWHvdfwru7vCj3jT";
+        }
+
         String format = privateKeyFactory.getFormat(key);
         assertThat(format, is(PrivateKeyFactory.WIF_COMPRESSED));
     }
@@ -91,6 +104,11 @@ public class PrivateKeyFactoryTest {
     public void test_WIF_UNCOMPRESSED_KeyFormat() throws Exception {
 
         String key = "5JKxWHiBf1GX2A83BRVxYG4xpqsbfR3w9kQtppAUUJ6jnafURkm";
+
+        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof TestNet3Params) {
+            key = "938XkbQZo5mwX6jk81ZdmFv2ziytri1tFDmcXvmAS5HxiMZeBkn";
+        }
+
         String format = privateKeyFactory.getFormat(key);
         assertThat(format, is(PrivateKeyFactory.WIF_UNCOMPRESSED));
     }
@@ -140,8 +158,10 @@ public class PrivateKeyFactoryTest {
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
-        assertThat(address.toString(), is(uncompressedAddress));
-        Assert.assertTrue(!ecKey.isCompressed());
+        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams) {
+            assertThat(address.toString(), is(uncompressedAddress));
+            Assert.assertTrue(!ecKey.isCompressed());
+        }
     }
 
     @Test
@@ -162,5 +182,17 @@ public class PrivateKeyFactoryTest {
         //Assert
         assertThat(address.toString(), is(compressedAddress));
         Assert.assertTrue(ecKey.isCompressed());
+    }
+
+    @Test
+    public void test_HEX_KeyFormat_shouldReturnCompressed() throws Exception {
+
+        String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
+        String format = privateKeyFactory.getFormat(key);
+        ECKey key1 = privateKeyFactory.getKey(PrivateKeyFactory.HEX_COMPRESSED, key);
+
+        //Assert
+        assertThat(format, is(PrivateKeyFactory.HEX_COMPRESSED));
+        assertThat(key1.toAddress(MainNetParams.get()).toString(), is("1NLLkARpefxpXaMb7ZhHmc2DYNoVUnzBAz"));
     }
 }

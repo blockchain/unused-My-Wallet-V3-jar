@@ -238,9 +238,8 @@ public class ContactsTest {
         mockInterceptor.setResponseString("{\"nonce\":\"yzlbDB+JbpUr7nJuGc9Y4C70C6Y=\",\"mdid\":\"1borrXJLeFgwF1aKS3io9c3rQ1uXHf1s5\",\"signature\":\"H00kjYWQ5rsT0+693EoL5r7DZObJxrxng3O7hs6bLL3HFGzPWEwBRs6Gy0Wi5aE8FRwW8HAQSwtZ7Zygwelih54=\"}");
         Contact myInvite = contacts.createInvitation(me, him);
 
-        Assert.assertTrue(contacts.getContactList().get(0).getName().equals("Him"));
         Assert.assertTrue(myInvite.getName().equals("Me"));
-        Assert.assertTrue(myInvite.getOutgoingInvitation().getMdid().equals("1borrXJLeFgwF1aKS3io9c3rQ1uXHf1s5"));
+        Assert.assertTrue(myInvite.getMdid().equals("1borrXJLeFgwF1aKS3io9c3rQ1uXHf1s5"));
     }
 
     @Test
@@ -266,7 +265,7 @@ public class ContactsTest {
 
         Assert.assertTrue(contacts.getContactList().get(0).getName().equals("Him"));
         Assert.assertTrue(myInvite.getName().equals("Me"));
-        Assert.assertTrue(myInvite.getOutgoingInvitation().getMdid().equals("1borrXJLeFgwF1aKS3io9c3rQ1uXHf1s5"));
+        Assert.assertTrue(myInvite.getMdid().equals("1borrXJLeFgwF1aKS3io9c3rQ1uXHf1s5"));
     }
 
     @Test
@@ -275,6 +274,6 @@ public class ContactsTest {
         Contact receivedInvite = contacts.readInvitationLink("http://blockchain.info/invite?id=852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37&name=Me");
 
         Assert.assertTrue(receivedInvite.getName().equals("Me"));
-        Assert.assertTrue(receivedInvite.getId().equals("852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37"));
+        Assert.assertTrue(receivedInvite.getInvitationReceived().getId().equals("852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37"));
     }
 }
