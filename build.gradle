@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'info.blockchain.wallet'
-version = '6.1.40'
+version = '6.2.2'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
