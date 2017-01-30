@@ -415,6 +415,7 @@ public class Contacts {
         tx.setIntended_amount(request.getIntended_amount());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
+        tx.setNote(request.getNote());
 
         request.setId(tx.getId());
 
