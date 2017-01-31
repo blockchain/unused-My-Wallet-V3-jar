@@ -1,14 +1,12 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.wallet.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SuggestedFee;
+import info.blockchain.wallet.util.FeeUtil;
 import info.blockchain.wallet.util.WebUtil;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class DynamicFee extends BaseApi {
 

@@ -1,11 +1,10 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.util.WebUtil;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class Settings extends BaseApi {
 

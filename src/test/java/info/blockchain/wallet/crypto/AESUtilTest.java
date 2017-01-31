@@ -1,12 +1,12 @@
 package info.blockchain.wallet.crypto;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.bitcoinj.core.Sha256Hash;
 import org.junit.Test;
 import org.spongycastle.crypto.paddings.ISO10126d2Padding;
 import org.spongycastle.crypto.paddings.ISO7816d4Padding;
 import org.spongycastle.crypto.paddings.ZeroBytePadding;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Created by riaanvos on 19/04/16.

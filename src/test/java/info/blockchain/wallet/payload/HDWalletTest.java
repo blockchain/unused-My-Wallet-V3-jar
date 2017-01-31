@@ -1,13 +1,11 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.util.AssertJson;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class HDWalletTest {
 

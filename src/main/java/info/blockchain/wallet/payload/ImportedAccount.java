@@ -1,10 +1,9 @@
 package info.blockchain.wallet.payload;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /*
 Could be used to represent a collection of all legacy addresses as a single account

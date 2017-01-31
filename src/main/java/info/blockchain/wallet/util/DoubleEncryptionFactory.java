@@ -1,10 +1,8 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
-
-import org.spongycastle.util.encoders.Hex;
-
 import java.security.MessageDigest;
+import org.spongycastle.util.encoders.Hex;
 
 public class DoubleEncryptionFactory {
 

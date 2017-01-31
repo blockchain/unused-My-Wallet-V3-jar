@@ -1,7 +1,8 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.api.PersistentUrls;
-
+import java.nio.ByteBuffer;
+import java.util.regex.Pattern;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -11,9 +12,6 @@ import org.bitcoinj.uri.BitcoinURIParseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.nio.ByteBuffer;
-import java.util.regex.Pattern;
 
 public class FormatsUtil {
 

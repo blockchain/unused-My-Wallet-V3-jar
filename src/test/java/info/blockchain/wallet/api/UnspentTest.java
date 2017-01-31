@@ -1,9 +1,9 @@
 package info.blockchain.wallet.api;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.json.JSONObject;
 import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class UnspentTest {
 

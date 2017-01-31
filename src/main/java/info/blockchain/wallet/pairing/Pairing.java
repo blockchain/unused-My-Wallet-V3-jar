@@ -1,7 +1,6 @@
 package info.blockchain.wallet.pairing;
 
 import info.blockchain.wallet.crypto.AESUtil;
-
 import java.util.regex.Pattern;
 
 public class Pairing {

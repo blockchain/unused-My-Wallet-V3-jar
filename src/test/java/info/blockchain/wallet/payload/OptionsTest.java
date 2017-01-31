@@ -1,7 +1,6 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.util.AssertJson;
-
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;

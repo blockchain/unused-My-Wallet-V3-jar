@@ -3,15 +3,12 @@ package info.blockchain.wallet.api;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
-
-import org.apache.commons.lang3.StringUtils;
-import org.bitcoinj.core.ECKey;
-import org.json.JSONObject;
-
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.apache.commons.lang3.StringUtils;
+import org.bitcoinj.core.ECKey;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Response;
 

@@ -3,7 +3,6 @@ package info.blockchain.wallet.payload;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-
 import info.blockchain.wallet.api.ExternalEntropy;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletPayload;
@@ -25,7 +24,12 @@ import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
-
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
@@ -35,14 +39,6 @@ import org.bitcoinj.crypto.DeterministicKey;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * PayloadManager.java : singleton class for reading/writing/parsing Blockchain HD JSON payload
@@ -787,7 +783,7 @@ public class PayloadManager {
 
     /**
      * Loads the metadata nodes from the metadata service. If this fails, the function returns false
-     * and they must be generated and saved using {@link this#generateNodes(String)}. This allows us
+     * and they must be generated and saved using this#generateNodes(String). This allows us
      * to generate and prompt for a second password only once.
      *
      * @param guid           The user's GUID
@@ -805,7 +801,7 @@ public class PayloadManager {
 
     /**
      * Generates the nodes for the shared metadata service and saves them on the service. Takes an
-     * optional second password if set by the user. {@link this#loadNodes(String, String, String)}
+     * optional second password if set by the user. this#loadNodes(String, String, String)
      * must be called first to avoid a {@link NullPointerException}.
      *
      * @param secondPassword An optional second password, if applicable

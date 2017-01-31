@@ -19,12 +19,10 @@ package info.blockchain.wallet.send;
 
 import info.blockchain.wallet.util.Hash;
 import info.blockchain.wallet.util.Util;
-
+import java.io.Serializable;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Utils;
-
-import java.io.Serializable;
 
 public class BitcoinAddress implements Serializable {
     private static final long serialVersionUID = 1L;

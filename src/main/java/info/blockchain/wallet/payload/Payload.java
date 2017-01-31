@@ -2,11 +2,6 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.FormatsUtil;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,8 +9,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.Nonnull;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Payload.java : java class for encapsulating Blockchain HD wallet payload

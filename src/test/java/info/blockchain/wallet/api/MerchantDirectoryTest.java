@@ -1,13 +1,11 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.test_data.MerchantDirectoryTestData;
-
-import org.junit.Test;
-
-import java.util.ArrayList;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+
+import info.blockchain.test_data.MerchantDirectoryTestData;
+import java.util.ArrayList;
+import org.junit.Test;
 
 public class MerchantDirectoryTest {
 

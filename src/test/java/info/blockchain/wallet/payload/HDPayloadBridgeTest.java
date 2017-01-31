@@ -1,18 +1,16 @@
 package info.blockchain.wallet.payload;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Wallet;
-
+import java.io.IOException;
+import java.util.ArrayList;
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.crypto.MnemonicException;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.ArrayList;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
 /**
  * Created by riaanvos on 13/07/16.

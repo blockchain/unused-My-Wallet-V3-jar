@@ -1,10 +1,8 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.send.SendCoins;
-
-import org.bitcoinj.core.Coin;
-
 import java.math.BigInteger;
+import org.bitcoinj.core.Coin;
 
 public class FeeUtil {
 

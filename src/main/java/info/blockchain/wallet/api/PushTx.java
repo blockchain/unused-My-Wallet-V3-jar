@@ -2,7 +2,6 @@ package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.send.SendCoins;
 import info.blockchain.wallet.util.WebUtil;
-
 import org.bitcoinj.core.Transaction;
 
 public class PushTx extends BaseApi {

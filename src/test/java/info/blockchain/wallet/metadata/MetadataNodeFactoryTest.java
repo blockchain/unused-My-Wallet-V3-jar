@@ -1,18 +1,16 @@
 package info.blockchain.wallet.metadata;
 
+import info.blockchain.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
-import info.blockchain.util.RestClient;
-
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 public class MetadataNodeFactoryTest {
@@ -61,6 +59,7 @@ public class MetadataNodeFactoryTest {
         String metadataB58 = "xprv9twfkEhG8UPRWCrX3HnowyQk7vMCVeGY5ZHWsLANZqxqBaiAHPN3MvuuFedVNBhixki7WBvYW8gcg2mCemfV6XNNpCZ31JusEHUhdmdhsvp";
         String sharedMetadataB58 = "xprv9twfkEhLiMZnQ5Gjf8w2f5wn5ASrQ9qMVwLo458shQmfMWhus8oo9aecvsAmSDXfgGbX2xQgeXi9Luj9ao5xGLKGjCj7gKiwvBGnjhdVEji";
 
+        mockInterceptor.setResponseString("{\"status\": \"success\"}");
         metadataNodeFactory.saveMetadataHdNodes(HDKeyDerivation.createMasterPrivateKey(Hex.decode(masterKeyHex)));
 
         Assert.assertTrue(metadataNodeFactory.getMetadataNode().serializePrivB58(MainNetParams.get()).equals(metadataB58));

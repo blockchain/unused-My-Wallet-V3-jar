@@ -1,7 +1,6 @@
 package info.blockchain.util;
 
 import info.blockchain.wallet.api.PersistentUrls;
-
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;

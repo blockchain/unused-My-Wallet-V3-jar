@@ -2,7 +2,13 @@ package info.blockchain.wallet.send;
 
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.util.Hash;
-
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
@@ -16,14 +22,6 @@ import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.spongycastle.util.encoders.Hex;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
 
 /**
  * SendCoins.java : singleton class for spending from Blockchain Android HD wallet

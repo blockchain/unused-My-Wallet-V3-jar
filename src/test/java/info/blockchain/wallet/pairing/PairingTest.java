@@ -1,10 +1,9 @@
 package info.blockchain.wallet.pairing;
 
-import info.blockchain.wallet.api.WalletPayload;
-
-import org.junit.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import info.blockchain.wallet.api.WalletPayload;
+import org.junit.Test;
 
 public class PairingTest {
 

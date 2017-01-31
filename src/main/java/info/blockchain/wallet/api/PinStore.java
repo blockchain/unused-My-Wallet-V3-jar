@@ -1,7 +1,6 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.util.WebUtil;
-
 import org.json.JSONObject;
 
 public class PinStore extends BaseApi {

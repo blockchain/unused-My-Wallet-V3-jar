@@ -1,7 +1,9 @@
 package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
-
+import java.io.UnsupportedEncodingException;
+import java.security.SecureRandom;
+import javax.annotation.Nullable;
 import org.apache.commons.codec.binary.Base64;
 import org.spongycastle.crypto.BlockCipher;
 import org.spongycastle.crypto.BufferedBlockCipher;
@@ -18,11 +20,6 @@ import org.spongycastle.crypto.paddings.ISO10126d2Padding;
 import org.spongycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.crypto.params.ParametersWithIV;
-
-import java.io.UnsupportedEncodingException;
-import java.security.SecureRandom;
-
-import javax.annotation.Nullable;
 
 public class AESUtil {
 

@@ -6,13 +6,11 @@ import info.blockchain.wallet.bip44.Address;
 import info.blockchain.wallet.bip44.Wallet;
 import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
-
-import org.apache.commons.lang3.StringUtils;
-import org.bitcoinj.core.AddressFormatException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 
 public class HDPayloadBridge {

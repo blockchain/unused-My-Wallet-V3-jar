@@ -1,12 +1,11 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.test_data.PayloadTestData;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+
+import info.blockchain.test_data.PayloadTestData;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class PayloadTest {
 

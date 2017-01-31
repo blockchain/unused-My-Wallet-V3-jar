@@ -1,12 +1,11 @@
 package info.blockchain.wallet.bip44;
 
+import java.io.IOException;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.IOException;
 
 public class WalletFactoryTest {
 

@@ -1,12 +1,10 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.util.WebUtil;
-
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 
 public class Balance extends BaseApi {
 

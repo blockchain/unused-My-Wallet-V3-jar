@@ -1,7 +1,6 @@
 package info.blockchain.wallet.payment.data;
 
 import info.blockchain.wallet.send.MyTransactionOutPoint;
-
 import java.math.BigInteger;
 import java.util.List;
 

@@ -3,14 +3,12 @@ package info.blockchain.wallet.payload;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
-
+import java.math.BigInteger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.json.JSONObject;
-
-import java.math.BigInteger;
 
 public class LegacyAddress {
 

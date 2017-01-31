@@ -1,14 +1,12 @@
 package info.blockchain.wallet.send;
 
 import info.blockchain.wallet.api.PersistentUrls;
-
+import java.math.BigInteger;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
-
-import java.math.BigInteger;
 
 public class MyTransactionOutPoint extends TransactionOutPoint {
 

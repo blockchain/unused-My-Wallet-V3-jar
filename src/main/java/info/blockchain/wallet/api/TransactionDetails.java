@@ -3,7 +3,6 @@ package info.blockchain.wallet.api;
 import info.blockchain.wallet.transaction.Transaction;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.WebUtil;
-
 import org.json.JSONObject;
 
 public class TransactionDetails extends BaseApi {

@@ -2,7 +2,10 @@ package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.api.Balance;
 import info.blockchain.wallet.api.PersistentUrls;
-
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
@@ -11,11 +14,6 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 
 public class PrivateKeyFactory {
 

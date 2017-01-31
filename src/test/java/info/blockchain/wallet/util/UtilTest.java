@@ -1,10 +1,10 @@
 package info.blockchain.wallet.util;
 
-import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+
+import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
 
 public class UtilTest {
 

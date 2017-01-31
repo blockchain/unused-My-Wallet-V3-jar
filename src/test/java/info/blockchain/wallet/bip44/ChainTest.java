@@ -1,7 +1,5 @@
 package info.blockchain.wallet.bip44;
 
-import static org.junit.Assert.*;
-
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;

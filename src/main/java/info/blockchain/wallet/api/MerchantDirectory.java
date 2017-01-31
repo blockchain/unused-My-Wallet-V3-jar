@@ -2,13 +2,11 @@ package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.WebUtil;
-
+import java.util.ArrayList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class MerchantDirectory extends BaseApi {
 

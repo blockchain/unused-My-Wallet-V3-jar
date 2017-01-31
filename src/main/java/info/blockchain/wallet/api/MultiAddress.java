@@ -1,11 +1,9 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.util.WebUtil;
-
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-
-import java.util.List;
 
 public class MultiAddress extends BaseApi {
 

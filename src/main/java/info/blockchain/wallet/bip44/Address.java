@@ -1,5 +1,6 @@
 package info.blockchain.wallet.bip44;
 
+import java.math.BigInteger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
@@ -7,8 +8,6 @@ import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-
-import java.math.BigInteger;
 
 /**
  * Address.java : an address in a BIP44 wallet account chain

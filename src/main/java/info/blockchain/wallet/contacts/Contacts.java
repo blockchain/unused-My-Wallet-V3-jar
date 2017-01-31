@@ -2,8 +2,6 @@ package info.blockchain.wallet.contacts;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
@@ -18,11 +16,6 @@ import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-
-import org.bitcoinj.crypto.DeterministicKey;
-import org.spongycastle.crypto.InvalidCipherTextException;
-import org.spongycastle.util.encoders.Base64;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -33,8 +26,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Nonnull;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.util.encoders.Base64;
 
 public class Contacts {
 
@@ -126,6 +121,10 @@ public class Contacts {
 
     /**
      * Overwrites contact list.
+     * @param contacts
+     * @throws MetadataException
+     * @throws IOException
+     * @throws InvalidCipherTextException
      */
     public void setContactList(List<Contact> contacts)
             throws MetadataException, IOException, InvalidCipherTextException {
@@ -141,6 +140,10 @@ public class Contacts {
 
     /**
      * Adds contact to contact list.
+     * @param contact
+     * @throws MetadataException
+     * @throws IOException
+     * @throws InvalidCipherTextException
      */
     public void addContact(Contact contact)
             throws MetadataException, IOException, InvalidCipherTextException {
@@ -150,9 +153,14 @@ public class Contacts {
 
     /**
      * Removes contact from contact list.
+     * @param contact
+     * @throws MetadataException
+     * @throws IOException
+     * @throws InvalidCipherTextException
+     * @throws SharedMetadataException
      */
     public void removeContact(Contact contact)
-            throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
+        throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
 
         contactList.remove(contact.getId());
         if (contact.getMdid() != null) {
@@ -163,6 +171,9 @@ public class Contacts {
 
     /**
      * Publishes your mdid-xpub pair unencrypted to metadata service
+     * @throws MetadataException
+     * @throws IOException
+     * @throws InvalidCipherTextException
      */
     public void publishXpub() throws MetadataException, IOException, InvalidCipherTextException {
 
@@ -179,6 +190,11 @@ public class Contacts {
 
     /**
      * Fetches unencrypted xpub associated with mdid
+     * @param mdid
+     * @return
+     * @throws MetadataException
+     * @throws IOException
+     * @throws InvalidCipherTextException
      */
     public String fetchXpub(String mdid)
             throws MetadataException, IOException, InvalidCipherTextException {
@@ -195,6 +211,13 @@ public class Contacts {
 
     /**
      * Creates an invitation {@link Contact}
+     * @param myDetails
+     * @param recipientDetails
+     * @return
+     * @throws IOException
+     * @throws SharedMetadataException
+     * @throws MetadataException
+     * @throws InvalidCipherTextException
      */
     public Contact createInvitation(Contact myDetails, Contact recipientDetails)
             throws IOException, SharedMetadataException, MetadataException, InvalidCipherTextException {
@@ -220,6 +243,9 @@ public class Contacts {
 
     /**
      * Parses invitation uri to {@link Contact}
+     * @param link
+     * @return
+     * @throws UnsupportedEncodingException
      */
     public Contact readInvitationLink(String link) throws UnsupportedEncodingException {
 
@@ -233,6 +259,9 @@ public class Contacts {
 
     /**
      * Accepts invitation link and returns {@link Contact}.
+     * @param link
+     * @return
+     * @throws Exception
      */
     public Contact acceptInvitationLink(String link) throws Exception {
 
@@ -255,6 +284,12 @@ public class Contacts {
     /**
      * Checks if sent invitation has been accepted. If accepted, the invitee is added to contact
      * list.
+     * @param invite
+     * @return
+     * @throws SharedMetadataException
+     * @throws IOException
+     * @throws MetadataException
+     * @throws InvalidCipherTextException
      */
     public boolean readInvitationSent(Contact invite)
             throws SharedMetadataException, IOException, MetadataException, InvalidCipherTextException {
@@ -294,6 +329,14 @@ public class Contacts {
 
     /**
      * Send message
+     * @param mdid
+     * @param message
+     * @param type
+     * @param encrypted
+     * @throws IOException
+     * @throws SharedMetadataException
+     * @throws InvalidCipherTextException
+     * @throws MetadataException
      */
     public void sendMessage(String mdid, String message, int type, boolean encrypted)
             throws IOException,
@@ -317,6 +360,12 @@ public class Contacts {
 
     /**
      * Retrieves received messages
+     * @param onlyNew
+     * @return
+     * @throws SharedMetadataException
+     * @throws ValidationException
+     * @throws SignatureException
+     * @throws IOException
      */
     public List<Message> getMessages(boolean onlyNew)
             throws SharedMetadataException, ValidationException,
@@ -345,6 +394,12 @@ public class Contacts {
 
     /**
      * Returns {@link Message}
+     * @param messageId
+     * @return
+     * @throws SharedMetadataException
+     * @throws ValidationException
+     * @throws SignatureException
+     * @throws IOException
      */
     public Message readMessage(String messageId)
             throws SharedMetadataException, ValidationException,
@@ -354,6 +409,10 @@ public class Contacts {
 
     /**
      * Flag message as read
+     * @param messageId
+     * @param markAsRead
+     * @throws IOException
+     * @throws SharedMetadataException
      */
     public void markMessageAsRead(String messageId, boolean markAsRead)
             throws IOException, SharedMetadataException {
@@ -397,6 +456,12 @@ public class Contacts {
 
     /**
      * Send request for payment request. (Ask recipient to send a bitcoin receive address)
+     * @param mdid
+     * @param request
+     * @throws IOException
+     * @throws SharedMetadataException
+     * @throws InvalidCipherTextException
+     * @throws MetadataException
      */
     public void sendRequestForPaymentRequest(final String mdid, RequestForPaymentRequest request)
             throws IOException,
@@ -419,6 +484,12 @@ public class Contacts {
 
     /**
      * Sends new payment request without need to ask for receive address.
+     * @param mdid
+     * @param request
+     * @throws IOException
+     * @throws SharedMetadataException
+     * @throws InvalidCipherTextException
+     * @throws MetadataException
      */
     public void sendPaymentRequest(final String mdid, PaymentRequest request) throws IOException,
             SharedMetadataException, InvalidCipherTextException, MetadataException {
@@ -438,6 +509,13 @@ public class Contacts {
 
     /**
      * Send payment request response
+     * @param mdid
+     * @param request
+     * @param fTxId
+     * @throws IOException
+     * @throws SharedMetadataException
+     * @throws InvalidCipherTextException
+     * @throws MetadataException
      */
     public void sendPaymentRequest(final String mdid, PaymentRequest request, String fTxId)
             throws IOException,
@@ -456,6 +534,14 @@ public class Contacts {
 
     /**
      * Sends notification that transaction has been processed.
+     * @param mdid
+     * @param txHash
+     * @param fTxId
+     * @throws IOException
+     * @throws SharedMetadataException
+     * @throws InvalidCipherTextException
+     * @throws MetadataException
+     * @throws MismatchValueException
      */
     public void sendPaymentBroadcasted(String mdid, String txHash, String fTxId)
             throws IOException,
@@ -475,8 +561,15 @@ public class Contacts {
     }
 
     /**
-     * Digests unread payment requests and returns a list of {@link Contact} with {@link
+     *  Digests unread payment requests and returns a list of {@link Contact} with {@link
      * FacilitatedTransaction} that need responding to.
+     * @return
+     * @throws SharedMetadataException
+     * @throws IOException
+     * @throws SignatureException
+     * @throws ValidationException
+     * @throws MetadataException
+     * @throws InvalidCipherTextException
      */
     public List<Contact> digestUnreadPaymentRequests()
         throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {

@@ -1,12 +1,11 @@
 package info.blockchain.wallet.settings;
 
-import info.blockchain.wallet.api.Settings;
-import info.blockchain.test_data.SettingsTestData;
-
-import org.junit.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+
+import info.blockchain.test_data.SettingsTestData;
+import info.blockchain.wallet.api.Settings;
+import org.junit.Test;
 
 public class SettingsTest {
 

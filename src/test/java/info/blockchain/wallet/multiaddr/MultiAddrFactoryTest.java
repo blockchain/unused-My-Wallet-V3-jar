@@ -1,17 +1,15 @@
 package info.blockchain.wallet.multiaddr;
 
-import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.FrameworkInterface;
-import info.blockchain.util.RestClient;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+
+import info.blockchain.util.RestClient;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import okhttp3.OkHttpClient;
+import org.junit.Before;
+import org.junit.Test;
+import retrofit2.Retrofit;
 
 public class MultiAddrFactoryTest {
 

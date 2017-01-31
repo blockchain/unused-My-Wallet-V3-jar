@@ -1,12 +1,10 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.util.AssertJson;
-
+import java.util.TreeMap;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.TreeMap;
 
 public class AccountTest {
 

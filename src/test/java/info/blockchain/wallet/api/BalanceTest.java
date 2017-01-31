@@ -1,10 +1,10 @@
 package info.blockchain.wallet.api;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+
+import org.junit.Ignore;
+import org.junit.Test;
 
 @Ignore
 public class BalanceTest {

@@ -1,19 +1,17 @@
 package info.blockchain.wallet.payment;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
 import info.blockchain.test_data.UnspentTestData;
-import info.blockchain.wallet.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.payment.data.SweepBundle;
 import info.blockchain.wallet.payment.data.UnspentOutputs;
 import info.blockchain.wallet.send.SendCoins;
-
+import info.blockchain.wallet.util.FeeUtil;
+import java.math.BigInteger;
 import org.json.JSONObject;
 import org.junit.Test;
-
-import java.math.BigInteger;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
 public class PaymentTest {
 

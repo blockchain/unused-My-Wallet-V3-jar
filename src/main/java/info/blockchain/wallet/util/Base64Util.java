@@ -1,9 +1,7 @@
 package info.blockchain.wallet.util;
 
 import com.lambdaworks.codec.Base64;
-
 import java.io.UnsupportedEncodingException;
-
 import javax.annotation.Nonnull;
 
 public final class Base64Util {

@@ -1,12 +1,10 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.wallet.payment.data.SuggestedFee;
-
-import org.junit.Test;
-
-import java.math.BigInteger;
-
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import info.blockchain.wallet.payment.data.SuggestedFee;
+import java.math.BigInteger;
+import org.junit.Test;
 
 public class DynamicFeeTest {
 

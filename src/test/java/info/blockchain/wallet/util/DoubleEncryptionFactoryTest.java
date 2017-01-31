@@ -1,10 +1,9 @@
 package info.blockchain.wallet.util;
 
-import info.blockchain.wallet.crypto.AESUtil;
-
-import org.junit.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import info.blockchain.wallet.crypto.AESUtil;
+import org.junit.Test;
 
 /**
  * Created by riaanvos on 20/04/16.
