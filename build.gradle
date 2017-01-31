@@ -64,7 +64,6 @@ artifacts {
 }
 
 
-
 dependencies {
     compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.13.1'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'

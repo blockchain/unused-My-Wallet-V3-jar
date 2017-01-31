@@ -4,15 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import info.blockchain.wallet.metadata.data.Invitation;
-import io.mikael.urlbuilder.UrlBuilder;
-import io.mikael.urlbuilder.util.UrlParameterMultimap;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.bitcoinj.core.ECKey;
+
+import javax.annotation.Nonnull;
+
+import io.mikael.urlbuilder.UrlBuilder;
+import io.mikael.urlbuilder.util.UrlParameterMultimap;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Contact {
@@ -116,8 +120,9 @@ public class Contact {
         this.invitationReceived = invitationReceived;
     }
 
+    @Nonnull
     public HashMap<String, FacilitatedTransaction> getFacilitatedTransaction() {
-        return facilitatedTransaction;
+        return facilitatedTransaction != null ? facilitatedTransaction : new HashMap<String, FacilitatedTransaction>();
     }
 
     @JsonIgnore

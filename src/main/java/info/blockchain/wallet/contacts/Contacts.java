@@ -3,11 +3,12 @@ package info.blockchain.wallet.contacts;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.api.TransactionDetails;
+import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
+import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.MismatchValueException;
@@ -17,9 +18,7 @@ import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-import info.blockchain.wallet.contacts.data.PublicContactDetails;
 
-import info.blockchain.wallet.transaction.Transaction;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
@@ -31,6 +30,7 @@ import java.net.URLDecoder;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -53,16 +53,16 @@ public class Contacts {
     }
 
     public void init(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode)
-        throws IOException,
-        MetadataException {
+            throws IOException,
+            MetadataException {
         metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
         sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
         contactList = new HashMap<>();
     }
 
     public Contacts(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode)
-        throws IOException,
-        MetadataException {
+            throws IOException,
+            MetadataException {
         init(metaDataHDNode, sharedMetaDataHDNode);
     }
 
@@ -128,7 +128,10 @@ public class Contacts {
      * Overwrites contact list.
      */
     public void setContactList(List<Contact> contacts)
-        throws MetadataException, IOException, InvalidCipherTextException {
+            throws MetadataException, IOException, InvalidCipherTextException {
+
+        contactList.clear();
+
         for (Contact contact : contacts) {
             contactList.put(contact.getId(), contact);
         }
@@ -140,7 +143,7 @@ public class Contacts {
      * Adds contact to contact list.
      */
     public void addContact(Contact contact)
-        throws MetadataException, IOException, InvalidCipherTextException {
+            throws MetadataException, IOException, InvalidCipherTextException {
         contactList.put(contact.getId(), contact);
         save();
     }
@@ -149,25 +152,12 @@ public class Contacts {
      * Removes contact from contact list.
      */
     public void removeContact(Contact contact)
-        throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
+            throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
 
         contactList.remove(contact.getId());
         if (contact.getMdid() != null) {
             sharedMetadata.deleteTrusted(contact.getMdid());
         }
-        save();
-    }
-
-    /**
-     * Removes contact from contact list using mdid.
-     */
-    public void removeContact(String mdid)
-        throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
-
-        Contact contact = getContactFromMdid(mdid);
-
-        contactList.remove(contact.getId());
-        sharedMetadata.deleteTrusted(contact.getMdid());
         save();
     }
 
@@ -191,7 +181,7 @@ public class Contacts {
      * Fetches unencrypted xpub associated with mdid
      */
     public String fetchXpub(String mdid)
-        throws MetadataException, IOException, InvalidCipherTextException {
+            throws MetadataException, IOException, InvalidCipherTextException {
 
         String data = metadata.getMetadata(mdid, false);
 
@@ -207,7 +197,7 @@ public class Contacts {
      * Creates an invitation {@link Contact}
      */
     public Contact createInvitation(Contact myDetails, Contact recipientDetails)
-        throws IOException, SharedMetadataException, MetadataException, InvalidCipherTextException {
+            throws IOException, SharedMetadataException, MetadataException, InvalidCipherTextException {
 
         myDetails.setMdid(sharedMetadata.getAddress());
 
@@ -267,7 +257,7 @@ public class Contacts {
      * list.
      */
     public boolean readInvitationSent(Contact invite)
-        throws SharedMetadataException, IOException, MetadataException, InvalidCipherTextException {
+            throws SharedMetadataException, IOException, MetadataException, InvalidCipherTextException {
 
         boolean accepted = false;
 
@@ -295,7 +285,7 @@ public class Contacts {
 
     private Contact getContactFromSentInviteId(String id) {
         for (Contact contact : contactList.values()) {
-            if(contact.getInvitationSent() != null && contact.getInvitationSent().getId().equals(id)) {
+            if (contact.getInvitationSent() != null && contact.getInvitationSent().getId().equals(id)) {
                 return contact;
             }
         }
@@ -306,8 +296,8 @@ public class Contacts {
      * Send message
      */
     public void sendMessage(String mdid, String message, int type, boolean encrypted)
-        throws IOException,
-        SharedMetadataException, InvalidCipherTextException, MetadataException {
+            throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         String b64Message;
 
@@ -329,16 +319,24 @@ public class Contacts {
      * Retrieves received messages
      */
     public List<Message> getMessages(boolean onlyNew)
-        throws SharedMetadataException, ValidationException,
-        SignatureException, IOException {
+            throws SharedMetadataException, ValidationException,
+            SignatureException, IOException {
 
         List<Message> messages = sharedMetadata.getMessages(onlyNew);
 
-        for (Message message : messages) {
-            try {
-                decryptMessageFrom(message, getContactFromMdid(message.getSender()).getXpub());
-            } catch (IOException | InvalidCipherTextException | MetadataException e) {
-                e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
+        Iterator<Message> i = messages.iterator();
+        while (i.hasNext()) {
+            Message message = i.next();
+            final Contact contactFromMdid = getContactFromMdid(message.getSender());
+            if (contactFromMdid != null) {
+                try {
+                    decryptMessageFrom(message, contactFromMdid.getXpub());
+                } catch (IOException | InvalidCipherTextException | MetadataException e) {
+                    e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
+                }
+            } else {
+                markMessageAsRead(message.getId(), true);
+                i.remove();
             }
         }
 
@@ -349,8 +347,8 @@ public class Contacts {
      * Returns {@link Message}
      */
     public Message readMessage(String messageId)
-        throws SharedMetadataException, ValidationException,
-        SignatureException, IOException {
+            throws SharedMetadataException, ValidationException,
+            SignatureException, IOException {
         return sharedMetadata.getMessage(messageId);
     }
 
@@ -358,12 +356,12 @@ public class Contacts {
      * Flag message as read
      */
     public void markMessageAsRead(String messageId, boolean markAsRead)
-        throws IOException, SharedMetadataException {
+            throws IOException, SharedMetadataException {
         sharedMetadata.processMessage(messageId, markAsRead);
     }
 
     private Message decryptMessageFrom(Message message, String xpub) throws IOException,
-        InvalidCipherTextException, MetadataException {
+            InvalidCipherTextException, MetadataException {
 
         String decryptedPayload = sharedMetadata.decryptFrom(xpub, message.getPayload());
         message.setPayload(decryptedPayload);
@@ -401,13 +399,14 @@ public class Contacts {
      * Send request for payment request. (Ask recipient to send a bitcoin receive address)
      */
     public void sendRequestForPaymentRequest(final String mdid, RequestForPaymentRequest request)
-        throws IOException,
-        SharedMetadataException, InvalidCipherTextException, MetadataException {
+            throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         FacilitatedTransaction tx = new FacilitatedTransaction();
         tx.setIntended_amount(request.getIntended_amount());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
+        tx.setNote(request.getNote());
 
         request.setId(tx.getId());
 
@@ -421,16 +420,19 @@ public class Contacts {
     /**
      * Sends new payment request without need to ask for receive address.
      */
-    public void sendPaymentRequest(final String mdid, PaymentRequest request,
-        FacilitatedTransaction ftx) throws IOException,
-        SharedMetadataException, InvalidCipherTextException, MetadataException {
+    public void sendPaymentRequest(final String mdid, PaymentRequest request) throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
+
+        FacilitatedTransaction facilitatedTransaction = new FacilitatedTransaction();
+        request.setId(facilitatedTransaction.getId());
+        facilitatedTransaction.setIntended_amount(request.getIntended_amount());
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
         Contact contact = getContactFromMdid(mdid);
-        contact.addFacilitatedTransaction(ftx);
-        ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-        ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
+        facilitatedTransaction.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
+        facilitatedTransaction.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
+        contact.addFacilitatedTransaction(facilitatedTransaction);
         save();
     }
 
@@ -438,8 +440,8 @@ public class Contacts {
      * Send payment request response
      */
     public void sendPaymentRequest(final String mdid, PaymentRequest request, String fTxId)
-        throws IOException,
-        SharedMetadataException, InvalidCipherTextException, MetadataException {
+            throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
@@ -455,46 +457,21 @@ public class Contacts {
     /**
      * Sends notification that transaction has been processed.
      */
-    public void sendPaymentBroadcasted(final String mdid, final String txHash, final String fTxId)
-        throws IOException,
-        SharedMetadataException, InvalidCipherTextException, MetadataException, MismatchValueException {
+    public void sendPaymentBroadcasted(String mdid, String txHash, String fTxId)
+            throws IOException,
+            SharedMetadataException, InvalidCipherTextException, MetadataException, MismatchValueException {
 
         Contact contact = getContactFromMdid(mdid);
         FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);
 
-        if (!assertTransactionValue(ftx, txHash)) {
-            throw new MismatchValueException(
-                "Transaction value does not match intended payment value.");
-        }
-
         sendMessage(mdid, new PaymentBroadcasted(fTxId, txHash).toJson(),
-            TYPE_PAYMENT_BROADCASTED,
-            true);
+                TYPE_PAYMENT_BROADCASTED,
+                true);
 
         ftx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
         ftx.setTx_hash(txHash);
 
         save();
-    }
-
-    private boolean assertTransactionValue(FacilitatedTransaction ftx, String txHash)
-        throws IOException {
-
-        long result = 0;
-        try {
-            Transaction tx = new TransactionDetails()
-                .getTransactionDetails(txHash);
-            if (tx == null) {
-                return false;
-            } else {
-                result = tx.getResult();
-            }
-        } catch (Exception e) {
-            throw new IOException(
-                e);// TODO: 13/01/2017 TransactionDetails should throw better exception
-        }
-
-        return ftx.getIntended_amount() == result;
     }
 
     /**
@@ -503,7 +480,11 @@ public class Contacts {
      */
     public List<Contact> digestUnreadPaymentRequests()
         throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {
-        List<Message> messages = getMessages(true);
+        return digestUnreadPaymentRequests(getMessages(true), true);
+    }
+
+    List<Contact> digestUnreadPaymentRequests(List<Message> messages, boolean markAsRead)
+            throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {
 
         List<Contact> unread = new ArrayList<>();
 
@@ -513,18 +494,19 @@ public class Contacts {
                 case TYPE_PAYMENT_REQUEST:
 
                     RequestForPaymentRequest rpr = new RequestForPaymentRequest()
-                        .fromJson(message.getPayload());
+                            .fromJson(message.getPayload());
 
                     FacilitatedTransaction tx = new FacilitatedTransaction();
                     tx.setId(rpr.getId());
                     tx.setIntended_amount(rpr.getIntended_amount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
+                    tx.setNote(rpr.getNote());
 
                     Contact contact = getContactFromMdid(message.getSender());
                     contact.addFacilitatedTransaction(tx);
                     unread.add(contact);
-                    markMessageAsRead(message.getId(), true);
+                    if(markAsRead)markMessageAsRead(message.getId(), true);
                     save();
                     break;
 
@@ -534,14 +516,26 @@ public class Contacts {
 
                     contact = getContactFromMdid(message.getSender());
                     tx = contact.getFacilitatedTransaction()
-                        .get(pr.getId());
+                            .get(pr.getId());
+
+                    boolean newlyCreated = false;
+                    if (tx == null) {
+                        tx = new FacilitatedTransaction();
+                        tx.setId(pr.getId());
+                        tx.setIntended_amount(pr.getIntended_amount());
+                        tx.setNote(pr.getNote());
+                        newlyCreated = true;
+                    }
 
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
                     tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setAddress(pr.getAddress());
 
                     unread.add(contact);
-                    markMessageAsRead(message.getId(), true);
+                    if(markAsRead)markMessageAsRead(message.getId(), true);
+                    if (newlyCreated) {
+                        contact.addFacilitatedTransaction(tx);
+                    }
                     save();
                     break;
 
@@ -557,7 +551,7 @@ public class Contacts {
                     tx.setTx_hash(pb.getTx_hash());
 
                     unread.add(contact);
-                    markMessageAsRead(message.getId(), true);
+                    if(markAsRead)markMessageAsRead(message.getId(), true);
                     save();
                     break;
             }
