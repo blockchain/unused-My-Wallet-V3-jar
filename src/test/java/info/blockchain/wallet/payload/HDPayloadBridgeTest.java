@@ -1,6 +1,6 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Wallet;
 
 import org.apache.commons.codec.DecoderException;

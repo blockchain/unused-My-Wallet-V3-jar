@@ -1,6 +1,6 @@
 package info.blockchain.wallet.send;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ProtocolException;

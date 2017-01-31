@@ -1,6 +1,6 @@
-package info.blockchain.api;
+package info.blockchain.wallet.api;
 
-import info.blockchain.BlockchainFramework;
+import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
 

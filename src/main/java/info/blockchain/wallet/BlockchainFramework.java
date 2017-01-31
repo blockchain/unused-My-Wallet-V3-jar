@@ -1,4 +1,4 @@
-package info.blockchain;
+package info.blockchain.wallet;
 
 import retrofit2.Retrofit;
 

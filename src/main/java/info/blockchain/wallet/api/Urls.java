@@ -1,4 +1,4 @@
-package info.blockchain.api;
+package info.blockchain.wallet.api;
 
 public final class Urls {
 

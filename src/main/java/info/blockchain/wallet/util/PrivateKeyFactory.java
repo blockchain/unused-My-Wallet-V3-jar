@@ -1,7 +1,7 @@
 package info.blockchain.wallet.util;
 
-import info.blockchain.api.Balance;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.Balance;
+import info.blockchain.wallet.api.PersistentUrls;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;

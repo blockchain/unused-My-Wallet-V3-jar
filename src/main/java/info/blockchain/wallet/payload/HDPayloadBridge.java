@@ -1,7 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.api.Balance;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.Balance;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Address;
 import info.blockchain.wallet.bip44.Wallet;
 import info.blockchain.wallet.bip44.WalletFactory;
@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
 
 public class HDPayloadBridge {
 

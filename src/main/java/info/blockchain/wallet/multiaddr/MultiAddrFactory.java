@@ -1,6 +1,6 @@
 package info.blockchain.wallet.multiaddr;
 
-import info.blockchain.api.MultiAddress;
+import info.blockchain.wallet.api.MultiAddress;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.transaction.Tx;

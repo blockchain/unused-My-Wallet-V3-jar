@@ -1,4 +1,4 @@
-package info.blockchain.api;
+package info.blockchain.wallet.api;
 
 import retrofit2.Call;
 import retrofit2.http.POST;

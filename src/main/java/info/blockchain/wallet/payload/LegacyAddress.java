@@ -1,6 +1,6 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.PayloadException;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 

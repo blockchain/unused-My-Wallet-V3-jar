@@ -1,6 +1,6 @@
 package info.blockchain.util;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

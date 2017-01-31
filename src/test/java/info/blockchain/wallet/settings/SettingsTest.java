@@ -1,6 +1,6 @@
 package info.blockchain.wallet.settings;
 
-import info.blockchain.api.Settings;
+import info.blockchain.wallet.api.Settings;
 import info.blockchain.test_data.SettingsTestData;
 
 import org.junit.Test;

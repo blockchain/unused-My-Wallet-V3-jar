@@ -1,4 +1,4 @@
-package info.blockchain.api;
+package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.metadata.data.Auth;
 import info.blockchain.wallet.metadata.data.Invitation;

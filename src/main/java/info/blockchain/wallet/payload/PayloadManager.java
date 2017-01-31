@@ -4,13 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import info.blockchain.api.ExternalEntropy;
-import info.blockchain.api.PersistentUrls;
-import info.blockchain.api.WalletPayload;
+import info.blockchain.wallet.api.ExternalEntropy;
+import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.WalletPayload;
 import info.blockchain.wallet.bip44.Address;
 import info.blockchain.wallet.bip44.Chain;
 import info.blockchain.wallet.bip44.Wallet;
-import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;

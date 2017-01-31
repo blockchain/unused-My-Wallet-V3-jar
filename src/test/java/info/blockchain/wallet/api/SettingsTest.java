@@ -1,9 +1,8 @@
-package info.blockchain.api;
+package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.payload.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

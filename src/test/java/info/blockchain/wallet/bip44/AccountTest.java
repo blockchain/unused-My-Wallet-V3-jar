@@ -1,10 +1,5 @@
 package info.blockchain.wallet.bip44;
 
-import static org.junit.Assert.*;
-
-import info.blockchain.api.PersistentUrls;
-import info.blockchain.wallet.util.MetadataUtil;
-import org.bitcoinj.core.Base58;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;

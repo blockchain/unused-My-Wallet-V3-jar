@@ -1,13 +1,12 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.RemoteMetadataNodes;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

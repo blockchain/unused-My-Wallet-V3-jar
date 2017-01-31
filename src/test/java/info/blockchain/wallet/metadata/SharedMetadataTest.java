@@ -1,8 +1,8 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.util.RestClient;
 

@@ -2,9 +2,9 @@ package info.blockchain.wallet.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Wallet;
 import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.util.RestClient;

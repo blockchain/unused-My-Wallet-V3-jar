@@ -1,8 +1,8 @@
 package info.blockchain.wallet.util;
 
-import info.blockchain.api.Balance;
+import info.blockchain.wallet.api.Balance;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;

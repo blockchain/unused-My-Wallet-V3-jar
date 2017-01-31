@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.api.MetadataEndpoints;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.MetadataEndpoints;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.exceptions.ValidationException;

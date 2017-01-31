@@ -1,8 +1,8 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.api.MetadataEndpoints;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.MetadataEndpoints;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.data.MetadataRequest;

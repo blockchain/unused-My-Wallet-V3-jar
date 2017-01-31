@@ -1,7 +1,7 @@
 package info.blockchain.wallet.payment;
 
-import info.blockchain.api.PersistentUrls;
-import info.blockchain.api.PushTx;
+import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.PushTx;
 import info.blockchain.wallet.util.FeeUtil;
 import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
 import info.blockchain.wallet.payment.data.SweepBundle;

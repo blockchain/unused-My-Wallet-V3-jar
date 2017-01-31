@@ -1,6 +1,6 @@
 package info.blockchain.wallet.pairing;
 
-import info.blockchain.api.WalletPayload;
+import info.blockchain.wallet.api.WalletPayload;
 
 import org.junit.Test;
 

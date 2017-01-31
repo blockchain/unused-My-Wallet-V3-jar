@@ -1,6 +1,6 @@
 package info.blockchain.wallet.send;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.util.Hash;
 
 import org.apache.commons.lang3.tuple.Pair;
