@@ -3,6 +3,7 @@ package info.blockchain.wallet.contacts;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
@@ -128,6 +129,9 @@ public class Contacts {
      */
     public void setContactList(List<Contact> contacts)
             throws MetadataException, IOException, InvalidCipherTextException {
+
+        contactList.clear();
+
         for (Contact contact : contacts) {
             contactList.put(contact.getId(), contact);
         }
@@ -154,19 +158,6 @@ public class Contacts {
         if (contact.getMdid() != null) {
             sharedMetadata.deleteTrusted(contact.getMdid());
         }
-        save();
-    }
-
-    /**
-     * Removes contact from contact list using mdid.
-     */
-    public void removeContact(String mdid)
-            throws MetadataException, IOException, InvalidCipherTextException, SharedMetadataException {
-
-        Contact contact = getContactFromMdid(mdid);
-
-        contactList.remove(contact.getId());
-        sharedMetadata.deleteTrusted(contact.getMdid());
         save();
     }
 
