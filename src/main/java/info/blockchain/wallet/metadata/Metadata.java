@@ -88,7 +88,7 @@ public class Metadata {
 
             byte[] encryptedPayloadBytes = Base64.decode(exe.body().getPayload().getBytes("utf-8"));
 
-            if(body.getPrev_magic_hash() != null){
+            if (body.getPrev_magic_hash() != null) {
                 byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
                 magicHash = MetadataUtil.magic(encryptedPayloadBytes, prevMagicBytes);
             } else {
@@ -96,28 +96,25 @@ public class Metadata {
             }
 
         } else {
-            if(exe.code() == 404) {
-                magicHash = null;
-            } else {
-                throw new MetadataException(exe.code() + " " + exe.message());
-            }
+            magicHash = null;
+            throw new MetadataException(exe.code() + " " + exe.message());
         }
     }
 
     /**
      * Put new metadata entry
+     *
      * @param payload JSON Stringified object
-     * @throws Exception
      */
     public void putMetadata(String payload) throws IOException, InvalidCipherTextException, MetadataException {
 
         //Ensure json syntax is correct
-        if(!FormatsUtil.getInstance().isValidJson(payload))
+        if (!FormatsUtil.getInstance().isValidJson(payload))
             throw new JSONException("Payload is not a valid json object.");
 
         byte[] encryptedPayloadBytes;
 
-        if(isEncrypted){
+        if (isEncrypted) {
             //base64 to buffer
             encryptedPayloadBytes = Base64.decode(AESUtil.encryptWithKey(encryptionKey, payload));
         } else {
@@ -168,18 +165,13 @@ public class Metadata {
 
         if (exe.isSuccessful()) {
 
-            if(isEncrypted){
+            if (isEncrypted) {
                 return AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload());
             } else {
                 return new String(Base64.decode(exe.body().getPayload()));
             }
         } else {
-
-            if (exe.code() == 404) {
-                return null;
-            } else {
-                throw new MetadataException(exe.code() + " " + exe.message());
-            }
+            throw new MetadataException(exe.code() + " " + exe.message());
         }
     }
 
@@ -190,7 +182,7 @@ public class Metadata {
 
         byte[] encryptedPayloadBytes;
 
-        if(isEncrypted){
+        if (isEncrypted) {
             //base64 to buffer
             encryptedPayloadBytes = Base64.decode(AESUtil.encryptWithKey(encryptionKey, payload));
         } else {
@@ -212,7 +204,7 @@ public class Metadata {
         }
     }
 
-    public static class Builder{
+    public static class Builder {
 
         //Required
         private int type;
@@ -223,31 +215,31 @@ public class Metadata {
         private byte[] encryptionKey;
 
 
-        public Builder(DeterministicKey metaDataHDNode, int type){
+        public Builder(DeterministicKey metaDataHDNode, int type) {
             this.metaDataHDNode = metaDataHDNode;
             this.type = type;
         }
 
-        public Builder setEncrypted(boolean isEncrypted){
+        public Builder setEncrypted(boolean isEncrypted) {
             this.isEncrypted = isEncrypted;
             return this;
         }
 
-        public Builder setEncryptionKey(byte[] encryptionKey){
+        public Builder setEncryptionKey(byte[] encryptionKey) {
             this.encryptionKey = encryptionKey;
             return this;
         }
 
         /**
-         * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authorize
-         * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
+         * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to
+         * authorize purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
          */
         public Metadata build() throws IOException, MetadataException {
 
             DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
             DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);
 
-            if(encryptionKey == null){
+            if (encryptionKey == null) {
                 byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
                 encryptionKey = Sha256Hash.hash(privateKeyBuffer);
             }
