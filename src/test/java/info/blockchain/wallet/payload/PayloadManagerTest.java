@@ -52,11 +52,16 @@ public class PayloadManagerTest {
 //                        .addInterceptor(loggingInterceptor)//Extensive logging
                         .build();
 
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
                 return null;
             }
         });
@@ -69,11 +74,16 @@ public class PayloadManagerTest {
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
             public Retrofit getRetrofitApiInstance() {
-                return RestClient.getRetrofitInstance(new OkHttpClient());
+                return RestClient.getRetrofitApiInstance(new OkHttpClient());
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
                 return null;
             }
         });

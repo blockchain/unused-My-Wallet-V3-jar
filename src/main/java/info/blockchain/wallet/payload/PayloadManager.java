@@ -3,6 +3,7 @@ package info.blockchain.wallet.payload;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.wallet.api.ExternalEntropy;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletPayload;
@@ -17,8 +18,7 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payment.data.SpendableUnspentOutputs;
-import info.blockchain.wallet.send.MyTransactionOutPoint;
+import info.blockchain.wallet.payment.PaymentBundle;
 import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
@@ -731,12 +731,12 @@ public class PayloadManager {
         return bciWallet;
     }
 
-    public List<ECKey> getHDKeys(String secondPassword, Account account, SpendableUnspentOutputs unspentOutputBundle) throws Exception {
+    public List<ECKey> getHDKeys(String secondPassword, Account account, PaymentBundle unspentOutputBundle) throws Exception {
 
         List<ECKey> keys = new ArrayList<ECKey>();
 
-        for (MyTransactionOutPoint a : unspentOutputBundle.getSpendableOutputs()) {
-            String[] split = a.getPath().split("/");
+        for (UnspentOutput a : unspentOutputBundle.getSpendableOutputs()) {
+            String[] split = a.getXpub().getPath().split("/");
             int chain = Integer.parseInt(split[1]);
             int addressIndex = Integer.parseInt(split[2]);
 

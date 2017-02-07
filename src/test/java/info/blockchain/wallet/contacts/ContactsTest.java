@@ -13,7 +13,7 @@ import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
-import info.blockchain.wallet.metadata.MockInterceptor;
+import info.blockchain.MockInterceptor;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 import java.io.IOException;
@@ -55,11 +55,16 @@ public class ContactsTest {
                         .addInterceptor(mockInterceptor)//Mock responses
                         .addInterceptor(loggingInterceptor)//Extensive logging
                         .build();
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
                 return null;
             }
         });

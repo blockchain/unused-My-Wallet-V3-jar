@@ -16,4 +16,8 @@ public interface FrameworkInterface {
      */
     Retrofit getRetrofitServerInstance();
 
+    /**
+     * Provides an ApiCode used for bci platform usage statistics.
+     */
+    String getApiCode();
 }

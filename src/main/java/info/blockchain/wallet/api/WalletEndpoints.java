@@ -1,11 +1,14 @@
 package info.blockchain.wallet.api;
 
+import info.blockchain.wallet.api.data.FeesResponse;
 import retrofit2.Call;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface WalletEndpoints {
 
+    //api.blockchain.info
     @POST("wallet")
     Call<Void> postMdidRegistration(@Query("method") String method,
                                     @Query("guid") String guid,
@@ -13,4 +16,6 @@ public interface WalletEndpoints {
                                     @Query("payload") String payload,
                                     @Query("length") int length);
 
+    @GET("fees")
+    Call<FeesResponse> getFees();
 }

@@ -44,11 +44,16 @@ public class MetadataIT {
 //                        .addInterceptor(loggingInterceptor)//Extensive logging
                         .build();
 
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
                 return null;
             }
         });

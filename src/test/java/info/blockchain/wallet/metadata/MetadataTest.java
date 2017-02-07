@@ -1,6 +1,7 @@
 package info.blockchain.wallet.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import info.blockchain.MockInterceptor;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
@@ -43,11 +44,16 @@ public class MetadataTest {
                         .addInterceptor(loggingInterceptor)//Extensive logging
                         .build();
 
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
                 return null;
             }
         });

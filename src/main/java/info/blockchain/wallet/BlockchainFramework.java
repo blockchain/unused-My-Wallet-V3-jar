@@ -20,4 +20,8 @@ public final class BlockchainFramework {
     public static Retrofit getRetrofitServerInstance() {
         return blockchainInterface.getRetrofitServerInstance();
     }
+
+    public static String getApiCode() {
+        return blockchainInterface.getApiCode();
+    }
 }

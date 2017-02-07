@@ -1,4 +1,4 @@
-package info.blockchain.wallet.metadata;
+package info.blockchain;
 
 import java.io.IOException;
 import java.util.LinkedList;

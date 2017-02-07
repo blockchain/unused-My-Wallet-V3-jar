@@ -7,7 +7,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public class RestClient {
 
-    public static Retrofit getRetrofitInstance(OkHttpClient client) {
+    public static Retrofit getRetrofitApiInstance(OkHttpClient client) {
         return new Retrofit.Builder()
                 .baseUrl(PersistentUrls.getInstance().getCurrentBaseApiUrl())
                 .client(client)

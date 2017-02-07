@@ -1,4 +1,4 @@
-package info.blockchain.wallet.payment.data;
+package info.blockchain.wallet.payment;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
