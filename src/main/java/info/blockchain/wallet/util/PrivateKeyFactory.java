@@ -1,11 +1,15 @@
 package info.blockchain.wallet.util;
 
-import info.blockchain.wallet.api.Balance;
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.data.Balance;
+import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
@@ -14,6 +18,8 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class PrivateKeyFactory {
 
@@ -26,14 +32,10 @@ public class PrivateKeyFactory {
     public final static String WIF_COMPRESSED = "wif_c";
     public final static String WIF_UNCOMPRESSED = "wif_u";
 
-    private Balance api;
+    private BlockExplorer blockExplorer;
 
-    public PrivateKeyFactory(Balance api) {
-        this.api = api;
-    }
-
-    public PrivateKeyFactory() {
-        this.api = new Balance();
+    public PrivateKeyFactory() throws IOException {
+        this.blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
     }
 
     public String getFormat(String key) {
@@ -109,10 +111,6 @@ public class PrivateKeyFactory {
 
     private ECKey decodeMiniKey(String hex) throws Exception {
 
-        if (api == null) {
-            throw new Exception("Balance API not set");
-        }
-
         Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(hex.getBytes("UTF-8")));
         ECKey uncompressedKey = decodeHexPK(hash.toString(), false);
         ECKey compressedKey = decodeHexPK(hash.toString(), true);
@@ -125,9 +123,18 @@ public class PrivateKeyFactory {
             list.add(uncompressedAddress);
             list.add(compressedAddress);
 
-            JSONObject json = api.getBalance(list);
-            long uncompressedBalance = json.getJSONObject(uncompressedAddress).getLong("final_balance");
-            long compressedBalance = json.getJSONObject(compressedAddress).getLong("final_balance");
+            Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, 4);
+
+            Response<HashMap<String, Balance>> exe = call.execute();
+
+            if(!exe.isSuccessful()) {
+                throw new Exception("Failed to connect to server.");
+            }
+
+            HashMap<String, Balance> body = exe.body();
+
+            long uncompressedBalance = body.get(uncompressedAddress).getFinalBalance().longValue();
+            long compressedBalance = body.get(compressedAddress).getFinalBalance().longValue();
 
             if (compressedBalance == 0 && uncompressedBalance > 0) {
                 return uncompressedKey;

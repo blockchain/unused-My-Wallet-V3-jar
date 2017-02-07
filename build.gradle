@@ -58,8 +58,8 @@ artifacts {
 }
 
 dependencies {
-    compile group: 'info.blockchain', name: 'api-client', version: '0.1.2-SNAPSHOT'
-    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.13.1'
+    compile group: 'info.blockchain', name: 'api-client', version: '0.1.3-SNAPSHOT'
+    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.3'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.5'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'

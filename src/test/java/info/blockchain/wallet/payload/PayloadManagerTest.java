@@ -5,24 +5,29 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
+import info.blockchain.BaseTest;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import retrofit2.Retrofit;
 
-public class PayloadManagerTest {
+public class PayloadManagerTest extends BaseTest{
 
     @Mock
     private PayloadManager mockPayloadManager;
@@ -36,57 +41,10 @@ public class PayloadManagerTest {
     @Before
     public void setUp() throws Exception {
 
-        //Set environment
-//        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
-//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
-
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-
-                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-                OkHttpClient okHttpClient = new OkHttpClient.Builder()
-//                        .addInterceptor(loggingInterceptor)//Extensive logging
-                        .build();
-
-                return RestClient.getRetrofitApiInstance(okHttpClient);
-            }
-
-            @Override
-            public Retrofit getRetrofitServerInstance() {
-                return null;
-            }
-
-            @Override
-            public String getApiCode() {
-                return null;
-            }
-        });
-
         MockitoAnnotations.initMocks(this);
 
         payloadManager = PayloadManager.getInstance();
         payload = payloadManager.createHDWallet(password, label);
-
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-                return RestClient.getRetrofitApiInstance(new OkHttpClient());
-            }
-
-            @Override
-            public Retrofit getRetrofitServerInstance() {
-                return null;
-            }
-
-            @Override
-            public String getApiCode() {
-                return null;
-            }
-        });
     }
 
     @After
@@ -199,14 +157,15 @@ public class PayloadManagerTest {
     }
 
     @Test
+    @Ignore
     public void upgradeV2PayloadToV3_shouldPass() throws Exception {
 
         final PayloadManager payloadManager = PayloadManager.getInstance();
+        getRestoredWallet_All_All(payloadManager);
 
-        //Create HD
-        String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password", label);
-        payload.setHdWalletList(new ArrayList<HDWallet>());//remove hd
+        //Remove HD
+        Payload payload = payloadManager.getPayload();
+        payload.setHdWalletList(new ArrayList<HDWallet>());
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
         LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", null);
@@ -245,6 +204,7 @@ public class PayloadManagerTest {
     }
 
     @Test
+    @Ignore
     public void upgradeV2PayloadToV3_withSecondPassword_shouldPass() throws Exception {
 
         final String secondPassword = "password2";
@@ -311,12 +271,30 @@ public class PayloadManagerTest {
         PayloadManager.getInstance().wipe();
     }
 
+    private Payload getRestoredWallet_All_All(PayloadManager payloadManager) throws Exception {
+
+        String mnemonic = "all all all all all all all all all all all all";
+
+        LinkedList<String> xpubs = new LinkedList<>();
+        xpubs.add("{\"xpub6BiVtCpG9fQPxnPmHXG8PhtzQdWC2Su4qWu6XW9tpWFYhxydCLJGrWBJZ5H6qTAHdPQ7pQhtpjiYZVZARo14qHiay2fvrX996oEP42u8wZy\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQ1EW99bMSYwySbPWvzTFRQZCFgTmV3samLSZAYU7C3f4Je9vkNh7h1GAWi5Fn93BwoGBy9EAXbWTTgTnVKAbthHpxM1fXVRL\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQ4xJHzNkdmqspAeMdBTDFZ2kYM39RzDYMAcb4wtkWZNSu7k3BbJgoPgTzx62G69mBiUjDnD3EJrTA5ZYZg4vfz1YWcGBnX2x\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQ77Qr7WArXSG3yWYm2bkRYpoSYtRkVEAk5nrcULBG8AeRYMMKVUXAsNeXdR7TGuL6SkUc4RF2YC7X4afLyZrT9NrrUFyotkH\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQ8pVjVF7jm3kLahkNbQRkWGUvzsKQpXWYvhYD4d4UDADxZUL4xp9UwsDT5YgwNKofTWRtwJgnHkbNxuzLDho4mxfS9KLesGP\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQCgxA541qm9qZ9VrGLScde4zsAMj2d15ewiMysCAnbgvSDSZXhFUdsyA2BfzzMrMFJbC4VSkXbzrXLZRitAmUVURmivxxqMJ\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQDvwDNekCEzAr3gYcoGXEF27bMwSBsCVP3bJYdUZ6m3jhv9vSG7hVxff3VEfnfK4fcMr2YRwfTfHcJwM4ioS6Eiwnrm1wcuf\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQGq7bXBjjf5zyguEXHrmxDu4t7pdTFUtDWD5epi4ecKmWBTMHvPQtRmQnby8gET7ArTzxjL4SNYdD2RYSdjk7fwYeEDMzkce\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQJXDcLwQU1cXECNqaGYb3nNSu1ZEuwFKMXjDbCni6eMhN6rFkdxQsgF1amKAqeLSN63zrYPKJ3GU2ppowBWZSdGBk7QUxgLV\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6BiVtCpG9fQQNBuKZoKzhzmENDKdCeXQsNVPF2Ynt8rhyYznmPURQNDmnNnX9SYahZ1DVTaNtsh3pJ4b2jKvsZhpv2oVj76YETCGztKJ3LM\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        mockInterceptor.setResponseStringList(xpubs);
+
+        return payloadManager.restoreHDWallet("password", mnemonic, "");
+    }
+
     @Test
     public void restoreWallet_withMnemonicNoPassphrase_shouldPass() throws Exception {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
-
-        String mnemonic = "all all all all all all all all all all all all";
 
         String seedHex = "0660cc198330660cc198330660cc1983";//All all ...
         String xpub1 = "xpub6BiVtCpG9fQPxnPmHXG8PhtzQdWC2Su4qWu6XW9tpWFYhxydCLJGrWBJZ5H6qTAHdPQ7pQhtpjiYZVZARo14qHiay2fvrX996oEP42u8wZy";
@@ -325,7 +303,7 @@ public class PayloadManagerTest {
         String xpub4 = "xpub6BiVtCpG9fQQ77Qr7WArXSG3yWYm2bkRYpoSYtRkVEAk5nrcULBG8AeRYMMKVUXAsNeXdR7TGuL6SkUc4RF2YC7X4afLyZrT9NrrUFyotkH";
         String xpub5 = "xpub6BiVtCpG9fQQ8pVjVF7jm3kLahkNbQRkWGUvzsKQpXWYvhYD4d4UDADxZUL4xp9UwsDT5YgwNKofTWRtwJgnHkbNxuzLDho4mxfS9KLesGP";
 
-        Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "");
+        Payload payload = getRestoredWallet_All_All(payloadManager);
 
         assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
         assertThat(payload.getHdWallet().getSeedHex(), is(seedHex));
@@ -367,6 +345,19 @@ public class PayloadManagerTest {
         String xpub4 = "xpub6D45Bi15NLqVwVjzUWpR6Nw1bdJZiEHqLg4k9MpFMFnLqBJTS1P5Zym4sgfdYMTP87yJFK1MkeXUxviHE3emBfd8k3NyZf2GPLoaKYfEQti";
         String xpub5 = "xpub6D45Bi15NLqVyTd6H8nZG7KZ6LjHaw3WBeAtsGVJ4pHxkZdj7ersAWJvejFtNHCe95JGXjVJuZ8pvSMmRdf84FUbrnpPCfhJj5SoEk67Um6";
 
+        LinkedList<String> xpubs = new LinkedList<>();
+        xpubs.add("{\"xpub6D45Bi15NLqVpUqw9ku1ucJw6AKa5mgU3fbodx96sbj8rWw91TPkZ1TVbhMNUVihSLHGJk5pdCXBb56r2tiPRrvp439uxq4S3D8Emxs8WiZ\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqVrLDEFqomu3YrS197BMHMdk9xy4Kp21g8CzABvQ1o7DNbL5aiFoksJYvpaJGW5aEXF7qFHFHejgvSV4UXu9LXoRaNfcek7sN\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqVtw4aMeT9xCXmE8YX4SBeeAozaYGeCgDPK8SwVDeLwGQv9wW6x8Ex41ERUHwT9KKgKF2d9jXaYe9M4XUitPGTgk7UERTJ1dm\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqVwVjzUWpR6Nw1bdJZiEHqLg4k9MpFMFnLqBJTS1P5Zym4sgfdYMTP87yJFK1MkeXUxviHE3emBfd8k3NyZf2GPLoaKYfEQti\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqVyTd6H8nZG7KZ6LjHaw3WBeAtsGVJ4pHxkZdj7ersAWJvejFtNHCe95JGXjVJuZ8pvSMmRdf84FUbrnpPCfhJj5SoEk67Um6\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqW1iv8utKQs2T6X3dXWNLXabdUdC2qP4xWMANJ7myAk3tKrdzptmkjxwDFWEdEKWGhEmw3yLEos5PLzUppzddgoiXnmxYcciV\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqW6Yf22xqpWRMMzNmhabDChWdT48s7qJmqFCBnziRzftDWnBMF2yEVt4A2gWwvbFyrJQKWqibGFDyFd43fqz194kVinYK27Wj\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqW7RYzFUQe8oqiBNB9DPtmERMCgi7Rk7WsZBZnUEUxojq39Tfw7cfTtMs3pb8ur4HVDwVaYZNf8UP1WzWwZiQhsSBKFcrQXF4\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqWB1JKmPM6hgu54zofJAMLywvyCt29bj18u36Z6epCmCQayJaCe54SWg3e3Na7n217QfyZ6zvV7gEsgcCxLW8KZPKohqk6SED\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("{\"xpub6D45Bi15NLqWCCqwmhSQoXNekogmYmMNKqAk9vNGg8uTRCRMB5XtBCWZv9nMMhLc3qVwSbgydUg4qfuBJZzjYmmG9y3o3Ta3k75a8x9iBMk\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        mockInterceptor.setResponseStringList(xpubs);
+
         Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "", passphrase);
 
         assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
@@ -398,9 +389,7 @@ public class PayloadManagerTest {
     public void restoreWallet_withMnemonic_shouldContainCorrectReceiveAddresses() throws Exception {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
-
-        String mnemonic = "all all all all all all all all all all all all";
-        payloadManager.restoreHDWallet("password", mnemonic, "");
+        getRestoredWallet_All_All(payloadManager);
 
         assertThat(payloadManager.getNextReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
 

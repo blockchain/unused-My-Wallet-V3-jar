@@ -25,7 +25,7 @@ public class Wallet2 {
     public static FeesItem getDefaultFee() throws IOException {
         return FeesItem.fromJson(""
             + "{\n"
-            + "     \"fee\": 65000,\n"
+            + "     \"fee\": 35000,\n"
             + "     \"surge\": false,\n"
             + "     \"ok\": true\n"
             + "}");

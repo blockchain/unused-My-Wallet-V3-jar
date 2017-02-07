@@ -24,6 +24,7 @@ import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Util;
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,8 +70,8 @@ public class PayloadManager {
     private WalletPayload walletApi;
     private MetadataNodeFactory metadataNodeFactory;
 
-    private PayloadManager() {
-        hdPayloadBridge = new HDPayloadBridge(PersistentUrls.getInstance().getCurrentNetworkParams());
+    private PayloadManager() throws IOException {
+        hdPayloadBridge = new HDPayloadBridge();
         payload = new Payload();
         cached_payload = "";
         privateKeyFactory = new PrivateKeyFactory();
@@ -82,7 +83,7 @@ public class PayloadManager {
      *
      * @return PayloadManager
      */
-    public static PayloadManager getInstance() {
+    public static PayloadManager getInstance() throws IOException {
 
         if (instance == null) {
             instance = new PayloadManager();
@@ -95,7 +96,7 @@ public class PayloadManager {
      * Clear all values. This is to prevent issues with DI where two instances can accidentally
      * be created as getInstance() is rarely called
      */
-    public void wipe() {
+    public void wipe() throws IOException {
         payload = new Payload();
         cached_payload = "";
         strTempPassword = null;
@@ -103,7 +104,7 @@ public class PayloadManager {
         email = null;
         version = 2.0;
         bciWallet = null;
-        hdPayloadBridge = new HDPayloadBridge(PersistentUrls.getInstance().getCurrentNetworkParams());
+        hdPayloadBridge = new HDPayloadBridge();
         wallet = null;
         privateKeyFactory = new PrivateKeyFactory();
     }

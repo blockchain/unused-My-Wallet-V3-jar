@@ -20,7 +20,7 @@ public class HDPayloadBridgeTest {
     @Test
     public void getHDWalletFromPayload_shouldReturnSameWallet() throws Exception {
 
-        HDPayloadBridge hdPayloadBridge = new HDPayloadBridge(PersistentUrls.getInstance().getCurrentNetworkParams());
+        HDPayloadBridge hdPayloadBridge = new HDPayloadBridge();
 
         HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet("Account 1");
         Wallet wallet = hdPayloadBridge.getHDWalletFromPayload(pair.payload);

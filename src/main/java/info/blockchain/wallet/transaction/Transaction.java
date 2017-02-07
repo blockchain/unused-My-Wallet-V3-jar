@@ -1,6 +1,7 @@
 package info.blockchain.wallet.transaction;
 
 import info.blockchain.wallet.payload.PayloadManager;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -212,6 +213,8 @@ public class Transaction {
             }
         } catch (JSONException je) {
             je.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }

@@ -1,17 +1,25 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.wallet.api.Balance;
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.data.Balance;
+import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Address;
 import info.blockchain.wallet.bip44.Wallet;
 import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
+import retrofit2.Response;
 
 public class HDPayloadBridge {
 
@@ -20,11 +28,11 @@ public class HDPayloadBridge {
     private final String DEFAULT_PASSPHRASE = "";
 
     private final WalletFactory bip44WalletFactory;
-    private AbstractBitcoinNetParams networkParameters;
+    private BlockExplorer blockExplorer;
 
-    public HDPayloadBridge(AbstractBitcoinNetParams networkParameters) {
-        this.networkParameters = networkParameters;
-        this.bip44WalletFactory = new WalletFactory(networkParameters);
+    public HDPayloadBridge() throws IOException {
+        this.bip44WalletFactory = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams());
+        this.blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
     }
 
     public class HDWalletPayloadPair {
@@ -64,9 +72,7 @@ public class HDPayloadBridge {
         while (lookAhead > 0) {
 
             String xpub = result.wallet.getAccount(index).xpubstr();
-
-            boolean hasTransactions = (new Balance().getXpubTransactionCount(xpub) > 0L);
-            if (hasTransactions) {
+            if (hasTransactions(blockExplorer, xpub)) {
                 lookAhead = lookAheadTotal;
                 walletSize++;
             }
@@ -80,6 +86,20 @@ public class HDPayloadBridge {
         result.payload = createBlockchainWallet(defaultAccountName, result.wallet);
 
         return result;
+    }
+
+    private boolean hasTransactions(BlockExplorer blockExplorer, String xpub) throws Exception {
+
+        Response<HashMap<String, info.blockchain.api.data.Balance>> exe = blockExplorer
+            .getBalance(Arrays.asList(xpub), 4).execute();
+
+        if(!exe.isSuccessful()) {
+            throw new Exception(exe.code()+" "+exe.errorBody().string());
+        }
+
+        HashMap<String, info.blockchain.api.data.Balance> body = exe.body();
+
+        return body.get(xpub).getNTx() > 0L;
     }
 
     public Wallet getHDWalletFromPayload(Payload payload) throws Exception {
@@ -145,7 +165,7 @@ public class HDPayloadBridge {
 
             String xpub;
             int attempts = 0;
-            boolean no_tx = false;
+            boolean isEmpty;
 
             do {
 
@@ -184,15 +204,11 @@ public class HDPayloadBridge {
 
                 payload.getHdWallet().getAccounts().get(0).setLabel(defaultAccountName);
 
-                try {
-                    no_tx = (new Balance().getXpubTransactionCount(xpub) == 0L);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                isEmpty = !hasTransactions(blockExplorer, xpub);
 
-            } while (!no_tx && attempts < 3);
+            } while (!isEmpty && attempts < 3);
 
-            return !(!no_tx && isNewlyCreated);
+            return !(!isEmpty && isNewlyCreated);
         }
 
         List<Account> accounts = payload.getHdWallet().getAccounts();

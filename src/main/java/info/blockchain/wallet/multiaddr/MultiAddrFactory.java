@@ -5,6 +5,7 @@ import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.transaction.TxMostRecentDateComparator;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -115,7 +116,7 @@ public class MultiAddrFactory {
         return map;
     }
 
-    private void parseXPUB(JSONObject jsonObject) throws JSONException {
+    private void parseXPUB(JSONObject jsonObject) throws JSONException, IOException {
 
         if (jsonObject != null) {
             if (jsonObject.has("wallet")) {
@@ -316,7 +317,7 @@ public class MultiAddrFactory {
 
     }
 
-    private void parseLegacy(JSONObject jsonObject) throws JSONException {
+    private void parseLegacy(JSONObject jsonObject) throws JSONException, IOException {
 
         if (jsonObject != null) {
 
@@ -587,7 +588,7 @@ public class MultiAddrFactory {
         return legacy_balance;
     }
 
-    public long getLegacyBalance(long address_type) {
+    public long getLegacyBalance(long address_type) throws IOException {
 
         if (PayloadManager.getInstance().getPayload() != null) {
             List<String> addrs = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(address_type);
@@ -605,7 +606,7 @@ public class MultiAddrFactory {
         }
     }
 
-    public long getLegacyActiveBalance() {
+    public long getLegacyActiveBalance() throws IOException {
 
         if (PayloadManager.getInstance().getPayload() != null) {
             List<String> addrs = PayloadManager.getInstance().getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
