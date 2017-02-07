@@ -1,7 +1,6 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Address;
@@ -13,12 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.params.AbstractBitcoinNetParams;
 import retrofit2.Response;
 
 public class HDPayloadBridge {

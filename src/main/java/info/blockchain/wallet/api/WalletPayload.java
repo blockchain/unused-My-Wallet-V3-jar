@@ -1,6 +1,5 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.util.WebUtil;
 import java.net.URLEncoder;
@@ -10,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.ECKey;
 import org.json.JSONObject;
 import retrofit2.Call;
-import retrofit2.Response;
 
 public class WalletPayload extends BaseApi {
 
@@ -18,7 +16,6 @@ public class WalletPayload extends BaseApi {
     private static final String WALLET = "wallet";
 
     private String sessionId;
-    private WalletEndpoints api;
 
     public WalletPayload() {
         // Empty constructor
@@ -37,13 +34,6 @@ public class WalletPayload extends BaseApi {
         }
 
         return sessionId;
-    }
-
-    private WalletEndpoints getApiInstance() {
-        if (api == null) {
-            api = BlockchainFramework.getRetrofitServerInstance().create(WalletEndpoints.class);
-        }
-        return api;
     }
 
     @Override
@@ -160,27 +150,19 @@ public class WalletPayload extends BaseApi {
         WebUtil.getInstance().postURL(getRoute(), args.toString());
     }
 
-    public void registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
-        updateMdid("register-mdid", walletKey, guid, sharedKey);
-    }
-
-    public void unregisterMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
-        updateMdid("unregister-mdid", walletKey, guid, sharedKey);
-    }
-
-    private void updateMdid(String method, ECKey walletKey, String guid, String sharedKey) throws Exception {
-
+    // TODO: 07/02/2017 This should be handled client side
+    public Call<Void> registerMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
         String signedGuid = walletKey.signMessage(guid);
+        return Wallet2.registerMdid(guid,
+            sharedKey,
+            signedGuid);
+    }
 
-        Call<Void> call = getApiInstance().postMdidRegistration(method,
-                guid,
-                sharedKey,
-                signedGuid,
-                signedGuid.length());
-
-        Response<Void> result = call.execute();
-
-        if (!result.isSuccessful()) throw new Exception(result.code() + " " + result.message());
-
+    // TODO: 07/02/2017 This should be handled client side
+    public Call<Void> unregisterMdid(ECKey walletKey, String guid, String sharedKey) throws Exception {
+        String signedGuid = walletKey.signMessage(guid);
+        return Wallet2.unregisterMdid(guid,
+            sharedKey,
+            signedGuid);
     }
 }

@@ -9,13 +9,13 @@ import retrofit2.http.Query;
 
 public interface WalletEndpoints {
 
-    //api.blockchain.info
     @POST("wallet")
-    Call<Void> postMdidRegistration(@Query("method") String method,
+    Call<Void> postToWallet(@Query("method") String method,
                                     @Query("guid") String guid,
                                     @Query("sharedKey") String sharedKey,
                                     @Query("payload") String payload,
-                                    @Query("length") int length);
+                                    @Query("length") int length,
+                                    @Query("api_code")String apiCode);
 
     @GET("fees")
     Call<FeesResponse> getFees();

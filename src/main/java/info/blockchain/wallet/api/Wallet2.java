@@ -9,18 +9,26 @@ import retrofit2.Call;
 
 public class Wallet2 {
 
-    private static WalletEndpoints api;
+    private static WalletEndpoints walletApi;
+    private static WalletEndpoints walletBase;
 
-    private static WalletEndpoints getApiInstance() {
-        if (api == null) {
-            api = BlockchainFramework.getRetrofitApiInstance().create(WalletEndpoints.class);
+    private static WalletEndpoints getBaseApiInstance() {
+        if (walletApi == null) {
+            walletApi = BlockchainFramework.getRetrofitApiInstance().create(WalletEndpoints.class);
         }
-        return api;
+        return walletApi;
     }
 
+    private static WalletEndpoints getServerApiInstance() {
+        if (walletBase == null) {
+            walletBase = BlockchainFramework.getRetrofitServerInstance()
+                .create(WalletEndpoints.class);
+        }
+        return walletBase;
+    }
 
     public static Call<FeesResponse> getDynamicFee() {
-        return getApiInstance().getFees();
+        return getBaseApiInstance().getFees();
     }
 
     public static FeesItem getDefaultFee() throws IOException {
@@ -33,6 +41,31 @@ public class Wallet2 {
     }
 
     public static Call<ResponseBody> getRandomBytes() {
-        return getApiInstance().getRandomBytes(32, "hex");
+        return getBaseApiInstance().getRandomBytes(32, "hex");
+    }
+
+    public static Call<Void> updateFirebaseNotificationToken(String token, String guid, String sharedKey)
+        throws Exception {
+
+        return getServerApiInstance().postToWallet("update-firebase",
+            guid,
+            sharedKey,
+            token,
+            token.length(),
+            BlockchainFramework.getApiCode());
+    }
+
+    public static Call<Void> registerMdid(String guid, String sharedKey,
+        String signedGuid) {
+        return getServerApiInstance().postToWallet("register-mdid",
+            guid, sharedKey, signedGuid, signedGuid.length(),
+            BlockchainFramework.getApiCode());
+    }
+
+    public static Call<Void> unregisterMdid(String guid, String sharedKey,
+        String signedGuid) {
+        return getServerApiInstance().postToWallet("unregister-mdid",
+            guid, sharedKey, signedGuid, signedGuid.length(),
+            BlockchainFramework.getApiCode());
     }
 }

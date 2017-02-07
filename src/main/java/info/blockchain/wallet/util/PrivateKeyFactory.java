@@ -16,7 +16,6 @@ import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
-import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
