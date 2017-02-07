@@ -3,9 +3,10 @@ package info.blockchain.wallet.payload;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.subgraph.orchid.encoders.Hex;
 import info.blockchain.api.data.UnspentOutput;
-import info.blockchain.wallet.api.ExternalEntropy;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.Wallet2;
 import info.blockchain.wallet.api.WalletPayload;
 import info.blockchain.wallet.bip44.Address;
 import info.blockchain.wallet.bip44.Chain;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
@@ -40,6 +42,8 @@ import org.bitcoinj.crypto.DeterministicKey;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import retrofit2.Call;
+import retrofit2.Response;
 
 /**
  * PayloadManager.java : singleton class for reading/writing/parsing Blockchain HD JSON payload
@@ -670,7 +674,14 @@ public class PayloadManager {
 
     ECKey getRandomECKey() throws Exception {
 
-        byte[] data = new ExternalEntropy().getRandomBytes();
+        Call<ResponseBody> call = Wallet2.getRandomBytes();
+        Response<ResponseBody> exe = call.execute();
+
+        if(!exe.isSuccessful()){
+            throw new Exception("ExternalEntropy.getRandomBytes failed.");
+        }
+
+        byte[] data = Hex.decode(exe.body().string());
 
         if (data == null) throw new Exception("ExternalEntropy.getRandomBytes failed.");
 

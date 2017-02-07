@@ -4,6 +4,7 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.data.FeesItem;
 import info.blockchain.wallet.api.data.FeesResponse;
 import java.io.IOException;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 
 public class Wallet2 {
@@ -29,5 +30,9 @@ public class Wallet2 {
             + "     \"surge\": false,\n"
             + "     \"ok\": true\n"
             + "}");
+    }
+
+    public static Call<ResponseBody> getRandomBytes() {
+        return getApiInstance().getRandomBytes(32, "hex");
     }
 }
