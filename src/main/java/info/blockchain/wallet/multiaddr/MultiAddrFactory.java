@@ -1,6 +1,7 @@
 package info.blockchain.wallet.multiaddr;
 
-import info.blockchain.wallet.api.MultiAddress;
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.payload.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.transaction.Tx;
@@ -14,6 +15,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class MultiAddrFactory {
 
@@ -65,22 +68,30 @@ public class MultiAddrFactory {
         instance = null;
     }
 
-    public void refreshXPUBData(String[] xpubs) throws Exception {
+    // TODO: 08/02/2017 Still needs refactor - just replaced old WebUtil with new api-client
+    public void refreshXPUBData(List<String> xpubs) throws Exception {
 
-        MultiAddress api = new MultiAddress();
+        Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer(
+            BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode())
+            .getMultiAddress(xpubs, BlockExplorer.TX_FILTER_ALL, 100, 0);
 
-        JSONObject jsonObject = api.getXPUB(xpubs);
+        Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();
+        JSONObject jsonObject = new JSONObject(exe.body().toJson());
 
         if (jsonObject != null) {
             parseXPUB(jsonObject);
         }
     }
 
-    public void refreshLegacyAddressData(String[] addresses, boolean simple) throws Exception {
+    // TODO: 08/02/2017 Still needs refactor - just replaced old WebUtil with new api-client
+    public void refreshLegacyAddressData(List<String> addresses, boolean simple) throws Exception {
 
-        MultiAddress api = new MultiAddress();
+        Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer(
+            BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode())
+            .getMultiAddress(addresses, BlockExplorer.TX_FILTER_ALL, 100, 0);
 
-        JSONObject jsonObject = api.getLegacy(addresses, simple);
+        Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();
+        JSONObject jsonObject = new JSONObject(exe.body().toJson());
 
         if (jsonObject != null) {
             parseLegacy(jsonObject);
@@ -92,6 +103,7 @@ public class MultiAddrFactory {
      *
      * @param addresses A List of addresses (HD)
      */
+    // TODO: 08/02/2017 Replace with Balance Api
     public LinkedHashMap<String, Long> getAddressBalanceFromApi(List<String> addresses) throws Exception {
         LinkedHashMap<String, Long> map = new LinkedHashMap<>();
 
@@ -100,8 +112,10 @@ public class MultiAddrFactory {
             map.put(address, 0L);
         }
 
-        MultiAddress api = new MultiAddress();
-        JSONObject jsonObject = api.getAddresses(addresses);
+        Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer()
+            .getMultiAddress(addresses, BlockExplorer.TX_FILTER_ALL, 100, 0);
+        Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();
+        JSONObject jsonObject = new JSONObject(exe.body().toJson());
 
         if (jsonObject.has("addresses")) {
             JSONArray addressList = jsonObject.getJSONArray("addresses");

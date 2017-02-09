@@ -1,38 +1,18 @@
 package info.blockchain.wallet.payload;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
-import info.blockchain.BaseTest;
-import info.blockchain.util.RestClient;
-import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.MockedResponseTest;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import retrofit2.Retrofit;
 
-public class PayloadManagerTest extends BaseTest{
+public class PayloadManagerTest extends MockedResponseTest {
 
-    @Mock
-    private PayloadManager mockPayloadManager;
-
-    // TODO: 30/09/16 Investigate changing integration tests to unit tests
     PayloadManager payloadManager;
     String password = "password";
     String label = "Account 1";
@@ -41,9 +21,8 @@ public class PayloadManagerTest extends BaseTest{
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
-
         payloadManager = PayloadManager.getInstance();
+        mockInterceptor.setResponseString("success");
         payload = payloadManager.createHDWallet(password, label);
     }
 
@@ -55,9 +34,10 @@ public class PayloadManagerTest extends BaseTest{
     @Test
     public void getPayloadFromServerAndDecrypt_withValidVars_shouldPass() throws Exception {
 
+        mockInterceptor.setResponseString("{\"extra_seed\":\"e1de65484e21aaa0f5ec66065368522514ff966026f2ec2dd2383f7520e28f3008c3d74c5118f467402bcc5ff4cdfb39e0e80666930f9e00b73df9d7e91602a0\",\"payload\":\"{\\\"pbkdf2_iterations\\\":5000,\\\"payload\\\":\\\"hVSP0SLkv\\/UNY0YA4fNzAfdxMK0StdczSSq7AmwSrhWicUzgJ8NO8yag4Fx7tzfSncQB4FMuf36zsOU0CRqNDqekk4LM\\/eUJk\\/4fq2XJzQrhPgo9+DHROZdi5YIm8JcGnlkrViBHKlOUqVXDUxOXhUnuwsWPR17jNx4z232\\/jmRRzJsUNyqk6u\\/qui++UBEiMNjIX8FqmVz7Uu0OaaVjAXVJFIDTCqA7tXTb8zCeQisxGFEmUleIOd48TpcAGTpPzRgSqVt3T7OE2AZgF2FXiuhYHsJQ3D1fjs4MTlmjdvDMOr9eUpjXwzSMdiYvwMEfcbeW+8EdWXcSDwvjHeNYmlDyLLlyKgov1AAOhn0+56vSLWfEbdjUaRJt9ao4Q48Nt8KoY2OBQbeaJAZugAxmhfGF5Gdz2p7aMvzw9bmgklMHwde+KSfD11mqvmJx+R3xOKh2linQSblJ+x3b0l1SU9+OK2yJgSUPWvVOSbPQm9OtjUOrXy5YjHBhI01bVFGnkn7hV6hC9w\\/B7MF4OhGF7UMA5YHeSnq5dehZ+Ln7VtDoXhhET+Ky92034fiXNWco0h5y+ekquJAx5jVJyT\\/49N4DDfrQXc\\/IbG073AZHGaA779I9GOFDtNE6ZFkgKEaJbJQdkQN9O+MS4\\/ppr72tXf7trPOeYFRaN1AivAadEu\\/ZazrWIUDUnaNnq8+wCnLwYTmt14uA5c55xeIh6abdD0JwdvStebnRN7gDWa\\/vhM5VrxDfD3KmHi0mpvIq7aDXQ0GS1u4mRtks1QZUA+2mHZ25AHW7LV1CXZ4JBuYanFi7xfuks\\/Ux3kCBnxfhvCCpujqg9jmR5yb3DPePQz9PLXElvsmvv74vWcJelLD\\/B4CbWK+HiyW9tR5Wrkg5hGjZIwSzxHVm4VqNCnih7uO40l6v+Dn5eJAEkug0lNMNS9Q0W3JIpXLZ\\/HsNh4zvUlhC2y+XzllKRZvxnV93O43MHsv4EizPdgouCB0l6wDbu8+EhhFtWNfl800+qrFdl0jFNPVWOYK+NOmCjtdkZ7t\\/nQ==\\\",\\\"version\\\":2}\",\"symbol_local\":{\"symbol\":\"$\",\"code\":\"USD\",\"symbolAppearsAfter\":false,\"name\":\"U.S. dollar\",\"local\":true,\"conversion\":95328.88465205},\"payload_checksum\":\"b3cf3ee653bd7ab24ed22d352ca7bf5ba115ae540f64c3a462ed3a19b9e3e4cc\",\"war_checksum\":\"d3e3b31c57f823ed\",\"language\":\"en\",\"symbol_btc\":{\"symbol\":\"BTC\",\"code\":\"BTC\",\"symbolAppearsAfter\":true,\"name\":\"Bitcoin\",\"local\":false,\"conversion\":100000000.00000000},\"storage_token\":\"b5d72fb67d2834702c7092d6f3df1d31\",\"sync_pubkeys\":false}");
         payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), password, new PayloadManager.InitiatePayloadListener() {
             public void onSuccess() {
-                assertThat("Payload successfully fetch and decrypted", true);
+                Assert.assertTrue(true);
             }
         });
         try {
@@ -70,16 +50,18 @@ public class PayloadManagerTest extends BaseTest{
     public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldThrow_AuthenticationException() {
 
         try {
+            mockInterceptor.setResponseCode(500);
+            mockInterceptor.setResponseString("Invalid GUID");
             payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid() + "addSomeTextToFail", password, new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
-                    assertThat("onSuccess", false);
+                    Assert.fail();
                 }
             });
         } catch (Exception e) {
             if (e instanceof InvalidCredentialsException) {
-                assertThat("Invalid Guid successfully detected", true);
+                Assert.assertTrue(true);
             } else {
-                assertThat("Auth should not pass with invalid guid", false);
+                Assert.fail();
             }
         }
         try {
@@ -94,11 +76,11 @@ public class PayloadManagerTest extends BaseTest{
         try {
             payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), password + "addSomeTextToFail", new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
-                    assertThat("onSuccess", false);
+                    Assert.assertEquals("onSuccess", false);
                 }
             });
         } catch (Exception e) {
-            assertThat("InitiatePayload failed as expected", true);
+            Assert.assertTrue(true);
         }
         try {
             Thread.sleep(500);
@@ -110,16 +92,18 @@ public class PayloadManagerTest extends BaseTest{
     public void getPayloadFromServerAndDecrypt_withInvalidSharedKey_shouldThrow_AuthenticationException() {
 
         try {
+            mockInterceptor.setResponseCode(500);
+            mockInterceptor.setResponseString("Invalid GUID"); 
             payloadManager.initiatePayload(payload.getSharedKey() + "addSomeTextToFail", payload.getGuid(), password, new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
-                    assertThat("onSuccess", false);
+                    Assert.assertEquals("onSuccess", false);
                 }
             });
         } catch (Exception e) {
             if (e instanceof InvalidCredentialsException) {
-                assertThat("Invalid shared key successfully detected", true);
+                Assert.assertTrue(true);
             } else {
-                assertThat("Auth should not pass with invalid shared key", false);
+                Assert.fail();
             }
         }
         try {
@@ -138,14 +122,14 @@ public class PayloadManagerTest extends BaseTest{
         try {
             payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), password, new PayloadManager.InitiatePayloadListener() {
                 public void onSuccess() {
-                    assertThat("Incompatible version should not pass", false);
+                    Assert.assertEquals("Incompatible version should not pass", false);
                 }
             });
         } catch (Exception e) {
             if (e instanceof UnsupportedVersionException) {
-                assertThat("Unsupported version detected", true);
+                Assert.assertTrue(true);
             } else {
-                assertThat("Unsupported version should not pass", false);
+                Assert.fail();
             }
         } finally {
             payloadManager.setVersion(3.0);
@@ -168,6 +152,7 @@ public class PayloadManagerTest extends BaseTest{
         payload.setHdWalletList(new ArrayList<HDWallet>());
 
         //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
+        mockInterceptor.setResponseString("2191f7564486869d6b08c56f496008d7c9741cf7111ed23d4ca4178a35446827");
         LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", null);
 
         payloadManager.addLegacyAddress(legacyAddress);
@@ -175,80 +160,29 @@ public class PayloadManagerTest extends BaseTest{
         final String guidOriginal = payloadManager.getPayload().getGuid();
 
         //Now we have legacy wallet (only addresses)
+        // TODO: 08/02/2017 Can't mock Balance api responses here
         payloadManager.upgradeV2PayloadToV3("", true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
             public void onDoubleEncryptionPasswordError() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
+                Assert.assertEquals("upgradeV2PayloadToV3 failed", false);
             }
 
             public void onUpgradeSuccess() {
 
-                assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
-                assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
+                Assert.assertEquals(payloadManager.getPayload().getGuid(), guidOriginal);
+                Assert.assertEquals("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
 
                 String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
+                Assert.assertEquals("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
                 try {
-                    assertThat(payloadManager.getMnemonic().length, is(12));
+                    Assert.assertEquals(payloadManager.getMnemonic().length, 12);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    assertThat("upgradeV2PayloadToV3 failed", false);
+                    Assert.assertEquals("upgradeV2PayloadToV3 failed", false);
                 }
             }
 
             public void onUpgradeFail() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
-            }
-        });
-
-        PayloadManager.getInstance().wipe();
-    }
-
-    @Test
-    @Ignore
-    public void upgradeV2PayloadToV3_withSecondPassword_shouldPass() throws Exception {
-
-        final String secondPassword = "password2";
-        final PayloadManager payloadManager = PayloadManager.getInstance();
-
-        //Create HD
-        String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password", label);
-        payload.setHdWalletList(new ArrayList<HDWallet>());//remove hd
-
-        //Set second password
-        String hash = DoubleEncryptionFactory.getInstance().getHash(payload.getSharedKey(), secondPassword, payload.getDoubleEncryptionPbkdf2Iterations());
-        payload.setDoublePasswordHash(hash);
-        payload.setDoubleEncrypted(true);
-
-        //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", secondPassword);
-        payloadManager.addLegacyAddress(legacyAddress);
-
-        final String guidOriginal = payloadManager.getPayload().getGuid();
-
-        //Now we have legacy wallet (only addresses)
-        payloadManager.upgradeV2PayloadToV3(secondPassword, true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
-            public void onDoubleEncryptionPasswordError() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
-            }
-
-            public void onUpgradeSuccess() {
-
-                assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
-                assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
-
-                String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
-                try {
-                    assertThat(payloadManager.getMnemonic().length, is(12));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    assertThat("upgradeV2PayloadToV3 failed", false);
-                }
-            }
-
-            public void onUpgradeFail() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
+                Assert.assertEquals("upgradeV2PayloadToV3 failed", false);
             }
         });
 
@@ -261,12 +195,13 @@ public class PayloadManagerTest extends BaseTest{
         PayloadManager payloadManager = PayloadManager.getInstance();
 
         String label = "Account 1";
+        mockInterceptor.setResponseString("Success");
         Payload payload = payloadManager.createHDWallet("password", label);
 
-        assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
-        assertThat(payload.getHdWallet().getAccounts().get(0).getLabel(), is(label));
-        assertThat(payload, is(payloadManager.getPayload()));
-        assertThat("Checksum should not be null", payloadManager.getCheckSum() != null);
+        Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);
+        Assert.assertEquals(payload, payloadManager.getPayload());
+        Assert.assertNotNull(payloadManager.getCheckSum());
 
         PayloadManager.getInstance().wipe();
     }
@@ -286,6 +221,7 @@ public class PayloadManagerTest extends BaseTest{
         xpubs.add("{\"xpub6BiVtCpG9fQQGq7bXBjjf5zyguEXHrmxDu4t7pdTFUtDWD5epi4ecKmWBTMHvPQtRmQnby8gET7ArTzxjL4SNYdD2RYSdjk7fwYeEDMzkce\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6BiVtCpG9fQQJXDcLwQU1cXECNqaGYb3nNSu1ZEuwFKMXjDbCni6eMhN6rFkdxQsgF1amKAqeLSN63zrYPKJ3GU2ppowBWZSdGBk7QUxgLV\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6BiVtCpG9fQQNBuKZoKzhzmENDKdCeXQsNVPF2Ynt8rhyYznmPURQNDmnNnX9SYahZ1DVTaNtsh3pJ4b2jKvsZhpv2oVj76YETCGztKJ3LM\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("Wallet successfully synced with server");
         mockInterceptor.setResponseStringList(xpubs);
 
         return payloadManager.restoreHDWallet("password", mnemonic, "");
@@ -305,27 +241,31 @@ public class PayloadManagerTest extends BaseTest{
 
         Payload payload = getRestoredWallet_All_All(payloadManager);
 
-        assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
-        assertThat(payload.getHdWallet().getSeedHex(), is(seedHex));
+        Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
+        Assert.assertEquals(payload.getHdWallet().getSeedHex(), seedHex);
 
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9xj9UhHNKHr6kJKJBVj82ZxFrbfhczBDUHyVj7kHGAiZqAeUenz2JhrphnMMYVKcWcVPFJESngtKsVa4FYEvFfWUTtZThCoZdwDeS9qQnqm"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpub(), xpub1);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), "9xj9UhHNKHr6kJKJBVj82ZxFrbfhczBDUHyVj7kHGAiZqAeUenz2JhrphnMMYVKcWcVPFJESngtKsVa4FYEvFfWUTtZThCoZdwDeS9qQnqm");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9xj9UhHNKHr6nkRg3ZpSBp2i3MgSazXa3LGet5MsVY3nTeE1zvnwVrjpnsJGEtEvvcm8fwoUBVpnHcioJfFqRUaZ6ijXEuwUuv2Q5RM6dGR"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpub(), xpub2);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), "9xj9UhHNKHr6nkRg3ZpSBp2i3MgSazXa3LGet5MsVY3nTeE1zvnwVrjpnsJGEtEvvcm8fwoUBVpnHcioJfFqRUaZ6ijXEuwUuv2Q5RM6dGR");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9xj9UhHNKHr6rUDptMDdQhw5ccX8mzVQBopwYejpRt1NHpFvQMSG1a8RGRJjZRE8rRJJ6N9g1GcB6yWEgkXCzGBweq934jS9LfBuViQRxRw"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpub(), xpub3);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), "9xj9UhHNKHr6rUDptMDdQhw5ccX8mzVQBopwYejpRt1NHpFvQMSG1a8RGRJjZRE8rRJJ6N9g1GcB6yWEgkXCzGBweq934jS9LfBuViQRxRw");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9xj9UhHNKHr6tdLP1UdrAJKKRUiGd92aBbsqkW28vtdmCzXTvns1aNKwh5uM1nSbdD8Y4x9VBnTLrDDEbREnu9KYnDyvt8QRPtPWQ78UgAG"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpub(), xpub4);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), "9xj9UhHNKHr6tdLP1UdrAJKKRUiGd92aBbsqkW28vtdmCzXTvns1aNKwh5uM1nSbdD8Y4x9VBnTLrDDEbREnu9KYnDyvt8QRPtPWQ78UgAG");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9xj9UhHNKHr6vLRGPDajPuoc2futBwhu93ZLCUuoGBya3uD4X5kDfMuUiEHz7HPWPpkgCHiwNbLWjxa6QrqfjmPmVr146GUt8D5shiXkQpC"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpub(), xpub5);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), "9xj9UhHNKHr6vLRGPDajPuoc2futBwhu93ZLCUuoGBya3uD4X5kDfMuUiEHz7HPWPpkgCHiwNbLWjxa6QrqfjmPmVr146GUt8D5shiXkQpC");
 
         PayloadManager.getInstance().wipe();
     }
@@ -356,31 +296,36 @@ public class PayloadManagerTest extends BaseTest{
         xpubs.add("{\"xpub6D45Bi15NLqW7RYzFUQe8oqiBNB9DPtmERMCgi7Rk7WsZBZnUEUxojq39Tfw7cfTtMs3pb8ur4HVDwVaYZNf8UP1WzWwZiQhsSBKFcrQXF4\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6D45Bi15NLqWB1JKmPM6hgu54zofJAMLywvyCt29bj18u36Z6epCmCQayJaCe54SWg3e3Na7n217QfyZ6zvV7gEsgcCxLW8KZPKohqk6SED\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6D45Bi15NLqWCCqwmhSQoXNekogmYmMNKqAk9vNGg8uTRCRMB5XtBCWZv9nMMhLc3qVwSbgydUg4qfuBJZzjYmmG9y3o3Ta3k75a8x9iBMk\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
+        xpubs.add("Wallet successfully synced with server");
         mockInterceptor.setResponseStringList(xpubs);
 
         Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "", passphrase);
 
-        assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
-        assertThat(payload.getHdWallet().getSeedHex(), is(seedHex));
+        Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
+        Assert.assertEquals(payload.getHdWallet().getSeedHex(), seedHex);
 
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpub(), xpub1);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), "9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpub(), xpub2);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), "9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpub(), xpub3);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), "9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpub(), xpub4);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), "9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF"));
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpub(), xpub5);
+        Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), "9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF");
 
         PayloadManager.getInstance().wipe();
     }
@@ -391,40 +336,21 @@ public class PayloadManagerTest extends BaseTest{
         PayloadManager payloadManager = PayloadManager.getInstance();
         getRestoredWallet_All_All(payloadManager);
 
-        assertThat(payloadManager.getNextReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
+        Assert.assertEquals(payloadManager.getNextReceiveAddress(0), "1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payloadManager.getNextReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
+        Assert.assertEquals(payloadManager.getNextReceiveAddress(1), "1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payloadManager.getNextReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
+        Assert.assertEquals(payloadManager.getNextReceiveAddress(2), "1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3");
 
+        mockInterceptor.setResponseString("Wallet successfully synced with server");
         payloadManager.addAccount("", null);
-        assertThat(payloadManager.getNextReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
+        Assert.assertEquals(payloadManager.getNextReceiveAddress(3), "19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3");
 
         PayloadManager.getInstance().wipe();
-    }
-
-    @Test
-    public void generateNewLegacyAddress_withWrongSecondPassword_shouldFail() throws Exception {
-
-        when(mockPayloadManager.validateSecondPassword(anyString()))
-                .thenReturn(false);
-
-        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar", "1.0", "second_password");
-
-        assertThat("Address should be null", legacyAddress == null);
-    }
-
-    @Test
-    public void generateNewLegacyAddress_withFailedRandomECKey_shouldFail() throws Exception {
-
-        when(mockPayloadManager.getRandomECKey())
-                .thenReturn(null);
-
-        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar", "1.0", "second_password");
-
-        assertThat("Address should be null", legacyAddress == null);
     }
 
     @Test

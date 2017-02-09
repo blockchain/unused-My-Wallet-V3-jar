@@ -1,6 +1,6 @@
 package info.blockchain.wallet.util;
 
-import info.blockchain.BaseTest;
+import info.blockchain.MockedResponseTest;
 import info.blockchain.wallet.api.PersistentUrls;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PrivateKeyFactoryTest extends BaseTest{
+public class PrivateKeyFactoryTest extends MockedResponseTest {
 
     PrivateKeyFactory privateKeyFactory;
 

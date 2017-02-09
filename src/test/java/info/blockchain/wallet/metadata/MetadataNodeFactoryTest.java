@@ -28,7 +28,7 @@ public class MetadataNodeFactoryTest {
     @Before
     public void setup() throws Exception {
 
-        mockInterceptor = new MockInterceptor();
+        mockInterceptor = MockInterceptor.getInstance();
 
         BlockchainFramework.init(new FrameworkInterface() {
             @Override

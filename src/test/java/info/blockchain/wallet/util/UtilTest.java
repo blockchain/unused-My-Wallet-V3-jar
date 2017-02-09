@@ -1,8 +1,9 @@
 package info.blockchain.wallet.util;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
+
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
@@ -18,6 +19,6 @@ public class UtilTest {
 
         byte[] xor = Util.getInstance().xor(data1, data2);
 
-        assertThat(expectedResult, is(Hex.toHexString(xor)));
+        Assert.assertEquals(expectedResult, Hex.toHexString(xor));
     }
 }

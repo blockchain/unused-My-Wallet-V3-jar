@@ -11,9 +11,22 @@ import okhttp3.ResponseBody;
 
 public class MockInterceptor implements Interceptor {
 
+    static MockInterceptor instance;
+
     LinkedList<String> responseStringList;
     LinkedList<Integer> responseCodeList;
     boolean ioException = false;
+
+    private MockInterceptor() {
+    }
+
+    public static MockInterceptor getInstance() {
+
+        if(instance == null){
+            instance = new MockInterceptor();
+        }
+        return instance;
+    }
 
     public void setResponseStringList(LinkedList<String> responseStringList){
         this.responseStringList = responseStringList;
@@ -49,12 +62,6 @@ public class MockInterceptor implements Interceptor {
         final String query = uri.query();
         final String method = chain.request().method();
 
-//        System.out.println(uri);
-//        System.out.println(query);
-//        System.out.println(method);
-//
-//        System.out.println("responseCode: "+responseCode);
-
         String responseString = responseStringList.getFirst();
         if(responseCodeList == null || responseCodeList.size() == 0) {
             responseCodeList = new LinkedList<>();
@@ -75,6 +82,7 @@ public class MockInterceptor implements Interceptor {
         //Reset responses
         responseStringList.removeFirst();
         responseCodeList.removeFirst();
+        ioException = false;
 
         return response;
     }

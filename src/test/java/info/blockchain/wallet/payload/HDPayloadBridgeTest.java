@@ -1,21 +1,20 @@
 package info.blockchain.wallet.payload;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
-import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.MockedResponseTest;
 import info.blockchain.wallet.bip44.Wallet;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.crypto.MnemonicException;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * Created by riaanvos on 13/07/16.
  */
-public class HDPayloadBridgeTest {
+public class HDPayloadBridgeTest extends MockedResponseTest {
 
     @Test
     public void getHDWalletFromPayload_shouldReturnSameWallet() throws Exception {
@@ -25,8 +24,8 @@ public class HDPayloadBridgeTest {
         HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet("Account 1");
         Wallet wallet = hdPayloadBridge.getHDWalletFromPayload(pair.payload);
 
-        assertThat(pair.wallet.getSeedHex(), is(wallet.getSeedHex()));
-        assertThat(pair.wallet.getMnemonic(), is(wallet.getMnemonic()));
+        Assert.assertEquals(pair.wallet.getSeedHex(), wallet.getSeedHex());
+        Assert.assertEquals(pair.wallet.getMnemonic(), wallet.getMnemonic());
     }
 
     public String[] getXPUBs(boolean includeArchives, Payload payload) throws IOException, DecoderException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {

@@ -4,25 +4,20 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.PersistentUrls.Environment;
-import java.lang.reflect.Type;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
-import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @Ignore
-public class BaseTest {
+public abstract class MockedResponseTest {
 
-    public static MockInterceptor mockInterceptor;
+    public static MockInterceptor mockInterceptor = MockInterceptor.getInstance();
 
     @BeforeClass
     public static void init() {
-
-        //Set up okHttpClient with interceptor for mocking responses
-        final OkHttpClient okHttpClient = getOkHttpClient();
 
         //Set Environment
         PersistentUrls.getInstance().setCurrentEnvironment(Environment.PRODUCTION);
@@ -33,12 +28,12 @@ public class BaseTest {
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
             public Retrofit getRetrofitApiInstance() {
-                return getRetrofit(PersistentUrls.getInstance().getCurrentBaseApiUrl(), okHttpClient);
+                return getRetrofit(PersistentUrls.getInstance().getCurrentBaseApiUrl(), getOkHttpClient());
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
-                return getRetrofit(PersistentUrls.getInstance().getCurrentBaseServerUrl(), okHttpClient);
+                return getRetrofit(PersistentUrls.getInstance().getCurrentBaseServerUrl(), getOkHttpClient());
             }
 
             @Override
@@ -49,8 +44,6 @@ public class BaseTest {
     }
 
     private static OkHttpClient getOkHttpClient() {
-        mockInterceptor = new MockInterceptor();
-
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 

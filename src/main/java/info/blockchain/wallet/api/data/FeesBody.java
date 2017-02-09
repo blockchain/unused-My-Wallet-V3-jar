@@ -1,6 +1,7 @@
 package info.blockchain.wallet.api.data;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,8 +11,8 @@ import java.io.IOException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect
-public class FeesItem {
+@JsonAutoDetect(getterVisibility = Visibility.NONE)
+public class FeesBody {
 
     @JsonProperty("fee")
     private double fee;
@@ -35,7 +36,7 @@ public class FeesItem {
     }
 
     @JsonIgnore
-    public static FeesItem fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, FeesItem.class);
+    public static FeesBody fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, FeesBody.class);
     }
 }

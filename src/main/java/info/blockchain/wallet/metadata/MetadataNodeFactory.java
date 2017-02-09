@@ -34,7 +34,7 @@ public class MetadataNodeFactory {
                 return false;
             } else {
                 //Yes load nodes from stored metadata.
-                return loadNodes(new RemoteMetadataNodes().fromJson(nodesJson));
+                return loadNodes(RemoteMetadataNodes.fromJson(nodesJson));
             }
 
         }catch (Exception e){

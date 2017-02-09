@@ -1,10 +1,10 @@
 package info.blockchain.wallet.payment;
 
-import info.blockchain.BaseTest;
+import info.blockchain.MockedResponseTest;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.test_data.UnspentTestData;
-import info.blockchain.wallet.api.data.FeesItem;
-import info.blockchain.wallet.api.data.FeesResponse;
+import info.blockchain.wallet.api.data.FeesBody;
+import info.blockchain.wallet.api.data.FeesListBody;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -23,7 +23,7 @@ import org.junit.Test;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class PaymentTest extends BaseTest{
+public class PaymentTest extends MockedResponseTest {
 
     @Test
     public void estimatedFee() throws Exception {
@@ -74,10 +74,10 @@ public class PaymentTest extends BaseTest{
     public void testGetDynamicFee() throws Exception {
 
         mockInterceptor.setResponseString("{\"mempool\":57126,\"default\":{\"fee\":65000,\"surge\":false,\"ok\":true},\"estimate\":[{\"fee\":71500,\"surge\":false,\"ok\":true},{\"fee\":65300,\"surge\":false,\"ok\":true},{\"fee\":65200,\"surge\":false,\"ok\":true},{\"fee\":65100,\"surge\":false,\"ok\":true},{\"fee\":65000,\"surge\":false,\"ok\":true},{\"fee\":59090.90909090909,\"surge\":false,\"ok\":true}]}");
-        Call<FeesResponse> dynamicFee = Payment.getDynamicFee();
+        Call<FeesListBody> dynamicFee = Payment.getDynamicFee();
 
-        Response<FeesResponse> exe = dynamicFee.execute();
-        FeesResponse fee = exe.body();
+        Response<FeesListBody> exe = dynamicFee.execute();
+        FeesListBody fee = exe.body();
 
         Assert.assertEquals(57126, fee.getMempool());
         Assert.assertEquals(65000, fee.getDefaultFee().getFee(), 0.0);
@@ -108,8 +108,8 @@ public class PaymentTest extends BaseTest{
         Assert.assertTrue(fee.getEstimate().get(5).isOk());
         Assert.assertFalse(fee.getEstimate().get(5).isSurge());
 
-        FeesItem defaultFee = Payment.getDefaultFee();
-        Assert.assertEquals(65000, defaultFee.getFee(), 0.0);
+        FeesBody defaultFee = Payment.getDefaultFee();
+        Assert.assertEquals(35000, defaultFee.getFee(), 0.0);
         Assert.assertTrue(defaultFee.isOk());
         Assert.assertFalse(defaultFee.isSurge());
     }

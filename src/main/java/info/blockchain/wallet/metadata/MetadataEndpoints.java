@@ -1,4 +1,4 @@
-package info.blockchain.wallet.api;
+package info.blockchain.wallet.metadata;
 
 import info.blockchain.wallet.metadata.data.Auth;
 import info.blockchain.wallet.metadata.data.Invitation;
@@ -22,58 +22,58 @@ import retrofit2.http.Query;
 
 public interface MetadataEndpoints {
 
-    @GET(Urls.Metadata.AUTH)
+    @GET("metadata/auth")
     Call<Auth> getNonce();
 
-    @POST(Urls.Metadata.AUTH)
+    @POST("metadata/auth")
     Call<Auth> getToken(@Body HashMap<String, String> body);
 
 
-    @GET(Urls.Metadata.TRUSTED)
+    @GET("metadata/trusted")
     Call<Trusted> getTrustedList(@Header("Authorization") String jwToken);
 
-    @GET(Urls.Metadata.TRUSTED)
+    @GET("metadata/trusted")
     Call<Trusted> getTrusted(@Header("Authorization") String jwToken, @Query("mdid") String mdid);
 
-    @PUT(Urls.Metadata.TRUSTED + "/{mdid}")
+    @PUT("metadata/trusted/{mdid}")
     Call<Trusted> putTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
-    @DELETE(Urls.Metadata.TRUSTED + "/{mdid}")
+    @DELETE("metadata/trusted/{mdid}")
     Call<ResponseBody> deleteTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
 
-    @POST(Urls.Metadata.MESSAGES)
+    @POST("metadata/messages")
     Call<Message> postMessage(@Header("Authorization") String jwToken, @Body Message body);
 
-    @GET(Urls.Metadata.MESSAGES)
+    @GET("metadata/messages")
     Call<List<Message>> getMessages(@Header("Authorization") String jwToken, @Query("new") Boolean onlyProcessed);
 
-    @GET(Urls.Metadata.MESSAGE + "/{uuid}")
+    @GET("metadata/message/{uuid}")
     Call<Message> getMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId);
 
-    @PUT(Urls.Metadata.MESSAGE + "/{uuid}/processed")
+    @PUT("metadata/message/{uuid}/processed")
     Call<Void> processMessage(@Header("Authorization") String jwToken, @Path("uuid") String id, @Body MessageProcessRequest body);
 
 
-    @POST(Urls.Metadata.SHARE)
+    @POST("metadata/share")
     Call<Invitation> postShare(@Header("Authorization") String jwToken);
 
-    @POST(Urls.Metadata.SHARE + "/{uuid}")
+    @POST("metadata/share" + "/{uuid}")
     Call<Invitation> postToShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
-    @GET(Urls.Metadata.SHARE + "/{uuid}")
+    @GET("metadata/share" + "/{uuid}")
     Call<Invitation> getShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
-    @DELETE(Urls.Metadata.SHARE + "/{uuid}")
+    @DELETE("metadata/share" + "/{uuid}")
     Call<Invitation> deleteShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
 
-    @PUT(Urls.Metadata.METADATA + "/{addr}")
+    @PUT("metadata/{addr}")
     Call<Void> putMetadata(@Path("addr") String address, @Body MetadataRequest body);
 
-    @GET(Urls.Metadata.METADATA + "/{addr}")
+    @GET("metadata/{addr}")
     Call<MetadataResponse> getMetadata(@Path("addr") String address);
 
-    @DELETE(Urls.Metadata.METADATA + "/{addr}")
+    @DELETE("metadata/{addr}")
     Call<Void> deleteMetadata(@Path("addr") String address, @Query("signature") String signature);
 }

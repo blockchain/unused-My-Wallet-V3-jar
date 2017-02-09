@@ -1,5 +1,6 @@
 package info.blockchain.wallet.contacts;
 
+import info.blockchain.MockInterceptor;
 import info.blockchain.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
@@ -13,7 +14,6 @@ import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
-import info.blockchain.MockInterceptor;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class ContactsTest {
     @Before
     public void setup() throws Exception {
 
-        mockInterceptor = new MockInterceptor();
+        mockInterceptor = MockInterceptor.getInstance();
 
         //Set environment
         BlockchainFramework.init(new FrameworkInterface() {

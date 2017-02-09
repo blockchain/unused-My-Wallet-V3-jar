@@ -1,7 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+
+
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -84,21 +85,20 @@ public class BlockchainWalletTest {
 
             BlockchainWallet bciWallet = new BlockchainWallet(walletString, password);
 
+            Assert.assertEquals(bciWallet.getVersion(), credentialsJson.getDouble("version"), 0.0);
+            Assert.assertEquals(bciWallet.getPbkdf2Iterations(), credentialsJson.getInt("iterations"), 0.0);
+            Assert.assertEquals(bciWallet.getVersion(), credentialsJson.getDouble("version"), 0.0);
 
-            assertThat(bciWallet.getVersion(), is(credentialsJson.getDouble("version")));
-            assertThat(bciWallet.getPbkdf2Iterations(), is(credentialsJson.getInt("iterations")));
-            assertThat(bciWallet.getVersion(), is(credentialsJson.getDouble("version")));
-
-            assertThat(bciWallet.getPayload().getGuid(), is(credentialsJson.getString("guid")));
-            assertThat(bciWallet.getPayload().getSharedKey(), is(credentialsJson.getString("sharedKey")));
+            Assert.assertEquals(bciWallet.getPayload().getGuid(), credentialsJson.getString("guid"));
+            Assert.assertEquals(bciWallet.getPayload().getSharedKey(), credentialsJson.getString("sharedKey"));
 
             JSONArray keys = payloadJson.getJSONArray("keys");
 
             for (int j = 0; j < keys.length(); j++) {
                 JSONObject json = keys.getJSONObject(j);
 
-                assertThat(bciWallet.getPayload().getLegacyAddressList().get(j).getEncryptedKey(), is(json.getString("priv")));
-                assertThat(bciWallet.getPayload().getLegacyAddressList().get(j).getAddress(), is(json.getString("addr")));
+                Assert.assertEquals(bciWallet.getPayload().getLegacyAddressList().get(j).getEncryptedKey(), json.getString("priv"));
+                Assert.assertEquals(bciWallet.getPayload().getLegacyAddressList().get(j).getAddress(), json.getString("addr"));
             }
         }
     }

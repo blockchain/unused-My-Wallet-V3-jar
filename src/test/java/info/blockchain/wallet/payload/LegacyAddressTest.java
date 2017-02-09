@@ -1,8 +1,6 @@
 package info.blockchain.wallet.payload;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-
+import info.blockchain.MockedResponseTest;
 import info.blockchain.util.AssertJson;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
@@ -11,7 +9,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class LegacyAddressTest {
+public class LegacyAddressTest extends MockedResponseTest {
 
     private String testString = "{\n" +
             "      \"addr\": \"someaddress\",\n" +
@@ -39,14 +37,15 @@ public class LegacyAddressTest {
         String device = "device";
         String version = "version";
 
+        mockInterceptor.setResponseString("a71ec904f11acab27ef9fc4bc6c67d9a88669d7c4bf6f90aec3253eaa50a2fc3");
         LegacyAddress legacyAddress = PayloadManager.getInstance().generateLegacyAddress(device, version, null);
 
-        assertThat(legacyAddress.getCreatedDeviceName(), is(device));
-        assertThat(legacyAddress.getCreatedDeviceVersion(), is(version));
+        Assert.assertEquals(legacyAddress.getCreatedDeviceName(), device);
+        Assert.assertEquals(legacyAddress.getCreatedDeviceVersion(), version);
 
         ECKey ecKey = legacyAddress.getECKey();
         String address = ecKey.toAddress(MainNetParams.get()).toString();
-        assertThat(address, is(legacyAddress.getAddress()));
+        Assert.assertEquals(address, legacyAddress.getAddress());
     }
 
     @Test

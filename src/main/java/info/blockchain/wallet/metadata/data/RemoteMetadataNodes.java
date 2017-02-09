@@ -33,7 +33,7 @@ public class RemoteMetadataNodes {
     }
 
     @JsonIgnore
-    public RemoteMetadataNodes fromJson(String json) throws IOException {
+    public static RemoteMetadataNodes fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, RemoteMetadataNodes.class);
     }
 

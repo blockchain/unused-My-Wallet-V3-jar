@@ -6,8 +6,7 @@ import com.google.common.collect.HashBiMap;
 import com.subgraph.orchid.encoders.Hex;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.api.Wallet2;
-import info.blockchain.wallet.api.WalletPayload;
+import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.Address;
 import info.blockchain.wallet.bip44.Chain;
 import info.blockchain.wallet.bip44.Wallet;
@@ -58,6 +57,7 @@ public class PayloadManager {
     // active payload:
     private Payload payload = null;
     // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
+    // TODO: 07/02/2017 Remove cached payload - checksum handles this already
     private String cached_payload = null;
 
     private String strTempPassword = null;
@@ -71,7 +71,6 @@ public class PayloadManager {
     private HDPayloadBridge hdPayloadBridge;
     private info.blockchain.wallet.bip44.Wallet wallet;
     private PrivateKeyFactory privateKeyFactory;
-    private WalletPayload walletApi;
     private MetadataNodeFactory metadataNodeFactory;
 
     private PayloadManager() throws IOException {
@@ -79,7 +78,6 @@ public class PayloadManager {
         payload = new Payload();
         cached_payload = "";
         privateKeyFactory = new PrivateKeyFactory();
-        walletApi = new WalletPayload();
     }
 
     /**
@@ -120,35 +118,37 @@ public class PayloadManager {
     /**
      * Downloads payload from server, decrypts, and stores as local var {@link Payload}
      */
+    // TODO: 08/02/2017 This should be improved - just roughly changed fetchWalletData() to call from WalletApi
     public void initiatePayload(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull String password, @Nonnull InitiatePayloadListener listener) throws Exception {
 
-        String walletData;
-        try {
-            walletData = walletApi.fetchWalletData(guid, sharedKey);
-        } catch (Exception e) {
+        if (version > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
+            payload = null;
+            throw new UnsupportedVersionException(version + "");
+        }
 
-            e.printStackTrace();
+        Call<ResponseBody> call = WalletApi.fetchWalletData(guid, sharedKey);
 
-            if (e.getMessage() != null && e.getMessage().contains("Invalid GUID")) {
+        Response<ResponseBody> exe = call.execute();
+
+        if(exe.isSuccessful()){
+            String walletData = exe.body().string();
+            bciWallet = new BlockchainWallet(walletData, password);
+            payload = bciWallet.getPayload();
+
+            syncWallet();
+
+            listener.onSuccess();
+        }else{
+            // TODO: 08/02/2017 Don't catch error messages like this
+            String errorMessage = exe.errorBody().string();
+            if (errorMessage != null && errorMessage.contains("Invalid GUID")) {
                 throw new InvalidCredentialsException();
-            } else if (e.getMessage() != null && e.getMessage().contains("locked")) {
-                throw new AccountLockedException(e.getMessage(), e);
+            } else if (errorMessage != null && errorMessage.contains("locked")) {
+                throw new AccountLockedException(errorMessage);
             } else {
-                throw new ServerConnectionException(e.getMessage(), e);
+                throw new ServerConnectionException(errorMessage);
             }
         }
-        bciWallet = new BlockchainWallet(walletData, password);
-        payload = bciWallet.getPayload();
-
-        if (getVersion() > PayloadManager.SUPPORTED_ENCRYPTION_VERSION) {
-
-            payload = null;
-            throw new UnsupportedVersionException(getVersion() + "");
-        }
-
-        syncWallet();
-
-        listener.onSuccess();
     }
 
     /**
@@ -228,6 +228,7 @@ public class PayloadManager {
         payload = p;
     }
 
+    // TODO: 07/02/2017 should return response and not block
     public boolean savePayloadToServer() {
 
         if (payload == null || !isEncryptionConsistent()) {
@@ -239,30 +240,36 @@ public class PayloadManager {
                 return true;
             }
 
-            String method = isNew ? "insert" : "update";
-
-
             Pair pair = bciWallet.encryptPayload(payload.toJson().toString(), strTempPassword, bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
             String newPayloadChecksum = (String) pair.getLeft();
             String oldPayloadChecksum = bciWallet.getPayloadChecksum();
 
-            new WalletPayload().savePayloadToServer(method,
-                    payload.getGuid(),
-                    payload.getSharedKey(),
-                    payload.getLegacyAddressList(),
-                    encryptedPayload,
-                    bciWallet.isSyncPubkeys(),
-                    newPayloadChecksum,
-                    oldPayloadChecksum,
-                    email);
+            Call<Void> call = WalletApi.saveWallet(isNew,
+                payload.getGuid(),
+                payload.getSharedKey(),
+                payload.getLegacyAddressStringList(0L),
+                encryptedPayload,
+                bciWallet.isSyncPubkeys(),
+                newPayloadChecksum,
+                oldPayloadChecksum,
+                email,
+                "android");
 
-            bciWallet.setPayloadChecksum(newPayloadChecksum);
+            Response<Void> exe = call.execute();
 
-            isNew = false;
-            cachePayload(payload);
-            return true;
+            if(exe.isSuccessful()) {
+
+                bciWallet.setPayloadChecksum(newPayloadChecksum);
+
+                isNew = false;
+                cachePayload(payload);
+
+                return true;
+            } else{
+                return false;
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -470,8 +477,8 @@ public class PayloadManager {
 
         // xPub balance
         if (!isNotUpgraded) {
-            String[] xpubs = getXPUBs(false);
-            if (xpubs.length > 0) {
+            ArrayList<String> xpubs = getXPUBs(false);
+            if (xpubs.size() > 0) {
                 MultiAddrFactory.getInstance().refreshXPUBData(xpubs);
             }
             List<Account> accounts = payload.getHdWallet().getAccounts();
@@ -486,8 +493,7 @@ public class PayloadManager {
         // Balance for legacy addresses
         if (payload.getLegacyAddressList().size() > 0) {
             List<String> legacyAddresses = payload.getLegacyAddressStringList();
-            String[] addresses = legacyAddresses.toArray(new String[legacyAddresses.size()]);
-            MultiAddrFactory.getInstance().refreshLegacyAddressData(addresses, false);
+            MultiAddrFactory.getInstance().refreshLegacyAddressData(legacyAddresses, false);
         }
     }
 
@@ -496,7 +502,7 @@ public class PayloadManager {
     }
 
     @SuppressWarnings("SameParameterValue")
-    public String[] getXPUBs(boolean includeArchives) {
+    public ArrayList<String> getXPUBs(boolean includeArchives) {
 
         ArrayList<String> xpubs = new ArrayList<String>();
 
@@ -514,7 +520,7 @@ public class PayloadManager {
             }
         }
 
-        return xpubs.toArray(new String[xpubs.size()]);
+        return xpubs;
     }
 
     public Account addAccount(String accountLabel, @Nullable String secondPassword) throws Exception {
@@ -674,7 +680,7 @@ public class PayloadManager {
 
     ECKey getRandomECKey() throws Exception {
 
-        Call<ResponseBody> call = Wallet2.getRandomBytes();
+        Call<ResponseBody> call = WalletApi.getRandomBytes();
         Response<ResponseBody> exe = call.execute();
 
         if(!exe.isSuccessful()){
@@ -785,12 +791,18 @@ public class PayloadManager {
         return getXpubToAccountIndexMap().inverse();
     }
 
-    public void unregisterMdid(String guid, String sharedKey, ECKey node) throws Exception {
-        walletApi.unregisterMdid(node, guid, sharedKey);
+    public Call<ResponseBody> unregisterMdid(String guid, String sharedKey, ECKey node) throws Exception {
+        String signedGuid = node.signMessage(guid);
+        return WalletApi.unregisterMdid(guid,
+            sharedKey,
+            signedGuid);
     }
 
-    public void registerMdid(String guid, String sharedKey, ECKey node) throws Exception {
-        walletApi.registerMdid(node, guid, sharedKey);
+    public Call<ResponseBody> registerMdid(String guid, String sharedKey, ECKey node) throws Exception {
+        String signedGuid = node.signMessage(guid);
+        return WalletApi.registerMdid(guid,
+            sharedKey,
+            signedGuid);
     }
 
     /**

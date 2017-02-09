@@ -87,7 +87,7 @@ public class HDPayloadBridge {
     private boolean hasTransactions(BlockExplorer blockExplorer, String xpub) throws Exception {
 
         Response<HashMap<String, info.blockchain.api.data.Balance>> exe = blockExplorer
-            .getBalance(Arrays.asList(xpub), 4).execute();
+            .getBalance(Arrays.asList(xpub), BlockExplorer.TX_FILTER_ALL).execute();
 
         if(!exe.isSuccessful()) {
             throw new Exception(exe.code()+" "+exe.errorBody().string());

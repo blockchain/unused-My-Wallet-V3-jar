@@ -3,9 +3,9 @@ package info.blockchain.wallet.payment;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.Wallet2;
-import info.blockchain.wallet.api.data.FeesItem;
-import info.blockchain.wallet.api.data.FeesResponse;
+import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.FeesBody;
+import info.blockchain.wallet.api.data.FeesListBody;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -42,12 +42,12 @@ public class Payment {
         return Fees.isAdequateFee(inputs, outputs, absoluteFee);
     }
 
-    public static Call<FeesResponse> getDynamicFee() {
-        return Wallet2.getDynamicFee();
+    public static Call<FeesListBody> getDynamicFee() {
+        return WalletApi.getDynamicFee();
     }
 
-    public static FeesItem getDefaultFee() throws IOException {
-        return Wallet2.getDefaultFee();
+    public static FeesBody getDefaultFee() throws IOException {
+        return WalletApi.getDefaultFee();
     }
 
     /**********************************************************************************************/

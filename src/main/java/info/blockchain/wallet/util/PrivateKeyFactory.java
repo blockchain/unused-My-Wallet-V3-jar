@@ -122,7 +122,7 @@ public class PrivateKeyFactory {
             list.add(uncompressedAddress);
             list.add(compressedAddress);
 
-            Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, 4);
+            Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, BlockExplorer.TX_FILTER_ALL);
 
             Response<HashMap<String, Balance>> exe = call.execute();
 
