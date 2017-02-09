@@ -3,6 +3,7 @@ package info.blockchain.wallet.contacts.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,9 +28,9 @@ public class FacilitatedTransaction {
 
     private String id;
     private String state;
-    private long intended_amount;
+    private long intendedAmount;
     private String address;
-    private String tx_hash;
+    private String txHash;
     private String role;
     private long created;
     private String note;
@@ -63,20 +64,24 @@ public class FacilitatedTransaction {
         this.address = address;
     }
 
-    public long getIntended_amount() {
-        return intended_amount;
+    @JsonProperty("intendedAmount")
+    public long getIntendedAmount() {
+        return intendedAmount;
     }
 
-    public void setIntended_amount(long intended_amount) {
-        this.intended_amount = intended_amount;
+    @JsonProperty("intendedAmount")
+    public void setIntendedAmount(long intendedAmount) {
+        this.intendedAmount = intendedAmount;
     }
 
-    public String getTx_hash() {
-        return tx_hash;
+    @JsonProperty("tx_hash")
+    public String getTxHash() {
+        return txHash;
     }
 
-    public void setTx_hash(String tx_hash) {
-        this.tx_hash = tx_hash;
+    @JsonProperty("tx_hash")
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
     }
 
     public String getRole() {
@@ -101,7 +106,7 @@ public class FacilitatedTransaction {
 
     @JsonIgnore
     public String toBitcoinURI() {
-        return BitcoinURI.convertToBitcoinURI(address, Coin.valueOf(intended_amount), null, null);
+        return BitcoinURI.convertToBitcoinURI(address, Coin.valueOf(intendedAmount), null, null);
     }
 
     @JsonIgnore

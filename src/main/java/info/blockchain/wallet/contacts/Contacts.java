@@ -171,6 +171,26 @@ public class Contacts {
     }
 
     /**
+     * Deletes a {@link FacilitatedTransaction} from a {@link Contact} and saves to the server.
+     * You'll want to sync the contacts list after failure if an exception is propagated.
+     *
+     * @param mdid   A {@link Contact#getMdid()}
+     * @param fctxId A {@link FacilitatedTransaction#getId()}
+     * @throws Exception Will throw a {@link NullPointerException} if the contact cannot be found,
+     *                   can throw other exceptions if there are network issues, encryption issues
+     *                   etc.
+     */
+    public void deleteFacilitatedTransaction(String mdid, String fctxId) throws Exception {
+        Contact contact = getContactFromMdid(mdid);
+        if (contact != null) {
+            contact.deleteFacilitatedTransaction(fctxId);
+            save();
+        } else {
+            throw new NullPointerException("Contact not found");
+        }
+    }
+
+    /**
      * Publishes your mdid-xpub pair unencrypted to metadata service
      */
     public void publishXpub() throws MetadataException, IOException, InvalidCipherTextException {
@@ -412,7 +432,7 @@ public class Contacts {
             SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         FacilitatedTransaction tx = new FacilitatedTransaction();
-        tx.setIntended_amount(request.getIntended_amount());
+        tx.setIntendedAmount(request.getIntended_amount());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
         tx.setNote(request.getNote());
@@ -434,7 +454,7 @@ public class Contacts {
 
         FacilitatedTransaction facilitatedTransaction = new FacilitatedTransaction();
         request.setId(facilitatedTransaction.getId());
-        facilitatedTransaction.setIntended_amount(request.getIntended_amount());
+        facilitatedTransaction.setIntendedAmount(request.getIntended_amount());
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
@@ -456,7 +476,7 @@ public class Contacts {
 
         Contact contact = getContactFromMdid(mdid);
 
-        FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);
+        FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
         ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
 
@@ -471,14 +491,14 @@ public class Contacts {
             SharedMetadataException, InvalidCipherTextException, MetadataException, MismatchValueException {
 
         Contact contact = getContactFromMdid(mdid);
-        FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);
+        FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
 
         sendMessage(mdid, new PaymentBroadcasted(fTxId, txHash).toJson(),
                 TYPE_PAYMENT_BROADCASTED,
                 true);
 
         ftx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
-        ftx.setTx_hash(txHash);
+        ftx.setTxHash(txHash);
 
         save();
     }
@@ -488,7 +508,7 @@ public class Contacts {
      * FacilitatedTransaction} that need responding to.
      */
     public List<Contact> digestUnreadPaymentRequests()
-        throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {
+            throws SharedMetadataException, IOException, SignatureException, ValidationException, MetadataException, InvalidCipherTextException {
         return digestUnreadPaymentRequests(getMessages(true), true);
     }
 
@@ -507,7 +527,7 @@ public class Contacts {
 
                     FacilitatedTransaction tx = new FacilitatedTransaction();
                     tx.setId(rpr.getId());
-                    tx.setIntended_amount(rpr.getIntended_amount());
+                    tx.setIntendedAmount(rpr.getIntended_amount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                     tx.setNote(rpr.getNote());
@@ -515,7 +535,7 @@ public class Contacts {
                     Contact contact = getContactFromMdid(message.getSender());
                     contact.addFacilitatedTransaction(tx);
                     unread.add(contact);
-                    if(markAsRead)markMessageAsRead(message.getId(), true);
+                    if (markAsRead) markMessageAsRead(message.getId(), true);
                     save();
                     break;
 
@@ -524,14 +544,14 @@ public class Contacts {
                     PaymentRequest pr = new PaymentRequest().fromJson(message.getPayload());
 
                     contact = getContactFromMdid(message.getSender());
-                    tx = contact.getFacilitatedTransaction()
+                    tx = contact.getFacilitatedTransactions()
                             .get(pr.getId());
 
                     boolean newlyCreated = false;
                     if (tx == null) {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
-                        tx.setIntended_amount(pr.getIntended_amount());
+                        tx.setIntendedAmount(pr.getIntended_amount());
                         tx.setNote(pr.getNote());
                         newlyCreated = true;
                     }
@@ -541,7 +561,7 @@ public class Contacts {
                     tx.setAddress(pr.getAddress());
 
                     unread.add(contact);
-                    if(markAsRead)markMessageAsRead(message.getId(), true);
+                    if (markAsRead) markMessageAsRead(message.getId(), true);
                     if (newlyCreated) {
                         contact.addFacilitatedTransaction(tx);
                     }
@@ -554,13 +574,13 @@ public class Contacts {
 
                     contact = getContactFromMdid(message.getSender());
 
-                    tx = contact.getFacilitatedTransaction().get(pb.getId());
+                    tx = contact.getFacilitatedTransactions().get(pb.getId());
 
                     tx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
-                    tx.setTx_hash(pb.getTx_hash());
+                    tx.setTxHash(pb.getTx_hash());
 
                     unread.add(contact);
-                    if(markAsRead)markMessageAsRead(message.getId(), true);
+                    if (markAsRead) markMessageAsRead(message.getId(), true);
                     save();
                     break;
             }

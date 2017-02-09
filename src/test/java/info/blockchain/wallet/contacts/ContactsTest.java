@@ -294,7 +294,7 @@ public class ContactsTest {
         contact.setId("5b47394c-f0d1-416e-8e9d-d63a91709d03");
         contact.setName("Jacob");
         contact.setMdid("13cA57Hvs5zT8yq852aUZeoYfX9DBXCTTR");
-        contact.setFacilitatedTransaction(new HashMap<String, FacilitatedTransaction>());
+        contact.setFacilitatedTransactions(new HashMap<String, FacilitatedTransaction>());
         contacts.addContact(contact);
 
         RequestForPaymentRequest rpr = new RequestForPaymentRequest();
@@ -317,12 +317,12 @@ public class ContactsTest {
         List<Contact> unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
         for(Contact item : unreadPaymentRequests) {
 
-            FacilitatedTransaction ftx = item.getFacilitatedTransaction().get(rpr.getId());
+            FacilitatedTransaction ftx = item.getFacilitatedTransactions().get(rpr.getId());
 
             Assert.assertEquals(contact.getName(), item.getName());
             Assert.assertEquals(rpr.getId(), ftx.getId());
             Assert.assertEquals("waiting_address", ftx.getState());
-            Assert.assertEquals(17940000L, ftx.getIntended_amount());
+            Assert.assertEquals(17940000L, ftx.getIntendedAmount());
             Assert.assertEquals("pr_receiver", ftx.getRole());
             Assert.assertEquals(rpr.getNote(), ftx.getNote());
         }
@@ -337,7 +337,7 @@ public class ContactsTest {
         contact.setId("5b47394c-f0d1-416e-8e9d-d63a91709d03");
         contact.setName("Jacob");
         contact.setMdid("13cA57Hvs5zT8yq852aUZeoYfX9DBXCTTR");
-        contact.setFacilitatedTransaction(new HashMap<String, FacilitatedTransaction>());
+        contact.setFacilitatedTransactions(new HashMap<String, FacilitatedTransaction>());
         contacts.addContact(contact);
 
         /* Set up Payment Request */
@@ -362,12 +362,12 @@ public class ContactsTest {
         List<Contact> unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
         for(Contact item : unreadPaymentRequests) {
 
-            FacilitatedTransaction ftx = item.getFacilitatedTransaction().get(pr.getId());
+            FacilitatedTransaction ftx = item.getFacilitatedTransactions().get(pr.getId());
 
             Assert.assertEquals(contact.getName(), item.getName());
             Assert.assertEquals(pr.getId(), ftx.getId());
             Assert.assertEquals("waiting_payment", ftx.getState());
-            Assert.assertEquals(28940000L, ftx.getIntended_amount());
+            Assert.assertEquals(28940000L, ftx.getIntendedAmount());
             Assert.assertEquals("rpr_receiver", ftx.getRole());
             Assert.assertEquals(pr.getNote(), ftx.getNote());
             Assert.assertEquals(pr.getAddress(), ftx.getAddress());
@@ -391,12 +391,12 @@ public class ContactsTest {
         unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
         for(Contact item : unreadPaymentRequests) {
 
-            FacilitatedTransaction ftx = item.getFacilitatedTransaction().get(b.getId());
+            FacilitatedTransaction ftx = item.getFacilitatedTransactions().get(b.getId());
 
             Assert.assertEquals(contact.getName(), item.getName());
             Assert.assertEquals(b.getId(), ftx.getId());
             Assert.assertEquals("payment_broadcasted", ftx.getState());
-            Assert.assertEquals(28940000L, ftx.getIntended_amount());
+            Assert.assertEquals(28940000L, ftx.getIntendedAmount());
             Assert.assertEquals("rpr_receiver", ftx.getRole());
             Assert.assertEquals(pr.getNote(), ftx.getNote());
             Assert.assertEquals(pr.getAddress(), ftx.getAddress());
