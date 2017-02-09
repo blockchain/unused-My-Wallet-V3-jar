@@ -171,6 +171,24 @@ public class Contacts {
     }
 
     /**
+     * Renames a {@link Contact} based on their ID. Saves changes to server.
+     * @param contactId The Contact's ID (Note: not MDID)
+     * @param name      The new name for the Contact
+     * @throws Exception Will throw a {@link NullPointerException} if the contact cannot be found,
+     *                   can throw other exceptions if there are network issues, encryption issues
+     *                   etc.
+     */
+    public void renameContact(String contactId, String name) throws Exception {
+        Contact contact = getContactList().get(contactId);
+        if (contact != null) {
+            contact.setName(name);
+            save();
+        } else {
+            throw new NullPointerException("Contact not found");
+        }
+    }
+
+    /**
      * Deletes a {@link FacilitatedTransaction} from a {@link Contact} and saves to the server.
      * You'll want to sync the contacts list after failure if an exception is propagated.
      *
