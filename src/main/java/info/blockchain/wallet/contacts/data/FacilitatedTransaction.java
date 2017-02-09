@@ -64,12 +64,12 @@ public class FacilitatedTransaction {
         this.address = address;
     }
 
-    @JsonProperty("intendedAmount")
+    @JsonProperty("intended_amount")
     public long getIntendedAmount() {
         return intendedAmount;
     }
 
-    @JsonProperty("intendedAmount")
+    @JsonProperty("intended_amount")
     public void setIntendedAmount(long intendedAmount) {
         this.intendedAmount = intendedAmount;
     }

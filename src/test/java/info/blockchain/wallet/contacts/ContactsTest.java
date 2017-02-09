@@ -299,7 +299,7 @@ public class ContactsTest {
 
         RequestForPaymentRequest rpr = new RequestForPaymentRequest();
         rpr.setId("a9feb110-1ae2-4242-9246-f1d6ec3e3be8");
-        rpr.setIntended_amount(17940000);
+        rpr.setIntendedAmount(17940000);
         rpr.setNote("For the pizza");
 
         List<Message> messages = new ArrayList<>();
@@ -343,7 +343,7 @@ public class ContactsTest {
         /* Set up Payment Request */
         PaymentRequest pr = new PaymentRequest();
         pr.setId("a9feb110-1ae2-4242-9246-f1d6ec3e3be8");
-        pr.setIntended_amount(28940000);
+        pr.setIntendedAmount(28940000);
         pr.setNote("For the pizza");
         pr.setAddress("15sAyHb9zBsZbVnaSXz2UivTZYxnjjrEkX");
 

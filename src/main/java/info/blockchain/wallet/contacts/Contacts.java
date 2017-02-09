@@ -255,9 +255,7 @@ public class Contacts {
         Map<String, String> queryParams = getQueryParams(link);
 
         //link will contain contact info, but not mdid
-        Contact contact = new Contact().fromQueryParameters(queryParams);
-
-        return contact;
+        return new Contact().fromQueryParameters(queryParams);
     }
 
     /**
@@ -432,7 +430,7 @@ public class Contacts {
             SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         FacilitatedTransaction tx = new FacilitatedTransaction();
-        tx.setIntendedAmount(request.getIntended_amount());
+        tx.setIntendedAmount(request.getIntendedAmount());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
         tx.setNote(request.getNote());
@@ -454,7 +452,7 @@ public class Contacts {
 
         FacilitatedTransaction facilitatedTransaction = new FacilitatedTransaction();
         request.setId(facilitatedTransaction.getId());
-        facilitatedTransaction.setIntendedAmount(request.getIntended_amount());
+        facilitatedTransaction.setIntendedAmount(request.getIntendedAmount());
 
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
@@ -527,7 +525,7 @@ public class Contacts {
 
                     FacilitatedTransaction tx = new FacilitatedTransaction();
                     tx.setId(rpr.getId());
-                    tx.setIntendedAmount(rpr.getIntended_amount());
+                    tx.setIntendedAmount(rpr.getIntendedAmount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                     tx.setNote(rpr.getNote());
@@ -551,7 +549,7 @@ public class Contacts {
                     if (tx == null) {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
-                        tx.setIntendedAmount(pr.getIntended_amount());
+                        tx.setIntendedAmount(pr.getIntendedAmount());
                         tx.setNote(pr.getNote());
                         newlyCreated = true;
                     }
@@ -577,7 +575,7 @@ public class Contacts {
                     tx = contact.getFacilitatedTransactions().get(pb.getId());
 
                     tx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
-                    tx.setTxHash(pb.getTx_hash());
+                    tx.setTxHash(pb.getTxHash());
 
                     unread.add(contact);
                     if (markAsRead) markMessageAsRead(message.getId(), true);

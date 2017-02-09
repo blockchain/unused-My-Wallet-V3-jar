@@ -232,7 +232,7 @@ public class ContactsIT {
         //Step 2
         PaymentRequest pr = new PaymentRequest();
         pr.setId(ftx.getId());
-        pr.setIntended_amount(ftx.getIntendedAmount());
+        pr.setIntendedAmount(ftx.getIntendedAmount());
         pr.setAddress(b_wallet.getAccount(0).getReceive().getAddressAt(0)
             .getAddressString());//should be next available
         System.out.println("Send PR to '" + RiaanMdid + "': " + pr.toJson());
