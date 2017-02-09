@@ -72,7 +72,7 @@ public class MultiAddrFactory {
     public void refreshXPUBData(List<String> xpubs) throws Exception {
 
         Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer(
-            BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode())
+            BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode())
             .getMultiAddress(xpubs, BlockExplorer.TX_FILTER_ALL, 100, 0);
 
         Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();
@@ -87,7 +87,7 @@ public class MultiAddrFactory {
     public void refreshLegacyAddressData(List<String> addresses, boolean simple) throws Exception {
 
         Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer(
-            BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode())
+            BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode())
             .getMultiAddress(addresses, BlockExplorer.TX_FILTER_ALL, 100, 0);
 
         Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();

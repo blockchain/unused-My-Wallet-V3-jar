@@ -61,7 +61,7 @@ public class DoubleEncryptionFactoryTest {
         try {
             String encrypted = doubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
             String decrypted = doubleEncryptionFactory.decrypt(encrypted, sharedKey, "bogus", iterations);
-            Assert.fail();
+            Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
             Assert.assertTrue("Double decryption failed", true);
         }
@@ -74,7 +74,7 @@ public class DoubleEncryptionFactoryTest {
         try {
             String encrypted = doubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
             String decrypted = doubleEncryptionFactory.decrypt(encrypted, sharedKey, pw.toString(), iterations + 1);
-            Assert.fail();
+            Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
             Assert.assertTrue("Double decryption failed", true);
         }

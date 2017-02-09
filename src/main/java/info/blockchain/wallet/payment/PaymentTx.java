@@ -76,7 +76,7 @@ public class PaymentTx {
                 continue;
             }
 
-            Address address = new Address(PersistentUrls.getInstance()
+            Address address = Address.fromBase58(PersistentUrls.getInstance()
                 .getCurrentNetworkParams(), toAddress);
             Coin coin = Coin.valueOf(amount.longValue());
 
@@ -151,7 +151,7 @@ public class PaymentTx {
         if (change.compareTo(BigInteger.ZERO) > 0) {
 
             Script changeScript = ScriptBuilder
-                .createOutputScript(new Address(networkParams, changeAddress));
+                .createOutputScript(Address.fromBase58(networkParams, changeAddress));
 
             TransactionOutput change_output = new TransactionOutput(networkParams,
                 null,

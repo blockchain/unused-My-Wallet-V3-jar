@@ -116,7 +116,7 @@ public class FormatsUtil {
         boolean ret;
 
         try {
-            new Address(PersistentUrls.getInstance().getCurrentNetworkParams(), address);
+            Address.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), address);
             ret = true;
         } catch (WrongNetworkException wne) {
             ret = false;

@@ -141,55 +141,6 @@ public class PayloadManagerTest extends MockedResponseTest {
     }
 
     @Test
-    @Ignore
-    public void upgradeV2PayloadToV3_shouldPass() throws Exception {
-
-        final PayloadManager payloadManager = PayloadManager.getInstance();
-        getRestoredWallet_All_All(payloadManager);
-
-        //Remove HD
-        Payload payload = payloadManager.getPayload();
-        payload.setHdWalletList(new ArrayList<HDWallet>());
-
-        //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        mockInterceptor.setResponseString("2191f7564486869d6b08c56f496008d7c9741cf7111ed23d4ca4178a35446827");
-        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", null);
-
-        payloadManager.addLegacyAddress(legacyAddress);
-
-        final String guidOriginal = payloadManager.getPayload().getGuid();
-
-        //Now we have legacy wallet (only addresses)
-        // TODO: 08/02/2017 Can't mock Balance api responses here
-        payloadManager.upgradeV2PayloadToV3("", true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
-            public void onDoubleEncryptionPasswordError() {
-                Assert.assertEquals("upgradeV2PayloadToV3 failed", false);
-            }
-
-            public void onUpgradeSuccess() {
-
-                Assert.assertEquals(payloadManager.getPayload().getGuid(), guidOriginal);
-                Assert.assertEquals("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
-
-                String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                Assert.assertEquals("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
-                try {
-                    Assert.assertEquals(payloadManager.getMnemonic().length, 12);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Assert.assertEquals("upgradeV2PayloadToV3 failed", false);
-                }
-            }
-
-            public void onUpgradeFail() {
-                Assert.assertEquals("upgradeV2PayloadToV3 failed", false);
-            }
-        });
-
-        PayloadManager.getInstance().wipe();
-    }
-
-    @Test
     public void createWallet_shouldPass() throws Exception {
 
         PayloadManager payloadManager = PayloadManager.getInstance();

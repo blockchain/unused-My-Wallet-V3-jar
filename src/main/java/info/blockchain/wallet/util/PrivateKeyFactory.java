@@ -91,7 +91,7 @@ public class PrivateKeyFactory {
 
     public ECKey getKey(String format, String data) throws Exception {
         if (format.equals(WIF_UNCOMPRESSED) || format.equals(WIF_COMPRESSED)) {
-            DumpedPrivateKey pk = new DumpedPrivateKey(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
+            DumpedPrivateKey pk = DumpedPrivateKey.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
             return pk.getKey();
         } else if (format.equals(BASE58)) {
             return decodeBase58PK(data);

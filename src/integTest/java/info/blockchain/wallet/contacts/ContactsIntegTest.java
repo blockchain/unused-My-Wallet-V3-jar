@@ -1,8 +1,6 @@
 package info.blockchain.wallet.contacts;
 
-import info.blockchain.util.RestClient;
-import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.BaseIntegTest;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Wallet;
 import info.blockchain.wallet.bip44.WalletFactory;
@@ -16,20 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import retrofit2.Retrofit;
 
-/**
- * Integration Test
- */
-@Ignore
-public class ContactsIT {
+public class ContactsIntegTest extends BaseIntegTest{
 
     //dev wallets
     private String wallet_A_guid = "014fb9fc-64f9-4cf5-b76b-d927d7619717";
@@ -39,40 +28,6 @@ public class ContactsIT {
     private String wallet_B_guid = "6fbe154a-35e0-46fb-a22b-699dc7cba87c";
     private String wallet_B_sharedKey = "49e58bdb-5a66-4353-923a-3b49054603d6";
     private String wallet_B_seedHex = "b88d0d894c19ad1d8e7f1563b7455f7c";
-
-    @Before
-    public void setup() throws Exception {
-
-        //Set environment
-        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
-        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
-
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-
-                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-                OkHttpClient okHttpClient = new OkHttpClient.Builder()
-//                        .addInterceptor(loggingInterceptor)//Extensive logging
-                    .build();
-
-                return RestClient.getRetrofitApiInstance(okHttpClient);
-            }
-
-            @Override
-            public Retrofit getRetrofitServerInstance() {
-                return null;
-            }
-
-            @Override
-            public String getApiCode() {
-                return null;
-            }
-        });
-    }
 
     private Wallet getWallet() throws Exception {
 
@@ -95,17 +50,17 @@ public class ContactsIT {
         Assert.assertTrue(contacts.getContactList().size() == 0);
 
         List<Contact> contactList = new ArrayList<>();
-        Contact contact = new Contact();
-        contact.setSurname("Doe");
-        contact.setName("John");
-        contact.setCompany("Blockchain");
-        contactList.add(contact);
+        Contact contact1 = new Contact();
+        contact1.setSurname("Doe");
+        contact1.setName("John");
+        contact1.setCompany("Blockchain");
+        contactList.add(contact1);
 
-        contact = new Contact();
-        contact.setSurname("Clark");
-        contact.setName("Bill");
-        contact.setCompany("Blockchain");
-        contactList.add(contact);
+        Contact contact2 = new Contact();
+        contact2.setSurname("Clark");
+        contact2.setName("Bill");
+        contact2.setCompany("Blockchain");
+        contactList.add(contact2);
 
         contacts.setContactList(contactList);
         Assert.assertTrue(contacts.getContactList().size() == 2);
@@ -116,12 +71,12 @@ public class ContactsIT {
         contacts.fetch();
         Assert.assertTrue(contacts.getContactList().size() == 2);
 
-        Assert.assertEquals(contacts.getContactList().get(0).getName(), "John");
-        Assert.assertEquals(contacts.getContactList().get(0).getSurname(), "Doe");
-        Assert.assertEquals(contacts.getContactList().get(0).getCompany(), "Blockchain");
-        Assert.assertEquals(contacts.getContactList().get(1).getName(), "Bill");
-        Assert.assertEquals(contacts.getContactList().get(1).getSurname(), "Clark");
-        Assert.assertEquals(contacts.getContactList().get(1).getCompany(), "Blockchain");
+        Assert.assertEquals(contacts.getContactList().get(contact1.getId()).getName(), "John");
+        Assert.assertEquals(contacts.getContactList().get(contact1.getId()).getSurname(), "Doe");
+        Assert.assertEquals(contacts.getContactList().get(contact1.getId()).getCompany(), "Blockchain");
+        Assert.assertEquals(contacts.getContactList().get(contact2.getId()).getName(), "Bill");
+        Assert.assertEquals(contacts.getContactList().get(contact2.getId()).getSurname(), "Clark");
+        Assert.assertEquals(contacts.getContactList().get(contact2.getId()).getCompany(), "Blockchain");
 
         contacts.wipe();
 

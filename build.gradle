@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'maven'
+    id 'maven-publish'
     id 'jacoco'
     id "com.github.kt3k.coveralls" version "2.7.1"
 }
@@ -8,8 +9,14 @@ plugins {
 group = 'info.blockchain'
 version = PROJECT_VERSION
 
+apply from: "integTest.gradle"
+
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 repositories {
     maven {
@@ -21,40 +28,37 @@ repositories {
     }
 }
 
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//            from components.java
-//
-//            artifact sourceJar {
-//                classifier "sources"
-//            }
-//        }
-//    }
-//
-//    repositories {
-//        project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
-//        maven {
-//            url "${nexusUrl}/repository/maven-${project.repo}/"
-//            credentials(PasswordCredentials) {
-//                username nexusUsername
-//                password nexusPassword
-//            }
-//        }
-//    }
-//}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+
+    repositories {
+        project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
+        maven {
+            url "${nexusUrl}/repository/maven-${project.repo}/"
+            credentials(PasswordCredentials) {
+                username nexusUsername
+                password nexusPassword
+            }
+        }
+    }
 }
 
-task sourcesJar(type: Jar, dependsOn:classes) {
+task sourceJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
 
-artifacts {
-    archives sourcesJar
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 dependencies {
