@@ -73,7 +73,7 @@ public class MultiAddrFactory {
 
         Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer(
             BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode())
-            .getMultiAddress(xpubs, BlockExplorer.TX_FILTER_ALL, 100, 0);
+            .getMultiAddress(xpubs, null,BlockExplorer.TX_FILTER_ALL, 100, 0);
 
         Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();
         JSONObject jsonObject = new JSONObject(exe.body().toJson());
@@ -88,7 +88,7 @@ public class MultiAddrFactory {
 
         Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer(
             BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode())
-            .getMultiAddress(addresses, BlockExplorer.TX_FILTER_ALL, 100, 0);
+            .getMultiAddress(addresses, null, BlockExplorer.TX_FILTER_ALL, 100, 0);
 
         Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();
         JSONObject jsonObject = new JSONObject(exe.body().toJson());
@@ -113,7 +113,7 @@ public class MultiAddrFactory {
         }
 
         Call<info.blockchain.api.data.MultiAddress> multiAddress = new BlockExplorer()
-            .getMultiAddress(addresses, BlockExplorer.TX_FILTER_ALL, 100, 0);
+            .getMultiAddress(addresses, null, BlockExplorer.TX_FILTER_ALL, 100, 0);
         Response<info.blockchain.api.data.MultiAddress> exe = multiAddress.execute();
         JSONObject jsonObject = new JSONObject(exe.body().toJson());
 

@@ -56,9 +56,6 @@ public class PayloadManager {
     private static PayloadManager instance = null;
     // active payload:
     private Payload payload = null;
-    // cached payload, compare to this payload to determine if changes have been made. Used to avoid needless remote saves to server
-    // TODO: 07/02/2017 Remove cached payload - checksum handles this already
-    private String cached_payload = null;
 
     private String strTempPassword = null;
     private boolean isNew = false;
@@ -76,7 +73,6 @@ public class PayloadManager {
     private PayloadManager() throws IOException {
         hdPayloadBridge = new HDPayloadBridge();
         payload = new Payload();
-        cached_payload = "";
         privateKeyFactory = new PrivateKeyFactory();
     }
 
@@ -100,7 +96,6 @@ public class PayloadManager {
      */
     public void wipe() throws IOException {
         payload = new Payload();
-        cached_payload = "";
         strTempPassword = null;
         isNew = false;
         email = null;
@@ -181,7 +176,6 @@ public class PayloadManager {
      */
     public void setTempPassword(String temp_password) {
         strTempPassword = temp_password;
-        clearCachedPayload();
     }
 
     /**
@@ -236,10 +230,6 @@ public class PayloadManager {
         }
 
         try {
-            if (cached_payload != null && cached_payload.equals(payload.toJson().toString())) {
-                return true;
-            }
-
             Pair pair = bciWallet.encryptPayload(payload.toJson().toString(), strTempPassword, bciWallet.getPbkdf2Iterations(), getVersion());
 
             JSONObject encryptedPayload = (JSONObject) pair.getRight();
@@ -264,7 +254,6 @@ public class PayloadManager {
                 bciWallet.setPayloadChecksum(newPayloadChecksum);
 
                 isNew = false;
-                cachePayload(payload);
 
                 return true;
             } else{
@@ -275,17 +264,6 @@ public class PayloadManager {
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * Write to current client payload to cache.
-     */
-    public void cachePayload(Payload payload) throws Exception {
-        cached_payload = payload.toJson().toString();
-    }
-
-    private void clearCachedPayload() {
-        cached_payload = null;
     }
 
     public String getEmail() {
@@ -411,7 +389,6 @@ public class PayloadManager {
 
                 syncWallet();
                 updateBalancesAndTransactions();
-                cachePayload(payload);
                 listener.onUpgradeSuccess();
 
             } catch (Exception e) {

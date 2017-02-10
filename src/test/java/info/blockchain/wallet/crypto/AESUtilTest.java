@@ -48,8 +48,7 @@ public class AESUtilTest {
         try {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
             String decrypted = AESUtil.decrypt(encrypted, "bogus", iterations);
-
-            Assert.assertTrue("Decryption (cleartext 'test data') successful with incorrect password as : " + decrypted, !decrypted.equals("bogus"));
+            Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
             Assert.assertTrue("Encryption failed as expected.", true);
         }
@@ -60,7 +59,7 @@ public class AESUtilTest {
         try {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
             String decrypted = AESUtil.decrypt(encrypted, pw, iterations + 1);
-            Assert.assertTrue("Decryption (cleartext 'test data') successful with incorrect iterations as : " + decrypted, cleartext.equals(decrypted));
+            Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
             Assert.assertTrue("Encryption failed as expected.", true);
         }
