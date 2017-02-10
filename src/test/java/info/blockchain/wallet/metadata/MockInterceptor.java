@@ -2,6 +2,7 @@ package info.blockchain.wallet.metadata;
 
 import java.io.IOException;
 
+import java.util.LinkedList;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
@@ -11,16 +12,28 @@ import okhttp3.ResponseBody;
 
 public class MockInterceptor implements Interceptor {
 
-    String responseString = "";
-    int responseCode = 200;
+    LinkedList<String> responseStringList;
+    LinkedList<Integer> responseCodeList;
     boolean ioException = false;
 
+    public void setResponseStringList(LinkedList<String> responseStringList){
+        this.responseStringList = responseStringList;
+    }
+
     public void setResponseString(String response) {
-        responseString = response;
+
+        this.responseStringList = new LinkedList<>();
+        this.responseStringList.add(response);
+    }
+
+    public void setResponseCodeList(LinkedList<Integer> responseCodeList){
+        this.responseCodeList = responseCodeList;
     }
 
     public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
+
+        this.responseCodeList = new LinkedList<>();
+        this.responseCodeList.add(responseCode);
     }
 
     public void setIOException(boolean throwException){
@@ -42,7 +55,14 @@ public class MockInterceptor implements Interceptor {
 //        System.out.println(method);
 //
 //        System.out.println("responseCode: "+responseCode);
-//        System.out.println("responseString: "+responseString);
+
+        String responseString = responseStringList.getFirst();
+        if(responseCodeList == null || responseCodeList.size() == 0) {
+            responseCodeList = new LinkedList<>();
+            responseCodeList.add(200);
+        }
+
+        int responseCode = responseCodeList.getFirst();
 
         Response response = new Response.Builder()
                 .code(responseCode)
@@ -52,6 +72,10 @@ public class MockInterceptor implements Interceptor {
                 .body(ResponseBody.create(MediaType.parse("application/json"), responseString.getBytes()))
                 .addHeader("content-type", "application/json")
                 .build();
+
+        //Reset responses
+        responseStringList.removeFirst();
+        responseCodeList.removeFirst();
 
         return response;
     }
