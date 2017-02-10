@@ -34,6 +34,11 @@ public class PaymentBroadcasted {
         return txHash;
     }
 
+    @JsonProperty("tx_hash")
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
     @JsonIgnore
     public PaymentBroadcasted fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, PaymentBroadcasted.class);
