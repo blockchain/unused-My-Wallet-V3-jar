@@ -33,11 +33,12 @@ public class FacilitatedTransaction {
     private String txHash;
     private String role;
     private long created;
+    private long lastUpdated;
     private String note;
 
     public FacilitatedTransaction() {
         this.id = UUID.randomUUID().toString();
-        this.created = System.currentTimeMillis();
+        this.created = System.currentTimeMillis() / 1000;
     }
 
     public void setId(String id) {
@@ -82,6 +83,30 @@ public class FacilitatedTransaction {
     @JsonProperty("tx_hash")
     public void setTxHash(String txHash) {
         this.txHash = txHash;
+    }
+
+    /**
+     * Returns the last time this object was updated, ie had any fields modified. Returns the date
+     * created if the last updated time has not yet been set
+     *
+     * @return A timestamp in seconds since epoch
+     */
+    @JsonProperty("last_updated")
+    public long getLastUpdated() {
+        return lastUpdated != 0 ? lastUpdated : created;
+    }
+
+    @JsonProperty("last_updated")
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    /**
+     * Updates the {@link #lastUpdated} field to the current time since epoch in seconds. Should be
+     * called after making any substantial changes to the class.
+     */
+    public void updateCompleted() {
+        setLastUpdated(System.currentTimeMillis() / 1000);
     }
 
     public String getRole() {

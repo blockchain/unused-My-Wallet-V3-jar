@@ -3,7 +3,6 @@ package info.blockchain.wallet.contacts;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
@@ -456,6 +455,7 @@ public class Contacts {
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
         tx.setNote(request.getNote());
+        tx.updateCompleted();
 
         request.setId(tx.getId());
 
@@ -481,6 +481,7 @@ public class Contacts {
         Contact contact = getContactFromMdid(mdid);
         facilitatedTransaction.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
         facilitatedTransaction.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
+        facilitatedTransaction.updateCompleted();
         contact.addFacilitatedTransaction(facilitatedTransaction);
         save();
     }
@@ -499,6 +500,7 @@ public class Contacts {
         FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
         ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
+        ftx.updateCompleted();
 
         save();
     }
@@ -519,6 +521,7 @@ public class Contacts {
 
         ftx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
         ftx.setTxHash(txHash);
+        ftx.updateCompleted();
 
         save();
     }
@@ -551,6 +554,7 @@ public class Contacts {
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                     tx.setNote(rpr.getNote());
+                    tx.updateCompleted();
 
                     Contact contact = getContactFromMdid(message.getSender());
                     contact.addFacilitatedTransaction(tx);
@@ -579,6 +583,7 @@ public class Contacts {
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
                     tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setAddress(pr.getAddress());
+                    tx.updateCompleted();
 
                     unread.add(contact);
                     if (markAsRead) markMessageAsRead(message.getId(), true);
@@ -598,6 +603,7 @@ public class Contacts {
 
                     tx.setState(FacilitatedTransaction.STATE_PAYMENT_BROADCASTED);
                     tx.setTxHash(pb.getTxHash());
+                    tx.updateCompleted();
 
                     unread.add(contact);
                     if (markAsRead) markMessageAsRead(message.getId(), true);

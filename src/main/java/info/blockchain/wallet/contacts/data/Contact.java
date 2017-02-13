@@ -38,7 +38,7 @@ public class Contact {
     public Contact() {
         this.id = UUID.randomUUID().toString();
         this.facilitatedTransaction = new HashMap<>();
-        this.created = System.currentTimeMillis();
+        this.created = System.currentTimeMillis() / 1000;
     }
 
     public String getId() {
