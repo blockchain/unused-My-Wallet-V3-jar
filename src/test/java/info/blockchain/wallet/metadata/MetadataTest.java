@@ -113,6 +113,7 @@ public class MetadataTest {
         Assert.assertTrue(msg.equals(result2));
 
         mockInterceptor.setResponseCode(200);
+        mockInterceptor.setResponseString("");
         metadata.deleteMetadata(msg);
 
         mockInterceptor.setResponseString("{\"message\":\"Not Found\"}");

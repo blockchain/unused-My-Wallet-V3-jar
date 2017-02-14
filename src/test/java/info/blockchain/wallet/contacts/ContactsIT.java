@@ -10,15 +10,12 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
-import info.blockchain.wallet.exceptions.MetadataException;
-import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
 
-import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
+
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,7 +27,6 @@ import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import org.spongycastle.crypto.InvalidCipherTextException;
 import retrofit2.Retrofit;
 
 /**
@@ -225,7 +221,7 @@ public class ContactsIT {
         FacilitatedTransaction ftx = null;
 
         for (Contact unread : b_unreadList) {
-            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransactions()
                 .entrySet();
             for (Entry<String, FacilitatedTransaction> item : set) {
                 System.out.println("Received RPR tx_id: " + item.getValue().getId());
@@ -236,7 +232,7 @@ public class ContactsIT {
         //Step 2
         PaymentRequest pr = new PaymentRequest();
         pr.setId(ftx.getId());
-        pr.setIntended_amount(ftx.getIntended_amount());
+        pr.setIntendedAmount(ftx.getIntendedAmount());
         pr.setAddress(b_wallet.getAccount(0).getReceive().getAddressAt(0)
             .getAddressString());//should be next available
         System.out.println("Send PR to '" + RiaanMdid + "': " + pr.toJson());
@@ -247,7 +243,7 @@ public class ContactsIT {
         List<Contact> a_unreadList = a_contacts.digestUnreadPaymentRequests();
 
         for (Contact unread : a_unreadList) {
-            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransactions()
                 .entrySet();
             for (Entry<String, FacilitatedTransaction> item : set) {
                 System.out.println("Received PR: " + item.getValue().toJson());
@@ -270,11 +266,11 @@ public class ContactsIT {
         System.out.println("\n--Recipient--");
         b_unreadList = b_contacts.digestUnreadPaymentRequests();
         for (Contact unread : b_unreadList) {
-            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransactions()
                 .entrySet();
             for (Entry<String, FacilitatedTransaction> item : set) {
                 System.out
-                    .println("Received payment broadcast tx_hash: " + item.getValue().getTx_hash());
+                    .println("Received payment broadcast tx_hash: " + item.getValue().getTxHash());
             }
         }
     }

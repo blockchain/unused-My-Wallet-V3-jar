@@ -1,5 +1,6 @@
 package info.blockchain.api;
 
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.util.WebUtil;
 
 import org.json.JSONObject;
@@ -26,7 +27,7 @@ public class Unspent extends BaseApi {
         if (response != null && !response.equals("No free outputs to spend")) {
             return new JSONObject(response);
         } else {
-            return null;
+            throw new ApiException(response);
         }
     }
 }
