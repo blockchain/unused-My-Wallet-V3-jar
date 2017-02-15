@@ -18,9 +18,9 @@ public class WalletFactoryTest {
         int mnemonicLength = 12;
         String path = "M/44H";
 
-        Wallet wallet = walletFactory.newWallet(mnemonicLength, passphrase, 1);
+        HDWallet wallet = walletFactory.newWallet(mnemonicLength, passphrase, 1);
 
-        Assert.assertEquals(mnemonicLength, wallet.getMnemonic().split(" ").length);
+        Assert.assertEquals(mnemonicLength, wallet.getMnemonicOld().split(" ").length);
         Assert.assertEquals(passphrase, wallet.getPassphrase());
         Assert.assertEquals(1, wallet.getAccounts().size());
         Assert.assertEquals(path, wallet.getPath());
@@ -33,7 +33,7 @@ public class WalletFactoryTest {
         String passphrase = "myPassPhrase";
         int accountListSize = 4;
 
-        Wallet wallet = null;
+        HDWallet wallet = null;
 
         try {
             wallet = walletFactory.restoreWallet(mnemonic, passphrase, accountListSize);
@@ -41,17 +41,17 @@ public class WalletFactoryTest {
             e.printStackTrace();
         }
 
-        //Wallet
+        //HDWallet
         Assert.assertNotNull(wallet);
         Assert.assertEquals("edb3e309910eafe85e03c9067b82a04d59e040523810c92bac3aca8252d461d5",
             wallet.getMasterKey().getPrivateKeyAsHex());
         Assert.assertEquals(16, wallet.getSeed().length);
         Assert.assertEquals("0660cc198330660cc198330660cc1983", wallet.getSeedHex());
         Assert.assertEquals("M/44H", wallet.getPath());
-        Assert.assertEquals(mnemonic, wallet.getMnemonic());
+        Assert.assertEquals(mnemonic, wallet.getMnemonicOld());
         Assert.assertEquals(passphrase, wallet.getPassphrase());
 
-        //Account
+        //HDAccount
         Assert.assertEquals(accountListSize, wallet.getAccounts().size());
         wallet.addAccount();
         Assert.assertEquals(accountListSize + 1, wallet.getAccounts().size());
@@ -60,7 +60,7 @@ public class WalletFactoryTest {
     @Test
     public void testRestoreWallet_badMnemonic_fail() {
 
-        Wallet wallet = null;
+        HDWallet wallet = null;
 
         try {
             wallet = walletFactory
@@ -79,7 +79,7 @@ public class WalletFactoryTest {
         String passphrase = "myPassPhrase";
         int accountListSize = 4;
 
-        Wallet wallet = null;
+        HDWallet wallet = null;
 
         try {
             wallet = walletFactory.restoreWallet(hexSeed, passphrase, accountListSize);
@@ -96,8 +96,8 @@ public class WalletFactoryTest {
     @Test
     public void testRestoredWallet_addressChains_withSamePassphrase_shouldBeSame() {
 
-        Wallet restoredWallet1 = null;
-        Wallet restoredWallet2 = null;
+        HDWallet restoredWallet1 = null;
+        HDWallet restoredWallet2 = null;
 
         String passphrase1 = "passphrase1";
 
@@ -122,8 +122,8 @@ public class WalletFactoryTest {
     @Test
     public void testRestoredWallet_addressChains_withDifferentPassphrase_shouldBeDifferent() {
 
-        Wallet wallet1 = null;
-        Wallet wallet2 = null;
+        HDWallet wallet1 = null;
+        HDWallet wallet2 = null;
 
         String passphrase1 = "passphrase1";
         String passphrase2 = "passphrase2";
@@ -148,12 +148,12 @@ public class WalletFactoryTest {
 
     @Test
     public void testAccount() throws AddressFormatException {
-        Account account = new Account(MainNetParams.get(), "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV", 1);
-        Assert.assertEquals("xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV",account.xpubstr());
+        HDAccount account = new HDAccount(MainNetParams.get(), "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV", 1);
+        Assert.assertEquals("xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV",account.getXpub());
         Assert.assertEquals(1,account.getId());
 
-        account = new Account(MainNetParams.get(), "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV");
-        Assert.assertEquals("xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV",account.xpubstr());
+        account = new HDAccount(MainNetParams.get(), "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV");
+        Assert.assertEquals("xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV",account.getXpub());
         Assert.assertEquals(0,account.getId());
     }
 }

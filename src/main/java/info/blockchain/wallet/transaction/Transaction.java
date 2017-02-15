@@ -8,6 +8,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/*
+Use info.blockchain.api.data.Transaction
+ */
+@Deprecated
 public class Transaction {
 
     private String strData = null;

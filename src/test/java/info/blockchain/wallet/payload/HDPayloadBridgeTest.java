@@ -2,7 +2,8 @@ package info.blockchain.wallet.payload;
 
 
 import info.blockchain.MockedResponseTest;
-import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.HDWallet;
+import info.blockchain.wallet.payload.data.Payload;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.commons.codec.DecoderException;
@@ -21,11 +22,11 @@ public class HDPayloadBridgeTest extends MockedResponseTest {
 
         HDPayloadBridge hdPayloadBridge = new HDPayloadBridge();
 
-        HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet("Account 1");
-        Wallet wallet = hdPayloadBridge.getHDWalletFromPayload(pair.payload);
+        HDPayloadBridge.HDWalletPayloadPair pair = hdPayloadBridge.createHDWallet("HDAccount 1");
+        HDWallet wallet = hdPayloadBridge.getHDWalletFromPayload(pair.payload);
 
         Assert.assertEquals(pair.wallet.getSeedHex(), wallet.getSeedHex());
-        Assert.assertEquals(pair.wallet.getMnemonic(), wallet.getMnemonic());
+        Assert.assertEquals(pair.wallet.getMnemonicOld(), wallet.getMnemonicOld());
     }
 
     public String[] getXPUBs(boolean includeArchives, Payload payload) throws IOException, DecoderException, AddressFormatException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicChecksumException, MnemonicException.MnemonicWordException {

@@ -9,7 +9,7 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.Address;
 import info.blockchain.wallet.bip44.Chain;
-import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -18,6 +18,11 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.multiaddr.MultiAddrFactory;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.BlockchainWallet;
+import info.blockchain.wallet.payload.data.ImportedAccount;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Payload;
 import info.blockchain.wallet.payment.PaymentBundle;
 import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
@@ -66,7 +71,7 @@ public class PayloadManager {
     private BlockchainWallet bciWallet;
 
     private HDPayloadBridge hdPayloadBridge;
-    private info.blockchain.wallet.bip44.Wallet wallet;
+    private HDWallet wallet;
     private PrivateKeyFactory privateKeyFactory;
     private MetadataNodeFactory metadataNodeFactory;
 
@@ -223,6 +228,7 @@ public class PayloadManager {
     }
 
     // TODO: 07/02/2017 should return response and not block
+    @Deprecated
     public boolean savePayloadToServer() {
 
         if (payload == null || !isEncryptionConsistent()) {
@@ -283,6 +289,7 @@ public class PayloadManager {
         return this.version = version;
     }
 
+    @Deprecated
     public boolean validateSecondPassword(String secondPassword) {
         return DoubleEncryptionFactory.getInstance().validateSecondPassword(
                 payload.getDoublePasswordHash(),
@@ -291,7 +298,8 @@ public class PayloadManager {
                 payload.getDoubleEncryptionPbkdf2Iterations());
     }
 
-    public Wallet getDecryptedWallet(String secondPassword) throws DecryptionException {
+    @Deprecated
+    public HDWallet getDecryptedWallet(String secondPassword) throws DecryptionException {
 
         if (validateSecondPassword(secondPassword)) {
 
@@ -313,6 +321,7 @@ public class PayloadManager {
         }
     }
 
+    @Deprecated
     public Payload createHDWallet(String payloadPassword, String defaultAccountName) throws Exception {
 
         setTempPassword(payloadPassword);
@@ -322,12 +331,13 @@ public class PayloadManager {
         setNew(true);
 
         bciWallet = new BlockchainWallet(payload);
-
+        System.out.println(payload.toJson().toString());
         savePayloadToServer();
 
         return payload;
     }
 
+    @Deprecated
     public Payload restoreHDWallet(String payloadPassword, String seed, String defaultAccountName) throws Exception {
 
         setTempPassword(payloadPassword);
@@ -343,6 +353,7 @@ public class PayloadManager {
         return payload;
     }
 
+    @Deprecated
     public Payload restoreHDWallet(String payloadPassword, String seed, String defaultAccountName, String passphrase) throws Exception {
 
         setTempPassword(payloadPassword);
@@ -369,6 +380,7 @@ public class PayloadManager {
     /*
     When called from Android - First apply PRNGFixes
      */
+    @Deprecated
     public void upgradeV2PayloadToV3(String secondPassword, boolean isNewlyCreated, String defaultAccountName, final UpgradePayloadListener listener) throws Exception {
 
         //Check if payload has 2nd password
@@ -442,6 +454,7 @@ public class PayloadManager {
                 ? findNextUnreservedReceiveAddressIndex(account, addressPosition + 1) : addressPosition;
     }
 
+    @Deprecated
     public String getXpubFromAccountIndex(int accountIdx) {
         return payload.getHdWallet().getAccounts().get(accountIdx).getXpub();
     }
@@ -474,11 +487,13 @@ public class PayloadManager {
         }
     }
 
+    @Deprecated
     public boolean isNotUpgraded() {
         return payload != null && !payload.isUpgraded();
     }
 
     @SuppressWarnings("SameParameterValue")
+    @Deprecated
     public ArrayList<String> getXPUBs(boolean includeArchives) {
 
         ArrayList<String> xpubs = new ArrayList<String>();
@@ -510,17 +525,17 @@ public class PayloadManager {
 
             wallet.addAccount();
 
-            xpub = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xpubstr();
-            xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xprvstr();
+            xpub = wallet.getAccounts().get(wallet.getAccounts().size() - 1).getXpub();
+            xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).getXPriv();
         } else {
 
-            Wallet wallet = getDecryptedWallet(secondPassword);
+            HDWallet wallet = getDecryptedWallet(secondPassword);
             if (wallet != null) {
 
                 wallet.addAccount();
 
-                xpub = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xpubstr();
-                xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).xprvstr();
+                xpub = wallet.getAccounts().get(wallet.getAccounts().size() - 1).getXpub();
+                xpriv = wallet.getAccounts().get(wallet.getAccounts().size() - 1).getXPriv();
 
 
             } else {
@@ -698,11 +713,11 @@ public class PayloadManager {
 
     public String[] getMnemonic(String secondPassword) throws Exception {
 
-        Wallet wallet = getDecryptedWallet(secondPassword);
+        HDWallet wallet = getDecryptedWallet(secondPassword);
 
         if (wallet == null) throw new Exception("getDecryptedWallet returned null.");
 
-        String mnemonic = wallet.getMnemonic();
+        String mnemonic = wallet.getMnemonicOld();
 
         if (mnemonic != null && mnemonic.length() > 0) {
             return mnemonic.split("\\s+");
@@ -712,7 +727,7 @@ public class PayloadManager {
     }
 
     public String[] getMnemonic() {
-        return wallet.getMnemonic().split("\\s+");
+        return wallet.getMnemonicOld().split("\\s+");
     }
 
     public String getHDPassphrase() {
@@ -735,7 +750,7 @@ public class PayloadManager {
             int chain = Integer.parseInt(split[1]);
             int addressIndex = Integer.parseInt(split[2]);
 
-            Wallet wallet;
+            HDWallet wallet;
 
             if (payload.isDoubleEncrypted()) {
                 wallet = getDecryptedWallet(secondPassword);
@@ -810,7 +825,7 @@ public class PayloadManager {
      *                   a generic Exception if saving the nodes fails
      */
     public void generateNodes(@Nullable String secondPassword) throws Exception {
-        Wallet wallet;
+        HDWallet wallet;
         if (payload.isDoubleEncrypted()) {
             wallet = getDecryptedWallet(secondPassword);
         } else {
@@ -826,13 +841,14 @@ public class PayloadManager {
         return metadataNodeFactory;
     }
 
-    Wallet getWallet() {
+    HDWallet getWallet() {
         return wallet;
     }
 
     /**
      * Checks imported address and hd keys for possible double encryption corruption
      */
+    @Deprecated
     public boolean isEncryptionConsistent() {
 
         ArrayList<String> keyList = new ArrayList<>();
@@ -856,6 +872,7 @@ public class PayloadManager {
         return isEncryptionConsistent(payload.isDoubleEncrypted(), keyList);
     }
 
+    @Deprecated
     boolean isEncryptionConsistent(boolean isDoubleEncrypted, List<String> keyList) {
 
         FormatsUtil formatsUtil = FormatsUtil.getInstance();

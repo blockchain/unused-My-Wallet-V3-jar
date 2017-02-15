@@ -1,7 +1,7 @@
 package info.blockchain.wallet.multiaddr;
 
 import info.blockchain.MockedResponseTest;
-import info.blockchain.wallet.payload.PayloadTest;
+import info.blockchain.wallet.payload.data.PayloadTest;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;

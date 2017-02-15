@@ -3,7 +3,7 @@ package info.blockchain.wallet;
 import retrofit2.Retrofit;
 
 /**
- * Class for initializing an instance of the Wallet JAR
+ * Class for initializing an instance of the HDWallet JAR
  */
 public final class BlockchainFramework {
 
@@ -23,5 +23,13 @@ public final class BlockchainFramework {
 
     public static String getApiCode() {
         return blockchainInterface.getApiCode();
+    }
+
+    public static String getDevice() {
+        return blockchainInterface.getDevice();
+    }
+
+    public static String getAppVersion() {
+        return blockchainInterface.getAppVersion();
     }
 }

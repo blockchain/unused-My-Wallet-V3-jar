@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -87,6 +88,7 @@ public class WalletApi {
     }
 
     // TODO: 07/02/2017  if !syncPubkeys just don't send address list then we can remove syncPubkeys param
+    @Deprecated
     public static Call<Void> saveWallet(boolean isNew, String guid, String sharedKey,
         List<String> activeAddressList, JSONObject encryptedPayload,
         boolean syncPubkeys, String newChecksum, String oldChecksum, String email, String device)
@@ -102,6 +104,38 @@ public class WalletApi {
         return getServerApiInstance().syncWallet(method,
             guid, sharedKey, encryptedPayload.toString(), encryptedPayload.toString().length(),
             URLEncoder.encode(newChecksum, "utf-8"), pipedAddresses, email, device, oldChecksum,
+            BlockchainFramework.getApiCode());
+    }
+
+    public static Call<Void> insertWallet(String guid, String sharedKey,
+        @Nullable List<String> activeAddressList, String encryptedPayload,
+        String newChecksum, String email, String device)
+        throws UnsupportedEncodingException {
+
+        String pipedAddresses = null;
+        if (activeAddressList != null) {
+            pipedAddresses = StringUtils.join(activeAddressList, "|");
+        }
+
+        return getServerApiInstance().syncWallet("insert",
+            guid, sharedKey, encryptedPayload, encryptedPayload.length(),
+            URLEncoder.encode(newChecksum, "utf-8"), pipedAddresses, email, device, null,
+            BlockchainFramework.getApiCode());
+    }
+
+    public static Call<Void> updateWallet(String guid, String sharedKey,
+        @Nullable List<String> activeAddressList, String encryptedPayload,
+        String newChecksum, String oldChecksum, String device)
+        throws UnsupportedEncodingException {
+
+        String pipedAddresses = null;
+        if (activeAddressList != null) {
+            pipedAddresses = StringUtils.join(activeAddressList, "|");
+        }
+
+        return getServerApiInstance().syncWallet("update",
+            guid, sharedKey, encryptedPayload, encryptedPayload.length(),
+            URLEncoder.encode(newChecksum, "utf-8"), pipedAddresses, null, device, oldChecksum,
             BlockchainFramework.getApiCode());
     }
 

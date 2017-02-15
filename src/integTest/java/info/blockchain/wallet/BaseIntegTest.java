@@ -36,6 +36,16 @@ public abstract class BaseIntegTest {
             public String getApiCode() {
                 return null;
             }
+
+            @Override
+            public String getDevice() {
+                return null;
+            }
+
+            @Override
+            public String getAppVersion() {
+                return null;
+            }
         });
     }
 

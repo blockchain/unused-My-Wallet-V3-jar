@@ -2,7 +2,7 @@ package info.blockchain.wallet.contacts;
 
 import info.blockchain.wallet.BaseIntegTest;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -29,7 +29,7 @@ public class ContactsIntegTest extends BaseIntegTest{
     private String wallet_B_sharedKey = "49e58bdb-5a66-4353-923a-3b49054603d6";
     private String wallet_B_seedHex = "b88d0d894c19ad1d8e7f1563b7455f7c";
 
-    private Wallet getWallet() throws Exception {
+    private HDWallet getWallet() throws Exception {
 
         return new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("15e23aa73d25994f1921a1256f93f72c",
             "",
@@ -92,7 +92,7 @@ public class ContactsIntegTest extends BaseIntegTest{
         /*
         Create wallets
          */
-        Wallet a_wallet = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).newWallet(12, "", 1);
+        HDWallet a_wallet = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).newWallet(12, "", 1);
         DeterministicKey sharedMetaDataHDNode = MetadataUtil
             .deriveSharedMetadataNode(a_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(a_wallet.getMasterKey());
@@ -100,7 +100,7 @@ public class ContactsIntegTest extends BaseIntegTest{
         a_contacts.publishXpub();
         a_contacts.fetch();
 
-        Wallet b_wallet = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).newWallet(12, "", 1);
+        HDWallet b_wallet = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).newWallet(12, "", 1);
         sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
         Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);

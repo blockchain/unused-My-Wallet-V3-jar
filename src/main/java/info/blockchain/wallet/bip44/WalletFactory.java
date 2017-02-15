@@ -40,12 +40,12 @@ public class WalletFactory {
      * @param nbWords number of words in menmonic
      * @param passphrase optional BIP39 passphrase
      * @param nbAccounts create this number of accounts
-     * @return Wallet
+     * @return HDWallet
      */
-    public Wallet newWallet(int nbWords, String passphrase,
+    public HDWallet newWallet(int nbWords, String passphrase,
         int nbAccounts) throws IOException, MnemonicException.MnemonicLengthException {
 
-        Wallet hdw;
+        HDWallet hdw;
 
         if ((nbWords % 3 != 0) || (nbWords < 12 || nbWords > 24)) {
             nbWords = 12;
@@ -67,7 +67,7 @@ public class WalletFactory {
             .getResourceAsStream("wordlist/" + locale.toString() + ".txt");
         if (wis != null) {
             MnemonicCode mc = new MnemonicCode(wis, null);
-            hdw = new Wallet(mc, networkParameters, seed, passphrase, nbAccounts);
+            hdw = new HDWallet(mc, networkParameters, seed, passphrase, nbAccounts);
             wis.close();
         } else {
             mLogger.info("cannot read BIP39 word list");
@@ -83,13 +83,13 @@ public class WalletFactory {
      * @param data: either BIP39 mnemonic or hex seed
      * @param passphrase optional BIP39 passphrase
      * @param nbAccounts create this number of accounts
-     * @return Wallet
+     * @return HDWallet
      */
-    public Wallet restoreWallet(String data, String passphrase,
+    public HDWallet restoreWallet(String data, String passphrase,
         int nbAccounts)
         throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
 
-        Wallet hdw;
+        HDWallet hdw;
 
         if (passphrase == null) {
             passphrase = "";
@@ -111,12 +111,12 @@ public class WalletFactory {
         if (data.length() % 4 == 0 && !data.contains(" ")) {
             //Hex seed
             seed = Hex.decodeHex(data.toCharArray());
-            hdw = new Wallet(mc, networkParameters, seed, passphrase, nbAccounts);
+            hdw = new HDWallet(mc, networkParameters, seed, passphrase, nbAccounts);
         } else {
             data = data.replaceAll("[^a-z]+", " ");             // only use for BIP39 English
             words = Arrays.asList(data.trim().split("\\s+"));
             seed = mc.toEntropy(words);
-            hdw = new Wallet(mc, networkParameters, seed, passphrase, nbAccounts);
+            hdw = new HDWallet(mc, networkParameters, seed, passphrase, nbAccounts);
         }
 
         wis.close();

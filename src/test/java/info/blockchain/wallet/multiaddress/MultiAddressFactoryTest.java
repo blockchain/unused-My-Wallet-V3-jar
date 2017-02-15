@@ -3,16 +3,13 @@ package info.blockchain.wallet.multiaddress;
 import info.blockchain.MockedResponseTest;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.MultiAddress;
-import info.blockchain.wallet.multiaddr.MultiAddrFactory;
-import info.blockchain.wallet.payload.PayloadTest;
+import info.blockchain.wallet.payload.data.PayloadTest;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import retrofit2.Call;
 

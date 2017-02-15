@@ -1,0 +1,58 @@
+{
+    "guid": "9ebb4d4f-f36e-40d6-9a3e-5a3cca5f83d6",
+    "sharedKey": "41cf823f-2dcd-4967-88d1-ef9af8689fc6",
+    "double_encryption": false,
+    "options": {
+        "pbkdf2_iterations": 0,
+        "fee_per_kb": 0,
+        "html5_notifications": false,
+        "logout_time": 600000
+    },
+    "keys": [
+        {
+            "addr": "1AN6WAdSrXATk7mcosqhK7vvPusC3fmw8p",
+            "priv": "XxkpqJqs1449nLHX1WcCP5QbmyJhjrwTis9hyvqGKJc",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "1Cp1xPTVdjePVcRAJHxesiLkNZbASgbkL",
+            "priv": "8uZW7qiz89NGtgwzdbqKZ9QDVPj1NeGV192RJUXdc946",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "1MsA1JJhgNMkuke9uttaXQfFyNBvmCyeiR",
+            "priv": "BH2MMphxoWQkynoo7HM8ukLSw8aNKFT9sWV2nu9QmNqe",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "13m3hC95Pp3ZWth6XCmhr9qUVNZGqMchia",
+            "priv": "4TE4wCgz1fcjSPsxSUUig36a9JpNfPn9c2KFcT94hWtk",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "17thFxEzSsR3fn2CpQrAYrcsUve6VN8JuX",
+            "priv": "2YARBSUuHrsuuvtEHoeTXiDXGdiDuHtfdLvvYCKkADCm",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        }
+    ]
+}

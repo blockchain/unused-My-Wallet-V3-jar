@@ -1,9 +1,9 @@
 package info.blockchain.wallet.wallet;
 
 import info.blockchain.wallet.BaseIntegTest;
-import info.blockchain.wallet.payload.HDWallet;
-import info.blockchain.wallet.payload.LegacyAddress;
-import info.blockchain.wallet.payload.Payload;
+import info.blockchain.wallet.payload.data.HDWallet;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Payload;
 import info.blockchain.wallet.payload.PayloadManager;
 import java.util.ArrayList;
 import org.junit.Assert;
@@ -36,7 +36,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
         final String guidOriginal = payloadManager.getPayload().getGuid();
 
         //Now we have legacy wallet (only addresses)
-        payloadManager.upgradeV2PayloadToV3("", true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
+        payloadManager.upgradeV2PayloadToV3("", true, "My Bci HDWallet", new PayloadManager.UpgradePayloadListener() {
             public void onDoubleEncryptionPasswordError() {
                 Assert.assertEquals("upgradeV2PayloadToV3 failed", false);
             }

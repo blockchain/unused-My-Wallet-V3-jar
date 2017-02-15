@@ -40,6 +40,16 @@ public abstract class MockedResponseTest {
             public String getApiCode() {
                 return null;
             }
+
+            @Override
+            public String getDevice() {
+                return "UnitTest";
+            }
+
+            @Override
+            public String getAppVersion() {
+                return null;
+            }
         });
     }
 

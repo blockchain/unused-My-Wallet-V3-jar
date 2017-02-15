@@ -1,10 +1,17 @@
 package info.blockchain.wallet.util;
 
 import com.google.common.primitives.UnsignedBytes;
+import info.blockchain.wallet.api.PersistentUrls;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import javax.annotation.Nonnull;
+import org.apache.commons.lang3.ArrayUtils;
+import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
@@ -69,5 +76,36 @@ public class Tools {
             data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
         }
         return data;
+    }
+
+    public static ECKey getECKeyFromKeyAndAddress(@Nonnull String decryptedKey, @Nonnull String address) throws AddressFormatException {
+
+        byte[] privBytes = Base58.decode(decryptedKey);
+        ECKey ecKey;
+
+        ECKey keyCompressed;
+        ECKey keyUnCompressed;
+        BigInteger priv = new BigInteger(privBytes);
+        if (priv.compareTo(BigInteger.ZERO) >= 0) {
+            keyCompressed = ECKey.fromPrivate(priv, true);
+            keyUnCompressed = ECKey.fromPrivate(priv, false);
+        } else {
+            byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
+            BigInteger priv2 = new BigInteger(appendZeroByte);
+            keyCompressed = ECKey.fromPrivate(priv2, true);
+            keyUnCompressed = ECKey.fromPrivate(priv2, false);
+        }
+
+        if (keyCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams())
+            .toString().equals(address)) {
+            ecKey = keyCompressed;
+        } else if (keyUnCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams())
+            .toString().equals(address)) {
+            ecKey = keyUnCompressed;
+        } else {
+            ecKey = null;
+        }
+
+        return ecKey;
     }
 }

@@ -1,15 +1,20 @@
 package info.blockchain.wallet.transaction;
 
+import info.blockchain.api.data.*;
 import java.util.Map;
 
+/*
+Use info.blockchain.api.data.Transaction
+ */
+@Deprecated
 public class Tx {
 
     private String strHash = null;
-    private String strNote = null;
+    private String strNote = null;//not used
     private String strDirection = null;
     private double amount = 0.0;
     private long ts = 0L;
-    private Map<Integer, String> tags = null;
+    private Map<Integer, String> tags = null;//not used
     private boolean isMove = false;
     private long confirmations = 0L;
     private boolean isWatchOnly = false;
@@ -40,18 +45,16 @@ public class Tx {
         strHash = hash;
     }
 
-    public String getNote() {
-        return strNote;
-    }
-
-    public void setNote(String note) {
-        strNote = note;
-    }
-
+    /*
+    Used in android
+     */
     public String getDirection() {
         return strDirection;
     }
 
+    /*
+    Set from multiaddr
+     */
     public void setDirection(String direction) {
         strDirection = direction;
     }
@@ -72,6 +75,9 @@ public class Tx {
         this.amount = amount;
     }
 
+    /*
+    used in multiaddr
+     */
     public boolean isMove() {
         return isMove;
     }
@@ -88,22 +94,26 @@ public class Tx {
         isDoubleSpend = doubleSpend;
     }
 
-    public Map<Integer, String> getTags() {
-        return this.tags;
-    }
+//    public Map<Integer, String> getTags() {
+//        return this.tags;
+//    }
 
-    public void setTags(Map<Integer, String> tags) {
-        this.tags = tags;
-    }
+//    public void setTags(Map<Integer, String> tags) {
+//        this.tags = tags;
+//    }
 
     public long getConfirmations() {
         return confirmations;
     }
 
+    /*
+    calc with latest block and height
+     */
     public void setConfirmations(long confirmations) {
         this.confirmations = confirmations;
     }
 
+    //not used
     public void setIsWatchOnly(boolean isWatchOnly) {
         this.isWatchOnly = isWatchOnly;
     }

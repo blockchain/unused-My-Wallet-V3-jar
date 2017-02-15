@@ -4,6 +4,7 @@ import info.blockchain.wallet.crypto.AESUtil;
 import java.security.MessageDigest;
 import org.spongycastle.util.encoders.Hex;
 
+// TODO: 10/02/2017 no need to be an object - can be static
 public class DoubleEncryptionFactory {
 
     private static DoubleEncryptionFactory instance = null;

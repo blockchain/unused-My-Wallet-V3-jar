@@ -5,7 +5,7 @@ import info.blockchain.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.bip44.WalletFactory;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
@@ -67,10 +67,20 @@ public class ContactsTest {
             public String getApiCode() {
                 return null;
             }
+
+            @Override
+            public String getDevice() {
+                return null;
+            }
+
+            @Override
+            public String getAppVersion() {
+                return null;
+            }
         });
     }
 
-    private Wallet getWallet() throws Exception {
+    private HDWallet getWallet() throws Exception {
 
         return new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("15e23aa73d25994f1921a1256f93f72c",
                 "",
@@ -78,7 +88,7 @@ public class ContactsTest {
     }
 
     private Contacts init() throws Exception{
-        Wallet b_wallet = getWallet();
+        HDWallet b_wallet = getWallet();
         DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
 

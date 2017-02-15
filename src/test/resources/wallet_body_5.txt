@@ -1,0 +1,24 @@
+{
+    "guid": "5f071985-01b5-4bd4-9d5f-c7cf570b1a2d",
+    "sharedKey": "ecfc1a81-cccb-4085-a260-ef7cb74b847e",
+    "double_encryption": false,
+    "tx_notes": {},
+    "options": {
+        "pbkdf2_iterations": 5000,
+        "fee_per_kb": 10000,
+        "html5_notifications": false,
+        "logout_time": 600000
+    },
+    "keys": [
+        {
+            "addr": "13CeRoCTgksr5A9276bLsAiM79i9hjMVLF",
+            "priv": "7ZefoHSaGKCspUAfdvLUrRZ2cQKb85381zd7rfKYTxki",
+            "label": null,
+            "created_time": 1471949131308,
+            "tag": 0,
+            "created_device_name": "javascript_web",
+            "created_device_version": "3.0"
+        }
+    ],
+    "address_book": []
+}

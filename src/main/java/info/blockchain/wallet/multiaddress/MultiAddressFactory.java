@@ -8,7 +8,7 @@ import info.blockchain.api.data.Output;
 import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.bip44.Account;
+import info.blockchain.wallet.bip44.HDAccount;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
@@ -73,7 +73,7 @@ public class MultiAddressFactory {
 
             for(int i = 0; i <= addr.getAccountIndex() + lookAhead; i++){
                 try {
-                    Account account = new Account(
+                    HDAccount account = new HDAccount(
                         PersistentUrls.getInstance().getCurrentNetworkParams(), xpubOrAddress);
                     if(address.equals(account.getReceive().getAddressAt(i).getAddressString())) {
                         return xpubOrAddress;
@@ -85,7 +85,7 @@ public class MultiAddressFactory {
 
             for(int i = 0; i <= addr.getChangeIndex() + lookAhead; i++){
                 try {
-                    Account account = new Account(
+                    HDAccount account = new HDAccount(
                         PersistentUrls.getInstance().getCurrentNetworkParams(), xpubOrAddress);
                     if(address.equals(account.getChange().getAddressAt(i).getAddressString())) {
                         return xpubOrAddress;

@@ -3,19 +3,19 @@ package info.blockchain.wallet.payload;
 import info.blockchain.MockedResponseTest;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.payload.data.Payload;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class PayloadManagerTest extends MockedResponseTest {
 
     PayloadManager payloadManager;
     String password = "password";
-    String label = "Account 1";
+    String label = "HDAccount 1";
     Payload payload;
 
     @Before
@@ -145,7 +145,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         PayloadManager payloadManager = PayloadManager.getInstance();
 
-        String label = "Account 1";
+        String label = "HDAccount 1";
         mockInterceptor.setResponseString("Success");
         Payload payload = payloadManager.createHDWallet("password", label);
 
@@ -172,7 +172,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         xpubs.add("{\"xpub6BiVtCpG9fQQGq7bXBjjf5zyguEXHrmxDu4t7pdTFUtDWD5epi4ecKmWBTMHvPQtRmQnby8gET7ArTzxjL4SNYdD2RYSdjk7fwYeEDMzkce\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6BiVtCpG9fQQJXDcLwQU1cXECNqaGYb3nNSu1ZEuwFKMXjDbCni6eMhN6rFkdxQsgF1amKAqeLSN63zrYPKJ3GU2ppowBWZSdGBk7QUxgLV\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6BiVtCpG9fQQNBuKZoKzhzmENDKdCeXQsNVPF2Ynt8rhyYznmPURQNDmnNnX9SYahZ1DVTaNtsh3pJ4b2jKvsZhpv2oVj76YETCGztKJ3LM\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
-        xpubs.add("Wallet successfully synced with server");
+        xpubs.add("HDWallet successfully synced with server");
         mockInterceptor.setResponseStringList(xpubs);
 
         return payloadManager.restoreHDWallet("password", mnemonic, "");
@@ -198,22 +198,22 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpub(), xpub1);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), "9xj9UhHNKHr6kJKJBVj82ZxFrbfhczBDUHyVj7kHGAiZqAeUenz2JhrphnMMYVKcWcVPFJESngtKsVa4FYEvFfWUTtZThCoZdwDeS9qQnqm");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpub(), xpub2);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), "9xj9UhHNKHr6nkRg3ZpSBp2i3MgSazXa3LGet5MsVY3nTeE1zvnwVrjpnsJGEtEvvcm8fwoUBVpnHcioJfFqRUaZ6ijXEuwUuv2Q5RM6dGR");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpub(), xpub3);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), "9xj9UhHNKHr6rUDptMDdQhw5ccX8mzVQBopwYejpRt1NHpFvQMSG1a8RGRJjZRE8rRJJ6N9g1GcB6yWEgkXCzGBweq934jS9LfBuViQRxRw");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpub(), xpub4);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), "9xj9UhHNKHr6tdLP1UdrAJKKRUiGd92aBbsqkW28vtdmCzXTvns1aNKwh5uM1nSbdD8Y4x9VBnTLrDDEbREnu9KYnDyvt8QRPtPWQ78UgAG");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpub(), xpub5);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), "9xj9UhHNKHr6vLRGPDajPuoc2futBwhu93ZLCUuoGBya3uD4X5kDfMuUiEHz7HPWPpkgCHiwNbLWjxa6QrqfjmPmVr146GUt8D5shiXkQpC");
@@ -247,7 +247,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         xpubs.add("{\"xpub6D45Bi15NLqW7RYzFUQe8oqiBNB9DPtmERMCgi7Rk7WsZBZnUEUxojq39Tfw7cfTtMs3pb8ur4HVDwVaYZNf8UP1WzWwZiQhsSBKFcrQXF4\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6D45Bi15NLqWB1JKmPM6hgu54zofJAMLywvyCt29bj18u36Z6epCmCQayJaCe54SWg3e3Na7n217QfyZ6zvV7gEsgcCxLW8KZPKohqk6SED\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
         xpubs.add("{\"xpub6D45Bi15NLqWCCqwmhSQoXNekogmYmMNKqAk9vNGg8uTRCRMB5XtBCWZv9nMMhLc3qVwSbgydUg4qfuBJZzjYmmG9y3o3Ta3k75a8x9iBMk\":{\"final_balance\":0,\"n_tx\":0,\"total_received\":20000}}");
-        xpubs.add("Wallet successfully synced with server");
+        xpubs.add("HDWallet successfully synced with server");
         mockInterceptor.setResponseStringList(xpubs);
 
         Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "", passphrase);
@@ -258,22 +258,22 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpub(), xpub1);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), "9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpub(), xpub2);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), "9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpub(), xpub3);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), "9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpub(), xpub4);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), "9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpub(), xpub5);
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), "9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF");
@@ -289,15 +289,15 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(payloadManager.getNextReceiveAddress(0), "1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payloadManager.getNextReceiveAddress(1), "1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payloadManager.getNextReceiveAddress(2), "1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3");
 
-        mockInterceptor.setResponseString("Wallet successfully synced with server");
+        mockInterceptor.setResponseString("HDWallet successfully synced with server");
         payloadManager.addAccount("", null);
         Assert.assertEquals(payloadManager.getNextReceiveAddress(3), "19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3");
 

@@ -2,7 +2,7 @@ package info.blockchain.wallet.multiaddr;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.payload.LegacyAddress;
+import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.transaction.Tx;
 import info.blockchain.wallet.transaction.TxMostRecentDateComparator;

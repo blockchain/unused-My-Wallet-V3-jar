@@ -4,8 +4,11 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.Address;
-import info.blockchain.wallet.bip44.Wallet;
+import info.blockchain.wallet.bip44.HDAccount;
+import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.bip44.WalletFactory;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.Payload;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +36,7 @@ public class HDPayloadBridge {
 
     public class HDWalletPayloadPair {
         Payload payload;
-        Wallet wallet;
+        HDWallet wallet;
     }
 
     public HDWalletPayloadPair createHDWallet(String defaultAccountName) throws Exception {
@@ -67,7 +70,7 @@ public class HDPayloadBridge {
 
         while (lookAhead > 0) {
 
-            String xpub = result.wallet.getAccount(index).xpubstr();
+            String xpub = result.wallet.getAccount(index).getXpub();
             if (hasTransactions(blockExplorer, xpub)) {
                 lookAhead = lookAheadTotal;
                 walletSize++;
@@ -98,17 +101,17 @@ public class HDPayloadBridge {
         return body.get(xpub).getNTx() > 0L;
     }
 
-    public Wallet getHDWalletFromPayload(Payload payload) throws Exception {
+    public HDWallet getHDWalletFromPayload(Payload payload) throws Exception {
         return bip44WalletFactory.restoreWallet(payload.getHdWallet().getSeedHex(),
                 DEFAULT_PASSPHRASE,
                 payload.getHdWallet().getAccounts().size());
     }
 
-    public Wallet decryptWatchOnlyWallet(Payload payload, String decrypted_hex) throws Exception {
+    public HDWallet decryptWatchOnlyWallet(Payload payload, String decrypted_hex) throws Exception {
         return bip44WalletFactory.restoreWallet(decrypted_hex, DEFAULT_PASSPHRASE, payload.getHdWallet().getAccounts().size());
     }
 
-    private Payload createBlockchainWallet(String defaultAccountName, Wallet hdw) {
+    private Payload createBlockchainWallet(String defaultAccountName, HDWallet hdw) {
 
         String guid = UUID.randomUUID().toString();
         String sharedKey = UUID.randomUUID().toString();
@@ -117,11 +120,11 @@ public class HDPayloadBridge {
         payload.setGuid(guid);
         payload.setSharedKey(sharedKey);
 
-        HDWallet payloadHDWallet = new HDWallet();
+        info.blockchain.wallet.payload.data.HDWallet payloadHDWallet = new info.blockchain.wallet.payload.data.HDWallet();
         payloadHDWallet.setSeedHex(hdw.getSeedHex());
 
-        List<info.blockchain.wallet.bip44.Account> hdAccounts = hdw.getAccounts();
-        List<info.blockchain.wallet.payload.Account> payloadAccounts = new ArrayList<Account>();
+        List<HDAccount> hdAccounts = hdw.getAccounts();
+        List<info.blockchain.wallet.payload.data.Account> payloadAccounts = new ArrayList<Account>();
 
         int accountNumber = 1;
         for (int i = 0; i < hdAccounts.size(); i++) {
@@ -130,12 +133,12 @@ public class HDPayloadBridge {
             if (accountNumber > 1) {
                 label = defaultAccountName + " " + accountNumber;
             }
-            info.blockchain.wallet.payload.Account account = new info.blockchain.wallet.payload.Account(label);
+            info.blockchain.wallet.payload.data.Account account = new info.blockchain.wallet.payload.data.Account(label);
             accountNumber++;
 
-            String xpub = hdw.getAccounts().get(i).xpubstr();
+            String xpub = hdw.getAccounts().get(i).getXpub();
             account.setXpub(xpub);
-            String xpriv = hdw.getAccounts().get(i).xprvstr();
+            String xpriv = hdw.getAccounts().get(i).getXPriv();
             account.setXpriv(xpriv);
 
             payloadAccounts.add(account);
@@ -167,8 +170,8 @@ public class HDPayloadBridge {
 
                 attempts++;
 
-                Wallet wallet = bip44WalletFactory.newWallet(DEFAULT_MNEMONIC_LENGTH, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
-                HDWallet hdw = new HDWallet();
+                HDWallet wallet = bip44WalletFactory.newWallet(DEFAULT_MNEMONIC_LENGTH, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
+                info.blockchain.wallet.payload.data.HDWallet hdw = new info.blockchain.wallet.payload.data.HDWallet();
                 String seedHex = wallet.getSeedHex();
                 if (!StringUtils.isEmpty(secondPassword)) {
                     seedHex = DoubleEncryptionFactory.getInstance().encrypt(
@@ -180,11 +183,11 @@ public class HDPayloadBridge {
 
                 hdw.setSeedHex(seedHex);
                 List<Account> accounts = new ArrayList<Account>();
-                xpub = wallet.getAccount(0).xpubstr();
+                xpub = wallet.getAccount(0).getXpub();
                 if (isNewlyCreated) {
                     accounts.add(new Account());
                     accounts.get(0).setXpub(xpub);
-                    String xpriv = wallet.getAccount(0).xprvstr();
+                    String xpriv = wallet.getAccount(0).getXPriv();
                     if (!StringUtils.isEmpty(secondPassword)) {
                         xpriv = DoubleEncryptionFactory.getInstance().encrypt(
                                 xpriv,
@@ -215,7 +218,7 @@ public class HDPayloadBridge {
 
     public Address getAddressAt(String xpub, int chain, int addressIndex) throws AddressFormatException {
 
-        info.blockchain.wallet.bip44.Account account = new info.blockchain.wallet.bip44.Account(PersistentUrls.getInstance().getCurrentNetworkParams(), xpub);
+        HDAccount account = new HDAccount(PersistentUrls.getInstance().getCurrentNetworkParams(), xpub);
         return account.getChain(chain).getAddressAt(addressIndex);
     }
 }
