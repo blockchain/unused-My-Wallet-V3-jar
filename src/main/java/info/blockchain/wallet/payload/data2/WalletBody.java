@@ -8,16 +8,26 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
+import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.bip44.Address;
+import info.blockchain.wallet.bip44.HDAccount;
+import info.blockchain.wallet.bip44.HDWallet;
+import info.blockchain.wallet.bip44.HDWalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.PayloadException;
+import info.blockchain.wallet.payment.PaymentBundle;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -31,6 +41,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
@@ -86,6 +97,11 @@ public class WalletBody {
     @JsonProperty("address_book")
     private List<AddressBookBody> addressBook;
 
+    //Have to handle HD here.
+    //WalletBody contains doubleEncryption hash to to handle encrypt/decrypt
+    //for HD and legacy.
+    private HDWallet HD;
+
     public WalletBody() {
         //Empty constructor needed for Jackson
     }
@@ -98,8 +114,40 @@ public class WalletBody {
         keys = new ArrayList<>();
         options = OptionsBody.getDefaultOptions();
 
+        //Bip44
+        this.HD = HDWalletFactory
+            .createWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                DEFAULT_MNEMONIC_LENGTH, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
+
+        HDWalletBody hdWalletBody = new HDWalletBody();
+
+        List<HDAccount> hdAccounts = this.HD.getAccounts();
+        List<AccountBody> accountBodyList = new ArrayList<>();
+        int accountNumber = 1;
+        for (int i = 0; i < hdAccounts.size(); i++) {
+
+            String label = defaultAccountName;
+            if (accountNumber > 1) {
+                label = defaultAccountName + " " + accountNumber;
+            }
+
+            AccountBody accountBody = new AccountBody();
+            accountBody.setLabel(label);
+            accountBody.setXpriv(this.HD.getAccount(0).getXPriv());
+            accountBody.setXpub(this.HD.getAccount(0).getXpub());
+            accountBodyList.add(accountBody);
+
+            accountNumber++;
+        }
+
+        hdWalletBody.setSeedHex(this.HD.getSeedHex());
+        hdWalletBody.setDefaultAccountIdx(0);
+        hdWalletBody.setMnemonicVerified(false);
+        hdWalletBody.setPassphrase(DEFAULT_PASSPHRASE);
+        hdWalletBody.setAccounts(accountBodyList);
+
         hdWallets = new ArrayList<>();
-        hdWallets.add(new HDWalletBody(defaultAccountName));
+        hdWallets.add(hdWalletBody);
     }
 
     public String getGuid() {
@@ -315,9 +363,20 @@ public class WalletBody {
         //V1 won't have hdWallets
         if(hdWallets != null){
             if(isDoubleEncryption()) {
-                getHdWallet().initHDNoPrivateKeys();
+                ArrayList<String> xpubList = new ArrayList<>();
+                for(AccountBody account : getHdWallet().getAccounts()) {
+                    xpubList.add(account.getXpub());
+                }
+
+                //Wallet still double encrypted at this point
+                //pass xpubs to give watch only wallet
+                HD = HDWalletFactory
+                    .restoreWatchOnlyWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
+                        xpubList);
             } else {
-                getHdWallet().initHD();
+                HD = HDWalletFactory
+                    .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                        getHdWallet().getSeedHex(), getHdWallet().getPassphrase(), DEFAULT_NEW_WALLET_SIZE);
             }
         }
     }
@@ -450,7 +509,7 @@ public class WalletBody {
         return consistent;
     }
 
-    public void validateSecondPassword(String secondPassword) throws DecryptionException {
+    public void validateSecondPassword(@Nullable String secondPassword) throws DecryptionException {
 
         if(isDoubleEncryption()) {
             DoubleEncryptionFactory.getInstance().validateSecondPassword(
@@ -464,7 +523,7 @@ public class WalletBody {
         }
     }
 
-    public void upgradeV2PayloadToV3(String secondPassword, String defaultAccountName) throws Exception {
+    public void upgradeV2PayloadToV3(@Nullable String secondPassword, String defaultAccountName) throws Exception {
 
         //Check if payload has 2nd password
         validateSecondPassword(secondPassword);
@@ -524,7 +583,7 @@ public class WalletBody {
         }
     }
 
-    public void addLegacyAddress(String label, @Nullable String secondPassword)
+    public LegacyAddressBody addLegacyAddress(String label, @Nullable String secondPassword)
         throws Exception {
         validateSecondPassword(secondPassword);
         LegacyAddressBody addressBody = LegacyAddressBody.generateNewLegacy();
@@ -544,23 +603,63 @@ public class WalletBody {
         }
 
         keys.add(addressBody);
+
+        return addressBody;
     }
 
-    public void addAccount(String label, @Nullable String secondPassword)
+    public AccountBody addAccount(String label, @Nullable String secondPassword)
         throws Exception {
 
         validateSecondPassword(secondPassword);
+        decryptHDWallet(secondPassword);
 
-        if (secondPassword != null) {
-            getHdWallet().addAccountDoubleEncrypt(label, secondPassword, sharedKey,
-                options.getPbkdf2Iterations());
-        } else {
-            getHdWallet().addAccount(label);
+        HD.addAccount();
+
+        HDAccount newlyDerived = HD.getAccount(HD.getAccounts().size() - 1);
+        String xpriv = newlyDerived.getXPriv();
+        String xpub = newlyDerived.getXpub();
+
+        //Double encryption
+        if(secondPassword != null) {
+            String encrypted = DoubleEncryptionFactory.getInstance().encrypt(
+                xpriv,
+                sharedKey,
+                secondPassword,
+                getOptions().getPbkdf2Iterations());
+            xpriv = encrypted;
+        }
+
+        return getHdWallet().addAccount(label, xpriv, xpub);
+    }
+
+    private void decryptHDWallet(@Nullable String secondPassword)
+        throws IOException, DecryptionException, InvalidCipherTextException, DecoderException,
+        MnemonicLengthException, MnemonicWordException, MnemonicChecksumException {
+
+        if(getHdWallets() == null || getHdWallets().size() == 0) {
+            throw new MnemonicLengthException("No HDWallet to decrypt!");
+        }
+
+        if(secondPassword != null) {
+
+            String encryptedSeedHex = getHdWallet().getSeedHex();
+
+            String decryptedSeedHex = DoubleEncryptionFactory.getInstance().decrypt(
+                encryptedSeedHex, sharedKey, secondPassword,
+                getOptions().getPbkdf2Iterations());
+
+            HD = HDWalletFactory
+                .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
+                    Language.US,
+                    decryptedSeedHex,
+                    getHdWallet().getPassphrase(),
+                    getHdWallet().getAccounts().size());
         }
     }
 
-    public LegacyAddressBody setKeyForLegacyAddress(ECKey key, String secondPassword)
-        throws DecryptionException, UnsupportedEncodingException, EncryptionException, NoSuchAddressException {
+    public LegacyAddressBody setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
+        throws DecryptionException, UnsupportedEncodingException, EncryptionException,
+        NoSuchAddressException {
 
         validateSecondPassword(secondPassword);
 
@@ -596,4 +695,79 @@ public class WalletBody {
 
         return matchingAddressBody;
     }
+
+    public DeterministicKey getMasterKey(@Nullable String secondPassword)
+        throws DecryptionException, MnemonicWordException, DecoderException, IOException,
+        MnemonicChecksumException, MnemonicLengthException, InvalidCipherTextException {
+
+        validateSecondPassword(secondPassword);
+        decryptHDWallet(secondPassword);
+        return HD.getMasterKey();
+    }
+
+    public List<String> getMnemonic(@Nullable String secondPassword)
+        throws DecryptionException, MnemonicWordException, DecoderException, IOException,
+        MnemonicChecksumException, MnemonicLengthException, InvalidCipherTextException {
+
+        validateSecondPassword(secondPassword);
+        decryptHDWallet(secondPassword);
+        return HD.getMnemonic();
+    }
+
+    public List<ECKey> getHDKeysForSigning(@Nullable String secondPassword, AccountBody account, PaymentBundle unspentOutputBundle)
+        throws Exception {
+
+        validateSecondPassword(secondPassword);
+        decryptHDWallet(secondPassword);
+
+
+        List<ECKey> keys = new ArrayList<>();
+
+        HDAccount hdAccount = getHDAccountFromAccountBody(account);
+        if (hdAccount != null) {
+            for (UnspentOutput unspent : unspentOutputBundle.getSpendableOutputs()) {
+                String[] split = unspent.getXpub().getPath().split("/");
+                int chain = Integer.parseInt(split[1]);
+                int addressIndex = Integer.parseInt(split[2]);
+
+                Address hdAddress = hdAccount.getChain(chain).getAddressAt(addressIndex);
+                ECKey walletKey = PrivateKeyFactory
+                    .getKey(PrivateKeyFactory.WIF_COMPRESSED, hdAddress.getPrivateKeyString());
+                keys.add(walletKey);
+            }
+        }
+
+        return keys;
+    }
+
+    private HDAccount getHDAccountFromAccountBody(AccountBody accountBody) {
+        for(HDAccount account : HD.getAccounts()) {
+            if(account.getXpub().equals(accountBody.getXpub())) {
+                return account;
+            }
+        }
+        return null;
+    }
+
+    //no need for second pw. only using HD xpubs
+    // TODO: 16/02/2017 this is so ugly to use. investigate other option
+    public BiMap<String, Integer> getXpubToAccountIndexMap() {
+
+        BiMap<String, Integer> xpubToAccountIndexMap = HashBiMap.create();
+
+        List<HDAccount> accountList = HD.getAccounts();
+
+        for (HDAccount account : accountList) {
+            xpubToAccountIndexMap.put(account.getXpub(), account.getId());
+        }
+
+        return xpubToAccountIndexMap;
+    }
+
+    // TODO: 16/02/2017 this is so ugly to use. investigate other option
+    public Map<Integer, String> getAccountIndexToXpubMap() {
+        return getXpubToAccountIndexMap().inverse();
+    }
 }
+
+// TODO: 16/02/2017 secondPassword could be extracted from methods if handled wallet side

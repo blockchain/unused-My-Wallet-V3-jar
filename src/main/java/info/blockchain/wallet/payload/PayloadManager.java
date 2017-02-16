@@ -72,13 +72,11 @@ public class PayloadManager {
 
     private HDPayloadBridge hdPayloadBridge;
     private HDWallet wallet;
-    private PrivateKeyFactory privateKeyFactory;
     private MetadataNodeFactory metadataNodeFactory;
 
     private PayloadManager() throws IOException {
         hdPayloadBridge = new HDPayloadBridge();
         payload = new Payload();
-        privateKeyFactory = new PrivateKeyFactory();
     }
 
     /**
@@ -108,7 +106,6 @@ public class PayloadManager {
         bciWallet = null;
         hdPayloadBridge = new HDPayloadBridge();
         wallet = null;
-        privateKeyFactory = new PrivateKeyFactory();
     }
 
     public interface InitiatePayloadListener {
@@ -719,6 +716,7 @@ public class PayloadManager {
         return wallet.getMasterKey();
     }
 
+    @Deprecated
     public String[] getMnemonic(String secondPassword) throws Exception {
 
         HDWallet wallet = getDecryptedWallet(secondPassword);
@@ -734,6 +732,7 @@ public class PayloadManager {
         }
     }
 
+    @Deprecated
     public String[] getMnemonic() {
         return wallet.getMnemonicOld().split("\\s+");
     }
@@ -749,6 +748,7 @@ public class PayloadManager {
         return bciWallet;
     }
 
+    @Deprecated
     public List<ECKey> getHDKeys(String secondPassword, Account account, PaymentBundle unspentOutputBundle) throws Exception {
 
         List<ECKey> keys = new ArrayList<ECKey>();
@@ -767,13 +767,14 @@ public class PayloadManager {
             }
 
             Address hd_address = wallet.getAccount(account.getRealIdx()).getChain(chain).getAddressAt(addressIndex);
-            ECKey walletKey = privateKeyFactory.getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
+            ECKey walletKey = PrivateKeyFactory.getKey(PrivateKeyFactory.WIF_COMPRESSED, hd_address.getPrivateKeyString());
             keys.add(walletKey);
         }
 
         return keys;
     }
 
+    @Deprecated
     public BiMap<String, Integer> getXpubToAccountIndexMap() {
 
         BiMap<String, Integer> xpubToAccountIndexMap = HashBiMap.create();
@@ -787,10 +788,12 @@ public class PayloadManager {
         return xpubToAccountIndexMap;
     }
 
+    @Deprecated
     public Map<Integer, String> getAccountIndexToXpubMap() {
         return getXpubToAccountIndexMap().inverse();
     }
 
+    @Deprecated
     public Call<ResponseBody> unregisterMdid(String guid, String sharedKey, ECKey node) throws Exception {
         String signedGuid = node.signMessage(guid);
         return WalletApi.unregisterMdid(guid,
@@ -798,6 +801,7 @@ public class PayloadManager {
             signedGuid);
     }
 
+    @Deprecated
     public Call<ResponseBody> registerMdid(String guid, String sharedKey, ECKey node) throws Exception {
         String signedGuid = node.signMessage(guid);
         return WalletApi.registerMdid(guid,
@@ -816,6 +820,7 @@ public class PayloadManager {
      * @return Returns true if the metadata nodes can be loaded from the service
      * @throws Exception Can throw an Exception if there's an issue with the credentials or network
      */
+    @Deprecated
     public boolean loadNodes(String guid, String sharedKey, String walletPassword) throws Exception {
         if (metadataNodeFactory == null) {
             metadataNodeFactory = new MetadataNodeFactory(guid, sharedKey, walletPassword);
@@ -832,6 +837,7 @@ public class PayloadManager {
      * @throws Exception Can throw a {@link DecryptionException} if the second password is wrong, or
      *                   a generic Exception if saving the nodes fails
      */
+    @Deprecated
     public void generateNodes(@Nullable String secondPassword) throws Exception {
         HDWallet wallet;
         if (payload.isDoubleEncrypted()) {
@@ -845,6 +851,7 @@ public class PayloadManager {
         }
     }
 
+    @Deprecated
     public MetadataNodeFactory getMetadataNodeFactory() {
         return metadataNodeFactory;
     }

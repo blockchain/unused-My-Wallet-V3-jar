@@ -31,13 +31,7 @@ public class PrivateKeyFactory {
     public final static String WIF_COMPRESSED = "wif_c";
     public final static String WIF_UNCOMPRESSED = "wif_u";
 
-    private BlockExplorer blockExplorer;
-
-    public PrivateKeyFactory() throws IOException {
-        this.blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
-    }
-
-    public String getFormat(String key) {
+    public static String getFormat(String key) {
 
         boolean isTestnet = !(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams);
 
@@ -89,7 +83,7 @@ public class PrivateKeyFactory {
         }
     }
 
-    public ECKey getKey(String format, String data) throws Exception {
+    public static ECKey getKey(String format, String data) throws Exception {
         if (format.equals(WIF_UNCOMPRESSED) || format.equals(WIF_COMPRESSED)) {
             DumpedPrivateKey pk = DumpedPrivateKey.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
             return pk.getKey();
@@ -108,7 +102,7 @@ public class PrivateKeyFactory {
         }
     }
 
-    private ECKey decodeMiniKey(String hex) throws Exception {
+    private static ECKey decodeMiniKey(String hex) throws Exception {
 
         Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(hex.getBytes("UTF-8")));
         ECKey uncompressedKey = decodeHexPK(hash.toString(), false);
@@ -122,6 +116,7 @@ public class PrivateKeyFactory {
             list.add(uncompressedAddress);
             list.add(compressedAddress);
 
+            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
             Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, BlockExplorer.TX_FILTER_ALL);
 
             Response<HashMap<String, Balance>> exe = call.execute();
@@ -146,28 +141,28 @@ public class PrivateKeyFactory {
         }
     }
 
-    private ECKey decodeBase58PK(String base58Priv) throws Exception {
+    private static ECKey decodeBase58PK(String base58Priv) throws Exception {
         byte[] privBytes = Base58.decode(base58Priv);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
         return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
     }
 
-    private ECKey decodeBase64PK(String base64Priv) {
+    private static ECKey decodeBase64PK(String base64Priv) {
         byte[] privBytes = Base64.decodeBase64(base64Priv.getBytes());
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
         return ECKey.fromPrivate(new BigInteger(appendZeroByte), true);
     }
 
-    private ECKey decodeHexPK(String hex, boolean compressed) {
+    private static ECKey decodeHexPK(String hex, boolean compressed) {
         byte[] privBytes = Hex.decode(hex);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
         return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
-    private String decryptPK(String base58Priv) {
+    private static String decryptPK(String base58Priv) {
 
 		/*
         if (this.isDoubleEncrypted()) {
@@ -181,11 +176,11 @@ public class PrivateKeyFactory {
         return base58Priv;
     }
 
-    private ECKey decodePK(String base58Priv) throws Exception {
+    private static ECKey decodePK(String base58Priv) throws Exception {
         return decodeBase58PK(decryptPK(base58Priv));
     }
 
-    private byte[] hash(byte[] data, int offset, int len) {
+    private static byte[] hash(byte[] data, int offset, int len) {
         try {
             MessageDigest a = MessageDigest.getInstance("SHA-256");
             a.update(data, offset, len);
@@ -195,7 +190,7 @@ public class PrivateKeyFactory {
         }
     }
 
-    private byte[] hash(byte[] data) {
+    private static byte[] hash(byte[] data) {
         return hash(data, 0, data.length);
     }
 

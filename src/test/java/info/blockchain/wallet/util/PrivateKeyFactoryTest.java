@@ -12,8 +12,6 @@ import org.junit.Test;
 
 public class PrivateKeyFactoryTest extends MockedResponseTest {
 
-    PrivateKeyFactory privateKeyFactory;
-
     //Mini key
     String uncompressedAddress = "16FFsrfKxeKt7JWhtpB4VrGBjQ1kKv5o3p";
     String compressedAddress = "1H2E6b2Ny6UeQ6bM5V2pSxAwZaVYAaaYUH";
@@ -30,21 +28,15 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
             "    }\n" +
             "}";
 
-    @Before
-    public void setUp() throws Exception {
-//        PersistentUrls.getInstance().setCurrentNetworkParams(TestNet3Params.get());
-        privateKeyFactory = new PrivateKeyFactory();
-    }
-
     @Test
     public void test_Mini_KeyFormat() throws Exception {
 
         String miniKey = "SmZxHc2PURmBHgKKXo97rEYWfnQKYu";
-        String format = privateKeyFactory.getFormat(miniKey);
+        String format = PrivateKeyFactory.getFormat(miniKey);
         Assert.assertEquals(PrivateKeyFactory.MINI, format);
 
         String miniKey2 = "SxuRMDrSNbwozww4twnedUPouUmGST";
-        String format2 = privateKeyFactory.getFormat(miniKey2);
+        String format2 = PrivateKeyFactory.getFormat(miniKey2);
         Assert.assertEquals(PrivateKeyFactory.MINI, format2);
     }
 
@@ -52,7 +44,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_BASE58_KeyFormat() throws Exception {
 
         String key = "22mPQQDMarsk4UcUuNH34PhebdftEtrQuftXDg5kA4QG";
-        String format = privateKeyFactory.getFormat(key);
+        String format = PrivateKeyFactory.getFormat(key);
         Assert.assertEquals(PrivateKeyFactory.BASE58, format);
     }
 
@@ -60,7 +52,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_BASE64_KeyFormat() throws Exception {
 
         String key = "vICceVGqzvxqnB7haMDSB1q+XtBJ2kYraP45sjPd3CA=";
-        String format = privateKeyFactory.getFormat(key);
+        String format = PrivateKeyFactory.getFormat(key);
         Assert.assertEquals(PrivateKeyFactory.BASE64, format);
     }
 
@@ -68,7 +60,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_HEX_COMPRESSED_KeyFormat() throws Exception {
 
         String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
-        String format = privateKeyFactory.getFormat(key);
+        String format = PrivateKeyFactory.getFormat(key);
         Assert.assertEquals(PrivateKeyFactory.HEX_COMPRESSED, format);
     }
 
@@ -81,7 +73,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
             key = "cUQEjQs1kQ5MdrKfKwV3GLq5onJ7tQ2uBmMuqWHvdfwru7vCj3jT";
         }
 
-        String format = privateKeyFactory.getFormat(key);
+        String format = PrivateKeyFactory.getFormat(key);
         Assert.assertEquals(PrivateKeyFactory.WIF_COMPRESSED, format);
     }
 
@@ -94,7 +86,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
             key = "938XkbQZo5mwX6jk81ZdmFv2ziytri1tFDmcXvmAS5HxiMZeBkn";
         }
 
-        String format = privateKeyFactory.getFormat(key);
+        String format = PrivateKeyFactory.getFormat(key);
         Assert.assertEquals(PrivateKeyFactory.WIF_UNCOMPRESSED, format);
     }
 
@@ -102,7 +94,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_BIP38_KeyFormat() throws Exception {
 
         String key = "6PfY1oK1kJX7jYDPMGBkcECCYwzH2qTCHfMdz67cBJrL7oZvpH8H8jfH2j";
-        String format = privateKeyFactory.getFormat(key);
+        String format = PrivateKeyFactory.getFormat(key);
         Assert.assertEquals(PrivateKeyFactory.BIP38, format);
     }
 
@@ -115,8 +107,8 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
 
         //Act
         String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
-        String format = privateKeyFactory.getFormat(miniKey);
-        ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
+        String format = PrivateKeyFactory.getFormat(miniKey);
+        ECKey ecKey = PrivateKeyFactory.getKey(format, miniKey);
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
@@ -133,8 +125,8 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
 
         //Act
         String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
-        String format = privateKeyFactory.getFormat(miniKey);
-        ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
+        String format = PrivateKeyFactory.getFormat(miniKey);
+        ECKey ecKey = PrivateKeyFactory.getKey(format, miniKey);
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
@@ -153,8 +145,8 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
 
         //Act
         String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
-        String format = privateKeyFactory.getFormat(miniKey);
-        ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
+        String format = PrivateKeyFactory.getFormat(miniKey);
+        ECKey ecKey = PrivateKeyFactory.getKey(format, miniKey);
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
@@ -166,8 +158,8 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_HEX_KeyFormat_shouldReturnCompressed() throws Exception {
 
         String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
-        String format = privateKeyFactory.getFormat(key);
-        ECKey key1 = privateKeyFactory.getKey(PrivateKeyFactory.HEX_COMPRESSED, key);
+        String format = PrivateKeyFactory.getFormat(key);
+        ECKey key1 = PrivateKeyFactory.getKey(PrivateKeyFactory.HEX_COMPRESSED, key);
 
         //Assert
         Assert.assertEquals(PrivateKeyFactory.HEX_COMPRESSED, format);

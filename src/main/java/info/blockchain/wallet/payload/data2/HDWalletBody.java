@@ -37,10 +37,6 @@ import org.spongycastle.crypto.InvalidCipherTextException;
     isGetterVisibility = Visibility.NONE)
 public class HDWalletBody {
 
-    private static final int DEFAULT_MNEMONIC_LENGTH = 12;
-    private static final int DEFAULT_NEW_WALLET_SIZE = 1;
-    private static final String DEFAULT_PASSPHRASE = "";
-
     @JsonProperty("accounts")
     private List<AccountBody> accounts;
 
@@ -55,47 +51,6 @@ public class HDWalletBody {
 
     @JsonProperty("default_account_idx")
     private int defaultAccountIdx;
-
-    // TODO: 15/02/2017 Refactor HDWallet and HDWalletBody to be one
-    private HDWallet HD;
-
-    public HDWalletBody(){
-        //Empty constructor needed for Jackson
-
-    }
-
-    public HDWalletBody(String defaultAccountName) throws IOException, MnemonicLengthException {
-
-        //Bip44
-        this.HD = HDWalletFactory
-            .createWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                DEFAULT_MNEMONIC_LENGTH, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
-
-        List<HDAccount> hdAccounts = this.HD.getAccounts();
-        List<AccountBody> accountBodyList = new ArrayList<>();
-        int accountNumber = 1;
-        for (int i = 0; i < hdAccounts.size(); i++) {
-
-            String label = defaultAccountName;
-            if (accountNumber > 1) {
-                label = defaultAccountName + " " + accountNumber;
-            }
-
-            AccountBody accountBody = new AccountBody();
-            accountBody.setLabel(label);
-            accountBody.setXpriv(this.HD.getAccount(0).getXPriv());
-            accountBody.setXpub(this.HD.getAccount(0).getXpub());
-            accountBodyList.add(accountBody);
-
-            accountNumber++;
-        }
-
-        this.seedHex = this.HD.getSeedHex();
-        this.defaultAccountIdx = 0;
-        this.mnemonicVerified = false;
-        this.passphrase = DEFAULT_PASSPHRASE;
-        this.accounts = accountBodyList;
-    }
 
     public List<AccountBody> getAccounts() {
         return accounts;
@@ -172,110 +127,16 @@ public class HDWalletBody {
         return xpubs;
     }
 
-    // TODO: 16/02/2017  Refactor HDWallet and HDWalletBody to be one
-    public DeterministicKey getMasterKey() {
-        return HD.getMasterKey();
-    }
-
-    public void addAccount(String label)
+    public AccountBody addAccount(String label, String xpriv, String xpub)
         throws IOException, DecryptionException, InvalidCipherTextException, DecoderException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, EncryptionException {
-
-        HD.addAccount();
-        HDAccount newlyDerived = HD
-            .getAccount(HD.getAccounts().size() - 1);
 
         AccountBody accountBody = new AccountBody();
         accountBody.setLabel(label);
-
-        String xpriv = newlyDerived.getXPriv();
-
-        accountBody.setXpub(newlyDerived.getXpub());
+        accountBody.setXpub(xpub);
         accountBody.setXpriv(xpriv);
 
         getAccounts().add(accountBody);
 
+        return accountBody;
     }
-
-    public void addAccountDoubleEncrypt(String label, String secondPassword, String sharedKey, int iterations)
-        throws IOException, DecryptionException, InvalidCipherTextException, DecoderException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, EncryptionException {
-
-        if(secondPassword != null) {
-
-            String encryptedSeedHex = getSeedHex();
-
-            String decryptedSeedHex = DoubleEncryptionFactory.getInstance().decrypt(
-                encryptedSeedHex, sharedKey, secondPassword,
-                iterations);
-
-            HD = HDWalletFactory
-                .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
-                    Language.US,
-                    decryptedSeedHex,
-                    getPassphrase(),
-                    getAccounts().size());
-        } else {
-            HD = HDWalletFactory
-                .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
-                    Language.US,
-                    getSeedHex(),
-                    getPassphrase(),
-                    getAccounts().size());
-        }
-
-        HD.addAccount();
-        HDAccount newlyDerived = HD
-            .getAccount(HD.getAccounts().size() - 1);
-
-        AccountBody accountBody = new AccountBody();
-        accountBody.setLabel(label);
-
-        String xpriv = newlyDerived.getXPriv();
-
-        //Double encryption
-        if(secondPassword != null) {
-            String encrypted = DoubleEncryptionFactory.getInstance().encrypt(
-                xpriv,
-                sharedKey,
-                secondPassword,
-                iterations);
-            xpriv = encrypted;
-            System.out.println(encrypted);
-        }
-
-        accountBody.setXpub(newlyDerived.getXpub());
-        accountBody.setXpriv(xpriv);
-
-        getAccounts().add(accountBody);
-
-    }
-
-    // TODO: 16/02/2017 Refactor HDWallet and HDWalletBody to be one
-    public void initHD()
-        throws DecoderException, MnemonicLengthException, MnemonicWordException,
-        MnemonicChecksumException, IOException, InvalidCipherTextException, DecryptionException {
-
-        HD = HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                seedHex, passphrase, DEFAULT_NEW_WALLET_SIZE);
-    }
-
-    // TODO: 16/02/2017 Refactor HDWallet and HDWalletBody to be one
-    public void initHDNoPrivateKeys()
-        throws DecoderException, MnemonicLengthException, MnemonicWordException,
-        MnemonicChecksumException, IOException, InvalidCipherTextException, DecryptionException {
-
-        ArrayList<String> xpubList = new ArrayList<>();
-        for(AccountBody account : accounts) {
-            xpubList.add(account.getXpub());
-        }
-
-        //pass xpubs to give watch only wallet
-        HD = HDWalletFactory
-            .restoreWatchOnlyWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
-                xpubList);
-    }
-
-//    public ArrayList<String> getMnemonic(@Nullable String secondPassword) {
-//
-//    }
 }

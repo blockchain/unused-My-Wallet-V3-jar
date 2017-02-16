@@ -9,6 +9,9 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -115,8 +118,10 @@ public class WalletManagerTest extends MockedResponseTest {
         WalletManager.getInstance().create("My HDWallet", "name@email.com");
 
         Assert.assertEquals(1, WalletManager.getInstance().getWalletBody().getHdWallet().getAccounts().size());
+        mockInterceptor.setResponseString("MyWallet save successful.");
         WalletManager.getInstance().addAccount("Some Label", null);
         Assert.assertEquals(2, WalletManager.getInstance().getWalletBody().getHdWallet().getAccounts().size());
+        mockInterceptor.setResponseString("MyWallet save successful.");
         WalletManager.getInstance().addAccount("Some Label", null);
         Assert.assertEquals(3, WalletManager.getInstance().getWalletBody().getHdWallet().getAccounts().size());
 
@@ -132,11 +137,17 @@ public class WalletManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(0, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
-        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        mockInterceptor.setResponseStringList(responseList);
         WalletManager.getInstance().addLegacyAddress("Some Label", null);
         Assert.assertEquals(1, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
-        mockInterceptor.setResponseString("3e2b33d63ba45320f42d2b1de6d7ebd3ea810c35348927fd34424fe9bc53c07a");
+        responseList = new LinkedList<>();
+        responseList.add("3e2b33d63ba45320f42d2b1de6d7ebd3ea810c35348927fd34424fe9bc53c07a");
+        responseList.add("MyWallet save successful");
+        mockInterceptor.setResponseStringList(responseList);
         WalletManager.getInstance().addLegacyAddress("Some Label", null);
         Assert.assertEquals(2, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
@@ -152,7 +163,10 @@ public class WalletManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(0, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
-        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        mockInterceptor.setResponseStringList(responseList);
         WalletManager.getInstance().addLegacyAddress("Some Label", null);
         Assert.assertEquals(1, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
@@ -178,7 +192,10 @@ public class WalletManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(0, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
-        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        mockInterceptor.setResponseStringList(responseList);
         WalletManager.getInstance().addLegacyAddress("Some Label", null);
         Assert.assertEquals(1, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
@@ -202,7 +219,10 @@ public class WalletManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(0, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 
-        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        mockInterceptor.setResponseStringList(responseList);
         WalletManager.getInstance().addLegacyAddress("Some Label", null);
         Assert.assertEquals(1, WalletManager.getInstance().getWalletBody().getLegacyAddressList().size());
 

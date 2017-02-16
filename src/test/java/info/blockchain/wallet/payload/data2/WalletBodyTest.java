@@ -1,15 +1,24 @@
 package info.blockchain.wallet.payload.data2;
 
+import com.google.common.collect.BiMap;
 import info.blockchain.MockedResponseTest;
+import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.test_data.UnspentTestData;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.payload.data.PayloadTest;
+import info.blockchain.wallet.payment.Payment;
+import info.blockchain.wallet.payment.PaymentBundle;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import java.math.BigInteger;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
@@ -349,6 +358,106 @@ public class WalletBodyTest extends MockedResponseTest{
 
         //Set private key
         wallet.setKeyForLegacyAddress(ecKey,"bogus");
+    }
+
+    @Test
+    public void getMasterKey() throws Exception {
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+        Assert.assertEquals("4NPYyXS5fhyoTHgDPt81cQ4838j1tRwmeRbK8pGLB1Xg",
+            Base58.encode(wallet.getMasterKey("hello").getPrivKeyBytes()));
+    }
+
+    @Test(expected = DecryptionException.class)
+    public void getMasterKey_DecryptionException() throws Exception {
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+        wallet.getMasterKey("bogus");
+    }
+
+    @Test
+    public void getMnemonic() throws Exception {
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+        Assert.assertEquals("[car, region, outdoor, punch, poverty, shadow, insane, claim, one, whisper, learn, alert]",
+            wallet.getMnemonic("hello").toString());
+    }
+
+    @Test(expected = DecryptionException.class)
+    public void getMnemonic_DecryptionException() throws Exception {
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+        wallet.getMnemonic("bogus").toString();
+    }
+
+    @Test
+    public void getHDKeysForSigning() throws Exception{
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        /*
+        8 available Payment. [80200,70000,60000,50000,40000,30000,20000,10000]
+         */
+        uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1_account1_unspent.txt").toURI();
+        body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+        UnspentOutputs unspentOutputs = new UnspentOutputs().fromJson(body);
+
+        Payment payment = new Payment();
+
+        long spendAmount = 80200l + 70000l + 60000l + 50000l + 40000l + 30000l + 20000l + 10000l - Payment.DUST.longValue();
+        long feeManual = Payment.DUST.longValue();
+
+        PaymentBundle paymentBundle = payment
+            .getCoinsForPayment(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L));
+
+        List<ECKey> keyList = wallet
+            .getHDKeysForSigning("hello", wallet.getHdWallet().getAccount(0), paymentBundle);
+
+        //Contains 5 matching keys for signing
+        Assert.assertEquals(5, keyList.size());
+    }
+
+    @Test
+    public void getXpubToAccountIndexMap() throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        BiMap<String, Integer> map = wallet.getXpubToAccountIndexMap();
+
+        Assert.assertEquals(0, map.get("xpub6DEe2bJAU7GbP12FBdsBckUkGPzQKMnZXaF2ajz2NCFfYJMEzb5G3oGwYrE6WQjnjhLeB6TgVudV3B9kKtpQmYeBJZLRNyXCobPht2jPUBm").intValue());
+        Assert.assertEquals(1, map.get("xpub6DEe2bJAU7GbQcGHvqgJ4T6pzZUU8j1WqLPyVtaWJFewfjChAKtUX5uRza9rabc6rAgFhXptveBmaoy7ptVGgbYT8KKaJ9E7wmyj5o4aqvr").intValue());
+        Assert.assertEquals(2, map.get("xpub6DEe2bJAU7GbUw3HDGPUY9c77mUcP9xvAWEhx9GReuJM9gppeGxHqBcaYAfrsyY8R6cfVRsuFhi2PokQFYLEQBVpM8p4MTLzEHpVu4SWq9a").intValue());
+        Assert.assertEquals(3, map.get("xpub6DEe2bJAU7GbW4d8d8Cfckg8kbHinDUQYHvXk3AobXNDYwGhaKZ1wZxGCBq67RiYzT3UuQjS3Jy3SGM3b9wz7aHVipE3Bg1HXhLguCgoALJ").intValue());
+        Assert.assertEquals(4, map.get("xpub6DEe2bJAU7GbYjCHygUwVDJYv5fjCUyQ1AHvkM1ecRL2PZ7vYv9a5iRiHjxmRgi3auyaA9NSAw88VwHm4hvw4C8zLbuFjNBcw2Cx7Ymq5zk").intValue());
+    }
+
+    @Test
+    public void getAccountIndexToXpubMap() throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        Map<Integer, String> map = wallet.getAccountIndexToXpubMap();
+
+        Assert.assertEquals("xpub6DEe2bJAU7GbP12FBdsBckUkGPzQKMnZXaF2ajz2NCFfYJMEzb5G3oGwYrE6WQjnjhLeB6TgVudV3B9kKtpQmYeBJZLRNyXCobPht2jPUBm", map.get(0));
+        Assert.assertEquals("xpub6DEe2bJAU7GbQcGHvqgJ4T6pzZUU8j1WqLPyVtaWJFewfjChAKtUX5uRza9rabc6rAgFhXptveBmaoy7ptVGgbYT8KKaJ9E7wmyj5o4aqvr", map.get(1));
+        Assert.assertEquals("xpub6DEe2bJAU7GbUw3HDGPUY9c77mUcP9xvAWEhx9GReuJM9gppeGxHqBcaYAfrsyY8R6cfVRsuFhi2PokQFYLEQBVpM8p4MTLzEHpVu4SWq9a", map.get(2));
+        Assert.assertEquals("xpub6DEe2bJAU7GbW4d8d8Cfckg8kbHinDUQYHvXk3AobXNDYwGhaKZ1wZxGCBq67RiYzT3UuQjS3Jy3SGM3b9wz7aHVipE3Bg1HXhLguCgoALJ", map.get(3));
+        Assert.assertEquals("xpub6DEe2bJAU7GbYjCHygUwVDJYv5fjCUyQ1AHvkM1ecRL2PZ7vYv9a5iRiHjxmRgi3auyaA9NSAw88VwHm4hvw4C8zLbuFjNBcw2Cx7Ymq5zk", map.get(4));
     }
 
 //    @Test

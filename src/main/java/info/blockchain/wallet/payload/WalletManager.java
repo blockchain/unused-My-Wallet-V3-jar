@@ -2,14 +2,18 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.metadata.MetadataNodeFactory;
+import info.blockchain.wallet.payload.data2.AccountBody;
 import info.blockchain.wallet.payload.data2.LegacyAddressBody;
 import info.blockchain.wallet.payload.data2.WalletBaseBody;
 import info.blockchain.wallet.payload.data2.WalletBody;
@@ -35,8 +39,8 @@ import retrofit2.Response;
 public class WalletManager {
 
     private WalletBaseBody walletBaseBody;
-
     private String tempPassword;
+    private MetadataNodeFactory metadataNodeFactory;
 
     private static WalletManager instance = new WalletManager();
 
@@ -56,6 +60,14 @@ public class WalletManager {
         walletBaseBody = null;
         tempPassword = null;
     }
+
+    public WalletBody getWalletBody() {
+        return walletBaseBody.getWalletBody();
+    }
+
+    //********************************************************************************************//
+    //*                  Wallet initialization, creation, recovery, syncing                      *//
+    //********************************************************************************************//
 
     public void create(@Nonnull String defaultAccountName, @Nonnull String email)
         throws Exception {
@@ -168,6 +180,62 @@ public class WalletManager {
         }
     }
 
+    //********************************************************************************************//
+    //*                         Account and Legacy Address creation                              *//
+    //********************************************************************************************//
+
+    public boolean addAccount(String label, @Nullable String secondPassword)
+        throws Exception {
+        AccountBody accountBody = walletBaseBody.getWalletBody().addAccount(label, secondPassword);
+
+        boolean success = save();
+
+        if (!success) {
+            //Revert on save fail
+            walletBaseBody.getWalletBody().getHdWallet().getAccounts().remove(accountBody);
+        }
+
+        return success;
+    }
+
+    public boolean addLegacyAddress(String label, @Nullable String secondPassword) throws Exception {
+
+        LegacyAddressBody legacyAddressBody = walletBaseBody.getWalletBody()
+            .addLegacyAddress(label, secondPassword);
+
+        boolean success = save();
+
+        if (!success) {
+            //Revert on save fail
+            walletBaseBody.getWalletBody().getLegacyAddressList().remove(legacyAddressBody);
+        }
+
+        return success;
+    }
+
+    public boolean setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
+        throws EncryptionException, IOException, DecryptionException, NoSuchAddressException,
+        NoSuchAlgorithmException, HDWalletException {
+
+        LegacyAddressBody matchingLegacyAddress = walletBaseBody.getWalletBody()
+            .setKeyForLegacyAddress(key, secondPassword);
+
+        boolean success = save();
+
+        if (!success) {
+            //Revert on save fail
+            matchingLegacyAddress.setPrivateKey(null);
+        }
+
+        return success;
+
+    }
+
+    //********************************************************************************************//
+    //*                 Shortcut methods(Remove from Android first then delete)                  *//
+    //********************************************************************************************//
+
+    @Deprecated
     public void validateSecondPassword(String secondPassword) throws DecryptionException {
         walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
     }
@@ -175,6 +243,7 @@ public class WalletManager {
     /*
     Used to check if wallet has HD wallet - Prompt user for upgrade if not
      */
+    @Deprecated
     public boolean isNotUpgraded() {
         return walletBaseBody.getWalletBody() != null && !walletBaseBody.getWalletBody().isUpgraded();
     }
@@ -208,34 +277,72 @@ public class WalletManager {
         return walletBaseBody.getWalletBody().getHdWallet().getActive();
     }
 
-    public void addAccount(String label, @Nullable String secondPassword)
-        throws Exception {
-        walletBaseBody.getWalletBody().addAccount(label, secondPassword);
+    //********************************************************************************************//
+    //*                                        Metadata                                          *//
+    //********************************************************************************************//
+
+    /**
+     *
+     * @param node used to sign GUID. This will deactivate push notifications.
+     * @return
+     * @throws Exception
+     */
+    public Call<ResponseBody> unregisterMdid(ECKey node) throws Exception {
+        String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
+        return WalletApi.unregisterMdid(walletBaseBody.getWalletBody().getGuid(),
+            walletBaseBody.getWalletBody().getSharedKey(),
+            signedGuid);
     }
 
-    public void addLegacyAddress(String label, @Nullable String secondPassword) throws Exception {
-        walletBaseBody.getWalletBody().addLegacyAddress(label, secondPassword);
+    /**
+     *
+     * @param node used to sign GUID. This will activate push notifications.
+     * @return
+     * @throws Exception
+     */
+    public Call<ResponseBody> registerMdid(ECKey node) throws Exception {
+        String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
+        return WalletApi.registerMdid(walletBaseBody.getWalletBody().getGuid(),
+            walletBaseBody.getWalletBody().getSharedKey(),
+            signedGuid);
     }
 
-    public boolean setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
-        throws EncryptionException, IOException, DecryptionException, NoSuchAddressException,
-        NoSuchAlgorithmException, HDWalletException {
-
-        LegacyAddressBody matchingLegacyAddress = walletBaseBody.getWalletBody()
-            .setKeyForLegacyAddress(key, secondPassword);
-
-        boolean success = save();
-
-        if (!success) {
-            //Revert on save fail
-            matchingLegacyAddress.setPrivateKey(null);
+    /**
+     *
+     * Loads the metadata nodes from the metadata service. If this fails, the function returns false
+     * and they must be generated and saved using this#generateNodes(String). This allows us
+     * to generate and prompt for a second password only once.
+     *
+     * @return Returns true if the metadata nodes can be loaded from the service
+     * @throws Exception Can throw an Exception if there's an issue with the credentials or network
+     */
+    public boolean loadNodes() throws Exception {
+        if (metadataNodeFactory == null) {
+            metadataNodeFactory = new MetadataNodeFactory(walletBaseBody.getWalletBody().getGuid(),
+                walletBaseBody.getWalletBody().getSharedKey(), tempPassword);
         }
-
-        return success;
-
+        return metadataNodeFactory.isMetadataUsable();
     }
 
-    public WalletBody getWalletBody() {
-        return walletBaseBody.getWalletBody();
+    /**
+     * Generates the nodes for the shared metadata service and saves them on the service. Takes an
+     * optional second password if set by the user. this#loadNodes(String, String, String)
+     * must be called first to avoid a {@link NullPointerException}.
+     *
+     * @param secondPassword An optional second password, if applicable
+     * @throws Exception Can throw a {@link DecryptionException} if the second password is wrong, or
+     *                   a generic Exception if saving the nodes fails
+     */
+    public void generateNodes(@Nullable String secondPassword) throws Exception{
+
+        boolean success = metadataNodeFactory.saveMetadataHdNodes(
+            walletBaseBody.getWalletBody().getMasterKey(secondPassword));
+        if (!success) {
+            throw new MetadataException("All Metadata nodes might not have saved.");
+        }
+    }
+
+    public MetadataNodeFactory getMetadataNodeFactory() {
+        return metadataNodeFactory;
     }
 }

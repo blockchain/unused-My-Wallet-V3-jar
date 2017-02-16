@@ -419,7 +419,7 @@ public class PaymentTest extends MockedResponseTest {
             changeAddress);
 
         List<ECKey> keys = new ArrayList<>();
-        keys.add(new PrivateKeyFactory().getKey(PrivateKeyFactory.WIF_UNCOMPRESSED, "L3wP9Q3gTZ9YwuTuB8nuczhWG9uEXQEE94PTWDZgpVttFzJbKSHL"));
+        keys.add(PrivateKeyFactory.getKey(PrivateKeyFactory.WIF_UNCOMPRESSED, "L3wP9Q3gTZ9YwuTuB8nuczhWG9uEXQEE94PTWDZgpVttFzJbKSHL"));
 
         Assert.assertEquals("393988f87ba7a6be24705d0821d4f61c54b341eda3776cc4f3c4eb7af5f7fa7c", tx.getHashAsString());
         payment.signTransaction(tx, keys);
