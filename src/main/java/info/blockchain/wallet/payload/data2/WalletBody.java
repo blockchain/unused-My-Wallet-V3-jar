@@ -11,19 +11,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.EncryptionException;
+import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import retrofit2.Response;
 
 @JsonInclude(Include.NON_NULL)
@@ -87,12 +98,8 @@ public class WalletBody {
         keys = new ArrayList<>();
         options = OptionsBody.getDefaultOptions();
 
-//        HDWallet hdWallet = HDWalletFactory
-//            .newWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-//                DEFAULT_MNEMONIC_LENGTH, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
-//
-//        hdWallets = new ArrayList<>();
-//        hdWallets.add(hdWallet);
+        hdWallets = new ArrayList<>();
+        hdWallets.add(new HDWalletBody(defaultAccountName));
     }
 
     public String getGuid() {
@@ -111,23 +118,6 @@ public class WalletBody {
         return dpasswordhash;
     }
 
-    public int getPbkdf2Iterations() {
-
-        int iterations = WalletWrapperBody.DEFAULT_PBKDF2_ITERATIONS_V2;
-
-        //Old wallets may contain wallet_options key
-        if (walletOptions != null && walletOptions.getPbkdf2Iterations() > 0) {
-            iterations = walletOptions.getPbkdf2Iterations();
-        }
-
-        //Options key should override wallet_options key
-        if (options != null && options.getPbkdf2Iterations() > 0) {
-            iterations = options.getPbkdf2Iterations();
-        }
-
-        return iterations;
-    }
-
     public Map<String, String> getTxNotes() {
         return txNotes;
     }
@@ -140,7 +130,34 @@ public class WalletBody {
         return tagNames;
     }
 
+    private int fixPbkdf2Iterations() {
+
+        //Use default initially
+        int iterations = WalletWrapperBody.DEFAULT_PBKDF2_ITERATIONS_V2;
+
+        //Old wallets may contain 'wallet_options' key - we'll use this now
+        if (walletOptions != null && walletOptions.getPbkdf2Iterations() > 0) {
+            iterations = walletOptions.getPbkdf2Iterations();
+        }
+
+        //'options' key override wallet_options key - we'll use this now
+        if (options != null && options.getPbkdf2Iterations() > 0) {
+            iterations = options.getPbkdf2Iterations();
+        }
+
+        //If wallet doesn't contain 'option' - use default
+        if(options == null) {
+            options = OptionsBody.getDefaultOptions();
+        }
+
+        //Set iterations
+        options.setPbkdf2Iterations(iterations);
+
+        return iterations;
+    }
+
     public OptionsBody getOptions() {
+        fixPbkdf2Iterations();
         return options;
     }
 
@@ -276,14 +293,33 @@ public class WalletBody {
         return (hdWallets != null);
     }
 
-    public static WalletBody fromJson(String json) throws IOException {
+    public static WalletBody fromJson(String json)
+        throws IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException,
+        DecoderException, InvalidCipherTextException, DecryptionException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
             .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
             .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
             .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
             .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-        return mapper.readValue(json, WalletBody.class);
+
+        WalletBody walletBody = mapper.readValue(json, WalletBody.class);
+        walletBody.initHD();
+        return walletBody;
+    }
+
+    private void initHD()
+        throws DecryptionException, DecoderException, MnemonicWordException, MnemonicChecksumException,
+        MnemonicLengthException, InvalidCipherTextException, IOException {
+
+        //V1 won't have hdWallets
+        if(hdWallets != null){
+            if(isDoubleEncryption()) {
+                getHdWallet().initHDNoPrivateKeys();
+            } else {
+                getHdWallet().initHD();
+            }
+        }
     }
 
     public String toJson() throws JsonProcessingException {
@@ -331,7 +367,7 @@ public class WalletBody {
 //                    walletSize++;
 //                }
 //
-//                hdWallet.addAccount(defaultAccountName+" "+(index+1));
+//                hdWallet.addAccountDoubleEncrypt(defaultAccountName+" "+(index+1));
 //                index++;
 //                lookAhead--;
 //            }
@@ -414,11 +450,24 @@ public class WalletBody {
         return consistent;
     }
 
+    public void validateSecondPassword(String secondPassword) throws DecryptionException {
 
+        if(isDoubleEncryption()) {
+            DoubleEncryptionFactory.getInstance().validateSecondPassword(
+                getDpasswordhash(),
+                getSharedKey(),
+                secondPassword,
+                getOptions().getPbkdf2Iterations(),
+                true);
+        } else if(!isDoubleEncryption() && secondPassword != null) {
+            throw new DecryptionException("Double encryption password specified on non double encrypted wallet.");
+        }
+    }
 
-
-    // TODO: 15/02/2017 these are extra for now
     public void upgradeV2PayloadToV3(String secondPassword, String defaultAccountName) throws Exception {
+
+        //Check if payload has 2nd password
+        validateSecondPassword(secondPassword);
 
         if (getHdWallets() == null || getHdWallets().size() == 0) {
 
@@ -445,7 +494,7 @@ public class WalletBody {
                         hdWalletBody.getSeedHex(),
                         getSharedKey(),
                         secondPassword,
-                        getPbkdf2Iterations());
+                        getOptions().getPbkdf2Iterations());
                     hdWalletBody.setSeedHex(doubleEncryptedSeedHex);
 
                     //Double encrypt private key
@@ -455,7 +504,7 @@ public class WalletBody {
                             account.getXpriv(),
                             getSharedKey(),
                             secondPassword,
-                            getPbkdf2Iterations());
+                            getOptions().getPbkdf2Iterations());
 
                         account.setXpriv(encryptedXPriv);
 
@@ -475,7 +524,76 @@ public class WalletBody {
         }
     }
 
-    public void addLegacyAddress(LegacyAddressBody address) {
-        keys.add(address);
+    public void addLegacyAddress(String label, @Nullable String secondPassword)
+        throws Exception {
+        validateSecondPassword(secondPassword);
+        LegacyAddressBody addressBody = LegacyAddressBody.generateNewLegacy();
+        addressBody.setLabel(label);
+
+        if(secondPassword != null) {
+            //Double encryption
+            String unencryptedKey = addressBody.getPrivateKey();
+
+            String encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(unencryptedKey,
+                getSharedKey(),
+                secondPassword,
+                getOptions().getPbkdf2Iterations());
+
+            addressBody.setPrivateKey(encryptedKey);
+
+        }
+
+        keys.add(addressBody);
+    }
+
+    public void addAccount(String label, @Nullable String secondPassword)
+        throws Exception {
+
+        validateSecondPassword(secondPassword);
+
+        if (secondPassword != null) {
+            getHdWallet().addAccountDoubleEncrypt(label, secondPassword, sharedKey,
+                options.getPbkdf2Iterations());
+        } else {
+            getHdWallet().addAccount(label);
+        }
+    }
+
+    public LegacyAddressBody setKeyForLegacyAddress(ECKey key, String secondPassword)
+        throws DecryptionException, UnsupportedEncodingException, EncryptionException, NoSuchAddressException {
+
+        validateSecondPassword(secondPassword);
+
+        List<LegacyAddressBody> addressList = getLegacyAddressList();
+
+        String address = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
+
+        LegacyAddressBody matchingAddressBody = null;
+
+        for(LegacyAddressBody addressBody : addressList) {
+            if(addressBody.getAddressString().equals(address)) {
+                matchingAddressBody = addressBody;
+            }
+        }
+
+        if(matchingAddressBody == null) {
+            throw new NoSuchAddressException("No matching address found for key");
+        }
+
+        if(secondPassword != null) {
+            //Double encryption
+            String encryptedKey = Base58.encode(key.getPrivKeyBytes());
+            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
+                getSharedKey(),
+                secondPassword != null ? secondPassword : null,
+                getOptions().getPbkdf2Iterations());
+
+            matchingAddressBody.setPrivateKey(encrypted2);
+
+        } else {
+            matchingAddressBody.setPrivateKeyFromBytes(key.getPrivKeyBytes());
+        }
+
+        return matchingAddressBody;
     }
 }

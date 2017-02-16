@@ -515,6 +515,7 @@ public class PayloadManager {
         return xpubs;
     }
 
+    @Deprecated
     public Account addAccount(String accountLabel, @Nullable String secondPassword) throws Exception {
 
         //Add account
@@ -586,6 +587,7 @@ public class PayloadManager {
     Generate V2 legacy address
     When called from Android - First apply PRNGFixes
      */
+    @Deprecated
     public LegacyAddress generateLegacyAddress(String deviceName, String deviceVersion, String secondPassword) throws Exception {
 
         if (payload.isDoubleEncrypted() && !validateSecondPassword(secondPassword)) {
@@ -612,6 +614,7 @@ public class PayloadManager {
         return legacyAddress;
     }
 
+    @Deprecated
     public boolean addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
 
         List<LegacyAddress> updatedLegacyAddresses = payload.getLegacyAddressList();
@@ -635,6 +638,7 @@ public class PayloadManager {
      * @param key            The {@link ECKey} for the address
      * @param secondPassword An optional double encryption password
      */
+    @Deprecated
     public boolean setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword) throws Exception {
 
         String address = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
@@ -670,6 +674,7 @@ public class PayloadManager {
         return success;
     }
 
+    @Deprecated
     ECKey getRandomECKey() throws Exception {
 
         Call<ResponseBody> call = WalletApi.getRandomBytes();
@@ -699,14 +704,17 @@ public class PayloadManager {
         return ecKey;
     }
 
+    @Deprecated
     public byte[] getHDSeed() {
         return wallet.getSeed();
     }
 
+    @Deprecated
     public String getHDSeedHex() {
         return wallet.getSeedHex();
     }
 
+    @Deprecated
     public DeterministicKey getMasterKey() {
         return wallet.getMasterKey();
     }
@@ -841,6 +849,7 @@ public class PayloadManager {
         return metadataNodeFactory;
     }
 
+    @Deprecated
     HDWallet getWallet() {
         return wallet;
     }

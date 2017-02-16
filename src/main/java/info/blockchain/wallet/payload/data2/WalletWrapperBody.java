@@ -11,7 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
+import org.apache.commons.codec.DecoderException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -83,12 +88,17 @@ public class WalletWrapperBody {
     }
 
     public WalletBody decryptPayload(String password)
-        throws UnsupportedVersionException, IOException, DecryptionException, InvalidCipherTextException {
+        throws UnsupportedVersionException, IOException, DecryptionException, InvalidCipherTextException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
         validateVersion();
         validatePbkdf2Iterations();
 
         String decryptedPayload = AESUtil.decrypt(getPayload(), password,
             getPbkdf2Iterations());
+
+        if(!FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
+            throw new DecryptionException("Decryption failed.");
+        }
+
         return WalletBody.fromJson(decryptedPayload);
     }
 

@@ -1,9 +1,11 @@
 package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.EncryptionException;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import javax.annotation.Nullable;
+import javax.security.auth.login.CredentialException;
 import org.apache.commons.codec.binary.Base64;
 import org.spongycastle.crypto.BlockCipher;
 import org.spongycastle.crypto.BufferedBlockCipher;
@@ -99,15 +101,17 @@ public class AESUtil {
     }
 
     // AES 256 PBKDF2 CBC iso10126 encryption
-    public static String encrypt(String cleartext, String password, int iterations) throws Exception {
+    public static String encrypt(String cleartext, String password, int iterations)
+        throws EncryptionException, UnsupportedEncodingException {
 
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String encryptWithSetMode(String cleartext, String password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws Exception {
+    public static String encryptWithSetMode(String cleartext, String password, int iterations, int mode, @Nullable BlockCipherPadding padding)
+        throws EncryptionException, UnsupportedEncodingException {
 
         if (password == null) {
-            throw  new Exception("Password null");
+            throw  new EncryptionException("Password null");
         }
 
         // Use secure random to generate a 16 byte iv

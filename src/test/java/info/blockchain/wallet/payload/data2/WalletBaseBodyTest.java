@@ -23,10 +23,9 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("en", walletBaseBody.getLanguage());
         Assert.assertEquals("d78bf97da866cdda7271a8de0f2d101caf43ae6280b3c69b85bf82d367649ea7", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("d3e3b31c57f823ed", walletBaseBody.getWarChecksum());
-        Assert.assertEquals(5000, walletBaseBody.getWalletWrapperBody().getPbkdf2Iterations());
-        Assert.assertEquals(3, walletBaseBody.getWalletWrapperBody().getVersion());
 
         walletBaseBody.decryptPayload("MyTestWallet");
+        Assert.assertEquals(5000, walletBaseBody.getWalletBody().getOptions().getPbkdf2Iterations());
         Assert.assertNotNull(walletBaseBody.getWalletBody());
         Assert.assertEquals("a09910d9-1906-4ea1-a956-2508c3fe0661", walletBaseBody.getWalletBody().getGuid());
     }
@@ -41,10 +40,9 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("en", walletBaseBody.getLanguage());
         Assert.assertEquals("7416cd440f7b15182beb15614a63d5e53b3a6f65634d2b160884c131ab336b01", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("d1aeff0ddc48b949", walletBaseBody.getWarChecksum());
-        Assert.assertEquals(5000, walletBaseBody.getWalletWrapperBody().getPbkdf2Iterations());
-        Assert.assertEquals(3, walletBaseBody.getWalletWrapperBody().getVersion());
 
         walletBaseBody.decryptPayload("SomeTestPassword");
+        Assert.assertEquals(5000, walletBaseBody.getWalletBody().getOptions().getPbkdf2Iterations());
         Assert.assertNotNull(walletBaseBody.getWalletBody());
         Assert.assertEquals("e5eba801-c8bc-4a64-99ba-094e12a80766", walletBaseBody.getWalletBody().getGuid());
     }
@@ -59,10 +57,9 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("en", walletBaseBody.getLanguage());
         Assert.assertEquals("fc631f8434f45c43e7040f1192b6676a8bd49e0fd00fb4848acdc0dcaa665400", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("d1aeff0ddc48b949", walletBaseBody.getWarChecksum());
-        Assert.assertEquals(7520, walletBaseBody.getWalletWrapperBody().getPbkdf2Iterations());
-        Assert.assertEquals(3, walletBaseBody.getWalletWrapperBody().getVersion());
 
         walletBaseBody.decryptPayload("SomeTestPassword");
+        Assert.assertEquals(7520, walletBaseBody.getWalletBody().getOptions().getPbkdf2Iterations());
         Assert.assertNotNull(walletBaseBody.getWalletBody());
         Assert.assertEquals("e5eba801-c8bc-4a64-99ba-094e12a80766", walletBaseBody.getWalletBody().getGuid());
     }
@@ -77,10 +74,9 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("en", walletBaseBody.getLanguage());
         Assert.assertEquals("110764d05c020d4818e2529ca28df9d8b96d50c694650348f885fc075f9366d5", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("d1aeff0ddc48b949", walletBaseBody.getWarChecksum());
-        Assert.assertEquals(5000, walletBaseBody.getWalletWrapperBody().getPbkdf2Iterations());
-        Assert.assertEquals(2, walletBaseBody.getWalletWrapperBody().getVersion());
 
         walletBaseBody.decryptPayload("SomeTestPassword");
+        Assert.assertEquals(5000, walletBaseBody.getWalletBody().getOptions().getPbkdf2Iterations());
         Assert.assertNotNull(walletBaseBody.getWalletBody());
         Assert.assertEquals("5f071985-01b5-4bd4-9d5f-c7cf570b1a2d", walletBaseBody.getWalletBody().getGuid());
     }
@@ -95,10 +91,9 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("en", walletBaseBody.getLanguage());
         Assert.assertEquals("31b162d3e1fd0b57d8b7dd1202c16604be221bde2fe0192fc0a4e7ce704d3446", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("d1aeff0ddc48b949", walletBaseBody.getWarChecksum());
-        Assert.assertEquals(1000, walletBaseBody.getWalletWrapperBody().getPbkdf2Iterations());
-        Assert.assertEquals(2, walletBaseBody.getWalletWrapperBody().getVersion());
 
         walletBaseBody.decryptPayload("SomeTestPassword");
+        Assert.assertEquals(1000, walletBaseBody.getWalletBody().getOptions().getPbkdf2Iterations());
         Assert.assertNotNull(walletBaseBody.getWalletBody());
         Assert.assertEquals("5f071985-01b5-4bd4-9d5f-c7cf570b1a2d", walletBaseBody.getWalletBody().getGuid());
     }
@@ -113,9 +108,6 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("en", walletBaseBody.getLanguage());
         Assert.assertEquals("26c0477b045655bb7ba3e81fb99d7e8ce16f4571400223026169ba8e207677a4", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("3642b083667c7f4d", walletBaseBody.getWarChecksum());
-
-        //V1 has no wrapper
-        Assert.assertNull(walletBaseBody.getWalletWrapperBody());
 
         walletBaseBody.decryptPayload("mypassword");
         Assert.assertNotNull(walletBaseBody.getWalletBody());
@@ -133,9 +125,6 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("57f97ace89c105c19c43a15f2d6e3091d457dec804243b15772d2062a32f8b7d", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("3642b083667c7f4d", walletBaseBody.getWarChecksum());
 
-        //V1 has no wrapper
-        Assert.assertNull(walletBaseBody.getWalletWrapperBody());
-
         walletBaseBody.decryptPayload("mypassword");
         Assert.assertNotNull(walletBaseBody.getWalletBody());
         Assert.assertEquals("2ca9b0e4-6b82-4dae-9fef-e8b300c72aa2", walletBaseBody.getWalletBody().getGuid());
@@ -151,9 +140,6 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         Assert.assertEquals("en", walletBaseBody.getLanguage());
         Assert.assertEquals("a4b67f406268dced75ac5c628da854898c9a3134b7e3755311f199723d426765", walletBaseBody.getPayloadChecksum());
         Assert.assertEquals("3642b083667c7f4d", walletBaseBody.getWarChecksum());
-
-        //V1 has no wrapper
-        Assert.assertNull(walletBaseBody.getWalletWrapperBody());
 
         walletBaseBody.decryptPayload("mypassword");
         Assert.assertNotNull(walletBaseBody.getWalletBody());
@@ -172,7 +158,7 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         walletBaseBody.decryptPayload("MyTestWallet");
 
         //Encrypt
-        Pair pair = walletBaseBody.encryptAndWrapPayload("MyTestWallet", 5000);
+        Pair pair = walletBaseBody.encryptAndWrapPayload("MyTestWallet");
 
         //Check wallet wrapper
         WalletWrapperBody encryptedwalletWrapper = (WalletWrapperBody) pair.getRight();
@@ -187,9 +173,10 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         //Decrypt
         walletBaseBody = WalletBaseBody.fromJson(walletBase);
         walletBaseBody.decryptPayload("MyTestWallet");
+        walletBaseBody.getWalletBody().getOptions().setPbkdf2Iterations(7500);
 
         //Encrypt
-        pair = walletBaseBody.encryptAndWrapPayload("MyTestWallet", 7500);
+        pair = walletBaseBody.encryptAndWrapPayload("MyTestWallet");
 
         //Check wallet wrapper
         encryptedwalletWrapper = (WalletWrapperBody) pair.getRight();
@@ -204,9 +191,10 @@ public class WalletBaseBodyTest extends MockedResponseTest {
         //Decrypt
         walletBaseBody = WalletBaseBody.fromJson(walletBase);
         walletBaseBody.decryptPayload("MyTestWallet");
+        walletBaseBody.getWalletBody().getOptions().setPbkdf2Iterations(7500);
 
         //Encrypt
-        pair = walletBaseBody.encryptAndWrapPayload("MyNewTestWallet", 7500);
+        pair = walletBaseBody.encryptAndWrapPayload("MyNewTestWallet");
 
         //Check wallet wrapper
         encryptedwalletWrapper = (WalletWrapperBody) pair.getRight();

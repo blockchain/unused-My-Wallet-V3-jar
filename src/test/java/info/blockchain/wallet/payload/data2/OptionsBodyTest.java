@@ -32,7 +32,10 @@ public class OptionsBodyTest {
         WalletBody wallet = WalletBody.fromJson(body);
         OptionsBody options = wallet.getOptions();
         Assert.assertEquals(0, options.getFeePerKb());
-        Assert.assertEquals(0, options.getPbkdf2Iterations());
+
+        //Expect iterations to default. 0 not allowed
+        Assert.assertEquals(5000, options.getPbkdf2Iterations());
+
         Assert.assertFalse(options.isHtml5Notifications());
         Assert.assertEquals(600000, options.getLogoutTime());
     }

@@ -1,7 +1,11 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.EncryptionException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
 
 // TODO: 10/02/2017 no need to be an object - can be static
@@ -21,11 +25,13 @@ public class DoubleEncryptionFactory {
         return instance;
     }
 
-    public String encrypt(String encrypted, String sharedKey, String password2, int iterations) throws Exception {
+    public String encrypt(String encrypted, String sharedKey, String password2, int iterations)
+        throws UnsupportedEncodingException, EncryptionException {
         return AESUtil.encrypt(encrypted, sharedKey + password2, iterations);
     }
 
-    public String decrypt(String encrypted2, String sharedKey, String password2, int iterations) throws Exception {
+    public String decrypt(String encrypted2, String sharedKey, String password2, int iterations)
+        throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
         return AESUtil.decrypt(encrypted2, sharedKey + password2, iterations);
     }
 
@@ -56,9 +62,17 @@ public class DoubleEncryptionFactory {
 
     }
 
+    @Deprecated
     public boolean validateSecondPassword(String dpasswordhash, String sharedKey, String password2, int iterations) {
         String dhash = getHash(sharedKey, password2, iterations);
         return dpasswordhash.equals(dhash);
     }
 
+    public void validateSecondPassword(String dpasswordhash, String sharedKey, String password2, int iterations, boolean removeThis)
+        throws DecryptionException {
+        String dhash = getHash(sharedKey, password2, iterations);
+        if(!dpasswordhash.equals(dhash)) {
+            throw new DecryptionException("Double encryption password error!!");
+        }
+    }
 }

@@ -9,7 +9,6 @@ import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
-import info.blockchain.wallet.exceptions.MismatchValueException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.exceptions.ValidationException;
 import info.blockchain.wallet.metadata.Metadata;
@@ -541,11 +540,10 @@ public class Contacts {
      * @throws SharedMetadataException
      * @throws InvalidCipherTextException
      * @throws MetadataException
-     * @throws MismatchValueException
      */
     public void sendPaymentBroadcasted(String mdid, String txHash, String fTxId)
             throws IOException,
-            SharedMetadataException, InvalidCipherTextException, MetadataException, MismatchValueException {
+            SharedMetadataException, InvalidCipherTextException, MetadataException {
 
         Contact contact = getContactFromMdid(mdid);
         FacilitatedTransaction ftx = contact.getFacilitatedTransaction().get(fTxId);

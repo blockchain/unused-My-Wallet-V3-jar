@@ -1,12 +1,19 @@
 package info.blockchain.wallet.payload.data2;
 
 import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.payload.data.PayloadTest;
+import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map.Entry;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,8 +89,12 @@ public class WalletBodyTest extends MockedResponseTest{
         Assert.assertNull(wallet.getDpasswordhash());
 
         //Options parsing tested in OptionsBodyTest
-        Assert.assertNull(wallet.getOptions());
         Assert.assertNotNull(wallet.getWalletOptions());//very old key for options
+        Assert.assertEquals(10, wallet.getWalletOptions().getPbkdf2Iterations());
+
+        //old wallet_options should have created new options
+        Assert.assertNotNull(wallet.getOptions());
+        Assert.assertEquals(10, wallet.getOptions().getPbkdf2Iterations());
 
         //Keys parsing tested in KeysBodyTest
         Assert.assertNotNull(wallet.getLegacyAddressList());
@@ -112,6 +123,232 @@ public class WalletBodyTest extends MockedResponseTest{
 
         JSONObject jsonObject = new JSONObject(jsonString);
         Assert.assertEquals(9, jsonObject.keySet().size());
+    }
+
+    @Test
+    public void validateSecondPassword() throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        wallet.validateSecondPassword("hello");
+        Assert.assertTrue(true);
+    }
+
+    @Test(expected = DecryptionException.class)
+    public void validateSecondPassword_fail() throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        wallet.validateSecondPassword("bogus");
+    }
+
+    @Test
+    public void addAccount() throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_6.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        Assert.assertEquals(1, wallet.getHdWallet().getAccounts().size());
+        wallet.addAccount("Some Label",null);
+        Assert.assertEquals(2, wallet.getHdWallet().getAccounts().size());
+
+        AccountBody account = wallet.getHdWallet()
+            .getAccount(wallet.getHdWallet().getAccounts().size() - 1);
+
+        Assert.assertEquals("xpub6DTFzKMsjf1Tt9KwHMYnQxMLGuVRcobDZdzDuhtc6xfvafsBFqsBS4RNM54kdJs9zK8RKkSbjSbwCeUJjxiySaBKTf8dmyXgUgVnFY7yS9x", account.getXpub());
+        Assert.assertEquals("xprv9zTuaopyuHTAffFUBL1n3pQbisewDLsNCR4d7KUzYd8whsY2iJYvtG6tVp1c3jRU4euNj3qdb6wCrmCwg1JRPfPghmH3hJ5ubRJVmqMGwyy", account.getXpriv());
+    }
+
+    @Test(expected = DecryptionException.class)
+    public void addAccount_doubleEncryptionError() throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_6.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        Assert.assertEquals(1, wallet.getHdWallet().getAccounts().size());
+        wallet.addAccount("Some Label","hello");
+    }
+
+    @Test
+    public void addAccount_doubleEncrypted() throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_7.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        Assert.assertEquals(2, wallet.getHdWallet().getAccounts().size());
+        wallet.addAccount("Some Label","hello");
+        Assert.assertEquals(3, wallet.getHdWallet().getAccounts().size());
+
+        AccountBody account = wallet.getHdWallet()
+            .getAccount(wallet.getHdWallet().getAccounts().size() - 1);
+
+        Assert.assertEquals("xpub6DEe2bJAU7GbUw3HDGPUY9c77mUcP9xvAWEhx9GReuJM9gppeGxHqBcaYAfrsyY8R6cfVRsuFhi2PokQFYLEQBVpM8p4MTLzEHpVu4SWq9a", account.getXpub());
+
+        //Private key will be encrypted
+        String decryptedXpriv = DoubleEncryptionFactory.getInstance().decrypt(
+            account.getXpriv(), wallet.getSharedKey(), "hello",
+            wallet.getOptions().getPbkdf2Iterations());
+        Assert.assertEquals("xprv9zFHd5mGdjiJGSxp7ErUB1fNZje7yhF4oHK79krp6ZmNGtVg6je3HPJ6gueSWrVR9oqdqriu2DcshvTfSRu6PXyWiAbP8n6S7DVWEpu5kAE", decryptedXpriv);
+    }
+
+    @Test
+    public void addLegacyAddress()
+        throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_6.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        Assert.assertEquals(0, wallet.getLegacyAddressList().size());
+        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        wallet.addLegacyAddress("Some Label", null);
+        Assert.assertEquals(1, wallet.getLegacyAddressList().size());
+
+        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+
+        Assert.assertNotNull(address.getPrivateKey());
+        Assert.assertNotNull(address.getAddressString());
+
+        Assert.assertEquals("1", address.getAddressString().substring(0, 1));
+    }
+
+    @Test
+    public void addLegacyAddress_doubleEncrypted()
+        throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        Assert.assertEquals(19, wallet.getLegacyAddressList().size());
+        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        wallet.addLegacyAddress("Some Label", "hello");
+        Assert.assertEquals(20, wallet.getLegacyAddressList().size());
+
+        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+
+        Assert.assertNotNull(address.getPrivateKey());
+        Assert.assertNotNull(address.getAddressString());
+
+        Assert.assertEquals("==", address.getPrivateKey().substring(address.getPrivateKey().length() - 2));
+        Assert.assertEquals("1", address.getAddressString().substring(0, 1));
+    }
+
+    @Test
+    public void setKeyForLegacyAddress()
+        throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_6.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        wallet.addLegacyAddress("Some Label", null);
+
+        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+
+        ECKey ecKey = DeterministicKey.fromPrivate(Base58.decode(address.getPrivateKey()));
+
+        wallet.setKeyForLegacyAddress(ecKey,null);
+    }
+
+    @Test(expected = NoSuchAddressException.class)
+    public void setKeyForLegacyAddress_NoSuchAddressException()
+        throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_6.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        wallet.addLegacyAddress("Some Label", null);
+
+        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+
+        //Try to set address key with ECKey not found in available addresses.
+        ECKey ecKey = new ECKey();
+        wallet.setKeyForLegacyAddress(ecKey,null);
+    }
+
+    @Test
+    public void setKeyForLegacyAddress_doubleEncrypted()
+        throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        wallet.addLegacyAddress("Some Label", "hello");
+
+        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+
+        final String decryptedOriginalPrivateKey = AESUtil
+            .decrypt(address.getPrivateKey(), wallet.getSharedKey()+"hello",
+                wallet.getOptions().getPbkdf2Iterations());
+
+        //Remove private key so we can set it again
+        address.setPrivateKey(null);
+
+        //Same key for created address, but unencrypted
+        ECKey ecKey = DeterministicKey.fromPrivate(Base58.decode(decryptedOriginalPrivateKey));
+
+        //Set private key
+        wallet.setKeyForLegacyAddress(ecKey,"hello");
+
+        //Get new set key
+        address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+        String decryptedSetPrivateKey = AESUtil
+            .decrypt(address.getPrivateKey(), wallet.getSharedKey()+"hello",
+                wallet.getOptions().getPbkdf2Iterations());
+
+        //Original private key must match newly set private key (unencrypted)
+        Assert.assertEquals(decryptedOriginalPrivateKey, decryptedSetPrivateKey);
+    }
+
+    @Test(expected = DecryptionException.class)
+    public void setKeyForLegacyAddress_DecryptionException()
+        throws Exception {
+
+        URI uri = PayloadTest.class.getClassLoader().getResource("wallet_body_1.txt").toURI();
+        String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        WalletBody wallet = WalletBody.fromJson(body);
+
+        mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        wallet.addLegacyAddress("Some Label", "hello");
+
+        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+
+        final String decryptedOriginalPrivateKey = AESUtil
+            .decrypt(address.getPrivateKey(), wallet.getSharedKey()+"hello",
+                wallet.getOptions().getPbkdf2Iterations());
+
+        //Remove private key so we can set it again
+        address.setPrivateKey(null);
+
+        //Same key for created address, but unencrypted
+        ECKey ecKey = DeterministicKey.fromPrivate(Base58.decode(decryptedOriginalPrivateKey));
+
+        //Set private key
+        wallet.setKeyForLegacyAddress(ecKey,"bogus");
     }
 
 //    @Test

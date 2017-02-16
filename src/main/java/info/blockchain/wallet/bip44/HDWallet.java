@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.codec.binary.Hex;
+import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -55,6 +56,23 @@ public class HDWallet {
         }
 
         strPath = dKey.getPathAsString();
+    }
+
+    /**
+     * Constructor for watch-only wallet initialized from submitted XPUB(s).
+     *
+     * @param xpubs arrayList of XPUB strings
+     */
+    public HDWallet(NetworkParameters params, ArrayList<String> xpubs) throws AddressFormatException {
+
+        this.params = params;
+        accounts = new ArrayList<>();
+
+        int i = 0;
+        for(String xpub : xpubs) {
+            accounts.add(new HDAccount(params, xpub, i));
+            i++;
+        }
     }
 
     /**

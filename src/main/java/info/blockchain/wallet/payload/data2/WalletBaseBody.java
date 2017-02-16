@@ -10,12 +10,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.annotation.Nonnull;
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
+import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.json.JSONObject;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.crypto.paddings.BlockCipherPadding;
@@ -67,10 +74,6 @@ public class WalletBaseBody {
         //Empty constructor needed for Jackson
     }
 
-    public WalletBaseBody(String defaultAccountName) {
-        WalletBody walletBody = new WalletBody();
-    }
-
     public String getGuid() {
         return guid;
     }
@@ -80,7 +83,7 @@ public class WalletBaseBody {
     }
 
     public void decryptPayload(@Nonnull String password)
-        throws DecryptionException, IOException, InvalidCipherTextException, UnsupportedVersionException {
+        throws DecryptionException, IOException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
 
         if (!isV1Wallet()) {
             walletBody = decryptV3Wallet(password);
@@ -90,14 +93,20 @@ public class WalletBaseBody {
     }
 
     private WalletBody decryptV3Wallet(String password)
-        throws IOException, DecryptionException, InvalidCipherTextException, UnsupportedVersionException {
+        throws IOException, DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
 
-        walletWrapperBody = WalletWrapperBody.fromJson(payload);
-        return walletWrapperBody.decryptPayload(password);
+        WalletWrapperBody walletWrapperBody = WalletWrapperBody.fromJson(payload);
+        WalletBody walletBody = walletWrapperBody.decryptPayload(password);
+        //In case iterations weren't set in wallet options
+        walletBody.getOptions().setPbkdf2Iterations(walletWrapperBody.getPbkdf2Iterations());
+        return walletBody;
     }
 
+    /*
+    No need to encrypt V1 wallet again. We will force user to upgrade to V3
+     */
     private WalletBody decryptV1Wallet(String password)
-        throws DecryptionException, IOException {
+        throws DecryptionException, IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException, InvalidCipherTextException {
 
         String decrypted = null;
         int succeededIterations = -1000;
@@ -138,10 +147,6 @@ public class WalletBaseBody {
         String decryptedPayload = decrypted;
         walletBody = WalletBody.fromJson(decryptedPayload);
         return walletBody;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
     }
 
     public String getExtraSeed() {
@@ -197,31 +202,24 @@ public class WalletBaseBody {
     }
 
     public static WalletBaseBody fromJson(String json) throws IOException {
-        WalletBaseBody walletBaseBody = new ObjectMapper().readValue(json, WalletBaseBody.class);
-        if(!walletBaseBody.isV1Wallet()) {
-            walletBaseBody.setWalletWrapperBody(WalletWrapperBody.fromJson(walletBaseBody.payload));
-        }
-        return walletBaseBody;
+        return new ObjectMapper().readValue(json, WalletBaseBody.class);
     }
 
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public Pair encryptAndWrapPayload(String password, int pbkdf2Iterations) throws Exception {
+    public Pair encryptAndWrapPayload(String password)
+        throws JsonProcessingException, UnsupportedEncodingException, EncryptionException, NoSuchAlgorithmException {
 
-        String encryptedPayload = AESUtil.encrypt(walletBody.toJson(), password, pbkdf2Iterations);
-
-        WalletWrapperBody wrapperBody = new WalletWrapperBody();
-        wrapperBody.setPbkdf2Iterations(pbkdf2Iterations);
-        wrapperBody.setVersion(WalletWrapperBody.CURRENT_VERSION);
-        wrapperBody.setPayload(encryptedPayload);
+        int iterations = walletBody.getOptions().getPbkdf2Iterations();
+        String encryptedPayload = AESUtil.encrypt(walletBody.toJson(), password, iterations);
+        WalletWrapperBody wrapperBody = WalletWrapperBody.wrap(encryptedPayload, iterations);
 
         String checkSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(wrapperBody.toJson().getBytes("UTF-8"))));
 
         return Pair.of(checkSum, wrapperBody);
     }
-
 
     /**********************************************************************************************/
     /*                          HDWallet body containing private keys                               */
@@ -234,15 +232,5 @@ public class WalletBaseBody {
 
     public void setWalletBody(WalletBody walletBody) {
         this.walletBody = walletBody;
-    }
-
-    WalletWrapperBody walletWrapperBody;
-
-    public WalletWrapperBody getWalletWrapperBody() {
-        return walletWrapperBody;
-    }
-
-    public void setWalletWrapperBody(WalletWrapperBody walletWrapperBody) {
-        this.walletWrapperBody = walletWrapperBody;
     }
 }

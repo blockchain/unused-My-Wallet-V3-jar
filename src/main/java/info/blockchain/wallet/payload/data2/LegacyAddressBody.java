@@ -149,19 +149,6 @@ public class LegacyAddressBody {
         return addressList;
     }
 
-    public static List<String> filterAddressString(int filter, @Nonnull List<LegacyAddressBody> keys) {
-
-        List<String> addressList = new ArrayList<>();
-
-        for(LegacyAddressBody key : keys) {
-            if(key.getTag() == filter) {
-                addressList.add(key.getAddressString());
-            }
-        }
-
-        return addressList;
-    }
-
     public static LegacyAddressBody generateNewLegacy() throws Exception {
 
         ECKey ecKey = getRandomECKey();

@@ -3,7 +3,7 @@
     "sharedKey": "e8553981-b196-47cc-8858-5b0d16284f61",
     "double_encryption": false,
     "wallet_options": {
-        "pbkdf2_iterations": 0,
+        "pbkdf2_iterations": 10,
         "fee_per_kb": 0,
         "html5_notifications": false,
         "logout_time": 600000

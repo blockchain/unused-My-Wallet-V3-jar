@@ -3,6 +3,7 @@ package info.blockchain.wallet.bip44;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -38,7 +39,7 @@ public class HDWalletFactory {
      * @param nbAccounts create this number of accounts
      * @return HDWallet
      */
-    public static HDWallet newWallet(AbstractBitcoinNetParams networkParameters, Language language, int nbWords, String passphrase,
+    public static HDWallet createWallet(AbstractBitcoinNetParams networkParameters, Language language, int nbWords, String passphrase,
         int nbAccounts) throws IOException, MnemonicException.MnemonicLengthException {
 
         Locale locale = getLocale(language);
@@ -122,6 +123,12 @@ public class HDWalletFactory {
         wis.close();
 
         return hdw;
+    }
+
+    public static HDWallet restoreWatchOnlyWallet(AbstractBitcoinNetParams networkParameters, ArrayList<String> xpubList)
+        throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
+
+        return new HDWallet(networkParameters, xpubList);
     }
 
     private static Locale getLocale(Language language) {
