@@ -65,10 +65,17 @@ public class WalletManager {
         return walletBaseBody.getWalletBody();
     }
 
+    public MetadataNodeFactory getMetadataNodeFactory() {
+        return metadataNodeFactory;
+    }
+
     //********************************************************************************************//
     //*                  Wallet initialization, creation, recovery, syncing                      *//
     //********************************************************************************************//
 
+    /*
+    NB! When called from Android - First apply PRNGFixes
+     */
     public void create(@Nonnull String defaultAccountName, @Nonnull String email)
         throws Exception {
 
@@ -76,6 +83,31 @@ public class WalletManager {
         walletBaseBody.setWalletBody(new WalletBody(defaultAccountName));
 
         saveNewWallet(email);
+    }
+
+    public void recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
+        @Nonnull String email) throws Exception {
+
+        walletBaseBody.getWalletBody().recoverFromMnemonic(mnemonic, defaultAccountName);
+
+        saveNewWallet(email);
+    }
+
+    /*
+    NB! When called from Android - First apply PRNGFixes
+     */
+    public boolean upgradeV2PayloadToV3(String secondPassword, String defaultAccountName) throws Exception {
+
+        walletBaseBody.getWalletBody().upgradeV2PayloadToV3(secondPassword, defaultAccountName);
+
+        boolean success = save();
+
+        if (!success) {
+            //Revert on save fail
+            walletBaseBody.getWalletBody().setHdWallets(null);
+        }
+
+        return success;
     }
 
     public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid)
@@ -198,6 +230,13 @@ public class WalletManager {
         return success;
     }
 
+    /**
+     * NB! When called from Android - First apply PRNGFixes
+     * @param label
+     * @param secondPassword
+     * @return
+     * @throws Exception
+     */
     public boolean addLegacyAddress(String label, @Nullable String secondPassword) throws Exception {
 
         LegacyAddressBody legacyAddressBody = walletBaseBody.getWalletBody()
@@ -246,13 +285,6 @@ public class WalletManager {
     @Deprecated
     public boolean isNotUpgraded() {
         return walletBaseBody.getWalletBody() != null && !walletBaseBody.getWalletBody().isUpgraded();
-    }
-
-    /*
-    When called from Android - First apply PRNGFixes
-     */
-    public void upgradeV2PayloadToV3(String secondPassword, String defaultAccountName) throws Exception {
-        walletBaseBody.getWalletBody().upgradeV2PayloadToV3(secondPassword, defaultAccountName);
     }
 
     public void getNextChangeAddress(int accountIndex) {
@@ -340,9 +372,5 @@ public class WalletManager {
         if (!success) {
             throw new MetadataException("All Metadata nodes might not have saved.");
         }
-    }
-
-    public MetadataNodeFactory getMetadataNodeFactory() {
-        return metadataNodeFactory;
     }
 }

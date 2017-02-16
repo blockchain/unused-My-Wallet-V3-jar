@@ -103,7 +103,6 @@ public class WalletBody {
     private HDWallet HD;
 
     public WalletBody() {
-        //Empty constructor needed for Jackson
     }
 
     public WalletBody(String defaultAccountName) throws IOException, MnemonicLengthException {
@@ -403,43 +402,64 @@ public class WalletBody {
     public static WalletBody recoverFromMnemonic(String mnemonic, String passphrase,
         String defaultAccountName, int accountSize) throws Exception {
 
-//        HDWalletBody hdWallet = HDWalletFactory2
-//            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-//                mnemonic, passphrase, DEFAULT_NEW_WALLET_SIZE, defaultAccountName);
-//
-//        BlockExplorer blockExplorer = new BlockExplorer(
-//            BlockchainFramework.getRetrofitServerInstance(),
-//            BlockchainFramework.getApiCode());
-//
-//        int walletSize = 1;
-//        if (accountSize <= 0) {
-//            int index = 0;
-//
-//            final int lookAheadTotal = 10;
-//            int lookAhead = lookAheadTotal;
-//
-//            while (lookAhead > 0) {
-//
-//                String xpub = hdWallet.getAccount(index).getXpub();
-//                if (hasTransactions(blockExplorer, xpub)) {
-//                    lookAhead = lookAheadTotal;
-//                    walletSize++;
-//                }
-//
-//                hdWallet.addAccountDoubleEncrypt(defaultAccountName+" "+(index+1));
-//                index++;
-//                lookAhead--;
-//            }
-//        } else {
-//            walletSize = accountSize;
-//        }
-//
-//        hdWallet = HDWalletFactory2
-//            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-//                mnemonic, passphrase, walletSize, defaultAccountName);
+        //Start with initial wallet size of 1.
+        //After wallet is recovered we'll check how many accounts to restore
+        HDWallet hdWallet = HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                mnemonic, passphrase, DEFAULT_NEW_WALLET_SIZE);
 
-        WalletBody walletBody = new WalletBody(defaultAccountName);
-//        walletBody.setHdWallets(Arrays.asList(hdWallet));
+        BlockExplorer blockExplorer = new BlockExplorer(
+            BlockchainFramework.getRetrofitServerInstance(),
+            BlockchainFramework.getApiCode());
+
+        HDWalletBody hdWalletBody = new HDWalletBody();
+        hdWalletBody.setAccounts(new ArrayList<AccountBody>());
+
+        int walletSize = 1;
+        int accountNumber = 1;
+        if (accountSize <= 0) {
+            int index = 0;
+
+            final int lookAheadTotal = 10;
+            int lookAhead = lookAheadTotal;
+
+            while (lookAhead > 0) {
+
+                String xpub = hdWallet.getAccount(index).getXpub();
+                String xpriv = hdWallet.getAccount(index).getXPriv();
+                if (hasTransactions(blockExplorer, xpub)) {
+                    lookAhead = lookAheadTotal;
+                    walletSize++;
+                }
+
+                hdWallet.addAccount();
+
+                String label = defaultAccountName;
+                if (accountNumber > 1) {
+                    label = defaultAccountName + " " + accountNumber;
+                }
+                hdWalletBody.addAccount(label, xpriv, xpub);
+                accountNumber++;
+
+                index++;
+                lookAhead--;
+            }
+        } else {
+            walletSize = accountSize;
+        }
+
+        hdWallet = HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                mnemonic, passphrase, walletSize);
+
+        WalletBody walletBody = new WalletBody();
+        walletBody.guid = UUID.randomUUID().toString();
+        walletBody.sharedKey = UUID.randomUUID().toString();
+        walletBody.txNotes = new HashMap<>();
+        walletBody.keys = new ArrayList<>();
+        walletBody.options = OptionsBody.getDefaultOptions();
+        walletBody.HD = hdWallet;
+        walletBody.setHdWallets(Arrays.asList(hdWalletBody));
 
         return walletBody;
     }
