@@ -1,18 +1,23 @@
 package info.blockchain.wallet.contacts.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import info.blockchain.wallet.metadata.data.Invitation;
-import io.mikael.urlbuilder.UrlBuilder;
-import io.mikael.urlbuilder.util.UrlParameterMultimap;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.bitcoinj.core.ECKey;
+
+import javax.annotation.Nonnull;
+
+import io.mikael.urlbuilder.UrlBuilder;
+import io.mikael.urlbuilder.util.UrlParameterMultimap;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Contact {
@@ -33,7 +38,7 @@ public class Contact {
     public Contact() {
         this.id = UUID.randomUUID().toString();
         this.facilitatedTransaction = new HashMap<>();
-        this.created = System.currentTimeMillis();
+        this.created = System.currentTimeMillis() / 1000;
     }
 
     public String getId() {
@@ -116,8 +121,10 @@ public class Contact {
         this.invitationReceived = invitationReceived;
     }
 
-    public HashMap<String, FacilitatedTransaction> getFacilitatedTransaction() {
-        return facilitatedTransaction;
+    @Nonnull
+    @JsonProperty("facilitatedTransaction")
+    public HashMap<String, FacilitatedTransaction> getFacilitatedTransactions() {
+        return facilitatedTransaction != null ? facilitatedTransaction : new HashMap<String, FacilitatedTransaction>();
     }
 
     @JsonIgnore
@@ -125,8 +132,13 @@ public class Contact {
         this.facilitatedTransaction.put(facilitatedTransaction.getId(), facilitatedTransaction);
     }
 
-    public void setFacilitatedTransaction(
-        HashMap<String, FacilitatedTransaction> facilitatedTransaction) {
+    public void deleteFacilitatedTransaction(String fctxId) {
+        facilitatedTransaction.remove(fctxId);
+    }
+
+    @JsonProperty("facilitatedTransaction")
+    public void setFacilitatedTransactions(
+            HashMap<String, FacilitatedTransaction> facilitatedTransaction) {
         this.facilitatedTransaction = facilitatedTransaction;
     }
 

@@ -5,17 +5,28 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.blockchain.wallet.contacts.data.Contact;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Invitation {
 
-    String id;//one-time UUID
-    String mdid;//me
-    String contact;//other user
+    /**
+     * A one-time UUID
+     */
+    private String id;
+
+    /**
+     * The sender's MDID
+     */
+    private String mdid;
+
+    /**
+     * The recipient
+     */
+    private String contact;
 
     public Invitation() {
+        // No-op
     }
 
     public String getId() {

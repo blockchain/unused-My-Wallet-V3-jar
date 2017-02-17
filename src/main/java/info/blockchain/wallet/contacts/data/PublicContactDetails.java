@@ -12,7 +12,7 @@ import java.io.IOException;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PublicContactDetails {
 
-    String xpub;
+    private String xpub;
 
     public PublicContactDetails() {
         //noop

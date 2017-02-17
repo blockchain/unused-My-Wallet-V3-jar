@@ -3,6 +3,7 @@ package info.blockchain.wallet.util;
 import org.apache.commons.io.IOUtils;
 
 import java.io.DataOutputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -111,9 +112,10 @@ public class WebUtil {
     }
 
     /**
-     * This can return an error string instead of throwing an exception. Use {@link #getRequest(String, String)}
-     * for proper error handling instead once the calling method handles errors appropriately and the endpoint
-     * being called returns correctly formatted error codes.
+     * This can return an error string instead of throwing an exception. Use {@link
+     * #getRequest(String, String)} for proper error handling instead once the calling method
+     * handles errors appropriately and the endpoint being called returns correctly formatted error
+     * codes.
      */
     @Deprecated
     private String getURLCall(String URL, String cookie) throws Exception {
@@ -205,35 +207,24 @@ public class WebUtil {
     }
 
     public String getCookie(String url, String cname) throws Exception {
-
-        String ret = null;
-
         URLConnection conn = new URL(url).openConnection();
-
         Map<String, List<String>> headerFields = conn.getHeaderFields();
-
         Set<String> headerFieldsSet = headerFields.keySet();
 
         for (String headerFieldKey : headerFieldsSet) {
-
             if ("Set-Cookie".equalsIgnoreCase(headerFieldKey)) {
-
                 List<String> headerFieldValue = headerFields.get(headerFieldKey);
-
                 for (String headerValue : headerFieldValue) {
-
                     String[] fields = headerValue.split(";\\s*");
-
                     String cookieValue = fields[0];
-
                     if (cookieValue.startsWith(cname + "=")) {
-                        ret = cookieValue.substring(cname.length() + 1);
+                        return cookieValue.substring(cname.length() + 1);
                     }
                 }
             }
         }
 
-        return ret;
+        throw new ConnectException("Cooke not found");
     }
 
 }
