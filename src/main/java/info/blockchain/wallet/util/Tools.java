@@ -2,7 +2,7 @@ package info.blockchain.wallet.util;
 
 import com.google.common.primitives.UnsignedBytes;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.payload.data2.LegacyAddressBody;
+import info.blockchain.wallet.payload.data.LegacyAddressBody;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;

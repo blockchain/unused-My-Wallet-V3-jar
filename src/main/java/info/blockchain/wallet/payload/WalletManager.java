@@ -1,9 +1,7 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
@@ -14,12 +12,11 @@ import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
-import info.blockchain.wallet.payload.data2.AccountBody;
-import info.blockchain.wallet.payload.data2.LegacyAddressBody;
-import info.blockchain.wallet.payload.data2.WalletBaseBody;
-import info.blockchain.wallet.payload.data2.WalletBody;
-import info.blockchain.wallet.payload.data2.WalletWrapperBody;
+import info.blockchain.wallet.payload.data.AccountBody;
+import info.blockchain.wallet.payload.data.LegacyAddressBody;
+import info.blockchain.wallet.payload.data.WalletBaseBody;
+import info.blockchain.wallet.payload.data.WalletBody;
+import info.blockchain.wallet.payload.data.WalletWrapperBody;
 import info.blockchain.wallet.util.Tools;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -41,7 +38,7 @@ import retrofit2.Response;
 public class WalletManager {
 
     private WalletBaseBody walletBaseBody;
-    private String tempPassword;
+    private String tempPassword; //Stored to encrypt before saving
     private MetadataNodeFactory metadataNodeFactory;
 
     private static WalletManager instance = new WalletManager();
@@ -75,8 +72,12 @@ public class WalletManager {
     //*                  Wallet initialization, creation, recovery, syncing                      *//
     //********************************************************************************************//
 
-    /*
-    NB! When called from Android - First apply PRNGFixes
+    /**
+     * NB! When called from Android - First apply PRNGFixes
+     * Creates a new Blockchain wallet and saves it to the server.
+     * @param defaultAccountName
+     * @param email Used to send GUID link to user
+     * @throws Exception
      */
     public void create(@Nonnull String defaultAccountName, @Nonnull String email)
         throws Exception {
@@ -93,6 +94,13 @@ public class WalletManager {
         }
     }
 
+    /**
+     * Creates a new Blockchain wallet based on provided mnemonic and saves it to the server.
+     * @param mnemonic 12 word recovery phrase - space separated
+     * @param defaultAccountName
+     * @param email Used to send GUID link to user
+     * @throws Exception
+     */
     public void recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
         @Nonnull String email) throws Exception {
 
@@ -108,8 +116,13 @@ public class WalletManager {
         }
     }
 
-    /*
-    NB! When called from Android - First apply PRNGFixes
+    /**
+     * Upgrades a V2 wallet to a V3 HD wallet and saves it to the server
+     * NB! When called from Android - First apply PRNGFixes
+     * @param secondPassword
+     * @param defaultAccountName
+     * @return
+     * @throws Exception
      */
     public boolean upgradeV2PayloadToV3(String secondPassword, String defaultAccountName) throws Exception {
 
@@ -125,6 +138,22 @@ public class WalletManager {
         return success;
     }
 
+    /**
+     * Initializes a wallet from provided credentials.
+     * @param sharedKey
+     * @param guid
+     * @throws IOException
+     * @throws InvalidCredentialsException GUID might be incorrect
+     * @throws AccountLockedException Account has been locked, contact support
+     * @throws ServerConnectionException Unknown server error
+     * @throws DecryptionException Password not able to decrypt payload
+     * @throws InvalidCipherTextException Decryption issue
+     * @throws UnsupportedVersionException Payload version newer than current supported
+     * @throws MnemonicLengthException Initializing HD issue
+     * @throws MnemonicWordException Initializing HD issue
+     * @throws MnemonicChecksumException Initializing HD issue
+     * @throws DecoderException Decryption issue
+     */
     public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid)
         throws IOException, InvalidCredentialsException, AccountLockedException, ServerConnectionException,
         DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
@@ -187,6 +216,14 @@ public class WalletManager {
         }
     }
 
+    /**
+     * Saves wallet to server
+     * @return True if save successful
+     * @throws HDWalletException
+     * @throws NoSuchAlgorithmException
+     * @throws EncryptionException
+     * @throws IOException
+     */
     public boolean save()
         throws HDWalletException, NoSuchAlgorithmException,
         EncryptionException, IOException {
@@ -227,9 +264,17 @@ public class WalletManager {
     }
 
     //********************************************************************************************//
-    //*                         Account and Legacy Address creation                              *//
+    //*                         Account and Legacy HDAddress creation                              *//
     //********************************************************************************************//
 
+    /**
+     * Adds a new account to hd wallet and saves to server.
+     * Reverts on save failure.
+     * @param label
+     * @param secondPassword
+     * @return
+     * @throws Exception
+     */
     public boolean addAccount(String label, @Nullable String secondPassword)
         throws Exception {
         AccountBody accountBody = walletBaseBody.getWalletBody().addAccount(label, secondPassword);
@@ -246,6 +291,8 @@ public class WalletManager {
 
     /**
      * NB! When called from Android - First apply PRNGFixes
+     * Generates new legacy address and saves to server.
+     * Reverts on save failure.
      * @param label
      * @param secondPassword
      * @return
@@ -266,6 +313,18 @@ public class WalletManager {
         return success;
     }
 
+    /**
+     * Sets private key to existing matching legacy address.
+     * @param key ECKey for existing legacy address
+     * @param secondPassword Double encryption password if applicable.
+     * @return
+     * @throws EncryptionException
+     * @throws IOException
+     * @throws DecryptionException
+     * @throws NoSuchAddressException
+     * @throws NoSuchAlgorithmException
+     * @throws HDWalletException
+     */
     public boolean setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
         throws EncryptionException, IOException, DecryptionException, NoSuchAddressException,
         NoSuchAlgorithmException, HDWalletException {
@@ -315,8 +374,8 @@ public class WalletManager {
     //********************************************************************************************//
 
     /**
-     *
-     * @param node used to sign GUID. This will deactivate push notifications.
+     * This will deactivate push notifications.
+     * @param node used to sign GUID.
      * @return
      * @throws Exception
      */
@@ -328,8 +387,8 @@ public class WalletManager {
     }
 
     /**
-     *
-     * @param node used to sign GUID. This will activate push notifications.
+     * This will activate push notifications.
+     * @param node used to sign GUID.
      * @return
      * @throws Exception
      */

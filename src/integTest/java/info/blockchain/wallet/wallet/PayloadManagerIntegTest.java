@@ -1,10 +1,10 @@
 package info.blockchain.wallet.wallet;
 
 import info.blockchain.wallet.BaseIntegTest;
+import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Payload;
-import info.blockchain.wallet.payload.PayloadManager;
 import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;

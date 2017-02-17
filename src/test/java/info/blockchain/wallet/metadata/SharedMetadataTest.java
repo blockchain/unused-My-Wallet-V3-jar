@@ -2,7 +2,8 @@ package info.blockchain.wallet.metadata;
 
 import info.blockchain.MockedResponseTest;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.bip44.WalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,13 +15,16 @@ public class SharedMetadataTest extends MockedResponseTest {
 
     @Before
     public void setUp() throws Exception {
-        key = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("15e23aa73d25994f1921a1256f93f72c","",1).getMasterKey();
+        key = HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                "15e23aa73d25994f1921a1256f93f72c", "", 1).getMasterKey();
     }
 
     @Test
     public void getNode() throws Exception {
         SharedMetadata sharedMetadata = new SharedMetadata.Builder(key).build();
-        Assert.assertTrue(sharedMetadata.getNode().getPrivateKeyAsHex().equals("b3c830cde7bac6b5d2cad754ea523fb6ff51fc59da49d28ac98268d87f23b89b"));
+        Assert.assertTrue(sharedMetadata.getNode().getPrivateKeyAsHex()
+            .equals("b3c830cde7bac6b5d2cad754ea523fb6ff51fc59da49d28ac98268d87f23b89b"));
     }
 
     @Test
@@ -100,13 +104,19 @@ public class SharedMetadataTest extends MockedResponseTest {
     @Test
     public void decryptFrom() throws Exception {
 
-        DeterministicKey a_key = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("15e23aa73d25994f1921a1256f93f72c","",1).getMasterKey();
+        DeterministicKey a_key = HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                "15e23aa73d25994f1921a1256f93f72c", "", 1).getMasterKey();
         SharedMetadata a_sharedMetadata = new SharedMetadata.Builder(a_key).build();
 
-        DeterministicKey b_key = new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("20e3939d08ddf727f34a130704cd925e","",1).getMasterKey();
+        DeterministicKey b_key = HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                "20e3939d08ddf727f34a130704cd925e", "", 1).getMasterKey();
         SharedMetadata b_sharedMetadata = new SharedMetadata.Builder(b_key).build();
 
-        String encryptedMessage = a_sharedMetadata.encryptFor(b_sharedMetadata.getXpub(), "Water is wet");
-        String decryptedMessage = b_sharedMetadata.decryptFrom(a_sharedMetadata.getXpub(), encryptedMessage);
+        String encryptedMessage = a_sharedMetadata
+            .encryptFor(b_sharedMetadata.getXpub(), "Water is wet");
+        String decryptedMessage = b_sharedMetadata
+            .decryptFrom(a_sharedMetadata.getXpub(), encryptedMessage);
     }
 }

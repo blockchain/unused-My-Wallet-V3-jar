@@ -1,8 +1,7 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.MockedResponseTest;
-import info.blockchain.wallet.payload.data.PayloadTest;
-import info.blockchain.wallet.payload.data2.WalletBaseBody;
+import info.blockchain.wallet.payload.data.WalletBaseBody;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,7 +28,7 @@ public class WalletApiTest extends MockedResponseTest {
     @Test
     public void getEncryptedPayload() throws IOException, URISyntaxException {
 
-        URI uri = PayloadTest.class.getClassLoader().getResource("encrypted-payload.txt").toURI();
+        URI uri = getClass().getClassLoader().getResource("encrypted-payload.txt").toURI();
         String encryptedPayload = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(encryptedPayload);

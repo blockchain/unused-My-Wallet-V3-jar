@@ -16,13 +16,13 @@ public class AddressTest {
     String xpub = "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV";
     String xpriv = "L1HazQbEpwQKWnE5gXNKsFtHy2ufmpScQ8zZAd14BpwRX5DJpsdq";
     DeterministicKey key;
-    Address address;
+    HDAddress address;
 
     @Before
     public void setup() {
         key = HDKeyDerivation
             .createMasterPrivateKey(seed.getBytes());
-        address = new Address(MainNetParams.get(), key, 0);
+        address = new HDAddress(MainNetParams.get(), key, 0);
     }
 
     @Test

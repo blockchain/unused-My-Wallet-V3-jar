@@ -1,6 +1,5 @@
 package info.blockchain.wallet.transaction;
 
-import info.blockchain.api.data.*;
 import java.util.Map;
 
 /*

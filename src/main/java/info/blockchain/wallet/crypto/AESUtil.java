@@ -5,7 +5,6 @@ import info.blockchain.wallet.exceptions.EncryptionException;
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import javax.annotation.Nullable;
-import javax.security.auth.login.CredentialException;
 import org.apache.commons.codec.binary.Base64;
 import org.spongycastle.crypto.BlockCipher;
 import org.spongycastle.crypto.BufferedBlockCipher;

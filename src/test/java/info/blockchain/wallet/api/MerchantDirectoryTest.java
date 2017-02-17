@@ -2,7 +2,6 @@ package info.blockchain.wallet.api;
 
 import info.blockchain.MockedResponseTest;
 import info.blockchain.wallet.api.data.MerchantBody;
-import info.blockchain.wallet.payload.data.PayloadTest;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -17,7 +16,7 @@ public class MerchantDirectoryTest extends MockedResponseTest {
     @Test
     public void getAllMerchants() throws Exception {
 
-        URI uri = PayloadTest.class.getClassLoader().getResource("merchant-directory.txt").toURI();
+        URI uri = getClass().getClassLoader().getResource("merchant-directory.txt").toURI();
         String merchants = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(merchants);

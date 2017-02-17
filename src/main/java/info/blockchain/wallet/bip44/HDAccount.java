@@ -18,7 +18,7 @@ public class HDAccount {
 
     private DeterministicKey aKey = null;
     private int aID;
-    private List<Chain> chains = null;
+    private List<HDChain> chains = null;
 
     private String strXPUB = null;
     private String strPath = null;
@@ -44,9 +44,9 @@ public class HDAccount {
 
         strXPUB = aKey.serializePubB58(params);
 
-        chains = new ArrayList<Chain>();
-        chains.add(new Chain(params, aKey, true));
-        chains.add(new Chain(params, aKey, false));
+        chains = new ArrayList<HDChain>();
+        chains.add(new HDChain(params, aKey, true));
+        chains.add(new HDChain(params, aKey, false));
 
         strPath = aKey.getPathAsString();
 
@@ -69,9 +69,9 @@ public class HDAccount {
 
         strXPUB = xpub;
 
-        chains = new ArrayList<Chain>();
-        chains.add(new Chain(params, aKey, true));
-        chains.add(new Chain(params, aKey, false));
+        chains = new ArrayList<HDChain>();
+        chains.add(new HDChain(params, aKey, true));
+        chains.add(new HDChain(params, aKey, false));
 
     }
 
@@ -90,9 +90,9 @@ public class HDAccount {
 
         strXPUB = xpub;
 
-        chains = new ArrayList<Chain>();
-        chains.add(new Chain(params, aKey, true));
-        chains.add(new Chain(params, aKey, false));
+        chains = new ArrayList<HDChain>();
+        chains.add(new HDChain(params, aKey, true));
+        chains.add(new HDChain(params, aKey, false));
 
     }
 
@@ -172,7 +172,7 @@ public class HDAccount {
      *
      * @return HD_Chain
      */
-    public Chain getReceive() {
+    public HDChain getReceive() {
         return chains.get(0);
     }
 
@@ -181,7 +181,7 @@ public class HDAccount {
      *
      * @return HD_Chain
      */
-    public Chain getChange() {
+    public HDChain getChange() {
         return chains.get(1);
     }
 
@@ -190,7 +190,7 @@ public class HDAccount {
      *
      * @return HD_Chain
      */
-    public Chain getChain(int idx) {
+    public HDChain getChain(int idx) {
 
         if (idx < 0 || idx > 1) {
             return null;

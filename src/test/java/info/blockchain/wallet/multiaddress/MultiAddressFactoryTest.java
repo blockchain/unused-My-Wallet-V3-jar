@@ -3,8 +3,6 @@ package info.blockchain.wallet.multiaddress;
 import info.blockchain.MockedResponseTest;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.MultiAddress;
-import info.blockchain.wallet.payload.data.PayloadTest;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -22,7 +20,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
     @Test
     public void getMultiAddress_legacyAddress() throws Exception {
 
-        URI uri = PayloadTest.class.getClassLoader().getResource("multi_address_1jH7K.txt").toURI();
+        URI uri = getClass().getClassLoader().getResource("multi_address_1jH7K.txt").toURI();
         String response = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(response);
@@ -39,7 +37,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
     @Test
     public void getMultiAddress_xpub() throws Exception {
 
-        URI uri = PayloadTest.class.getClassLoader().getResource("multi_address_xpub6CFg.txt").toURI();
+        URI uri = getClass().getClassLoader().getResource("multi_address_xpub6CFg.txt").toURI();
         String response = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(response);
@@ -67,7 +65,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
     @Test
     public void getAll() throws Exception {
 
-        URI uri = PayloadTest.class.getClassLoader().getResource("multi_address_all.txt").toURI();
+        URI uri = getClass().getClassLoader().getResource("multi_address_all.txt").toURI();
         String response = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
         mockInterceptor.setResponseString(response);
 

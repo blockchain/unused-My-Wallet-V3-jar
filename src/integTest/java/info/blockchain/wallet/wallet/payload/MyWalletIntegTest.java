@@ -5,9 +5,9 @@ import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.BaseIntegTest;
 import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.payload.WalletManager;
-import info.blockchain.wallet.payload.data2.LegacyAddressBody;
-import info.blockchain.wallet.payload.data2.HDWalletBody;
-import info.blockchain.wallet.payload.data2.WalletBody;
+import info.blockchain.wallet.payload.data.HDWalletBody;
+import info.blockchain.wallet.payload.data.LegacyAddressBody;
+import info.blockchain.wallet.payload.data.WalletBody;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +30,7 @@ public class MyWalletIntegTest extends BaseIntegTest{
         walletBody.setHdWallets(new ArrayList<HDWalletBody>());
 
         //Add legacy so we have at least 1 address
-        LegacyAddressBody newlyAdded = walletBody.addLegacyAddress("Address label", null);
+        LegacyAddressBody newlyAdded = walletBody.addLegacyAddress("HDAddress label", null);
 
         final String guidOriginal = walletBody.getGuid();
 

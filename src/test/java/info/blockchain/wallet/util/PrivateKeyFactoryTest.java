@@ -7,7 +7,6 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class PrivateKeyFactoryTest extends MockedResponseTest {

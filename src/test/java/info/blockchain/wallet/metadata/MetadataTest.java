@@ -7,7 +7,8 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDWallet;
-import info.blockchain.wallet.bip44.WalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.util.MetadataUtil;
 import okhttp3.OkHttpClient;
@@ -71,9 +72,9 @@ public class MetadataTest {
 
     private HDWallet getWallet() throws Exception {
 
-        return new WalletFactory(PersistentUrls.getInstance().getCurrentNetworkParams()).restoreWallet("15e23aa73d25994f1921a1256f93f72c",
-                "",
-                1);
+        return HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                "15e23aa73d25994f1921a1256f93f72c", "", 1);
     }
 
     @Test
