@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class LegacyAddressBodyTest {
+public class LegacyAddressTest {
 
     @Test
     public void fromJson_1() throws Exception {
@@ -16,10 +16,10 @@ public class LegacyAddressBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertEquals(19, wallet.getLegacyAddressList().size());
 
-        LegacyAddressBody addressBody = wallet.getLegacyAddressList().get(0);
+        LegacyAddress addressBody = wallet.getLegacyAddressList().get(0);
         Assert.assertEquals("import 1", addressBody.getLabel());
         Assert.assertEquals("19Axrcn8nsdZkSJtbnyM1rCs1PGwSzzzNn", addressBody.getAddressString());
         Assert.assertEquals("g9rIjgOlfASQuJv38i1xdLmP1m2gMTPe96YzJJ9hjI2BBz5RErNOSeHPdeU2ZIOnsk+M1dfFw649MHXb7RAcZg==", addressBody.getPrivateKey());
@@ -45,8 +45,8 @@ public class LegacyAddressBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        LegacyAddressBody addressBody = wallet.getLegacyAddressList().get(0);
+        Wallet wallet = Wallet.fromJson(body);
+        LegacyAddress addressBody = wallet.getLegacyAddressList().get(0);
 
         String jsonString = addressBody.toJson();
 

@@ -4,8 +4,8 @@ import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.api.data.FeesBody;
-import info.blockchain.wallet.api.data.FeesListBody;
+import info.blockchain.wallet.api.data.Fees;
+import info.blockchain.wallet.api.data.FeesList;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -31,22 +31,22 @@ public class Payment {
     /*                                     Fee Handling                                           */
     /**********************************************************************************************/
     public static BigInteger estimatedFee(int inputs, int outputs, @Nonnull BigInteger feePerKb) {
-        return Fees.estimatedFee(inputs, outputs, feePerKb);
+        return info.blockchain.wallet.payment.Fees.estimatedFee(inputs, outputs, feePerKb);
     }
 
     public static int estimatedSize(int inputs, int outputs) {
-        return Fees.estimatedSize(inputs, outputs);
+        return info.blockchain.wallet.payment.Fees.estimatedSize(inputs, outputs);
     }
 
     public static boolean isAdequateFee(int inputs, int outputs, @Nonnull BigInteger absoluteFee) {
-        return Fees.isAdequateFee(inputs, outputs, absoluteFee);
+        return info.blockchain.wallet.payment.Fees.isAdequateFee(inputs, outputs, absoluteFee);
     }
 
-    public static Call<FeesListBody> getDynamicFee() {
+    public static Call<FeesList> getDynamicFee() {
         return WalletApi.getDynamicFee();
     }
 
-    public static FeesBody getDefaultFee() throws IOException {
+    public static Fees getDefaultFee() throws IOException {
         return WalletApi.getDefaultFee();
     }
 

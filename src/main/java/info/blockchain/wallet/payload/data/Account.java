@@ -18,7 +18,7 @@ import java.util.List;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class AccountBody {
+public class Account {
 
     @JsonProperty("label")
     private String label;
@@ -33,16 +33,16 @@ public class AccountBody {
     private String xpub;
 
     @JsonProperty("cache")
-    private CacheBody cache;
+    private Cache cache;
 
     @JsonProperty("address_labels")
-    private List<AddressLabelsBody> addressLabels;
+    private List<AddressLabels> addressLabels;
 
     public String getLabel() {
         return label;
     }
 
-    public AccountBody() {
+    public Account() {
         addressLabels = new ArrayList<>();
     }
 
@@ -74,26 +74,26 @@ public class AccountBody {
         this.xpub = xpub;
     }
 
-    public CacheBody getCache() {
+    public Cache getCache() {
         return cache;
     }
 
-    public void setCache(CacheBody cache) {
+    public void setCache(Cache cache) {
         this.cache = cache;
     }
 
-    public List<AddressLabelsBody> getAddressLabels() {
+    public List<AddressLabels> getAddressLabels() {
         return addressLabels;
     }
 
     public void setAddressLabels(
-        List<AddressLabelsBody> addressLabels) {
+        List<AddressLabels> addressLabels) {
         this.addressLabels = addressLabels;
     }
 
 
-    public static AccountBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, AccountBody.class);
+    public static Account fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Account.class);
     }
 
     public String toJson() throws JsonProcessingException {

@@ -4,10 +4,10 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.BaseIntegTest;
 import info.blockchain.wallet.multiaddress.MultiAddressFactory;
-import info.blockchain.wallet.payload.WalletManager;
-import info.blockchain.wallet.payload.data.HDWalletBody;
-import info.blockchain.wallet.payload.data.LegacyAddressBody;
-import info.blockchain.wallet.payload.data.WalletBody;
+import info.blockchain.wallet.payload.PayloadManager;
+import info.blockchain.wallet.payload.data.HDWallet;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,22 +15,22 @@ import org.junit.Assert;
 import org.junit.Test;
 import retrofit2.Call;
 
-public class MyWalletIntegTest extends BaseIntegTest{
+public class PayloadManagerIntegTest extends BaseIntegTest{
 
     @Test
     public void upgradeV2PayloadToV3() throws Exception {
 
         //Create a wallet
-        WalletManager.getInstance().setTempPassword("MyTestWallet");
-        WalletManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().setTempPassword("MyTestWallet");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
 
-        WalletBody walletBody = WalletManager.getInstance().getWalletBody();
+        Wallet walletBody = PayloadManager.getInstance().getPayload();
 
         //Remove HD part
-        walletBody.setHdWallets(new ArrayList<HDWalletBody>());
+        walletBody.setHdWallets(new ArrayList<HDWallet>());
 
         //Add legacy so we have at least 1 address
-        LegacyAddressBody newlyAdded = walletBody.addLegacyAddress("HDAddress label", null);
+        LegacyAddress newlyAdded = walletBody.addLegacyAddress("HDAddress label", null);
 
         final String guidOriginal = walletBody.getGuid();
 

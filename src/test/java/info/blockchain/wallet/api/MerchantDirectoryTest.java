@@ -1,7 +1,7 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.MockedResponseTest;
-import info.blockchain.wallet.api.data.MerchantBody;
+import info.blockchain.wallet.api.data.Merchant;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -20,12 +20,12 @@ public class MerchantDirectoryTest extends MockedResponseTest {
         String merchants = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(merchants);
-        Call<ArrayList<MerchantBody>> call = WalletApi.getAllMerchants();
+        Call<ArrayList<Merchant>> call = WalletApi.getAllMerchants();
 
-        ArrayList<MerchantBody> merchantList = call.execute().body();
+        ArrayList<Merchant> merchantList = call.execute().body();
         Assert.assertEquals(585, merchantList.size());
 
-        MerchantBody merchant = merchantList.get(0);
+        Merchant merchant = merchantList.get(0);
         Assert.assertEquals(1, merchant.getId());
         Assert.assertEquals("Bubble-T Broca", merchant.getName());
         Assert.assertEquals("87 Rue Broca Paris", merchant.getAddress());
@@ -38,7 +38,7 @@ public class MerchantDirectoryTest extends MockedResponseTest {
         Assert.assertEquals("Our mission is to bring an authentic teahouse.", merchant.getDescription());
         Assert.assertTrue(merchant.isBlockchainMerchant());
         Assert.assertTrue(merchant.isApproved());
-        Assert.assertEquals(MerchantBody.HEADING_CAFE, merchant.getCategoryId());
+        Assert.assertEquals(Merchant.HEADING_CAFE, merchant.getCategoryId());
         Assert.assertFalse(merchant.isFeaturedMerchant());
     }
 }

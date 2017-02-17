@@ -14,7 +14,7 @@ import java.util.ArrayList;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(getterVisibility = Visibility.NONE)
-public class SettingsBody {
+public class Settings {
 
     @JsonIgnore
     public static final int NOTIFICATION_ON = 2;
@@ -202,8 +202,8 @@ public class SettingsBody {
     }
 
     @JsonIgnore
-    public static SettingsBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, SettingsBody.class);
+    public static Settings fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Settings.class);
     }
 
     @JsonIgnore

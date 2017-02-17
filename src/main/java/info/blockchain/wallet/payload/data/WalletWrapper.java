@@ -25,7 +25,7 @@ import org.spongycastle.crypto.InvalidCipherTextException;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class WalletWrapperBody {
+public class WalletWrapper {
 
     public static final int CURRENT_VERSION = 3;
     public static final int DEFAULT_PBKDF2_ITERATIONS_V2 = 5000;
@@ -63,8 +63,8 @@ public class WalletWrapperBody {
         this.payload = payload;
     }
 
-    public static WalletWrapperBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, WalletWrapperBody.class);
+    public static WalletWrapper fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, WalletWrapper.class);
     }
 
     public String toJson() throws JsonProcessingException {
@@ -86,7 +86,7 @@ public class WalletWrapperBody {
         }
     }
 
-    public WalletBody decryptPayload(String password)
+    public Wallet decryptPayload(String password)
         throws UnsupportedVersionException, IOException, DecryptionException, InvalidCipherTextException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
         validateVersion();
         validatePbkdf2Iterations();
@@ -98,11 +98,11 @@ public class WalletWrapperBody {
             throw new DecryptionException("Decryption failed.");
         }
 
-        return WalletBody.fromJson(decryptedPayload);
+        return Wallet.fromJson(decryptedPayload);
     }
 
-    public static WalletWrapperBody wrap(String encryptedPayload, int iterations) {
-        WalletWrapperBody walletWrapperBody = new WalletWrapperBody();
+    public static WalletWrapper wrap(String encryptedPayload, int iterations) {
+        WalletWrapper walletWrapperBody = new WalletWrapper();
         walletWrapperBody.setVersion(CURRENT_VERSION);
         walletWrapperBody.setPbkdf2Iterations(iterations);
         walletWrapperBody.setPayload(encryptedPayload);

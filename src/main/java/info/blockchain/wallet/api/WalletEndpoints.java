@@ -1,8 +1,8 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.wallet.api.data.FeesListBody;
-import info.blockchain.wallet.api.data.MerchantBody;
-import info.blockchain.wallet.api.data.SettingsBody;
+import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.Merchant;
+import info.blockchain.wallet.api.data.Settings;
 import java.util.ArrayList;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -23,7 +23,7 @@ public interface WalletEndpoints {
         @Query("api_code") String apiCode);
 
     @POST("wallet")
-    Call<SettingsBody> fetchSettings(
+    Call<Settings> fetchSettings(
         @Query("method") String method,
         @Query("guid") String guid,
         @Query("sharedKey") String sharedKey,
@@ -76,7 +76,7 @@ public interface WalletEndpoints {
         @Query("api_code") String apiCode);
 
     @GET("fees")
-    Call<FeesListBody> getFees();
+    Call<FeesList> getFees();
 
     @GET("v2/randombytes")
     Call<ResponseBody> getRandomBytes(
@@ -91,5 +91,5 @@ public interface WalletEndpoints {
         @Query("api_code") String apiCode);
 
     @GET("merchant")
-    Call<ArrayList<MerchantBody>> getAllMerchants();
+    Call<ArrayList<Merchant>> getAllMerchants();
 }

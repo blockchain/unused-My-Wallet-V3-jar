@@ -37,13 +37,13 @@ import org.spongycastle.util.encoders.Hex;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class WalletBaseBody {
+public class WalletBase {
 
     private static final int DEFAULT_PBKDF2_ITERATIONS_V1_A = 1;
     private static final int DEFAULT_PBKDF2_ITERATIONS_V1_B = 10;
 
     //payload could be string in V1
-    //V2 and up is WalletWrapperBody
+    //V2 and up is WalletWrapper
     @JsonProperty("payload")
     private String payload;
 
@@ -69,7 +69,7 @@ public class WalletBaseBody {
     @JsonProperty("sync_pubkeys")
     private boolean syncPubkeys;
 
-    public WalletBaseBody() {
+    public WalletBase() {
         //Empty constructor needed for Jackson
     }
 
@@ -91,11 +91,11 @@ public class WalletBaseBody {
         }
     }
 
-    private WalletBody decryptV3Wallet(String password)
+    private Wallet decryptV3Wallet(String password)
         throws IOException, DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
 
-        WalletWrapperBody walletWrapperBody = WalletWrapperBody.fromJson(payload);
-        WalletBody walletBody = walletWrapperBody.decryptPayload(password);
+        WalletWrapper walletWrapperBody = WalletWrapper.fromJson(payload);
+        Wallet walletBody = walletWrapperBody.decryptPayload(password);
         //In case iterations weren't set in wallet options
         walletBody.getOptions().setPbkdf2Iterations(walletWrapperBody.getPbkdf2Iterations());
         return walletBody;
@@ -104,7 +104,7 @@ public class WalletBaseBody {
     /*
     No need to encrypt V1 wallet again. We will force user to upgrade to V3
      */
-    private WalletBody decryptV1Wallet(String password)
+    private Wallet decryptV1Wallet(String password)
         throws DecryptionException, IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException, InvalidCipherTextException {
 
         String decrypted = null;
@@ -144,7 +144,7 @@ public class WalletBaseBody {
         }
 
         String decryptedPayload = decrypted;
-        walletBody = WalletBody.fromJson(decryptedPayload);
+        walletBody = Wallet.fromJson(decryptedPayload);
         return walletBody;
     }
 
@@ -200,8 +200,8 @@ public class WalletBaseBody {
         return !FormatsUtil.isValidJson(payload);
     }
 
-    public static WalletBaseBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, WalletBaseBody.class);
+    public static WalletBase fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, WalletBase.class);
     }
 
     public String toJson() throws JsonProcessingException {
@@ -213,7 +213,7 @@ public class WalletBaseBody {
 
         int iterations = walletBody.getOptions().getPbkdf2Iterations();
         String encryptedPayload = AESUtil.encrypt(walletBody.toJson(), password, iterations);
-        WalletWrapperBody wrapperBody = WalletWrapperBody.wrap(encryptedPayload, iterations);
+        WalletWrapper wrapperBody = WalletWrapper.wrap(encryptedPayload, iterations);
 
         String checkSum = new String(Hex.encode(MessageDigest.getInstance("SHA-256").digest(wrapperBody.toJson().getBytes("UTF-8"))));
 
@@ -223,13 +223,13 @@ public class WalletBaseBody {
     /**********************************************************************************************/
     /*                          HDWallet body containing private keys                               */
     /**********************************************************************************************/
-    private WalletBody walletBody;
+    private Wallet walletBody;
 
-    public WalletBody getWalletBody() {
+    public Wallet getWalletBody() {
         return walletBody;
     }
 
-    public void setWalletBody(WalletBody walletBody) {
+    public void setWalletBody(Wallet walletBody) {
         this.walletBody = walletBody;
     }
 }

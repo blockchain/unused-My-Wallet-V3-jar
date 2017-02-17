@@ -16,7 +16,7 @@ import java.io.IOException;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class OptionsBody {
+public class Options {
 
     private static long DEFAULT_FEE_PER_KB = 10000L;
     private static long DEFAULT_LOGOUT_TIME = 600000L;
@@ -66,17 +66,17 @@ public class OptionsBody {
         this.logoutTime = logoutTime;
     }
 
-    public static OptionsBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, OptionsBody.class);
+    public static Options fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Options.class);
     }
 
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public static OptionsBody getDefaultOptions() {
-        OptionsBody defaultOptions = new OptionsBody();
-        defaultOptions.setPbkdf2Iterations(WalletWrapperBody.DEFAULT_PBKDF2_ITERATIONS_V2);
+    public static Options getDefaultOptions() {
+        Options defaultOptions = new Options();
+        defaultOptions.setPbkdf2Iterations(WalletWrapper.DEFAULT_PBKDF2_ITERATIONS_V2);
         defaultOptions.setHtml5Notifications(DEFAULT_HTML5_NOTIFICATIONS);
         defaultOptions.setLogoutTime(DEFAULT_LOGOUT_TIME);
         defaultOptions.setFeePerKb(DEFAULT_FEE_PER_KB);

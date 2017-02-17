@@ -8,15 +8,15 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class OptionsBodyTest {
+public class OptionsTest {
 
     @Test
     public void fromJson_1() throws Exception {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        OptionsBody options = wallet.getOptions();
+        Wallet wallet = Wallet.fromJson(body);
+        Options options = wallet.getOptions();
         Assert.assertEquals(10000, options.getFeePerKb());
         Assert.assertEquals(5000, options.getPbkdf2Iterations());
         Assert.assertFalse(options.isHtml5Notifications());
@@ -28,8 +28,8 @@ public class OptionsBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_2.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        OptionsBody options = wallet.getOptions();
+        Wallet wallet = Wallet.fromJson(body);
+        Options options = wallet.getOptions();
         Assert.assertEquals(0, options.getFeePerKb());
 
         //Expect iterations to default. 0 not allowed
@@ -46,8 +46,8 @@ public class OptionsBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        OptionsBody options = wallet.getOptions();
+        Wallet wallet = Wallet.fromJson(body);
+        Options options = wallet.getOptions();
         String jsonString = options.toJson();
 
         JSONObject jsonObject = new JSONObject(jsonString);

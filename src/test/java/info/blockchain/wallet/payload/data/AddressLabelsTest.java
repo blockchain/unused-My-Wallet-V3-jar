@@ -9,19 +9,19 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AddressLabelsBodyTest {
+public class AddressLabelsTest {
 
     @Test
     public void fromJson_1() throws Exception {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
 
-        List<AccountBody> accounts = hdWallet.getAccounts();
+        List<Account> accounts = hdWallet.getAccounts();
 
-        List<AddressLabelsBody> addressLabels = accounts.get(1).getAddressLabels();
+        List<AddressLabels> addressLabels = accounts.get(1).getAddressLabels();
         Assert.assertEquals(98, addressLabels.get(0).getIndex());
         Assert.assertEquals("New Address", addressLabels.get(0).getLabel());
 
@@ -39,12 +39,12 @@ public class AddressLabelsBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
 
-        List<AccountBody> accounts = hdWallet.getAccounts();
+        List<Account> accounts = hdWallet.getAccounts();
 
-        List<AddressLabelsBody> addressLabels = accounts.get(1).getAddressLabels();
+        List<AddressLabels> addressLabels = accounts.get(1).getAddressLabels();
         String jsonString = addressLabels.get(0).toJson();
 
         JSONObject jsonObject = new JSONObject(jsonString);

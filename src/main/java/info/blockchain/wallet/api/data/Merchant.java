@@ -13,7 +13,7 @@ import java.io.IOException;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(getterVisibility = Visibility.NONE)
-public class MerchantBody {
+public class Merchant {
 
     @JsonIgnore
     public static final int HEADING_CAFE = 1;
@@ -145,8 +145,8 @@ public class MerchantBody {
     }
 
     @JsonIgnore
-    public static MerchantBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, MerchantBody.class);
+    public static Merchant fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Merchant.class);
     }
 
     @JsonIgnore

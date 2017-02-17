@@ -8,15 +8,15 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class HDWalletBodyTest {
+public class HDWalletTest {
 
     @Test
     public void fromJson_1() throws Exception {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
 
         Assert.assertEquals(68, hdWallet.getAccounts().size());
         Assert.assertEquals("i3gtswW35zfbS/23fnh3IzKzcrpD04Tp+zeKbj++rODMOGRMO1aMQukwE3Q+63ds8pUMzBFnzomkjntprhisrQ==", hdWallet.getSeedHex());
@@ -30,7 +30,7 @@ public class HDWalletBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_2.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertNull(wallet.getHdWallets());
     }
 
@@ -39,8 +39,8 @@ public class HDWalletBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_6.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
 
         Assert.assertEquals(1, hdWallet.getAccounts().size());
         Assert.assertEquals("bfb70136ef9f973e866dff00817b8070", hdWallet.getSeedHex());
@@ -56,8 +56,8 @@ public class HDWalletBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
         String jsonString = hdWallet.toJson();
 
         JSONObject jsonObject = new JSONObject(jsonString);

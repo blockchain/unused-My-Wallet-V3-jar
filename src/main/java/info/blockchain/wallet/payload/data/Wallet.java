@@ -17,7 +17,6 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.bip44.HDAddress;
-import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -55,7 +54,7 @@ import retrofit2.Response;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class WalletBody {
+public class Wallet {
 
     private static final int DEFAULT_MNEMONIC_LENGTH = 12;
     private static final int DEFAULT_NEW_WALLET_SIZE = 1;
@@ -83,45 +82,45 @@ public class WalletBody {
     private Map<Integer, String> tagNames;
 
     @JsonProperty("options")
-    private OptionsBody options;
+    private Options options;
 
     @JsonProperty("wallet_options")
-    private OptionsBody walletOptions;
+    private Options walletOptions;
 
     @JsonProperty("hd_wallets")
-    private List<HDWalletBody> hdWallets;
+    private List<HDWallet> hdWallets;
 
     @JsonProperty("keys")
-    private List<LegacyAddressBody> keys;
+    private List<LegacyAddress> keys;
 
     @JsonProperty("address_book")
-    private List<AddressBookBody> addressBook;
+    private List<AddressBook> addressBook;
 
     //Have to handle HD here.
-    //WalletBody contains doubleEncryption hash to to handle encrypt/decrypt
+    //Wallet contains doubleEncryption hash to to handle encrypt/decrypt
     //for HD and legacy.
-    private HDWallet HD;
+    private info.blockchain.wallet.bip44.HDWallet HD;
 
-    public WalletBody() {
+    public Wallet() {
     }
 
-    public WalletBody(String defaultAccountName) throws IOException, MnemonicLengthException {
+    public Wallet(String defaultAccountName) throws IOException, MnemonicLengthException {
 
         guid = UUID.randomUUID().toString();
         sharedKey = UUID.randomUUID().toString();
         txNotes = new HashMap<>();
         keys = new ArrayList<>();
-        options = OptionsBody.getDefaultOptions();
+        options = Options.getDefaultOptions();
 
         //Bip44
         this.HD = HDWalletFactory
             .createWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
                 DEFAULT_MNEMONIC_LENGTH, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
 
-        HDWalletBody hdWalletBody = new HDWalletBody();
+        HDWallet hdWalletBody = new HDWallet();
 
         List<HDAccount> hdAccounts = this.HD.getAccounts();
-        List<AccountBody> accountBodyList = new ArrayList<>();
+        List<Account> accountBodyList = new ArrayList<>();
         int accountNumber = 1;
         for (int i = 0; i < hdAccounts.size(); i++) {
 
@@ -130,7 +129,7 @@ public class WalletBody {
                 label = defaultAccountName + " " + accountNumber;
             }
 
-            AccountBody accountBody = new AccountBody();
+            Account accountBody = new Account();
             accountBody.setLabel(label);
             accountBody.setXpriv(this.HD.getAccount(0).getXPriv());
             accountBody.setXpub(this.HD.getAccount(0).getXpub());
@@ -180,7 +179,7 @@ public class WalletBody {
     private int fixPbkdf2Iterations() {
 
         //Use default initially
-        int iterations = WalletWrapperBody.DEFAULT_PBKDF2_ITERATIONS_V2;
+        int iterations = WalletWrapper.DEFAULT_PBKDF2_ITERATIONS_V2;
 
         //Old wallets may contain 'wallet_options' key - we'll use this now
         if (walletOptions != null && walletOptions.getPbkdf2Iterations() > 0) {
@@ -194,7 +193,7 @@ public class WalletBody {
 
         //If wallet doesn't contain 'option' - use default
         if(options == null) {
-            options = OptionsBody.getDefaultOptions();
+            options = Options.getDefaultOptions();
         }
 
         //Set iterations
@@ -203,34 +202,34 @@ public class WalletBody {
         return iterations;
     }
 
-    public OptionsBody getOptions() {
+    public Options getOptions() {
         fixPbkdf2Iterations();
         return options;
     }
 
-    public OptionsBody getWalletOptions() {
+    public Options getWalletOptions() {
         return walletOptions;
     }
 
     /*
     Currently Bci wallet only handles 1 wallet in payload.
      */
-    public HDWalletBody getHdWallet() {
+    public HDWallet getHdWallet() {
         return hdWallets.get(0);
     }
 
-    public List<HDWalletBody> getHdWallets() {
+    public List<HDWallet> getHdWallets() {
         return hdWallets;
     }
 
-    public List<LegacyAddressBody> getLegacyAddressList() {
+    public List<LegacyAddress> getLegacyAddressList() {
         return keys;
     }
 
     public List<String> getLegacyAddressStringList() {
 
         List<String> addrs = new ArrayList<>();
-        for (LegacyAddressBody legacyAddress : keys) {
+        for (LegacyAddress legacyAddress : keys) {
             addrs.add(legacyAddress.getAddressString());
         }
 
@@ -240,7 +239,7 @@ public class WalletBody {
     public List<String> getWatchOnlyAddressStringList() {
 
         List<String> addrs = new ArrayList<>();
-        for (LegacyAddressBody legacyAddress : keys) {
+        for (LegacyAddress legacyAddress : keys) {
             if (legacyAddress.isWatchOnly()) {
                 addrs.add(legacyAddress.getAddressString());
             }
@@ -252,7 +251,7 @@ public class WalletBody {
     public List<String> getLegacyAddressStringList(long tag) {
 
         List<String> addrs = new ArrayList<>();
-        for (LegacyAddressBody legacyAddress : keys) {
+        for (LegacyAddress legacyAddress : keys) {
             if (legacyAddress.getTag() == tag) {
                 addrs.add(legacyAddress.getAddressString());
             }
@@ -261,10 +260,10 @@ public class WalletBody {
         return addrs;
     }
 
-    public List<LegacyAddressBody> getLegacyAddressList(long tag) {
+    public List<LegacyAddress> getLegacyAddressList(long tag) {
 
-        List<LegacyAddressBody> addrs = new ArrayList<>();
-        for (LegacyAddressBody legacyAddress : keys) {
+        List<LegacyAddress> addrs = new ArrayList<>();
+        for (LegacyAddress legacyAddress : keys) {
             if (legacyAddress.getTag() == tag) {
                 addrs.add(legacyAddress);
             }
@@ -275,7 +274,7 @@ public class WalletBody {
 
     public boolean containsLegacyAddress(String addr) {
 
-        for (LegacyAddressBody legacyAddress : keys) {
+        for (LegacyAddress legacyAddress : keys) {
             if (legacyAddress.getAddressString().equals(addr)) {
                 return true;
             }
@@ -284,7 +283,7 @@ public class WalletBody {
         return false;
     }
 
-    public List<AddressBookBody> getAddressBook() {
+    public List<AddressBook> getAddressBook() {
         return addressBook;
     }
 
@@ -316,23 +315,23 @@ public class WalletBody {
         this.tagNames = tagNames;
     }
 
-    public void setOptions(OptionsBody options) {
+    public void setOptions(Options options) {
         this.options = options;
     }
 
-    public void setWalletOptions(OptionsBody walletOptions) {
+    public void setWalletOptions(Options walletOptions) {
         this.walletOptions = walletOptions;
     }
 
-    public void setHdWallets(List<HDWalletBody> hdWallets) {
+    public void setHdWallets(List<HDWallet> hdWallets) {
         this.hdWallets = hdWallets;
     }
 
-    public void setLegacyAddressList(List<LegacyAddressBody> keys) {
+    public void setLegacyAddressList(List<LegacyAddress> keys) {
         this.keys = keys;
     }
 
-    public void setAddressBook(List<AddressBookBody> addressBook) {
+    public void setAddressBook(List<AddressBook> addressBook) {
         this.addressBook = addressBook;
     }
 
@@ -340,7 +339,7 @@ public class WalletBody {
         return (hdWallets != null);
     }
 
-    public static WalletBody fromJson(String json)
+    public static Wallet fromJson(String json)
         throws IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException,
         DecoderException, InvalidCipherTextException, DecryptionException {
         ObjectMapper mapper = new ObjectMapper();
@@ -350,7 +349,7 @@ public class WalletBody {
             .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
             .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-        WalletBody walletBody = mapper.readValue(json, WalletBody.class);
+        Wallet walletBody = mapper.readValue(json, Wallet.class);
         walletBody.initHD();
         return walletBody;
     }
@@ -363,7 +362,7 @@ public class WalletBody {
         if(hdWallets != null){
             if(isDoubleEncryption()) {
                 ArrayList<String> xpubList = new ArrayList<>();
-                for(AccountBody account : getHdWallet().getAccounts()) {
+                for(Account account : getHdWallet().getAccounts()) {
                     xpubList.add(account.getXpub());
                 }
 
@@ -384,27 +383,27 @@ public class WalletBody {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public static WalletBody recoverFromMnemonic(String mnemonic, String defaultAccountName)
+    public static Wallet recoverFromMnemonic(String mnemonic, String defaultAccountName)
         throws Exception {
         return recoverFromMnemonic(mnemonic, "", defaultAccountName, 0);
     }
 
-    public static WalletBody recoverFromMnemonic(String mnemonic, String defaultAccountName,
+    public static Wallet recoverFromMnemonic(String mnemonic, String defaultAccountName,
         int accountSize) throws Exception {
         return recoverFromMnemonic(mnemonic, "", defaultAccountName, accountSize);
     }
 
-    public static WalletBody recoverFromMnemonic(String mnemonic, String passphrase,
+    public static Wallet recoverFromMnemonic(String mnemonic, String passphrase,
         String defaultAccountName) throws Exception {
         return recoverFromMnemonic(mnemonic, passphrase, defaultAccountName, 0);
     }
 
-    public static WalletBody recoverFromMnemonic(String mnemonic, String passphrase,
+    public static Wallet recoverFromMnemonic(String mnemonic, String passphrase,
         String defaultAccountName, int accountSize) throws Exception {
 
         //Start with initial wallet size of 1.
         //After wallet is recovered we'll check how many accounts to restore
-        HDWallet hdWallet = HDWalletFactory
+        info.blockchain.wallet.bip44.HDWallet hdWallet = HDWalletFactory
             .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
                 mnemonic, passphrase, DEFAULT_NEW_WALLET_SIZE);
 
@@ -412,8 +411,8 @@ public class WalletBody {
             BlockchainFramework.getRetrofitServerInstance(),
             BlockchainFramework.getApiCode());
 
-        HDWalletBody hdWalletBody = new HDWalletBody();
-        hdWalletBody.setAccounts(new ArrayList<AccountBody>());
+        HDWallet hdWalletBody = new HDWallet();
+        hdWalletBody.setAccounts(new ArrayList<Account>());
 
         int walletSize = 1;
         int accountNumber = 1;
@@ -452,12 +451,12 @@ public class WalletBody {
             .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
                 mnemonic, passphrase, walletSize);
 
-        WalletBody walletBody = new WalletBody();
+        Wallet walletBody = new Wallet();
         walletBody.guid = UUID.randomUUID().toString();
         walletBody.sharedKey = UUID.randomUUID().toString();
         walletBody.txNotes = new HashMap<>();
         walletBody.keys = new ArrayList<>();
-        walletBody.options = OptionsBody.getDefaultOptions();
+        walletBody.options = Options.getDefaultOptions();
         walletBody.HD = hdWallet;
         walletBody.setHdWallets(Arrays.asList(hdWalletBody));
 
@@ -486,8 +485,8 @@ public class WalletBody {
         ArrayList<String> keyList = new ArrayList<>();
 
         if (getLegacyAddressList() != null) {
-            List<LegacyAddressBody> legacyAddresses = getLegacyAddressList();
-            for (LegacyAddressBody legacyAddress : legacyAddresses) {
+            List<LegacyAddress> legacyAddresses = getLegacyAddressList();
+            for (LegacyAddress legacyAddress : legacyAddresses) {
                 if (!legacyAddress.isWatchOnly()) {
                     keyList.add(legacyAddress.getPrivateKey());
                 }
@@ -496,9 +495,9 @@ public class WalletBody {
 
         if (getHdWallets() != null && getHdWallets().size() > 0) {
 
-            for (HDWalletBody hdWallet : getHdWallets()) {
-                List<AccountBody> accounts = hdWallet.getAccounts();
-                for (AccountBody account : accounts) {
+            for (HDWallet hdWallet : getHdWallets()) {
+                List<Account> accounts = hdWallet.getAccounts();
+                for (Account account : accounts) {
                     keyList.add(account.getXpriv());
                 }
             }
@@ -559,8 +558,8 @@ public class WalletBody {
                 attempts++;
 
                 //Create new hd wallet
-                WalletBody wallet = new WalletBody(defaultAccountName);
-                HDWalletBody hdWalletBody = wallet.getHdWallet();
+                Wallet wallet = new Wallet(defaultAccountName);
+                HDWallet hdWalletBody = wallet.getHdWallet();
 
                 //Double encrypt if need
                 if (!StringUtils.isEmpty(secondPassword)) {
@@ -574,7 +573,7 @@ public class WalletBody {
                     hdWalletBody.setSeedHex(doubleEncryptedSeedHex);
 
                     //Double encrypt private key
-                    for(AccountBody account : hdWalletBody.getAccounts()) {
+                    for(Account account : hdWalletBody.getAccounts()) {
 
                         String encryptedXPriv = DoubleEncryptionFactory.encrypt(
                             account.getXpriv(),
@@ -600,10 +599,10 @@ public class WalletBody {
         }
     }
 
-    public LegacyAddressBody addLegacyAddress(String label, @Nullable String secondPassword)
+    public LegacyAddress addLegacyAddress(String label, @Nullable String secondPassword)
         throws Exception {
         validateSecondPassword(secondPassword);
-        LegacyAddressBody addressBody = LegacyAddressBody.generateNewLegacy();
+        LegacyAddress addressBody = LegacyAddress.generateNewLegacy();
         addressBody.setLabel(label);
 
         if(secondPassword != null) {
@@ -624,7 +623,7 @@ public class WalletBody {
         return addressBody;
     }
 
-    public AccountBody addAccount(String label, @Nullable String secondPassword)
+    public Account addAccount(String label, @Nullable String secondPassword)
         throws Exception {
 
         validateSecondPassword(secondPassword);
@@ -674,19 +673,19 @@ public class WalletBody {
         }
     }
 
-    public LegacyAddressBody setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
+    public LegacyAddress setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
         throws DecryptionException, UnsupportedEncodingException, EncryptionException,
         NoSuchAddressException {
 
         validateSecondPassword(secondPassword);
 
-        List<LegacyAddressBody> addressList = getLegacyAddressList();
+        List<LegacyAddress> addressList = getLegacyAddressList();
 
         String address = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
 
-        LegacyAddressBody matchingAddressBody = null;
+        LegacyAddress matchingAddressBody = null;
 
-        for(LegacyAddressBody addressBody : addressList) {
+        for(LegacyAddress addressBody : addressList) {
             if(addressBody.getAddressString().equals(address)) {
                 matchingAddressBody = addressBody;
             }
@@ -731,7 +730,7 @@ public class WalletBody {
         return HD.getMnemonic();
     }
 
-    public List<ECKey> getHDKeysForSigning(@Nullable String secondPassword, AccountBody account, PaymentBundle unspentOutputBundle)
+    public List<ECKey> getHDKeysForSigning(@Nullable String secondPassword, Account account, PaymentBundle unspentOutputBundle)
         throws Exception {
 
         validateSecondPassword(secondPassword);
@@ -757,7 +756,7 @@ public class WalletBody {
         return keys;
     }
 
-    private HDAccount getHDAccountFromAccountBody(AccountBody accountBody) {
+    private HDAccount getHDAccountFromAccountBody(Account accountBody) {
         for(HDAccount account : HD.getAccounts()) {
             if(account.getXpub().equals(accountBody.getXpub())) {
                 return account;

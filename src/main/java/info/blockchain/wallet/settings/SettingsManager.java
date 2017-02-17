@@ -1,11 +1,10 @@
 package info.blockchain.wallet.settings;
 
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.api.data.SettingsBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 
-public class Settings  {
+public class SettingsManager {
 
     //API methods
     public static final String METHOD_GET_INFO = "get-info";
@@ -35,16 +34,16 @@ public class Settings  {
     private String guid;
     private String sharedKey;
 
-    public Settings() {
+    public SettingsManager() {
         // No-op
     }
 
-    public Settings(String guid, String sharedKey) {
+    public SettingsManager(String guid, String sharedKey) {
         this.guid = guid;
         this.sharedKey = sharedKey;
     }
 
-    public Call<SettingsBody> getInfo()  {
+    public Call<info.blockchain.wallet.api.data.Settings> getInfo()  {
         return WalletApi.fetchSettings(METHOD_GET_INFO, guid, sharedKey);
     }
 

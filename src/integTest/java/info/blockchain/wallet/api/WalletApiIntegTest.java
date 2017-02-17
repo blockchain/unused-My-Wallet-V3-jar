@@ -1,10 +1,10 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BaseIntegTest;
-import info.blockchain.wallet.api.data.FeesListBody;
-import info.blockchain.wallet.api.data.MerchantBody;
-import info.blockchain.wallet.api.data.SettingsBody;
-import info.blockchain.wallet.settings.Settings;
+import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.Merchant;
+import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.settings.SettingsManager;
 import java.util.ArrayList;
 import okhttp3.ResponseBody;
 import org.json.JSONObject;
@@ -23,7 +23,7 @@ public class WalletApiIntegTest extends BaseIntegTest{
 
     @Test
     public void getDynamicFee() throws Exception {
-        Response<FeesListBody> call = WalletApi.getDynamicFee().execute();
+        Response<FeesList> call = WalletApi.getDynamicFee().execute();
         Assert.assertNotNull(call.body());
         Assert.assertNotNull(call.body().toJson());
     }
@@ -100,21 +100,22 @@ public class WalletApiIntegTest extends BaseIntegTest{
 
     @Test
     public void getAllMerchants() throws Exception {
-        Response<ArrayList<MerchantBody>> call = WalletApi.getAllMerchants().execute();
+        Response<ArrayList<Merchant>> call = WalletApi.getAllMerchants().execute();
         Assert.assertNotNull(call.body());
         Assert.assertTrue(call.body().size() > 0);
     }
 
     @Test
     public void fetchSettings() throws Exception {
-        Response<SettingsBody> call = WalletApi.fetchSettings(Settings.METHOD_GET_INFO, guid, sharedKey).execute();
+        Response<Settings> call = WalletApi.fetchSettings(SettingsManager.METHOD_GET_INFO, guid, sharedKey).execute();
         Assert.assertNotNull(call.body());
         Assert.assertNotNull(call.body().toJson());
     }
 
     @Test
     public void updateSettings() throws Exception {
-        Response<ResponseBody> call = WalletApi.updateSettings(Settings.METHOD_UPDATE_EMAIL, guid, sharedKey, "a@a.com").execute();
+        Response<ResponseBody> call = WalletApi.updateSettings(
+            SettingsManager.METHOD_UPDATE_EMAIL, guid, sharedKey, "a@a.com").execute();
         Assert.assertNotNull(call.body());
         Assert.assertNotNull(call.body().string());
     }

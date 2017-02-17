@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AccountBodyTest {
+public class AccountTest {
 
     String seed = "15e23aa73d25994f1921a1256f93f72c";
     String xpub = "xpub698BtD3Gk6yvP2WsPNHatEtJ9aVfKZDBvhi6xoUodor5S2PTsGvox9pf5VCtfx7naLadpNPRe8JQCW9RcJV2rhBQ37CrNpBCDaowY17Mp5X";
@@ -31,10 +31,10 @@ public class AccountBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
 
-        List<AccountBody> accounts = hdWallet.getAccounts();
+        List<Account> accounts = hdWallet.getAccounts();
 
         Assert.assertEquals(68, accounts.size());
         Assert.assertEquals("My Wallet", accounts.get(0).getLabel());
@@ -58,7 +58,7 @@ public class AccountBodyTest {
             accounts.get(1).getXpub());
         Assert.assertNotNull(accounts.get(1).getCache());
 
-        //AddressLabels parsing tested in AddressLabelsBodyTest
+        //AddressLabels parsing tested in AddressLabelsTest
         Assert.assertNotNull(accounts.get(1).getAddressLabels());
     }
 
@@ -67,10 +67,10 @@ public class AccountBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_6.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
 
-        List<AccountBody> accounts = hdWallet.getAccounts();
+        List<Account> accounts = hdWallet.getAccounts();
 
         Assert.assertEquals(1, accounts.size());
         Assert.assertEquals("My Bitcoin Wallet", accounts.get(0).getLabel());
@@ -92,11 +92,11 @@ public class AccountBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
-        HDWalletBody hdWallet = wallet.getHdWallet();
+        Wallet wallet = Wallet.fromJson(body);
+        HDWallet hdWallet = wallet.getHdWallet();
 
-        List<AccountBody> accounts = hdWallet.getAccounts();
-        AccountBody accountBody = accounts.get(0);
+        List<Account> accounts = hdWallet.getAccounts();
+        Account accountBody = accounts.get(0);
 
         String jsonString = accountBody.toJson();
 

@@ -32,7 +32,7 @@ WalletBase
             |
             |__Wallet
  */
-public class WalletBodyTest extends MockedResponseTest{
+public class WalletTest extends MockedResponseTest{
 
     @Test
     public void fromJson_1() throws Exception {
@@ -40,7 +40,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertEquals("a09910d9-1906-4ea1-a956-2508c3fe0661", wallet.getGuid());
         Assert.assertEquals("d14f3d2c-f883-40da-87e2-c8448521ee64", wallet.getSharedKey());
         Assert.assertTrue(wallet.isDoubleEncryption());
@@ -51,7 +51,7 @@ public class WalletBodyTest extends MockedResponseTest{
             Assert.assertEquals("Bought Pizza", item.getValue());
         }
 
-        //Options parsing tested in OptionsBodyTest
+        //Options parsing tested in OptionsTest
         Assert.assertNotNull(wallet.getOptions());
 
         //HdWallets parsing tested in HdWalletsBodyTest
@@ -60,7 +60,7 @@ public class WalletBodyTest extends MockedResponseTest{
         //Keys parsing tested in KeysBodyTest
         Assert.assertNotNull(wallet.getLegacyAddressList());
 
-        //AddressBook parsing tested in AddressBookBodyTest
+        //AddressBook parsing tested in AddressBookTest
         Assert.assertNotNull(wallet.getAddressBook());
     }
 
@@ -70,13 +70,13 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_2.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertEquals("9ebb4d4f-f36e-40d6-9a3e-5a3cca5f83d6", wallet.getGuid());
         Assert.assertEquals("41cf823f-2dcd-4967-88d1-ef9af8689fc6", wallet.getSharedKey());
         Assert.assertFalse(wallet.isDoubleEncryption());
         Assert.assertNull(wallet.getDpasswordhash());
 
-        //Options parsing tested in OptionsBodyTest
+        //Options parsing tested in OptionsTest
         Assert.assertNotNull(wallet.getOptions());
 
         //Keys parsing tested in KeysBodyTest
@@ -89,13 +89,13 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_3.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertEquals("2ca9b0e4-6b82-4dae-9fef-e8b300c72aa2", wallet.getGuid());
         Assert.assertEquals("e8553981-b196-47cc-8858-5b0d16284f61", wallet.getSharedKey());
         Assert.assertFalse(wallet.isDoubleEncryption());
         Assert.assertNull(wallet.getDpasswordhash());
 
-        //Options parsing tested in OptionsBodyTest
+        //Options parsing tested in OptionsTest
         Assert.assertNotNull(wallet.getWalletOptions());//very old key for options
         Assert.assertEquals(10, wallet.getWalletOptions().getPbkdf2Iterations());
 
@@ -113,7 +113,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_4.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertEquals("4077b6d9-73b3-4d22-96d4-9f8810fec435", wallet.getGuid());
         Assert.assertEquals("fa1beb37-5836-41d1-9f73-09f292076eb9", wallet.getSharedKey());
     }
@@ -125,7 +125,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         String jsonString = wallet.toJson();
 
         JSONObject jsonObject = new JSONObject(jsonString);
@@ -138,7 +138,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         wallet.validateSecondPassword("hello");
         Assert.assertTrue(true);
@@ -150,7 +150,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         wallet.validateSecondPassword("bogus");
     }
@@ -161,13 +161,13 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_6.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         Assert.assertEquals(1, wallet.getHdWallet().getAccounts().size());
         wallet.addAccount("Some Label",null);
         Assert.assertEquals(2, wallet.getHdWallet().getAccounts().size());
 
-        AccountBody account = wallet.getHdWallet()
+        Account account = wallet.getHdWallet()
             .getAccount(wallet.getHdWallet().getAccounts().size() - 1);
 
         Assert.assertEquals("xpub6DTFzKMsjf1Tt9KwHMYnQxMLGuVRcobDZdzDuhtc6xfvafsBFqsBS4RNM54kdJs9zK8RKkSbjSbwCeUJjxiySaBKTf8dmyXgUgVnFY7yS9x", account.getXpub());
@@ -180,7 +180,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_6.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         Assert.assertEquals(1, wallet.getHdWallet().getAccounts().size());
         wallet.addAccount("Some Label","hello");
@@ -192,13 +192,13 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_7.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         Assert.assertEquals(2, wallet.getHdWallet().getAccounts().size());
         wallet.addAccount("Some Label","hello");
         Assert.assertEquals(3, wallet.getHdWallet().getAccounts().size());
 
-        AccountBody account = wallet.getHdWallet()
+        Account account = wallet.getHdWallet()
             .getAccount(wallet.getHdWallet().getAccounts().size() - 1);
 
         Assert.assertEquals("xpub6DEe2bJAU7GbUw3HDGPUY9c77mUcP9xvAWEhx9GReuJM9gppeGxHqBcaYAfrsyY8R6cfVRsuFhi2PokQFYLEQBVpM8p4MTLzEHpVu4SWq9a", account.getXpub());
@@ -217,14 +217,14 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_6.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         Assert.assertEquals(0, wallet.getLegacyAddressList().size());
         mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         wallet.addLegacyAddress("Some Label", null);
         Assert.assertEquals(1, wallet.getLegacyAddressList().size());
 
-        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+        LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         Assert.assertNotNull(address.getPrivateKey());
         Assert.assertNotNull(address.getAddressString());
@@ -239,14 +239,14 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         Assert.assertEquals(19, wallet.getLegacyAddressList().size());
         mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         wallet.addLegacyAddress("Some Label", "hello");
         Assert.assertEquals(20, wallet.getLegacyAddressList().size());
 
-        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+        LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         Assert.assertNotNull(address.getPrivateKey());
         Assert.assertNotNull(address.getAddressString());
@@ -262,12 +262,12 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_6.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         wallet.addLegacyAddress("Some Label", null);
 
-        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+        LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         ECKey ecKey = DeterministicKey.fromPrivate(Base58.decode(address.getPrivateKey()));
 
@@ -281,12 +281,12 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_6.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         wallet.addLegacyAddress("Some Label", null);
 
-        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+        LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         //Try to set address key with ECKey not found in available addresses.
         ECKey ecKey = new ECKey();
@@ -300,12 +300,12 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         wallet.addLegacyAddress("Some Label", "hello");
 
-        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+        LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         final String decryptedOriginalPrivateKey = AESUtil
             .decrypt(address.getPrivateKey(), wallet.getSharedKey()+"hello",
@@ -337,12 +337,12 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         mockInterceptor.setResponseString("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         wallet.addLegacyAddress("Some Label", "hello");
 
-        LegacyAddressBody address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
+        LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         final String decryptedOriginalPrivateKey = AESUtil
             .decrypt(address.getPrivateKey(), wallet.getSharedKey()+"hello",
@@ -363,7 +363,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertEquals("4NPYyXS5fhyoTHgDPt81cQ4838j1tRwmeRbK8pGLB1Xg",
             Base58.encode(wallet.getMasterKey("hello").getPrivKeyBytes()));
     }
@@ -373,7 +373,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         wallet.getMasterKey("bogus");
     }
 
@@ -382,7 +382,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         Assert.assertEquals("[car, region, outdoor, punch, poverty, shadow, insane, claim, one, whisper, learn, alert]",
             wallet.getMnemonic("hello").toString());
     }
@@ -392,7 +392,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         wallet.getMnemonic("bogus").toString();
     }
 
@@ -400,7 +400,7 @@ public class WalletBodyTest extends MockedResponseTest{
     public void getHDKeysForSigning() throws Exception{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         /*
         8 available Payment. [80200,70000,60000,50000,40000,30000,20000,10000]
@@ -430,7 +430,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         BiMap<String, Integer> map = wallet.getXpubToAccountIndexMap();
 
@@ -447,7 +447,7 @@ public class WalletBodyTest extends MockedResponseTest{
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         Map<Integer, String> map = wallet.getAccountIndexToXpubMap();
 
@@ -462,7 +462,7 @@ public class WalletBodyTest extends MockedResponseTest{
     public void createNewWallet() throws Exception {
 
         String label = "HDAccount 1";
-        WalletBody payload = new WalletBody(label);
+        Wallet payload = new Wallet(label);
 
         Assert.assertEquals(36, payload.getGuid().length());//GUIDs are 36 in length
         Assert.assertEquals(label, payload.getHdWallet().getAccounts().get(0).getLabel());
@@ -494,7 +494,7 @@ public class WalletBodyTest extends MockedResponseTest{
         mockInterceptor.setResponseStringList(xpubs);
 
         String label = "HDAccount 1";
-        WalletBody payload = WalletBody.recoverFromMnemonic(mnemonic, label);
+        Wallet payload = Wallet.recoverFromMnemonic(mnemonic, label);
 
         Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);
@@ -526,7 +526,7 @@ public class WalletBodyTest extends MockedResponseTest{
         mockInterceptor.setResponseStringList(xpubs);
 
         String label = "HDAccount 1";
-        WalletBody payload = WalletBody.recoverFromMnemonic(mnemonic, "somePassphrase", label);
+        Wallet payload = Wallet.recoverFromMnemonic(mnemonic, "somePassphrase", label);
 
         Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);

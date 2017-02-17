@@ -1,6 +1,6 @@
 package info.blockchain.wallet.transaction;
 
-import info.blockchain.wallet.payload.WalletManager;
+import info.blockchain.wallet.payload.PayloadManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -130,7 +130,7 @@ public class Transaction {
                                 } else if (prev_out.has("addr")) {
                                     input.addr = prev_out.getString("addr");
 
-                                    if (WalletManager.getInstance().getWalletBody().getLegacyAddressStringList().contains(input.addr)) {
+                                    if (PayloadManager.getInstance().getPayload().getLegacyAddressStringList().contains(input.addr)) {
                                         our_xput = true;
                                     }
                                 }
@@ -178,7 +178,7 @@ public class Transaction {
                                 output.addr = _output.getString("addr");
 
                                 // TODO: 17/02/2017
-                                if (WalletManager.getInstance().getWalletBody().getLegacyAddressStringList().contains(output.addr)) {
+                                if (PayloadManager.getInstance().getPayload().getLegacyAddressStringList().contains(output.addr)) {
                                     our_xput = true;
                                 }
                             }

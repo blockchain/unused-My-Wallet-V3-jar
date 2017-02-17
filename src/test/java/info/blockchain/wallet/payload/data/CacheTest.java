@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CacheBodyTest {
+public class CacheTest {
 
     @Test
     public void fromJson() throws Exception {
@@ -16,7 +16,7 @@ public class CacheBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
 
         Assert.assertEquals("xpub6F2ehb9khoF6PZZxKS7vD8T2yDeDWuSR5RNH43b2wK5gY2ayWVApQezEzsFz7EpH2Jf6d6GYJzTrbfReT948CyxVgkhkkvmDBGkcY41MMnv",
             wallet.getHdWallets().get(0).getAccount(0).getCache().getChangeAccount());
@@ -31,7 +31,7 @@ public class CacheBodyTest {
         URI uri = getClass().getClassLoader().getResource("wallet_body_1.txt").toURI();
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        WalletBody wallet = WalletBody.fromJson(body);
+        Wallet wallet = Wallet.fromJson(body);
         String jsonString = wallet.getHdWallets().get(0).getAccount(0).getCache().toJson();
 
         JSONObject jsonObject = new JSONObject(jsonString);

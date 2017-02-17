@@ -9,9 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 
-/*
-This class is used for iOS and Web only.
- */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = Visibility.NONE,
@@ -19,32 +16,32 @@ This class is used for iOS and Web only.
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class CacheBody {
+public class AddressLabels {
 
-    @JsonProperty("receiveAccount")
-    private String receiveAccount;
+    @JsonProperty("index")
+    private int index;
 
-    @JsonProperty("changeAccount")
-    private String changeAccount;
+    @JsonProperty("label")
+    private String label;
 
-    public String getReceiveAccount() {
-        return receiveAccount;
+    public int getIndex() {
+        return index;
     }
 
-    public void setReceiveAccount(String receiveAccount) {
-        this.receiveAccount = receiveAccount;
+    public String getLabel() {
+        return label;
     }
 
-    public String getChangeAccount() {
-        return changeAccount;
+    public void setIndex(int index) {
+        this.index = index;
     }
 
-    public void setChangeAccount(String changeAccount) {
-        this.changeAccount = changeAccount;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
-    public static CacheBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, CacheBody.class);
+    public static AddressLabels fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, AddressLabels.class);
     }
 
     public String toJson() throws JsonProcessingException {

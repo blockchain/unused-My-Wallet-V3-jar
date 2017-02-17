@@ -28,7 +28,7 @@ import retrofit2.Response;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class LegacyAddressBody {
+public class LegacyAddress {
 
     public static final int NORMAL_ADDRESS = 0;
     public static final int ARCHIVED_ADDRESS = 2;
@@ -127,19 +127,19 @@ public class LegacyAddressBody {
         this.createdDeviceVersion = createdDeviceVersion;
     }
 
-    public static LegacyAddressBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, LegacyAddressBody.class);
+    public static LegacyAddress fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, LegacyAddress.class);
     }
 
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public static List<LegacyAddressBody> filterAddress(int filter, @Nonnull List<LegacyAddressBody> keys) {
+    public static List<LegacyAddress> filterAddress(int filter, @Nonnull List<LegacyAddress> keys) {
 
-        List<LegacyAddressBody> addressList = new ArrayList<>();
+        List<LegacyAddress> addressList = new ArrayList<>();
 
-        for(LegacyAddressBody key : keys) {
+        for(LegacyAddress key : keys) {
             if(key.getTag() == filter) {
                 addressList.add(key);
             }
@@ -148,13 +148,13 @@ public class LegacyAddressBody {
         return addressList;
     }
 
-    public static LegacyAddressBody generateNewLegacy() throws Exception {
+    public static LegacyAddress generateNewLegacy() throws Exception {
 
         ECKey ecKey = getRandomECKey();
 
         String encryptedKey = Base58.encode(ecKey.getPrivKeyBytes());
 
-        LegacyAddressBody legacyAddress = new LegacyAddressBody();
+        LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setPrivateKey(encryptedKey);
         legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
         legacyAddress.setCreatedDeviceName(BlockchainFramework.getDevice());

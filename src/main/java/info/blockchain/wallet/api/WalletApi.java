@@ -1,10 +1,10 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.data.FeesBody;
-import info.blockchain.wallet.api.data.FeesListBody;
-import info.blockchain.wallet.api.data.MerchantBody;
-import info.blockchain.wallet.api.data.SettingsBody;
+import info.blockchain.wallet.api.data.Fees;
+import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.Merchant;
+import info.blockchain.wallet.api.data.Settings;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -36,12 +36,12 @@ public class WalletApi {
         return walletServer;
     }
 
-    public static Call<FeesListBody> getDynamicFee() {
+    public static Call<FeesList> getDynamicFee() {
         return getBaseApiInstance().getFees();
     }
 
-    public static FeesBody getDefaultFee() throws IOException {
-        return FeesBody.fromJson(""
+    public static Fees getDefaultFee() throws IOException {
+        return Fees.fromJson(""
             + "{\n"
             + "     \"fee\": 35000,\n"
             + "     \"surge\": false,\n"
@@ -158,11 +158,11 @@ public class WalletApi {
             BlockchainFramework.getApiCode());
     }
 
-    public static Call<ArrayList<MerchantBody>> getAllMerchants() throws Exception {
+    public static Call<ArrayList<Merchant>> getAllMerchants() throws Exception {
         return getBaseApiInstance().getAllMerchants();
     }
 
-    public static Call<SettingsBody> fetchSettings(String method, String guid, String sharedKey){
+    public static Call<Settings> fetchSettings(String method, String guid, String sharedKey){
         return getServerApiInstance().fetchSettings(method,
             guid, sharedKey,"plain",
             BlockchainFramework.getApiCode());

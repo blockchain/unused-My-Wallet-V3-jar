@@ -12,11 +12,11 @@ import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
-import info.blockchain.wallet.payload.data.AccountBody;
-import info.blockchain.wallet.payload.data.LegacyAddressBody;
-import info.blockchain.wallet.payload.data.WalletBaseBody;
-import info.blockchain.wallet.payload.data.WalletBody;
-import info.blockchain.wallet.payload.data.WalletWrapperBody;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
+import info.blockchain.wallet.payload.data.WalletBase;
+import info.blockchain.wallet.payload.data.WalletWrapper;
 import info.blockchain.wallet.util.Tools;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -35,19 +35,19 @@ import org.spongycastle.crypto.InvalidCipherTextException;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class WalletManager {
+public class PayloadManager {
 
-    private WalletBaseBody walletBaseBody;
+    private WalletBase walletBaseBody;
     private String tempPassword; //Stored to encrypt before saving
     private MetadataNodeFactory metadataNodeFactory;
 
-    private static WalletManager instance = new WalletManager();
+    private static PayloadManager instance = new PayloadManager();
 
-    public static WalletManager getInstance() {
+    public static PayloadManager getInstance() {
         return instance;
     }
 
-    private WalletManager() {
+    private PayloadManager() {
         //no-op
     }
 
@@ -60,7 +60,7 @@ public class WalletManager {
         tempPassword = null;
     }
 
-    public WalletBody getWalletBody() {
+    public Wallet getPayload() {
         return walletBaseBody.getWalletBody();
     }
 
@@ -82,8 +82,8 @@ public class WalletManager {
     public void create(@Nonnull String defaultAccountName, @Nonnull String email)
         throws Exception {
 
-        walletBaseBody = new WalletBaseBody();
-        walletBaseBody.setWalletBody(new WalletBody(defaultAccountName));
+        walletBaseBody = new WalletBase();
+        walletBaseBody.setWalletBody(new Wallet(defaultAccountName));
 
         boolean success = saveNewWallet(email);
 
@@ -104,8 +104,8 @@ public class WalletManager {
     public void recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
         @Nonnull String email) throws Exception {
 
-        walletBaseBody = new WalletBaseBody();
-        walletBaseBody.setWalletBody(WalletBody.recoverFromMnemonic(mnemonic, defaultAccountName));
+        walletBaseBody = new WalletBase();
+        walletBaseBody.setWalletBody(Wallet.recoverFromMnemonic(mnemonic, defaultAccountName));
 
         boolean success = saveNewWallet(email);
 
@@ -162,7 +162,7 @@ public class WalletManager {
         Response<ResponseBody> exe = call.execute();
 
         if(exe.isSuccessful()){
-            walletBaseBody = WalletBaseBody.fromJson(exe.body().string());
+            walletBaseBody = WalletBase.fromJson(exe.body().string());
             walletBaseBody.decryptPayload(tempPassword);
         } else {
             String errorMessage = exe.errorBody().string();
@@ -192,7 +192,7 @@ public class WalletManager {
 
         //Encrypt and wrap payload
         Pair pair = walletBaseBody.encryptAndWrapPayload(tempPassword);
-        WalletWrapperBody payloadWrapper = (WalletWrapperBody) pair.getRight();
+        WalletWrapper payloadWrapper = (WalletWrapper) pair.getRight();
         String newPayloadChecksum = (String) pair.getLeft();
 
         //Save to server
@@ -232,7 +232,7 @@ public class WalletManager {
 
         //Encrypt and wrap payload
         Pair pair = walletBaseBody.encryptAndWrapPayload(tempPassword);
-        WalletWrapperBody payloadWrapper = (WalletWrapperBody) pair.getRight();
+        WalletWrapper payloadWrapper = (WalletWrapper) pair.getRight();
         String newPayloadChecksum = (String) pair.getLeft();
         String oldPayloadChecksum = walletBaseBody.getPayloadChecksum();
 
@@ -240,7 +240,7 @@ public class WalletManager {
         List<String> syncAddresses = null;
         if(walletBaseBody.isSyncPubkeys()) {
             syncAddresses = Tools.filterLegacyAddress(
-                LegacyAddressBody.NORMAL_ADDRESS,
+                LegacyAddress.NORMAL_ADDRESS,
                 walletBaseBody.getWalletBody().getLegacyAddressList());
         }
         Call<Void> call = WalletApi.updateWallet(
@@ -277,7 +277,7 @@ public class WalletManager {
      */
     public boolean addAccount(String label, @Nullable String secondPassword)
         throws Exception {
-        AccountBody accountBody = walletBaseBody.getWalletBody().addAccount(label, secondPassword);
+        Account accountBody = walletBaseBody.getWalletBody().addAccount(label, secondPassword);
 
         boolean success = save();
 
@@ -300,7 +300,7 @@ public class WalletManager {
      */
     public boolean addLegacyAddress(String label, @Nullable String secondPassword) throws Exception {
 
-        LegacyAddressBody legacyAddressBody = walletBaseBody.getWalletBody()
+        LegacyAddress legacyAddressBody = walletBaseBody.getWalletBody()
             .addLegacyAddress(label, secondPassword);
 
         boolean success = save();
@@ -329,7 +329,7 @@ public class WalletManager {
         throws EncryptionException, IOException, DecryptionException, NoSuchAddressException,
         NoSuchAlgorithmException, HDWalletException {
 
-        LegacyAddressBody matchingLegacyAddress = walletBaseBody.getWalletBody()
+        LegacyAddress matchingLegacyAddress = walletBaseBody.getWalletBody()
             .setKeyForLegacyAddress(key, secondPassword);
 
         boolean success = save();

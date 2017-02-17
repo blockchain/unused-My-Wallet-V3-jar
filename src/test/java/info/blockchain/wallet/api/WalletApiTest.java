@@ -1,7 +1,7 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.MockedResponseTest;
-import info.blockchain.wallet.payload.data.WalletBaseBody;
+import info.blockchain.wallet.payload.data.WalletBase;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +36,7 @@ public class WalletApiTest extends MockedResponseTest {
 
         Response<ResponseBody> exe = call.execute();
 
-        WalletBaseBody walletBaseBody = WalletBaseBody.fromJson(exe.body().string());
+        WalletBase walletBaseBody = WalletBase.fromJson(exe.body().string());
         Assert.assertEquals("a09910d9-1906-4ea1-a956-2508c3fe0661", walletBaseBody.getGuid());
     }
 

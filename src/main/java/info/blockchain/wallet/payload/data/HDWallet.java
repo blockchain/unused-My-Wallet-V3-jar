@@ -25,10 +25,10 @@ import org.spongycastle.crypto.InvalidCipherTextException;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class HDWalletBody {
+public class HDWallet {
 
     @JsonProperty("accounts")
-    private List<AccountBody> accounts;
+    private List<Account> accounts;
 
     @JsonProperty("seed_hex")
     private String seedHex;
@@ -42,11 +42,11 @@ public class HDWalletBody {
     @JsonProperty("default_account_idx")
     private int defaultAccountIdx;
 
-    public List<AccountBody> getAccounts() {
+    public List<Account> getAccounts() {
         return accounts;
     }
 
-    public AccountBody getAccount(int accountId) {
+    public Account getAccount(int accountId) {
         return accounts.get(accountId);
     }
 
@@ -66,7 +66,7 @@ public class HDWalletBody {
         return defaultAccountIdx;
     }
 
-    public void setAccounts(List<AccountBody> accounts) {
+    public void setAccounts(List<Account> accounts) {
         this.accounts = accounts;
     }
 
@@ -86,8 +86,8 @@ public class HDWalletBody {
         this.defaultAccountIdx = defaultAccountIdx;
     }
 
-    public static HDWalletBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, HDWalletBody.class);
+    public static HDWallet fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, HDWallet.class);
     }
 
     public String toJson() throws JsonProcessingException {
@@ -105,7 +105,7 @@ public class HDWalletBody {
         int nb_accounts = getAccounts().size();
         for (int i = 0; i < nb_accounts; i++) {
 
-            AccountBody account = getAccounts().get(i);
+            Account account = getAccounts().get(i);
             boolean isArchived = account.isArchived();
             if (!isArchived) {
                 String xpub = account.getXpub();
@@ -117,10 +117,10 @@ public class HDWalletBody {
         return xpubs;
     }
 
-    public AccountBody addAccount(String label, String xpriv, String xpub)
+    public Account addAccount(String label, String xpriv, String xpub)
         throws IOException, DecryptionException, InvalidCipherTextException, DecoderException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, EncryptionException {
 
-        AccountBody accountBody = new AccountBody();
+        Account accountBody = new Account();
         accountBody.setLabel(label);
         accountBody.setXpub(xpub);
         accountBody.setXpriv(xpriv);

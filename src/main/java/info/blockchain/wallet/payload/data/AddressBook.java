@@ -16,7 +16,7 @@ import java.io.IOException;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class AddressBookBody {
+public class AddressBook {
 
     @JsonProperty("label")
     private String label;
@@ -40,8 +40,8 @@ public class AddressBookBody {
         this.address = address;
     }
 
-    public static AddressBookBody fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, AddressBookBody.class);
+    public static AddressBook fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, AddressBook.class);
     }
 
     public String toJson() throws JsonProcessingException {
