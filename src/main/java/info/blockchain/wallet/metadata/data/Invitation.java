@@ -10,11 +10,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Invitation {
 
-    String id;//one-time UUID
-    String mdid;//me
-    String contact;//other user
+    /**
+     * A one-time UUID
+     */
+    private String id;
+
+    /**
+     * The sender's MDID
+     */
+    private String mdid;
+
+    /**
+     * The recipient
+     */
+    private String contact;
 
     public Invitation() {
+        // No-op
     }
 
     public String getId() {

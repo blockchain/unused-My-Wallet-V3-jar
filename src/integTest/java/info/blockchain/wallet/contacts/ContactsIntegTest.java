@@ -178,7 +178,7 @@ public class ContactsIntegTest extends BaseIntegTest{
         FacilitatedTransaction ftx = null;
 
         for (Contact unread : b_unreadList) {
-            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransactions()
                 .entrySet();
             for (Entry<String, FacilitatedTransaction> item : set) {
                 System.out.println("Received RPR tx_id: " + item.getValue().getId());
@@ -189,7 +189,7 @@ public class ContactsIntegTest extends BaseIntegTest{
         //Step 2
         PaymentRequest pr = new PaymentRequest();
         pr.setId(ftx.getId());
-        pr.setIntended_amount(ftx.getIntended_amount());
+        pr.setIntendedAmount(ftx.getIntendedAmount());
         pr.setAddress(b_wallet.getAccount(0).getReceive().getAddressAt(0)
             .getAddressString());//should be next available
         System.out.println("Send PR to '" + RiaanMdid + "': " + pr.toJson());
@@ -200,7 +200,7 @@ public class ContactsIntegTest extends BaseIntegTest{
         List<Contact> a_unreadList = a_contacts.digestUnreadPaymentRequests();
 
         for (Contact unread : a_unreadList) {
-            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransactions()
                 .entrySet();
             for (Entry<String, FacilitatedTransaction> item : set) {
                 System.out.println("Received PR: " + item.getValue().toJson());
@@ -223,11 +223,11 @@ public class ContactsIntegTest extends BaseIntegTest{
         System.out.println("\n--Recipient--");
         b_unreadList = b_contacts.digestUnreadPaymentRequests();
         for (Contact unread : b_unreadList) {
-            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransaction()
+            Set<Entry<String, FacilitatedTransaction>> set = unread.getFacilitatedTransactions()
                 .entrySet();
             for (Entry<String, FacilitatedTransaction> item : set) {
                 System.out
-                    .println("Received payment broadcast tx_hash: " + item.getValue().getTx_hash());
+                    .println("Received payment broadcast tx_hash: " + item.getValue().getTxHash());
             }
         }
     }

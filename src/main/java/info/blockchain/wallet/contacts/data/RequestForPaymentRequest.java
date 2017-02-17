@@ -3,6 +3,7 @@ package info.blockchain.wallet.contacts.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -11,15 +12,15 @@ import java.io.IOException;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestForPaymentRequest {
 
-    String id;
-    long intended_amount;
-    String note;
+    private String id;
+    private long intendedAmount;
+    private String note;
 
     public RequestForPaymentRequest() {
     }
 
     public RequestForPaymentRequest(long amount, String note) {
-        this.intended_amount = amount;
+        this.intendedAmount = amount;
         this.note = note;
     }
 
@@ -31,12 +32,14 @@ public class RequestForPaymentRequest {
         this.id = id;
     }
 
-    public long getIntended_amount() {
-        return intended_amount;
+    @JsonProperty("intended_amount")
+    public long getIntendedAmount() {
+        return intendedAmount;
     }
 
-    public void setIntended_amount(long satoshis) {
-        this.intended_amount = satoshis;
+    @JsonProperty("intended_amount")
+    public void setIntendedAmount(long satoshis) {
+        this.intendedAmount = satoshis;
     }
 
     public String getNote() {

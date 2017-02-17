@@ -129,6 +129,7 @@ public class MetadataTest {
 
         mockInterceptor.setResponseString("{\"status\": \"success\"}");
         mockInterceptor.setResponseCode(200);
+        mockInterceptor.setResponseString("");
         metadata.deleteMetadata(msg);
 
         mockInterceptor.setResponseString("{\"message\":\"Not Found\"}");
