@@ -34,10 +34,9 @@ public class PayloadManagerTest extends MockedResponseTest {
 
     @Test
     public void create() throws Exception {
-        PayloadManager.getInstance().setTempPassword("SomePassword");
 
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
             .getPayload();
@@ -54,16 +53,14 @@ public class PayloadManagerTest extends MockedResponseTest {
 
     @Test(expected = ServerConnectionException.class)
     public void create_ServerConnectionException() throws Exception {
-        PayloadManager.getInstance().setTempPassword("SomePassword");
 
         mockInterceptor.setResponseString("Save failed.");
         mockInterceptor.setResponseCode(500);
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
     }
 
     @Test
     public void recoverFromMnemonic() throws Exception {
-        PayloadManager.getInstance().setTempPassword("SomePassword");
 
         String mnemonic = "all all all all all all all all all all all all";
 
@@ -81,7 +78,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         xpubs.add("HDWallet successfully synced with server");
         mockInterceptor.setResponseStringList(xpubs);
 
-        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com");
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
             .getPayload();
@@ -98,7 +95,6 @@ public class PayloadManagerTest extends MockedResponseTest {
 
     @Test(expected = ServerConnectionException.class)
     public void recoverFromMnemonic_ServerConnectionException() throws Exception {
-        PayloadManager.getInstance().setTempPassword("SomePassword");
 
         String mnemonic = "all all all all all all all all all all all all";
 
@@ -131,7 +127,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         codes.add(500);
         mockInterceptor.setResponseCodeList(codes);
 
-        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com");
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
             .getPayload();
@@ -149,34 +145,28 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test(expected = UnsupportedVersionException.class)
     public void initializeAndDecrypt_unsupported_version() throws Exception {
 
-        PayloadManager.getInstance().setTempPassword("SomeTestPassword");
-
         URI uri = getClass().getClassLoader()
             .getResource("wallet_v4_unsupported.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
             Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(walletBase);
-        PayloadManager.getInstance().initializeAndDecrypt("any_shared_key", "any_guid");
+        PayloadManager.getInstance().initializeAndDecrypt("any_shared_key", "any_guid", "SomeTestPassword");
     }
 
     @Test
     public void initializeAndDecrypt() throws Exception {
-
-        PayloadManager.getInstance().setTempPassword("SomeTestPassword");
 
         URI uri = getClass().getClassLoader().getResource("wallet_v3_3.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
             Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(walletBase);
-        PayloadManager.getInstance().initializeAndDecrypt("any", "any");
+        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "SomeTestPassword");
     }
 
     @Test(expected = InvalidCredentialsException.class)
     public void initializeAndDecrypt_invalidGuid() throws Exception {
-
-        PayloadManager.getInstance().setTempPassword("SomeTestPassword");
 
         URI uri = getClass().getClassLoader().getResource("invalid_guid.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
@@ -184,7 +174,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         mockInterceptor.setResponseString(walletBase);
         mockInterceptor.setResponseCode(500);
-        PayloadManager.getInstance().initializeAndDecrypt("any", "any");
+        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "SomeTestPassword");
     }
 
     @Test(expected = HDWalletException.class)
@@ -196,10 +186,8 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void save() throws Exception {
 
-        PayloadManager.getInstance().setTempPassword("SomePassword");
-
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
 
         mockInterceptor.setResponseString("MyWallet save successful.");
         PayloadManager.getInstance().save();
@@ -213,10 +201,8 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void addAccount() throws Exception {
 
-        PayloadManager.getInstance().setTempPassword("MyTestWallet");
-
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getHdWallet().getAccounts().size());
         mockInterceptor.setResponseString("MyWallet save successful.");
@@ -231,10 +217,8 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void addLegacyAddress() throws Exception {
 
-        PayloadManager.getInstance().setTempPassword("MyTestWallet");
-
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
@@ -257,10 +241,8 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void setKeyForLegacyAddress() throws Exception {
 
-        PayloadManager.getInstance().setTempPassword("MyTestWallet");
-
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
@@ -286,10 +268,8 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test(expected = NoSuchAddressException.class)
     public void setKeyForLegacyAddress_NoSuchAddressException() throws Exception {
 
-        PayloadManager.getInstance().setTempPassword("MyTestWallet");
-
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
@@ -313,10 +293,8 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void setKeyForLegacyAddress_saveFail_revert() throws Exception {
 
-        PayloadManager.getInstance().setTempPassword("MyTestWallet");
-
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 

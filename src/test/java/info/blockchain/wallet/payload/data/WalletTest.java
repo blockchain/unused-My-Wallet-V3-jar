@@ -227,9 +227,9 @@ public class WalletTest extends MockedResponseTest{
         LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         Assert.assertNotNull(address.getPrivateKey());
-        Assert.assertNotNull(address.getAddressString());
+        Assert.assertNotNull(address.getAddress());
 
-        Assert.assertEquals("1", address.getAddressString().substring(0, 1));
+        Assert.assertEquals("1", address.getAddress().substring(0, 1));
     }
 
     @Test
@@ -249,10 +249,10 @@ public class WalletTest extends MockedResponseTest{
         LegacyAddress address = wallet.getLegacyAddressList().get(wallet.getLegacyAddressList().size() - 1);
 
         Assert.assertNotNull(address.getPrivateKey());
-        Assert.assertNotNull(address.getAddressString());
+        Assert.assertNotNull(address.getAddress());
 
         Assert.assertEquals("==", address.getPrivateKey().substring(address.getPrivateKey().length() - 2));
-        Assert.assertEquals("1", address.getAddressString().substring(0, 1));
+        Assert.assertEquals("1", address.getAddress().substring(0, 1));
     }
 
     @Test

@@ -21,7 +21,7 @@ public class LegacyAddressTest {
 
         LegacyAddress addressBody = wallet.getLegacyAddressList().get(0);
         Assert.assertEquals("import 1", addressBody.getLabel());
-        Assert.assertEquals("19Axrcn8nsdZkSJtbnyM1rCs1PGwSzzzNn", addressBody.getAddressString());
+        Assert.assertEquals("19Axrcn8nsdZkSJtbnyM1rCs1PGwSzzzNn", addressBody.getAddress());
         Assert.assertEquals("g9rIjgOlfASQuJv38i1xdLmP1m2gMTPe96YzJJ9hjI2BBz5RErNOSeHPdeU2ZIOnsk+M1dfFw649MHXb7RAcZg==", addressBody.getPrivateKey());
         Assert.assertEquals(1433495572, addressBody.getCreatedTime());
         Assert.assertEquals(0, addressBody.getTag());
@@ -30,7 +30,7 @@ public class LegacyAddressTest {
 
         addressBody = wallet.getLegacyAddressList().get(1);
         Assert.assertEquals("1rW486AbUx2LapYca7kddpULJVqMGMhTH", addressBody.getLabel());
-        Assert.assertEquals("1rW486AbUx2LapYca7kddpULJVqMGMhTH", addressBody.getAddressString());
+        Assert.assertEquals("1rW486AbUx2LapYca7kddpULJVqMGMhTH", addressBody.getAddress());
         Assert.assertEquals("TIMsVAyWiVcTmcwc6Xv5r494sZcMBRQue6DamkXzDAzOn0cGQSf2XDN+1ZKM/cHgsL0oeJqxrBs9c5TzsNHIZg==", addressBody.getPrivateKey());
         Assert.assertEquals(1434379366, addressBody.getCreatedTime());
         Assert.assertEquals(2, addressBody.getTag());

@@ -230,7 +230,7 @@ public class Wallet {
 
         List<String> addrs = new ArrayList<>();
         for (LegacyAddress legacyAddress : keys) {
-            addrs.add(legacyAddress.getAddressString());
+            addrs.add(legacyAddress.getAddress());
         }
 
         return addrs;
@@ -241,7 +241,7 @@ public class Wallet {
         List<String> addrs = new ArrayList<>();
         for (LegacyAddress legacyAddress : keys) {
             if (legacyAddress.isWatchOnly()) {
-                addrs.add(legacyAddress.getAddressString());
+                addrs.add(legacyAddress.getAddress());
             }
         }
 
@@ -253,7 +253,7 @@ public class Wallet {
         List<String> addrs = new ArrayList<>();
         for (LegacyAddress legacyAddress : keys) {
             if (legacyAddress.getTag() == tag) {
-                addrs.add(legacyAddress.getAddressString());
+                addrs.add(legacyAddress.getAddress());
             }
         }
 
@@ -275,7 +275,7 @@ public class Wallet {
     public boolean containsLegacyAddress(String addr) {
 
         for (LegacyAddress legacyAddress : keys) {
-            if (legacyAddress.getAddressString().equals(addr)) {
+            if (legacyAddress.getAddress().equals(addr)) {
                 return true;
             }
         }
@@ -686,7 +686,7 @@ public class Wallet {
         LegacyAddress matchingAddressBody = null;
 
         for(LegacyAddress addressBody : addressList) {
-            if(addressBody.getAddressString().equals(address)) {
+            if(addressBody.getAddress().equals(address)) {
                 matchingAddressBody = addressBody;
             }
         }

@@ -54,7 +54,7 @@ public class LegacyAddress {
     @JsonProperty("created_device_version")
     private String createdDeviceVersion;
 
-    public String getAddressString() {
+    public String getAddress() {
         return address;
     }
 

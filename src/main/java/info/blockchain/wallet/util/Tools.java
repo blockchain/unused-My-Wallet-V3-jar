@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -116,7 +117,7 @@ public class Tools {
 
         for(LegacyAddress key : keys) {
             if(key.getTag() == filter) {
-                addressList.add(key.getAddressString());
+                addressList.add(key.getAddress());
             }
         }
 

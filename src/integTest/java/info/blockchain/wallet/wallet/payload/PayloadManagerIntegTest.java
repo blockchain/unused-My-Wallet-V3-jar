@@ -21,8 +21,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
     public void upgradeV2PayloadToV3() throws Exception {
 
         //Create a wallet
-        PayloadManager.getInstance().setTempPassword("MyTestWallet");
-        PayloadManager.getInstance().create("My HDWallet", "name@email.com");
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Wallet walletBody = PayloadManager.getInstance().getPayload();
 
@@ -37,7 +36,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
         walletBody.upgradeV2PayloadToV3(null, "HDAccount Name2");
 
         //Check that existing legacy addresses still exist
-        Assert.assertEquals(newlyAdded.getAddressString(), walletBody.getLegacyAddressList().get(0).getAddressString());
+        Assert.assertEquals(newlyAdded.getAddress(), walletBody.getLegacyAddressList().get(0).getAddress());
 
         //Check that Guid is still same
         Assert.assertEquals(walletBody.getGuid(), guidOriginal);

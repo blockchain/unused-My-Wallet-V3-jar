@@ -17,8 +17,10 @@ import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.payload.data.WalletBase;
 import info.blockchain.wallet.payload.data.WalletWrapper;
+import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.Tools;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,10 +53,6 @@ public class PayloadManager {
         //no-op
     }
 
-    public void setTempPassword(String password) {
-        this.tempPassword = password;
-    }
-
     public void wipe() {
         walletBaseBody = null;
         tempPassword = null;
@@ -79,9 +77,10 @@ public class PayloadManager {
      * @param email Used to send GUID link to user
      * @throws Exception
      */
-    public void create(@Nonnull String defaultAccountName, @Nonnull String email)
+    public Wallet create(@Nonnull String defaultAccountName, @Nonnull String email, @Nonnull String password)
         throws Exception {
 
+        tempPassword = password;
         walletBaseBody = new WalletBase();
         walletBaseBody.setWalletBody(new Wallet(defaultAccountName));
 
@@ -92,6 +91,8 @@ public class PayloadManager {
             walletBaseBody = null;
             throw new ServerConnectionException("Failed to save new wallet to server.");
         }
+
+        return walletBaseBody.getWalletBody();
     }
 
     /**
@@ -101,9 +102,10 @@ public class PayloadManager {
      * @param email Used to send GUID link to user
      * @throws Exception
      */
-    public void recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
-        @Nonnull String email) throws Exception {
+    public Wallet recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
+        @Nonnull String email, @Nonnull String password) throws Exception {
 
+        tempPassword = password;
         walletBaseBody = new WalletBase();
         walletBaseBody.setWalletBody(Wallet.recoverFromMnemonic(mnemonic, defaultAccountName));
 
@@ -114,6 +116,8 @@ public class PayloadManager {
             walletBaseBody = null;
             throw new ServerConnectionException("Failed to save new wallet to server.");
         }
+
+        return walletBaseBody.getWalletBody();
     }
 
     /**
@@ -154,9 +158,11 @@ public class PayloadManager {
      * @throws MnemonicChecksumException Initializing HD issue
      * @throws DecoderException Decryption issue
      */
-    public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid)
+    public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull String password)
         throws IOException, InvalidCredentialsException, AccountLockedException, ServerConnectionException,
         DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
+
+        tempPassword = password;
 
         Call<ResponseBody> call = WalletApi.fetchWalletData(guid, sharedKey);
         Response<ResponseBody> exe = call.execute();
@@ -348,14 +354,10 @@ public class PayloadManager {
     //*                 Shortcut methods(Remove from Android first then delete)                  *//
     //********************************************************************************************//
 
-    @Deprecated
-    //Shouldn't really have to call this - validation already happens in methods that need it
     public void validateSecondPassword(String secondPassword) throws DecryptionException {
         walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
     }
 
-    @Deprecated
-    //old way - try to use walletBody directly
     public boolean isNotUpgraded() {
         return walletBaseBody.getWalletBody() != null && !walletBaseBody.getWalletBody().isUpgraded();
     }
@@ -364,10 +366,22 @@ public class PayloadManager {
         return walletBaseBody.getWalletBody().getHdWallet().getAccounts().get(accountIdx).getXpub();
     }
 
-    @Deprecated
-    //old way - just get directly from hdWallet
-    public ArrayList<String> getActiveXpubs() {
-        return walletBaseBody.getWalletBody().getHdWallet().getActive();
+    public ECKey getAddressECKey(@Nonnull LegacyAddress legacyAddress, @Nullable String secondPassword)
+        throws DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
+
+        validateSecondPassword(secondPassword);
+
+        String decryptedPrivateKey = legacyAddress.getPrivateKey();
+
+        if(secondPassword != null) {
+            decryptedPrivateKey = DoubleEncryptionFactory
+                .decrypt(legacyAddress.getPrivateKey(),
+                    walletBaseBody.getWalletBody().getSharedKey(),
+                    secondPassword,
+                    walletBaseBody.getWalletBody().getOptions().getPbkdf2Iterations());
+        }
+
+        return Tools.getECKeyFromKeyAndAddress(decryptedPrivateKey, legacyAddress.getAddress());
     }
 
     //********************************************************************************************//
