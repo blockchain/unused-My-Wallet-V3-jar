@@ -17,7 +17,7 @@ public class UtilTest {
         byte[] data2 = Hex.decode("3980d19c880f6cfecf97ba22e8d1e03c9566448e37de0b4757a898a76c71fa64");
         String expectedResult = "3abc0d324308cad85a0181cb333f230aba7d623e7f36ea18e5915051fa0f7e74";
 
-        byte[] xor = Util.getInstance().xor(data1, data2);
+        byte[] xor = Util.xor(data1, data2);
 
         Assert.assertEquals(expectedResult, Hex.toHexString(xor));
     }

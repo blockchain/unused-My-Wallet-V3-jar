@@ -87,7 +87,6 @@ public class WalletApi {
         return getBaseApiInstance().pinStore(key, pin, "get", BlockchainFramework.getApiCode());
     }
 
-    // TODO: 07/02/2017  if !syncPubkeys just don't send address list then we can remove syncPubkeys param
     @Deprecated
     public static Call<Void> saveWallet(boolean isNew, String guid, String sharedKey,
         List<String> activeAddressList, JSONObject encryptedPayload,

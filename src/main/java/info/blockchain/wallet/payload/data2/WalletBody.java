@@ -509,16 +509,14 @@ public class WalletBody {
 
     public boolean isEncryptionConsistent(boolean isDoubleEncrypted, List<String> keyList) {
 
-        FormatsUtil formatsUtil = FormatsUtil.getInstance();
-
         boolean consistent = true;
 
         for (String key : keyList) {
 
             if (isDoubleEncrypted) {
-                consistent = formatsUtil.isKeyEncrypted(key);
+                consistent = FormatsUtil.isKeyEncrypted(key);
             } else {
-                consistent = formatsUtil.isKeyUnencrypted(key);
+                consistent = FormatsUtil.isKeyUnencrypted(key);
             }
 
             if (!consistent) {
@@ -532,12 +530,11 @@ public class WalletBody {
     public void validateSecondPassword(@Nullable String secondPassword) throws DecryptionException {
 
         if(isDoubleEncryption()) {
-            DoubleEncryptionFactory.getInstance().validateSecondPassword(
+            DoubleEncryptionFactory.validateSecondPassword(
                 getDpasswordhash(),
                 getSharedKey(),
                 secondPassword,
-                getOptions().getPbkdf2Iterations(),
-                true);
+                getOptions().getPbkdf2Iterations());
         } else if(!isDoubleEncryption() && secondPassword != null) {
             throw new DecryptionException("Double encryption password specified on non double encrypted wallet.");
         }
@@ -569,7 +566,7 @@ public class WalletBody {
                 if (!StringUtils.isEmpty(secondPassword)) {
 
                     //Double encrypt seedHex
-                    String doubleEncryptedSeedHex = DoubleEncryptionFactory.getInstance().encrypt(
+                    String doubleEncryptedSeedHex = DoubleEncryptionFactory.encrypt(
                         hdWalletBody.getSeedHex(),
                         getSharedKey(),
                         secondPassword,
@@ -579,7 +576,7 @@ public class WalletBody {
                     //Double encrypt private key
                     for(AccountBody account : hdWalletBody.getAccounts()) {
 
-                        String encryptedXPriv = DoubleEncryptionFactory.getInstance().encrypt(
+                        String encryptedXPriv = DoubleEncryptionFactory.encrypt(
                             account.getXpriv(),
                             getSharedKey(),
                             secondPassword,
@@ -613,7 +610,7 @@ public class WalletBody {
             //Double encryption
             String unencryptedKey = addressBody.getPrivateKey();
 
-            String encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(unencryptedKey,
+            String encryptedKey = DoubleEncryptionFactory.encrypt(unencryptedKey,
                 getSharedKey(),
                 secondPassword,
                 getOptions().getPbkdf2Iterations());
@@ -641,7 +638,7 @@ public class WalletBody {
 
         //Double encryption
         if(secondPassword != null) {
-            String encrypted = DoubleEncryptionFactory.getInstance().encrypt(
+            String encrypted = DoubleEncryptionFactory.encrypt(
                 xpriv,
                 sharedKey,
                 secondPassword,
@@ -664,7 +661,7 @@ public class WalletBody {
 
             String encryptedSeedHex = getHdWallet().getSeedHex();
 
-            String decryptedSeedHex = DoubleEncryptionFactory.getInstance().decrypt(
+            String decryptedSeedHex = DoubleEncryptionFactory.decrypt(
                 encryptedSeedHex, sharedKey, secondPassword,
                 getOptions().getPbkdf2Iterations());
 
@@ -702,7 +699,7 @@ public class WalletBody {
         if(secondPassword != null) {
             //Double encryption
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
-            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
+            String encrypted2 = DoubleEncryptionFactory.encrypt(encryptedKey,
                 getSharedKey(),
                 secondPassword != null ? secondPassword : null,
                 getOptions().getPbkdf2Iterations());
@@ -770,7 +767,7 @@ public class WalletBody {
     }
 
     //no need for second pw. only using HD xpubs
-    // TODO: 16/02/2017 this is so ugly to use. investigate other option
+    // TODO: 16/02/2017 Investigate better way to do this
     public BiMap<String, Integer> getXpubToAccountIndexMap() {
 
         BiMap<String, Integer> xpubToAccountIndexMap = HashBiMap.create();
@@ -784,10 +781,8 @@ public class WalletBody {
         return xpubToAccountIndexMap;
     }
 
-    // TODO: 16/02/2017 this is so ugly to use. investigate other option
+    // TODO: 16/02/2017 Investigate better way to do this
     public Map<Integer, String> getAccountIndexToXpubMap() {
         return getXpubToAccountIndexMap().inverse();
     }
 }
-
-// TODO: 16/02/2017 secondPassword could be extracted from methods if handled wallet side

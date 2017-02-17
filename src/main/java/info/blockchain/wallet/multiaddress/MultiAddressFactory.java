@@ -14,31 +14,31 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import retrofit2.Call;
 
-/*
-// TODO: 10/02/2017 Might want to handle this in the wallet and not from android
- */
+// TODO: 17/02/2017  Order txs - TxMostRecentDateComparator
 public class MultiAddressFactory {
 
-    public static Call<MultiAddress> getMultiAddress(List<String> addressList, String context, int filter, int limit,
+    public static Call<MultiAddress> getMultiAddress(List<String> addressList, String context,
+        int filter, int limit,
         int offset) throws IOException {
 
-        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
+        BlockExplorer blockExplorer = new BlockExplorer(
+            BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
         return blockExplorer
             .getMultiAddress(addressList, context, filter, limit, offset);
     }
 
     public static boolean isOwnHDAddress(MultiAddress body, String address) {
 
-        for(Transaction tx : body.getTxs()) {
-            for(Input input : tx.getInputs()){
+        for (Transaction tx : body.getTxs()) {
+            for (Input input : tx.getInputs()) {
                 Output prevOut = input.getPrevOut();
-                if(prevOut.getXpub() != null && address.equals(prevOut.getAddr())) {
+                if (prevOut.getXpub() != null && address.equals(prevOut.getAddr())) {
                     return true;
                 }
             }
 
-            for(Output out : tx.getOut()){
-                if(out.getXpub() != null && address.equals(out.getAddr())) {
+            for (Output out : tx.getOut()) {
+                if (out.getXpub() != null && address.equals(out.getAddr())) {
                     return true;
                 }
             }
@@ -47,14 +47,14 @@ public class MultiAddressFactory {
         return false;
     }
 
-    public static Pair<Integer, Integer> getHighestIndexes(MultiAddress body, String xpub){
+    public static Pair<Integer, Integer> getHighestIndexes(MultiAddress body, String xpub) {
 
         int receiveIndex = 0;
         int changeIndex = 0;
 
-        for(Address address : body.getAddresses()) {
+        for (Address address : body.getAddresses()) {
 
-            if(address.getAddress().equals(xpub)) {
+            if (address.getAddress().equals(xpub)) {
                 receiveIndex = address.getAccountIndex();
                 changeIndex = address.getChangeIndex();
             }
@@ -67,35 +67,57 @@ public class MultiAddressFactory {
 
         final int lookAhead = 10;
 
-        for(Address addr : body.getAddresses()) {
+        for (Address addr : body.getAddresses()) {
 
             String xpubOrAddress = addr.getAddress();
 
-            for(int i = 0; i <= addr.getAccountIndex() + lookAhead; i++){
+            for (int i = 0; i <= addr.getAccountIndex() + lookAhead; i++) {
                 try {
                     HDAccount account = new HDAccount(
                         PersistentUrls.getInstance().getCurrentNetworkParams(), xpubOrAddress);
-                    if(address.equals(account.getReceive().getAddressAt(i).getAddressString())) {
+                    if (address.equals(account.getReceive().getAddressAt(i).getAddressString())) {
                         return xpubOrAddress;
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     //might be address
                 }
             }
 
-            for(int i = 0; i <= addr.getChangeIndex() + lookAhead; i++){
+            for (int i = 0; i <= addr.getChangeIndex() + lookAhead; i++) {
                 try {
                     HDAccount account = new HDAccount(
                         PersistentUrls.getInstance().getCurrentNetworkParams(), xpubOrAddress);
-                    if(address.equals(account.getChange().getAddressAt(i).getAddressString())) {
+                    if (address.equals(account.getChange().getAddressAt(i).getAddressString())) {
                         return xpubOrAddress;
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     //might be address
                 }
             }
         }
 
         return null;
+    }
+
+    public static int getNextChangeAddress(MultiAddress body, String addressOrXpub) {
+
+        int changeIndex = 0;
+        for (Address address : body.getAddresses()) {
+            if(address.getAddress().equals(addressOrXpub)) {
+                changeIndex = address.getChangeIndex();
+            }
+        }
+        return changeIndex + 1;
+    }
+
+    public static int getNextReceiveAddress(MultiAddress body, String addressOrXpub) {
+
+        int receiveIndex = 0;
+        for (Address address : body.getAddresses()) {
+            if(address.getAddress().equals(addressOrXpub)) {
+                receiveIndex = address.getAccountIndex();
+            }
+        }
+        return receiveIndex + 1;
     }
 }

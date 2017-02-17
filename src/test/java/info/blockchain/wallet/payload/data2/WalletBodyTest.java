@@ -211,7 +211,7 @@ public class WalletBodyTest extends MockedResponseTest{
         Assert.assertEquals("xpub6DEe2bJAU7GbUw3HDGPUY9c77mUcP9xvAWEhx9GReuJM9gppeGxHqBcaYAfrsyY8R6cfVRsuFhi2PokQFYLEQBVpM8p4MTLzEHpVu4SWq9a", account.getXpub());
 
         //Private key will be encrypted
-        String decryptedXpriv = DoubleEncryptionFactory.getInstance().decrypt(
+        String decryptedXpriv = DoubleEncryptionFactory.decrypt(
             account.getXpriv(), wallet.getSharedKey(), "hello",
             wallet.getOptions().getPbkdf2Iterations());
         Assert.assertEquals("xprv9zFHd5mGdjiJGSxp7ErUB1fNZje7yhF4oHK79krp6ZmNGtVg6je3HPJ6gueSWrVR9oqdqriu2DcshvTfSRu6PXyWiAbP8n6S7DVWEpu5kAE", decryptedXpriv);
@@ -471,9 +471,14 @@ public class WalletBodyTest extends MockedResponseTest{
         String label = "HDAccount 1";
         WalletBody payload = new WalletBody(label);
 
-        Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
-        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);
-        // TODO: 16/02/2017 more tests
+        Assert.assertEquals(36, payload.getGuid().length());//GUIDs are 36 in length
+        Assert.assertEquals(label, payload.getHdWallet().getAccounts().get(0).getLabel());
+
+        Assert.assertEquals(1, payload.getHdWallet().getAccounts().size());
+
+        Assert.assertEquals(5000, payload.getOptions().getPbkdf2Iterations());
+        Assert.assertEquals(600000, payload.getOptions().getLogoutTime());
+        Assert.assertEquals(10000, payload.getOptions().getFeePerKb());
     }
 
     @Test
@@ -500,7 +505,12 @@ public class WalletBodyTest extends MockedResponseTest{
 
         Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);
-        // TODO: 16/02/2017 more tests
+
+        Assert.assertEquals(10, payload.getHdWallet().getAccounts().size());
+
+        Assert.assertEquals(5000, payload.getOptions().getPbkdf2Iterations());
+        Assert.assertEquals(600000, payload.getOptions().getLogoutTime());
+        Assert.assertEquals(10000, payload.getOptions().getFeePerKb());
     }
 
     @Test
@@ -527,16 +537,12 @@ public class WalletBodyTest extends MockedResponseTest{
 
         Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
         Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);
-        // TODO: 16/02/2017 more tests
+
+        Assert.assertEquals(10, payload.getHdWallet().getAccounts().size());
+
+        Assert.assertEquals(5000, payload.getOptions().getPbkdf2Iterations());
+        Assert.assertEquals(600000, payload.getOptions().getLogoutTime());
+        Assert.assertEquals(10000, payload.getOptions().getFeePerKb());
     }
 
 }
-/*
-have a data2 package now (which will need to be renamed along with classses after refactor)
-all the 'bodies' are actual wallet payload elements
-new HDWalletFactory class (same as WalletFactory class but static)
-
-moved 'payload' package json element classes to a 'data' package for now
-the WalletBody class can now create and restore statically - no need for PayloadManager
-- continue moving code from payload manager to right places (like decryptAndInitializeWallet)
- */

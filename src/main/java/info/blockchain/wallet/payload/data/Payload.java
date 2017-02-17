@@ -93,7 +93,7 @@ public class Payload implements Serializable {
 
     private void parseWalletData(final String decryptedPayload, int pbkdf2Iterations) throws PayloadException {
 
-        if (FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
+        if (FormatsUtil.isValidJson(decryptedPayload)) {
             // Default to wallet pbkdf2 iterations in case the double encryption pbkdf2 iterations is not set in wallet.json > options
             setDoubleEncryptionPbkdf2Iterations(pbkdf2Iterations);
             parsePayload(new JSONObject(decryptedPayload));

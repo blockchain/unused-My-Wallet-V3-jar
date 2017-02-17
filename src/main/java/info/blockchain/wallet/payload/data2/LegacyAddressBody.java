@@ -181,7 +181,7 @@ public class LegacyAddressBody {
         byte[] rdata = new byte[32];
         SecureRandom random = new SecureRandom();
         random.nextBytes(rdata);
-        byte[] privbytes = Util.getInstance().xor(data, rdata);
+        byte[] privbytes = Util.xor(data, rdata);
         if (privbytes == null) {
             return null;
         }

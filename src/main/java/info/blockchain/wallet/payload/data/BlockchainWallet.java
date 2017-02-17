@@ -70,7 +70,7 @@ public class BlockchainWallet {
 
         this.unparsedWalletData = walletData;
 
-        if (FormatsUtil.getInstance().isValidJson(walletData)) {
+        if (FormatsUtil.isValidJson(walletData)) {
             parseWallet(new JSONObject(walletData), password);
         } else {
             parseV1Wallet(walletData, password);
@@ -123,7 +123,7 @@ public class BlockchainWallet {
             //Payload wrapper contains version, iterations and encrypted payload
             String anyPayload = walletJson.getString(KEY_PAYLOAD);
 
-            if (FormatsUtil.getInstance().isValidJson(anyPayload)) {
+            if (FormatsUtil.isValidJson(anyPayload)) {
                 //V2+
                 JSONObject payloadWrapper = new JSONObject(anyPayload);
 
@@ -142,7 +142,7 @@ public class BlockchainWallet {
                 } else {
                     String decryptedPayload = decryptWallet(payloadWrapper.getString(KEY_PAYLOAD), password, pbkdf2Iterations);
 
-                    if (decryptedPayload != null && FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
+                    if (decryptedPayload != null && FormatsUtil.isValidJson(decryptedPayload)) {
                         payload = new Payload(decryptedPayload, pbkdf2Iterations);
                     } else {
                         throw new DecryptionException("Payload null after decrypt.");

@@ -288,11 +288,17 @@ public class PayloadManager {
 
     @Deprecated
     public boolean validateSecondPassword(String secondPassword) {
-        return DoubleEncryptionFactory.getInstance().validateSecondPassword(
-                payload.getDoublePasswordHash(),
-                payload.getSharedKey(),
-                secondPassword,
-                payload.getDoubleEncryptionPbkdf2Iterations());
+        try {
+            DoubleEncryptionFactory.validateSecondPassword(
+                    payload.getDoublePasswordHash(),
+                    payload.getSharedKey(),
+                    secondPassword,
+                    payload.getDoubleEncryptionPbkdf2Iterations());
+            return true;
+        } catch (DecryptionException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Deprecated
@@ -302,7 +308,7 @@ public class PayloadManager {
 
             try {
                 String encrypted_hex = payload.getHdWallet().getSeedHex();
-                String decrypted_hex = DoubleEncryptionFactory.getInstance().decrypt(
+                String decrypted_hex = DoubleEncryptionFactory.decrypt(
                         encrypted_hex,
                         payload.getSharedKey(),
                         secondPassword,
@@ -410,6 +416,8 @@ public class PayloadManager {
 
     }
 
+    @Deprecated
+    //get from multi address
     public String getNextChangeAddress(int accountIndex) throws AddressFormatException {
 
         int changeAddressIndex = payload.getHdWallet().getAccounts().get(accountIndex).getIdxChangeAddresses();
@@ -418,6 +426,8 @@ public class PayloadManager {
         return hdPayloadBridge.getAddressAt(xpub, Chain.CHANGE_CHAIN, changeAddressIndex).getAddressString();
     }
 
+    @Deprecated
+    //get from multi address
     public String getNextReceiveAddress(int accountIndex) throws AddressFormatException {
 
         Account account = payload.getHdWallet().getAccounts().get(accountIndex);
@@ -554,7 +564,7 @@ public class PayloadManager {
         if (!payload.isDoubleEncrypted()) {
             account.setXpriv(xpriv);
         } else {
-            String encrypted_xpriv = DoubleEncryptionFactory.getInstance().encrypt(
+            String encrypted_xpriv = DoubleEncryptionFactory.encrypt(
                     xpriv,
                     payload.getSharedKey(),
                     secondPassword,
@@ -595,7 +605,7 @@ public class PayloadManager {
 
         String encryptedKey = Base58.encode(ecKey.getPrivKeyBytes());
         if (payload.isDoubleEncrypted()) {
-            encryptedKey = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
+            encryptedKey = DoubleEncryptionFactory.encrypt(encryptedKey,
                     payload.getSharedKey(),
                     secondPassword,
                     payload.getOptions().getIterations());
@@ -648,7 +658,7 @@ public class PayloadManager {
             legacyAddress.setEncryptedKeyBytes(key.getPrivKeyBytes());
         } else {
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
-            String encrypted2 = DoubleEncryptionFactory.getInstance().encrypt(encryptedKey,
+            String encrypted2 = DoubleEncryptionFactory.encrypt(encryptedKey,
                     payload.getSharedKey(),
                     secondPassword != null ? secondPassword : null,
                     payload.getOptions().getIterations());
@@ -688,7 +698,7 @@ public class PayloadManager {
         byte[] rdata = new byte[32];
         SecureRandom random = new SecureRandom();
         random.nextBytes(rdata);
-        byte[] privbytes = Util.getInstance().xor(data, rdata);
+        byte[] privbytes = Util.xor(data, rdata);
         if (privbytes == null) {
             return null;
         }
@@ -891,16 +901,14 @@ public class PayloadManager {
     @Deprecated
     boolean isEncryptionConsistent(boolean isDoubleEncrypted, List<String> keyList) {
 
-        FormatsUtil formatsUtil = FormatsUtil.getInstance();
-
         boolean consistent = true;
 
         for (String key : keyList) {
 
             if (isDoubleEncrypted) {
-                consistent = formatsUtil.isKeyEncrypted(key);
+                consistent = FormatsUtil.isKeyEncrypted(key);
             } else {
-                consistent = formatsUtil.isKeyUnencrypted(key);
+                consistent = FormatsUtil.isKeyUnencrypted(key);
             }
 
             if (!consistent) {

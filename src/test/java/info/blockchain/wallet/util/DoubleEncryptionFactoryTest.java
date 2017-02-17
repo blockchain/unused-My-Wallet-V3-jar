@@ -3,6 +3,7 @@ package info.blockchain.wallet.util;
 
 
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.DecryptionException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,21 +18,19 @@ public class DoubleEncryptionFactoryTest {
     String sharedKey = "524b5e9f-72ea-4690-b28c-8c1cfce65ca0";
 
     @Test
-    public void validateSecondPasswordTest() {
+    public void validateSecondPasswordTest() throws DecryptionException {
 
-        DoubleEncryptionFactory doubleEncryptionFactory = DoubleEncryptionFactory.getInstance();
-        String hash = doubleEncryptionFactory.getHash(sharedKey, pw, iterations);
-        Assert.assertTrue("Validate second password failed",
-            doubleEncryptionFactory.validateSecondPassword(hash, sharedKey, pw, iterations));
+        String hash = DoubleEncryptionFactory.getHash(sharedKey, pw, iterations);
+        DoubleEncryptionFactory.validateSecondPassword(hash, sharedKey, pw, iterations);
+        Assert.assertTrue(true);
     }
 
     @Test
     public void doubleEncryptionTest() {
 
-        DoubleEncryptionFactory doubleEncryptionFactory = DoubleEncryptionFactory.getInstance();
         String encrypted = null;
         try {
-            encrypted = doubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
+            encrypted = DoubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
             Assert.assertNotNull(encrypted);
         } catch (Exception e) {
             Assert.fail();
@@ -42,10 +41,9 @@ public class DoubleEncryptionFactoryTest {
     @Test
     public void doubleDecryptionTest() {
 
-        DoubleEncryptionFactory doubleEncryptionFactory = DoubleEncryptionFactory.getInstance();
         try {
-            String encrypted = doubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
-            String decrypted = doubleEncryptionFactory.decrypt(encrypted, sharedKey, pw.toString(), iterations);
+            String encrypted = DoubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
+            String decrypted = DoubleEncryptionFactory.decrypt(encrypted, sharedKey, pw.toString(), iterations);
 
             Assert.assertTrue("Double decryption failed", cleartext.equals(decrypted));
 
@@ -57,10 +55,9 @@ public class DoubleEncryptionFactoryTest {
     @Test
     public void doubleDecryptionFailPasswordTest() {
 
-        DoubleEncryptionFactory doubleEncryptionFactory = DoubleEncryptionFactory.getInstance();
         try {
-            String encrypted = doubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
-            String decrypted = doubleEncryptionFactory.decrypt(encrypted, sharedKey, "bogus", iterations);
+            String encrypted = DoubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
+            String decrypted = DoubleEncryptionFactory.decrypt(encrypted, sharedKey, "bogus", iterations);
             Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
             Assert.assertTrue("Double decryption failed", true);
@@ -70,10 +67,9 @@ public class DoubleEncryptionFactoryTest {
     @Test
     public void doubleDecryptionFailIterationTest() {
 
-        DoubleEncryptionFactory doubleEncryptionFactory = DoubleEncryptionFactory.getInstance();
-        try {
-            String encrypted = doubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
-            String decrypted = doubleEncryptionFactory.decrypt(encrypted, sharedKey, pw.toString(), iterations + 1);
+        try{
+            String encrypted = DoubleEncryptionFactory.encrypt(cleartext, sharedKey, pw.toString(), iterations);
+            String decrypted = DoubleEncryptionFactory.decrypt(encrypted, sharedKey, pw.toString(), iterations + 1);
             Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
             Assert.assertTrue("Double decryption failed", true);

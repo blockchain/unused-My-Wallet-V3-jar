@@ -1,5 +1,6 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.HDWallet;
@@ -13,6 +14,7 @@ import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.payload.data2.AccountBody;
 import info.blockchain.wallet.payload.data2.LegacyAddressBody;
 import info.blockchain.wallet.payload.data2.WalletBaseBody;
@@ -82,15 +84,28 @@ public class WalletManager {
         walletBaseBody = new WalletBaseBody();
         walletBaseBody.setWalletBody(new WalletBody(defaultAccountName));
 
-        saveNewWallet(email);
+        boolean success = saveNewWallet(email);
+
+        if(!success) {
+            //revert on save fail
+            walletBaseBody = null;
+            throw new ServerConnectionException("Failed to save new wallet to server.");
+        }
     }
 
     public void recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
         @Nonnull String email) throws Exception {
 
-        walletBaseBody.getWalletBody().recoverFromMnemonic(mnemonic, defaultAccountName);
+        walletBaseBody = new WalletBaseBody();
+        walletBaseBody.setWalletBody(WalletBody.recoverFromMnemonic(mnemonic, defaultAccountName));
 
-        saveNewWallet(email);
+        boolean success = saveNewWallet(email);
+
+        if(!success) {
+            //revert on save fail
+            walletBaseBody = null;
+            throw new ServerConnectionException("Failed to save new wallet to server.");
+        }
     }
 
     /*
@@ -121,9 +136,8 @@ public class WalletManager {
             walletBaseBody = WalletBaseBody.fromJson(exe.body().string());
             walletBaseBody.decryptPayload(tempPassword);
         } else {
-            // TODO: 14/02/2017 Catching error messages bad
             String errorMessage = exe.errorBody().string();
-            if (errorMessage != null && errorMessage.contains("Invalid GUID")) {
+            if (errorMessage != null && errorMessage.contains("Unknown Wallet Identifier")) {
                 throw new InvalidCredentialsException();
             } else if (errorMessage != null && errorMessage.contains("locked")) {
                 throw new AccountLockedException(errorMessage);
@@ -275,37 +289,24 @@ public class WalletManager {
     //********************************************************************************************//
 
     @Deprecated
+    //Shouldn't really have to call this - validation already happens in methods that need it
     public void validateSecondPassword(String secondPassword) throws DecryptionException {
         walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
     }
 
-    /*
-    Used to check if wallet has HD wallet - Prompt user for upgrade if not
-     */
     @Deprecated
+    //old way - try to use walletBody directly
     public boolean isNotUpgraded() {
         return walletBaseBody.getWalletBody() != null && !walletBaseBody.getWalletBody().isUpgraded();
-    }
-
-    public void getNextChangeAddress(int accountIndex) {
-        // TODO: 13/02/2017 Multi_address needs to set this first
-//        walletBaseBody.getWalletBody().getHdWallet().getAccounts().get(accountIndex).ge
     }
 
     public String getXpubFromAccountIndex(int accountIdx) {
         return walletBaseBody.getWalletBody().getHdWallet().getAccounts().get(accountIdx).getXpub();
     }
 
-    /**
-     * Return non-archived xpubs
-     * @return
-     */
+    @Deprecated
+    //old way - just get directly from hdWallet
     public ArrayList<String> getActiveXpubs() {
-
-        if(walletBaseBody.getWalletBody().getHdWallet() == null) {
-            return new ArrayList<>();
-        }
-
         return walletBaseBody.getWalletBody().getHdWallet().getActive();
     }
 

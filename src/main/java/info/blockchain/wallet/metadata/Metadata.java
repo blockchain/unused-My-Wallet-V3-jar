@@ -108,7 +108,7 @@ public class Metadata {
     public void putMetadata(String payload) throws IOException, InvalidCipherTextException, MetadataException {
 
         //Ensure json syntax is correct
-        if(!FormatsUtil.getInstance().isValidJson(payload))
+        if(!FormatsUtil.isValidJson(payload))
             throw new JSONException("Payload is not a valid json object.");
 
         byte[] encryptedPayloadBytes;

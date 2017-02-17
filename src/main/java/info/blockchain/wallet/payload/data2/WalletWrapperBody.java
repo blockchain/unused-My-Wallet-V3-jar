@@ -95,7 +95,7 @@ public class WalletWrapperBody {
         String decryptedPayload = AESUtil.decrypt(getPayload(), password,
             getPbkdf2Iterations());
 
-        if(!FormatsUtil.getInstance().isValidJson(decryptedPayload)) {
+        if(!FormatsUtil.isValidJson(decryptedPayload)) {
             throw new DecryptionException("Decryption failed.");
         }
 

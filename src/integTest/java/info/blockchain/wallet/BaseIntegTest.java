@@ -39,12 +39,12 @@ public abstract class BaseIntegTest {
 
             @Override
             public String getDevice() {
-                return null;
+                return "Android Integration test";
             }
 
             @Override
             public String getAppVersion() {
-                return null;
+                return "1.0";
             }
         });
     }

@@ -198,7 +198,7 @@ public class WalletBaseBody {
     }
 
     public boolean isV1Wallet() {
-        return !FormatsUtil.getInstance().isValidJson(payload);
+        return !FormatsUtil.isValidJson(payload);
     }
 
     public static WalletBaseBody fromJson(String json) throws IOException {

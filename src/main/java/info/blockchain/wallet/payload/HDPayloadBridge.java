@@ -174,7 +174,7 @@ public class HDPayloadBridge {
                 info.blockchain.wallet.payload.data.HDWallet hdw = new info.blockchain.wallet.payload.data.HDWallet();
                 String seedHex = wallet.getSeedHex();
                 if (!StringUtils.isEmpty(secondPassword)) {
-                    seedHex = DoubleEncryptionFactory.getInstance().encrypt(
+                    seedHex = DoubleEncryptionFactory.encrypt(
                             seedHex,
                             payload.getSharedKey(),
                             secondPassword.toString(),
@@ -189,7 +189,7 @@ public class HDPayloadBridge {
                     accounts.get(0).setXpub(xpub);
                     String xpriv = wallet.getAccount(0).getXPriv();
                     if (!StringUtils.isEmpty(secondPassword)) {
-                        xpriv = DoubleEncryptionFactory.getInstance().encrypt(
+                        xpriv = DoubleEncryptionFactory.encrypt(
                                 xpriv,
                                 payload.getSharedKey(),
                                 secondPassword,

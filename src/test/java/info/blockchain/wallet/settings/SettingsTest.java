@@ -23,7 +23,7 @@ public class SettingsTest extends MockedResponseTest {
 
         SettingsBody settingsBody = call.execute().body();
         Assert.assertEquals("BTC", settingsBody.getBtcCurrency());
-        Assert.assertEquals(0, settingsBody.getNotificationsType().size());// TODO: 08/02/2017
+        Assert.assertEquals(0, settingsBody.getNotificationsType().size());
         Assert.assertEquals("en", settingsBody.getLanguage());
         Assert.assertEquals(0, settingsBody.getNotificationsOn());
         Assert.assertEquals(0, settingsBody.getIpLockOn());

@@ -4,6 +4,7 @@ import info.blockchain.MockedResponseTest;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.payload.data.PayloadTest;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -58,6 +59,9 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
 
         Assert.assertEquals(5, MultiAddressFactory.getHighestIndexes(body, dormantXpub).getRight().intValue());
         Assert.assertEquals(10, MultiAddressFactory.getHighestIndexes(body, dormantXpub).getLeft().intValue());
+
+        Assert.assertEquals(6, MultiAddressFactory.getNextChangeAddress(body, dormantXpub));
+        Assert.assertEquals(11, MultiAddressFactory.getNextReceiveAddress(body, dormantXpub));
     }
 
     @Test
@@ -84,5 +88,8 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertEquals(10, MultiAddressFactory.getHighestIndexes(body, dormantXpub).getLeft().intValue());
 
         Assert.assertEquals(dormantXpub, MultiAddressFactory.getXpubFromAddress(body, "1CAAzobQ2UrE4QUR3HJrkZs8UFA8wi5wwQ"));
+
+        Assert.assertEquals(6, MultiAddressFactory.getNextChangeAddress(body, dormantXpub));
+        Assert.assertEquals(11, MultiAddressFactory.getNextReceiveAddress(body, dormantXpub));
     }
 }

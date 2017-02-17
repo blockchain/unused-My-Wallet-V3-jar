@@ -9,7 +9,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import retrofit2.Call;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -38,47 +40,6 @@ public class AccountBody {
     @JsonProperty("address_labels")
     private List<AddressLabelsBody> addressLabels;
 
-    /////////////////////////////////////REMOVE BELOW///////////////////////////////////////////////
-    // TODO: 15/02/2017 These vars shouldn't be here wtf
-    protected int realIdx = -1;
-    protected long amount = 0L;
-    protected int idxChangeAddresses = 0;
-    protected int idxReceiveAddresses = 0;
-
-    public int getIdxChangeAddresses() {
-        return idxChangeAddresses;
-    }
-
-    public void setIdxChangeAddresses(int nbChangeAddresses) {
-        this.idxChangeAddresses = nbChangeAddresses;
-    }
-
-    public int getIdxReceiveAddresses() {
-        return idxReceiveAddresses;
-    }
-
-    public void setIdxReceiveAddresses(int nbReceiveAddresses) {
-        this.idxReceiveAddresses = nbReceiveAddresses;
-    }
-
-    public int getRealIdx() {
-        return realIdx;
-    }
-
-    public void setRealIdx(int realIdx) {
-        this.realIdx = realIdx;
-    }
-
-    public long getAmount() {
-        return amount;
-    }
-
-    public void setAmount(long amount) {
-        this.amount = amount;
-    }
-
-    /////////////////////////////////////REMOVE ABOVE///////////////////////////////////////////////
-
     public String getLabel() {
         return label;
     }
@@ -88,7 +49,6 @@ public class AccountBody {
     }
 
     public void setLabel(String label) {
-        // TODO: 15/02/2017  client side ellipse after 32 chars
         this.label = label;
     }
 

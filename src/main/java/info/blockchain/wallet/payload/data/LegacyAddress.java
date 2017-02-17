@@ -263,7 +263,7 @@ public class LegacyAddress {
     @Deprecated
     public ECKey getECKey(String secondPassword) throws Exception {
 
-        String decryptedKey = DoubleEncryptionFactory.getInstance().decrypt(strEncryptedKey,
+        String decryptedKey = DoubleEncryptionFactory.decrypt(strEncryptedKey,
                 PayloadManager.getInstance().getPayload().getSharedKey(),
                 secondPassword,
                 PayloadManager.getInstance().getPayload().getDoubleEncryptionPbkdf2Iterations());
