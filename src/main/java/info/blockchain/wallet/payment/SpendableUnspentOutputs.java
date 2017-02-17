@@ -4,13 +4,13 @@ import info.blockchain.api.data.UnspentOutput;
 import java.math.BigInteger;
 import java.util.List;
 
-public class PaymentBundle {
+public class SpendableUnspentOutputs {
 
     private List<UnspentOutput> spendableOutputs = null;
     private BigInteger absoluteFee = BigInteger.ZERO;
     private BigInteger consumedAmount = BigInteger.ZERO;
 
-    public PaymentBundle() {
+    public SpendableUnspentOutputs() {
     }
 
     public void setSpendableOutputs(List<UnspentOutput> spendableOutputs) {

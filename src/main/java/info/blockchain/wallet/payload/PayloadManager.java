@@ -275,7 +275,7 @@ public class PayloadManager {
      * @return
      * @throws Exception
      */
-    public boolean addAccount(String label, @Nullable String secondPassword)
+    public Account addAccount(String label, @Nullable String secondPassword)
         throws Exception {
         Account accountBody = walletBaseBody.getWalletBody().addAccount(label, secondPassword);
 
@@ -284,9 +284,10 @@ public class PayloadManager {
         if (!success) {
             //Revert on save fail
             walletBaseBody.getWalletBody().getHdWallet().getAccounts().remove(accountBody);
+            throw new Exception("Failed to save added account.");
         }
 
-        return success;
+        return accountBody;
     }
 
     /**

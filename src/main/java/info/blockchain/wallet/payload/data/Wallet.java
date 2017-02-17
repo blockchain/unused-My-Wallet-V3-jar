@@ -23,7 +23,7 @@ import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.payment.PaymentBundle;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.PrivateKeyFactory;
@@ -730,7 +730,7 @@ public class Wallet {
         return HD.getMnemonic();
     }
 
-    public List<ECKey> getHDKeysForSigning(@Nullable String secondPassword, Account account, PaymentBundle unspentOutputBundle)
+    public List<ECKey> getHDKeysForSigning(@Nullable String secondPassword, Account account, SpendableUnspentOutputs unspentOutputBundle)
         throws Exception {
 
         validateSecondPassword(secondPassword);

@@ -58,12 +58,18 @@ public class Payment {
         return Coins.getUnspentCoins(addresses);
     }
 
+    /**
+     *
+     * @param unspentCoins
+     * @param feePerKb
+     * @return Pair left = sweepable amount, right = absolute fee needed for sweep
+     */
     public static Pair<BigInteger, BigInteger> getSweepableCoins(@Nonnull UnspentOutputs unspentCoins,
         @Nonnull BigInteger feePerKb) {
         return Coins.getSweepableCoins(unspentCoins, feePerKb);
     }
 
-    public static PaymentBundle getCoinsForPayment(@Nonnull UnspentOutputs unspentCoins,
+    public static SpendableUnspentOutputs getSpendableCoins(@Nonnull UnspentOutputs unspentCoins,
         @Nonnull BigInteger paymentAmount, @Nonnull BigInteger feePerKb)
         throws UnsupportedEncodingException {
         return Coins.getMinimumCoinsForPayment(unspentCoins, paymentAmount, feePerKb);

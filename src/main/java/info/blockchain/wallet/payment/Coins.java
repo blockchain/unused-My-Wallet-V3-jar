@@ -54,7 +54,7 @@ class Coins {
         return Pair.of(sweepBalance, sweepFee);
     }
 
-    public static synchronized PaymentBundle getMinimumCoinsForPayment(UnspentOutputs coins, BigInteger paymentAmount, BigInteger feePerKb)
+    public static synchronized SpendableUnspentOutputs getMinimumCoinsForPayment(UnspentOutputs coins, BigInteger paymentAmount, BigInteger feePerKb)
         throws UnsupportedEncodingException {
 
         List<UnspentOutput> unspentOutputs = coins.getUnspentOutputs();
@@ -113,7 +113,7 @@ class Coins {
             }
         }
 
-        PaymentBundle paymentBundle = new PaymentBundle();
+        SpendableUnspentOutputs paymentBundle = new SpendableUnspentOutputs();
         paymentBundle.setSpendableOutputs(spendWorthyList);
         paymentBundle.setAbsoluteFee(Fees.estimatedFee(spendWorthyList.size(), outputCount, feePerKb));
         paymentBundle.setConsumedAmount(consumedAmount);

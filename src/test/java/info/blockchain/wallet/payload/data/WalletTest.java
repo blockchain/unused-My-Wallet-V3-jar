@@ -7,7 +7,7 @@ import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.payment.Payment;
-import info.blockchain.wallet.payment.PaymentBundle;
+import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import java.math.BigInteger;
 import java.net.URI;
@@ -414,8 +414,8 @@ public class WalletTest extends MockedResponseTest{
         long spendAmount = 80200l + 70000l + 60000l + 50000l + 40000l + 30000l + 20000l + 10000l - Payment.DUST.longValue();
         long feeManual = Payment.DUST.longValue();
 
-        PaymentBundle paymentBundle = payment
-            .getCoinsForPayment(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L));
+        SpendableUnspentOutputs paymentBundle = payment
+            .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L));
 
         List<ECKey> keyList = wallet
             .getHDKeysForSigning("hello", wallet.getHdWallet().getAccount(0), paymentBundle);
