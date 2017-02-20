@@ -163,12 +163,12 @@ public class WalletTest extends MockedResponseTest{
 
         Wallet wallet = Wallet.fromJson(body);
 
-        Assert.assertEquals(1, wallet.getHdWallet().getAccounts().size());
+        Assert.assertEquals(1, wallet.getHdWallets().get(0).getAccounts().size());
         wallet.addAccount("Some Label",null);
-        Assert.assertEquals(2, wallet.getHdWallet().getAccounts().size());
+        Assert.assertEquals(2, wallet.getHdWallets().get(0).getAccounts().size());
 
-        Account account = wallet.getHdWallet()
-            .getAccount(wallet.getHdWallet().getAccounts().size() - 1);
+        Account account = wallet.getHdWallets().get(0)
+            .getAccount(wallet.getHdWallets().get(0).getAccounts().size() - 1);
 
         Assert.assertEquals("xpub6DTFzKMsjf1Tt9KwHMYnQxMLGuVRcobDZdzDuhtc6xfvafsBFqsBS4RNM54kdJs9zK8RKkSbjSbwCeUJjxiySaBKTf8dmyXgUgVnFY7yS9x", account.getXpub());
         Assert.assertEquals("xprv9zTuaopyuHTAffFUBL1n3pQbisewDLsNCR4d7KUzYd8whsY2iJYvtG6tVp1c3jRU4euNj3qdb6wCrmCwg1JRPfPghmH3hJ5ubRJVmqMGwyy", account.getXpriv());
@@ -182,7 +182,7 @@ public class WalletTest extends MockedResponseTest{
 
         Wallet wallet = Wallet.fromJson(body);
 
-        Assert.assertEquals(1, wallet.getHdWallet().getAccounts().size());
+        Assert.assertEquals(1, wallet.getHdWallets().get(0).getAccounts().size());
         wallet.addAccount("Some Label","hello");
     }
 
@@ -194,12 +194,12 @@ public class WalletTest extends MockedResponseTest{
 
         Wallet wallet = Wallet.fromJson(body);
 
-        Assert.assertEquals(2, wallet.getHdWallet().getAccounts().size());
+        Assert.assertEquals(2, wallet.getHdWallets().get(0).getAccounts().size());
         wallet.addAccount("Some Label","hello");
-        Assert.assertEquals(3, wallet.getHdWallet().getAccounts().size());
+        Assert.assertEquals(3, wallet.getHdWallets().get(0).getAccounts().size());
 
-        Account account = wallet.getHdWallet()
-            .getAccount(wallet.getHdWallet().getAccounts().size() - 1);
+        Account account = wallet.getHdWallets().get(0)
+            .getAccount(wallet.getHdWallets().get(0).getAccounts().size() - 1);
 
         Assert.assertEquals("xpub6DEe2bJAU7GbUw3HDGPUY9c77mUcP9xvAWEhx9GReuJM9gppeGxHqBcaYAfrsyY8R6cfVRsuFhi2PokQFYLEQBVpM8p4MTLzEHpVu4SWq9a", account.getXpub());
 
@@ -418,7 +418,7 @@ public class WalletTest extends MockedResponseTest{
             .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L));
 
         List<ECKey> keyList = wallet
-            .getHDKeysForSigning("hello", wallet.getHdWallet().getAccount(0), paymentBundle);
+            .getHDKeysForSigning("hello", wallet.getHdWallets().get(0).getAccount(0), paymentBundle);
 
         //Contains 5 matching keys for signing
         Assert.assertEquals(5, keyList.size());
@@ -465,9 +465,9 @@ public class WalletTest extends MockedResponseTest{
         Wallet payload = new Wallet(label);
 
         Assert.assertEquals(36, payload.getGuid().length());//GUIDs are 36 in length
-        Assert.assertEquals(label, payload.getHdWallet().getAccounts().get(0).getLabel());
+        Assert.assertEquals(label, payload.getHdWallets().get(0).getAccounts().get(0).getLabel());
 
-        Assert.assertEquals(1, payload.getHdWallet().getAccounts().size());
+        Assert.assertEquals(1, payload.getHdWallets().get(0).getAccounts().size());
 
         Assert.assertEquals(5000, payload.getOptions().getPbkdf2Iterations());
         Assert.assertEquals(600000, payload.getOptions().getLogoutTime());
@@ -497,9 +497,9 @@ public class WalletTest extends MockedResponseTest{
         Wallet payload = Wallet.recoverFromMnemonic(mnemonic, label);
 
         Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
-        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);
+        Assert.assertEquals(payload.getHdWallets().get(0).getAccounts().get(0).getLabel(), label);
 
-        Assert.assertEquals(10, payload.getHdWallet().getAccounts().size());
+        Assert.assertEquals(10, payload.getHdWallets().get(0).getAccounts().size());
 
         Assert.assertEquals(5000, payload.getOptions().getPbkdf2Iterations());
         Assert.assertEquals(600000, payload.getOptions().getLogoutTime());
@@ -529,9 +529,9 @@ public class WalletTest extends MockedResponseTest{
         Wallet payload = Wallet.recoverFromMnemonic(mnemonic, "somePassphrase", label);
 
         Assert.assertEquals(payload.getGuid().length(), 36);//GUIDs are 36 in length
-        Assert.assertEquals(payload.getHdWallet().getAccounts().get(0).getLabel(), label);
+        Assert.assertEquals(payload.getHdWallets().get(0).getAccounts().get(0).getLabel(), label);
 
-        Assert.assertEquals(10, payload.getHdWallet().getAccounts().size());
+        Assert.assertEquals(10, payload.getHdWallets().get(0).getAccounts().size());
 
         Assert.assertEquals(5000, payload.getOptions().getPbkdf2Iterations());
         Assert.assertEquals(600000, payload.getOptions().getLogoutTime());

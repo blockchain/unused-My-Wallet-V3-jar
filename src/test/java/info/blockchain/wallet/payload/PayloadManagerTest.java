@@ -42,9 +42,9 @@ public class PayloadManagerTest extends MockedResponseTest {
             .getPayload();
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
-        Assert.assertEquals("My HDWallet", walletBody.getHdWallet().getAccounts().get(0).getLabel());
+        Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
 
-        Assert.assertEquals(1, walletBody.getHdWallet().getAccounts().size());
+        Assert.assertEquals(1, walletBody.getHdWallets().get(0).getAccounts().size());
 
         Assert.assertEquals(5000, walletBody.getOptions().getPbkdf2Iterations());
         Assert.assertEquals(600000, walletBody.getOptions().getLogoutTime());
@@ -84,9 +84,9 @@ public class PayloadManagerTest extends MockedResponseTest {
             .getPayload();
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
-        Assert.assertEquals("My HDWallet", walletBody.getHdWallet().getAccounts().get(0).getLabel());
+        Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
 
-        Assert.assertEquals(10, walletBody.getHdWallet().getAccounts().size());
+        Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
 
         Assert.assertEquals(5000, walletBody.getOptions().getPbkdf2Iterations());
         Assert.assertEquals(600000, walletBody.getOptions().getLogoutTime());
@@ -133,9 +133,9 @@ public class PayloadManagerTest extends MockedResponseTest {
             .getPayload();
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
-        Assert.assertEquals("My HDWallet", walletBody.getHdWallet().getAccounts().get(0).getLabel());
+        Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
 
-        Assert.assertEquals(10, walletBody.getHdWallet().getAccounts().size());
+        Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
 
         Assert.assertEquals(5000, walletBody.getOptions().getPbkdf2Iterations());
         Assert.assertEquals(600000, walletBody.getOptions().getLogoutTime());
@@ -204,13 +204,13 @@ public class PayloadManagerTest extends MockedResponseTest {
         mockInterceptor.setResponseString("MyWallet save successful.");
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
-        Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getHdWallet().getAccounts().size());
+        Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
         mockInterceptor.setResponseString("MyWallet save successful.");
         PayloadManager.getInstance().addAccount("Some Label", null);
-        Assert.assertEquals(2, PayloadManager.getInstance().getPayload().getHdWallet().getAccounts().size());
+        Assert.assertEquals(2, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
         mockInterceptor.setResponseString("MyWallet save successful.");
         PayloadManager.getInstance().addAccount("Some Label", null);
-        Assert.assertEquals(3, PayloadManager.getInstance().getPayload().getHdWallet().getAccounts().size());
+        Assert.assertEquals(3, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
 
     }
 

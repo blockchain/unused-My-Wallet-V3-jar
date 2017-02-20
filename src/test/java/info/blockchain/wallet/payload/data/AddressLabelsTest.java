@@ -17,7 +17,7 @@ public class AddressLabelsTest {
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         Wallet wallet = Wallet.fromJson(body);
-        HDWallet hdWallet = wallet.getHdWallet();
+        HDWallet hdWallet = wallet.getHdWallets().get(0);
 
         List<Account> accounts = hdWallet.getAccounts();
 
@@ -40,7 +40,7 @@ public class AddressLabelsTest {
         String body = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         Wallet wallet = Wallet.fromJson(body);
-        HDWallet hdWallet = wallet.getHdWallet();
+        HDWallet hdWallet = wallet.getHdWallets().get(0);
 
         List<Account> accounts = hdWallet.getAccounts();
 

@@ -211,13 +211,6 @@ public class Wallet {
         return walletOptions;
     }
 
-    /*
-    Currently Bci wallet only handles 1 wallet in payload.
-     */
-    public HDWallet getHdWallet() {
-        return hdWallets.get(0);
-    }
-
     public List<HDWallet> getHdWallets() {
         return hdWallets;
     }
@@ -362,7 +355,7 @@ public class Wallet {
         if(hdWallets != null){
             if(isDoubleEncryption()) {
                 ArrayList<String> xpubList = new ArrayList<>();
-                for(Account account : getHdWallet().getAccounts()) {
+                for(Account account : getHdWallets().get(0).getAccounts()) {
                     xpubList.add(account.getXpub());
                 }
 
@@ -374,7 +367,7 @@ public class Wallet {
             } else {
                 HD = HDWalletFactory
                     .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                        getHdWallet().getSeedHex(), getHdWallet().getPassphrase(), DEFAULT_NEW_WALLET_SIZE);
+                        getHdWallets().get(0).getSeedHex(), getHdWallets().get(0).getPassphrase(), DEFAULT_NEW_WALLET_SIZE);
             }
         }
     }
@@ -559,7 +552,7 @@ public class Wallet {
 
                 //Create new hd wallet
                 Wallet wallet = new Wallet(defaultAccountName);
-                HDWallet hdWalletBody = wallet.getHdWallet();
+                HDWallet hdWalletBody = wallet.getHdWallets().get(0);
 
                 //Double encrypt if need
                 if (!StringUtils.isEmpty(secondPassword)) {
@@ -645,7 +638,7 @@ public class Wallet {
             xpriv = encrypted;
         }
 
-        return getHdWallet().addAccount(label, xpriv, xpub);
+        return getHdWallets().get(0).addAccount(label, xpriv, xpub);
     }
 
     private void decryptHDWallet(@Nullable String secondPassword)
@@ -658,7 +651,7 @@ public class Wallet {
 
         if(secondPassword != null) {
 
-            String encryptedSeedHex = getHdWallet().getSeedHex();
+            String encryptedSeedHex = getHdWallets().get(0).getSeedHex();
 
             String decryptedSeedHex = DoubleEncryptionFactory.decrypt(
                 encryptedSeedHex, sharedKey, secondPassword,
@@ -668,8 +661,8 @@ public class Wallet {
                 .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
                     Language.US,
                     decryptedSeedHex,
-                    getHdWallet().getPassphrase(),
-                    getHdWallet().getAccounts().size());
+                    getHdWallets().get(0).getPassphrase(),
+                    getHdWallets().get(0).getAccounts().size());
         }
     }
 

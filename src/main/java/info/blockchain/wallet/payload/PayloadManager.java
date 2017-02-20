@@ -289,7 +289,7 @@ public class PayloadManager {
 
         if (!success) {
             //Revert on save fail
-            walletBaseBody.getWalletBody().getHdWallet().getAccounts().remove(accountBody);
+            walletBaseBody.getWalletBody().getHdWallets().get(0).getAccounts().remove(accountBody);
             throw new Exception("Failed to save added account.");
         }
 
@@ -363,7 +363,7 @@ public class PayloadManager {
     }
 
     public String getXpubFromAccountIndex(int accountIdx) {
-        return walletBaseBody.getWalletBody().getHdWallet().getAccounts().get(accountIdx).getXpub();
+        return walletBaseBody.getWalletBody().getHdWallets().get(0).getAccounts().get(accountIdx).getXpub();
     }
 
     public ECKey getAddressECKey(@Nonnull LegacyAddress legacyAddress, @Nullable String secondPassword)

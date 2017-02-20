@@ -45,7 +45,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
         Assert.assertTrue(walletBody.isUpgraded());
 
         //Check that 1 account exists with keys
-        String xpriv = walletBody.getHdWallet().getAccounts().get(0).getXpriv();
+        String xpriv = walletBody.getHdWallets().get(0).getAccounts().get(0).getXpriv();
         Assert.assertTrue(xpriv != null && !xpriv.isEmpty());
 
         //Check that mnemonic exists
