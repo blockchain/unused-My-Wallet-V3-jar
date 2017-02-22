@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import okhttp3.ResponseBody;
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -99,6 +101,10 @@ public class LegacyAddress {
         this.address = address;
     }
 
+    public void setAddressFromPublicKeyBytes(byte[] pubKeyBytes) {
+        this.address = Base58.encode(pubKeyBytes);
+    }
+
     public void setLabel(String label) {
         this.label = label;
     }
@@ -152,11 +158,22 @@ public class LegacyAddress {
 
         ECKey ecKey = getRandomECKey();
 
-        String encryptedKey = Base58.encode(ecKey.getPrivKeyBytes());
+        LegacyAddress legacyAddress = new LegacyAddress();
+        legacyAddress.setPrivateKeyFromBytes(ecKey.getPrivKeyBytes());
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+        legacyAddress.setCreatedDeviceName(BlockchainFramework.getDevice());
+        legacyAddress.setCreatedTime(System.currentTimeMillis());
+        legacyAddress.setCreatedDeviceVersion(BlockchainFramework.getAppVersion());
+
+        return legacyAddress;
+    }
+
+    public static LegacyAddress fromECKey(ECKey ecKey) throws Exception {
 
         LegacyAddress legacyAddress = new LegacyAddress();
-        legacyAddress.setPrivateKey(encryptedKey);
-        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+        legacyAddress.setPrivateKeyFromBytes(ecKey.getPrivKeyBytes());
+
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toBase58());
         legacyAddress.setCreatedDeviceName(BlockchainFramework.getDevice());
         legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BlockchainFramework.getAppVersion());

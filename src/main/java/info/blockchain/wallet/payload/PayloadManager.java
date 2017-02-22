@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import okhttp3.ResponseBody;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
@@ -60,6 +61,14 @@ public class PayloadManager {
 
     public Wallet getPayload() {
         return walletBaseBody.getWalletBody();
+    }
+
+    public String getPayloadChecksum() {
+        return walletBaseBody.getPayloadChecksum();
+    }
+
+    public String getTempPassword() {
+        return tempPassword;
     }
 
     public MetadataNodeFactory getMetadataNodeFactory() {
@@ -321,7 +330,8 @@ public class PayloadManager {
     }
 
     /**
-     * Sets private key to existing matching legacy address.
+     * Sets private key to existing matching legacy address. If no match is found the key will be added
+     * to the wallet non the less.
      * @param key ECKey for existing legacy address
      * @param secondPassword Double encryption password if applicable.
      * @return
@@ -332,12 +342,18 @@ public class PayloadManager {
      * @throws NoSuchAlgorithmException
      * @throws HDWalletException
      */
-    public boolean setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
-        throws EncryptionException, IOException, DecryptionException, NoSuchAddressException,
-        NoSuchAlgorithmException, HDWalletException {
+    public LegacyAddress setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
+        throws Exception {
 
-        LegacyAddress matchingLegacyAddress = walletBaseBody.getWalletBody()
-            .setKeyForLegacyAddress(key, secondPassword);
+        LegacyAddress matchingLegacyAddress = null;
+        try {
+            matchingLegacyAddress = walletBaseBody.getWalletBody()
+                .setKeyForLegacyAddress(key, secondPassword);
+        } catch (NoSuchAddressException e) {
+            e.printStackTrace();
+            //If no match found, save as new
+            return addLegacyAddressFromKey(key, secondPassword);
+        }
 
         boolean success = save();
 
@@ -346,7 +362,24 @@ public class PayloadManager {
             matchingLegacyAddress.setPrivateKey(null);
         }
 
-        return success;
+        return matchingLegacyAddress;
+
+    }
+
+    public LegacyAddress addLegacyAddressFromKey(ECKey key, @Nullable String secondPassword)
+        throws Exception {
+
+        LegacyAddress newlyAdded = walletBaseBody.getWalletBody()
+            .addLegacyAddressFromKey(key, secondPassword);
+
+        boolean success = save();
+
+        if (!success) {
+            //Revert on save fail
+            newlyAdded.setPrivateKey(null);
+        }
+
+        return newlyAdded;
 
     }
 

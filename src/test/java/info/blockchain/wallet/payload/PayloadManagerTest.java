@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
@@ -13,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -265,7 +267,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         PayloadManager.getInstance().setKeyForLegacyAddress(ecKey,null);
     }
 
-    @Test(expected = NoSuchAddressException.class)
+    @Test
     public void setKeyForLegacyAddress_NoSuchAddressException() throws Exception {
 
         mockInterceptor.setResponseString("MyWallet save successful.");
@@ -280,14 +282,23 @@ public class PayloadManagerTest extends MockedResponseTest {
         PayloadManager.getInstance().addLegacyAddress("Some Label", null);
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
-        LegacyAddress legacyAddressBody = PayloadManager.getInstance().getPayload()
+        LegacyAddress existingLegacyAddressBody = PayloadManager.getInstance().getPayload()
             .getLegacyAddressList().get(0);
 
         //Try non matching ECKey
         ECKey ecKey = new ECKey();
-        legacyAddressBody.setPrivateKey(null);
+//        legacyAddressBody.setPrivateKey(null);
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().setKeyForLegacyAddress(ecKey,null);
+
+        LegacyAddress newlyAdded = PayloadManager.getInstance()
+            .setKeyForLegacyAddress(ecKey, null);
+
+        //Ensure new address is created if no match found
+        Assert.assertNotNull(newlyAdded);
+        Assert.assertNotNull(newlyAdded.getPrivateKey());
+        Assert.assertNotNull(newlyAdded.getAddress());
+        Assert.assertNotEquals(existingLegacyAddressBody.getPrivateKey(), newlyAdded.getPrivateKey());
+        Assert.assertNotEquals(existingLegacyAddressBody.getAddress(), newlyAdded.getAddress());
     }
 
     @Test

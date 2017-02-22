@@ -46,7 +46,7 @@ public class Payment {
         return WalletApi.getDynamicFee();
     }
 
-    public static Fees getDefaultFee() throws IOException {
+    public static Fees getDefaultFee() {
         return WalletApi.getDefaultFee();
     }
 

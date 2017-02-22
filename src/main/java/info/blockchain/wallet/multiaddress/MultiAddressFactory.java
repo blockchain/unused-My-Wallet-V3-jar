@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import retrofit2.Call;
 
 // TODO: 17/02/2017  Order txs - TxMostRecentDateComparator
+// TODO: 22/02/2017  Not 100% yet
 public class MultiAddressFactory {
 
     public static Call<MultiAddress> getMultiAddress(List<String> addressList, String context,

@@ -4,12 +4,15 @@ import info.blockchain.wallet.BaseIntegTest;
 import info.blockchain.wallet.api.data.FeesList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.settings.SettingsManager;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import okhttp3.ResponseBody;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
 import retrofit2.Response;
 
 /**
@@ -58,13 +61,27 @@ public class WalletApiIntegTest extends BaseIntegTest{
 
     @Test
     public void setAccess() throws Exception {
-        Response<Void> call = WalletApi.setAccess("some_key","1234").execute();
+
+        byte[] bytes = new byte[16];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(bytes);
+        String key = new String(Hex.encode(bytes), "UTF-8");
+        random.nextBytes(bytes);
+        String value = new String(Hex.encode(bytes), "UTF-8");
+
+        Response<Status> call = WalletApi.setAccess(key, value,"1234").execute();
         Assert.assertEquals(200, call.code());
     }
 
     @Test
     public void validateAccess() throws Exception {
-        Response<Void> call = WalletApi.validateAccess("some_key","1234").execute();
+
+        String key = "db2f4184429bf05c1a962384befb8873";
+
+        Response<Status> call = WalletApi.validateAccess(key,"1234").execute();
+
+        Assert.assertEquals("3236346436663830663565363434383130393262343739613437333763333739",
+            call.body().getSuccess());
         Assert.assertEquals(200, call.code());
     }
 

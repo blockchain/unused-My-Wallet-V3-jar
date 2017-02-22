@@ -5,6 +5,7 @@ import info.blockchain.wallet.api.data.Fees;
 import info.blockchain.wallet.api.data.FeesList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.api.data.Status;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -14,6 +15,7 @@ import javax.annotation.Nullable;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 
 public class WalletApi {
@@ -40,13 +42,20 @@ public class WalletApi {
         return getBaseApiInstance().getFees();
     }
 
-    public static Fees getDefaultFee() throws IOException {
-        return Fees.fromJson(""
-            + "{\n"
-            + "     \"fee\": 35000,\n"
-            + "     \"surge\": false,\n"
-            + "     \"ok\": true\n"
-            + "}");
+    public static Fees getDefaultFee() {
+        Fees fee = null;
+        try {
+            fee = Fees.fromJson(""
+                + "{\n"
+                + "     \"fee\": 35000,\n"
+                + "     \"surge\": false,\n"
+                + "     \"ok\": true\n"
+                + "}");
+        } catch (IOException e) {
+            //This won't happen
+            e.printStackTrace();
+        }
+        return fee;
     }
 
     public static Call<ResponseBody> getRandomBytes() {
@@ -79,12 +88,13 @@ public class WalletApi {
             BlockchainFramework.getApiCode());
     }
 
-    public static Call<Void> setAccess(String key, String pin) {
-        return getBaseApiInstance().pinStore(key, pin, "put", BlockchainFramework.getApiCode());
+    public static Call<Status> setAccess(String key, String value, String pin) {
+        String hex = Hex.toHexString(value.getBytes());
+        return getServerApiInstance().pinStore(key, pin, hex,"put", BlockchainFramework.getApiCode());
     }
 
-    public static Call<Void> validateAccess(String key, String pin) {
-        return getBaseApiInstance().pinStore(key, pin, "get", BlockchainFramework.getApiCode());
+    public static Call<Status> validateAccess(String key, String pin) {
+        return getServerApiInstance().pinStore(key, pin, null, "get", BlockchainFramework.getApiCode());
     }
 
     @Deprecated

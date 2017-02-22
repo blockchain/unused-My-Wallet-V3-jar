@@ -616,6 +616,29 @@ public class Wallet {
         return addressBody;
     }
 
+    public LegacyAddress addLegacyAddressFromKey(ECKey key, @Nullable String secondPassword)
+        throws Exception {
+        validateSecondPassword(secondPassword);
+        LegacyAddress addressBody = LegacyAddress.fromECKey(key);
+
+        if(secondPassword != null) {
+            //Double encryption
+            String unencryptedKey = addressBody.getPrivateKey();
+
+            String encryptedKey = DoubleEncryptionFactory.encrypt(unencryptedKey,
+                getSharedKey(),
+                secondPassword,
+                getOptions().getPbkdf2Iterations());
+
+            addressBody.setPrivateKey(encryptedKey);
+
+        }
+
+        keys.add(addressBody);
+
+        return addressBody;
+    }
+
     public Account addAccount(String label, @Nullable String secondPassword)
         throws Exception {
 

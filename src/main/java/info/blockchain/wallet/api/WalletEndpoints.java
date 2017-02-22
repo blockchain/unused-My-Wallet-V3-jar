@@ -3,6 +3,7 @@ package info.blockchain.wallet.api;
 import info.blockchain.wallet.api.data.FeesList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
+import info.blockchain.wallet.api.data.Status;
 import java.util.ArrayList;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -12,6 +13,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface WalletEndpoints {
+
 
     @POST("wallet")
     Call<ResponseBody> postToWallet(
@@ -84,9 +86,10 @@ public interface WalletEndpoints {
         @Query("format") String format);
 
     @POST("pin-store")
-    Call<Void> pinStore(
+    Call<Status> pinStore(
         @Query("key") String key,
         @Query("pin") String pin,
+        @Query("value") String value,
         @Query("method") String method,
         @Query("api_code") String apiCode);
 
