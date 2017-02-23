@@ -68,6 +68,10 @@ public class Metadata {
         return this.node;
     }
 
+    public byte[] getMagicHash() {
+        return magicHash;
+    }
+
     private MetadataEndpoints getApiInstance() {
         if (endpoints == null) {
             endpoints = BlockchainFramework
