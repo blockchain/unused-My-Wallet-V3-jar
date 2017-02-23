@@ -1,6 +1,7 @@
 package info.blockchain.wallet.settings;
 
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.Settings;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 
@@ -43,7 +44,7 @@ public class SettingsManager {
         this.sharedKey = sharedKey;
     }
 
-    public Call<info.blockchain.wallet.api.data.Settings> getInfo()  {
+    public Call<Settings> getInfo()  {
         return WalletApi.fetchSettings(METHOD_GET_INFO, guid, sharedKey);
     }
 

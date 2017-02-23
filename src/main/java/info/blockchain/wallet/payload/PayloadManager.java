@@ -387,8 +387,15 @@ public class PayloadManager {
     //*                 Shortcut methods(Remove from Android first then delete)                  *//
     //********************************************************************************************//
 
-    public void validateSecondPassword(String secondPassword) throws DecryptionException {
-        walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
+    public boolean validateSecondPassword(String secondPassword) {
+
+        try{
+            walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
+            return true;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean isNotUpgraded() {
@@ -402,7 +409,7 @@ public class PayloadManager {
     public ECKey getAddressECKey(@Nonnull LegacyAddress legacyAddress, @Nullable String secondPassword)
         throws DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
 
-        validateSecondPassword(secondPassword);
+        walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
 
         String decryptedPrivateKey = legacyAddress.getPrivateKey();
 

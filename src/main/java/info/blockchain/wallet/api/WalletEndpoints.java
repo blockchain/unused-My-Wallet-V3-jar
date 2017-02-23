@@ -95,4 +95,11 @@ public interface WalletEndpoints {
 
     @GET("merchant")
     Call<ArrayList<Merchant>> getAllMerchants();
+
+    @GET("frombtc")
+    Call<ResponseBody> getHistoricPrice(
+        @Query("value") long value,
+        @Query("currency") String currency,
+        @Query("time") long time,
+        @Query("api_code") String apiCode);
 }

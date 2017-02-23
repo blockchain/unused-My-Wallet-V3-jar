@@ -13,7 +13,11 @@ import java.util.ArrayList;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(getterVisibility = Visibility.NONE)
+@JsonAutoDetect(fieldVisibility = Visibility.NONE,
+    getterVisibility = Visibility.NONE,
+    setterVisibility = Visibility.NONE,
+    creatorVisibility = Visibility.NONE,
+    isGetterVisibility = Visibility.NONE)
 public class Settings {
 
     @JsonIgnore
@@ -129,8 +133,8 @@ public class Settings {
         return language;
     }
 
-    public int getNotificationsOn() {
-        return notificationsOn;
+    public boolean isNotificationsOn() {
+        return intToBoolean(notificationsOn);
     }
 
     public int getIpLockOn() {
@@ -141,8 +145,8 @@ public class Settings {
         return dialCode;
     }
 
-    public int getBlockTorIps() {
-        return blockTorIps;
+    public boolean isBlockTorIps() {
+        return intToBoolean(blockTorIps);
     }
 
     public String getCurrency() {
@@ -153,24 +157,24 @@ public class Settings {
         return notificationsConfirmations;
     }
 
-    public int getAutoEmailBackup() {
-        return autoEmailBackup;
+    public boolean isAutoEmailBackup() {
+        return intToBoolean(autoEmailBackup);
     }
 
-    public int getNeverSaveAuthType() {
-        return neverSaveAuthType;
+    public boolean isNeverSaveAuthType() {
+        return intToBoolean(neverSaveAuthType);
     }
 
     public String getEmail() {
         return email;
     }
 
-    public int getSmsVerified() {
-        return smsVerified;
+    public boolean isSmsVerified() {
+        return intToBoolean(smsVerified);
     }
 
-    public int getIsApiAccessEnabled() {
-        return isApiAccessEnabled;
+    public boolean isApiAccessEnabled() {
+        return intToBoolean(isApiAccessEnabled);
     }
 
     public int getAuthType() {
@@ -181,8 +185,8 @@ public class Settings {
         return myIp;
     }
 
-    public int getEmailVerified() {
-        return emailVerified;
+    public boolean isEmailVerified() {
+        return intToBoolean(emailVerified);
     }
 
     public String getPasswordHint1() {
@@ -209,5 +213,9 @@ public class Settings {
     @JsonIgnore
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
+    }
+
+    private boolean intToBoolean(int value) {
+        return value != 0;
     }
 }

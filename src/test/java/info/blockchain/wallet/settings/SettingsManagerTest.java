@@ -1,6 +1,7 @@
 package info.blockchain.wallet.settings;
 
 import info.blockchain.MockedResponseTest;
+import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.api.data.Settings;
 import java.io.IOException;
 import okhttp3.ResponseBody;
@@ -25,24 +26,23 @@ public class SettingsManagerTest extends MockedResponseTest {
         Assert.assertEquals("BTC", settingsBody.getBtcCurrency());
         Assert.assertEquals(0, settingsBody.getNotificationsType().size());
         Assert.assertEquals("en", settingsBody.getLanguage());
-        Assert.assertEquals(0, settingsBody.getNotificationsOn());
+        Assert.assertFalse(settingsBody.isNotificationsOn());
         Assert.assertEquals(0, settingsBody.getIpLockOn());
         Assert.assertEquals("44", settingsBody.getDialCode());
-        Assert.assertEquals(0, settingsBody.getBlockTorIps());
+        Assert.assertFalse(settingsBody.isBlockTorIps());
         Assert.assertEquals("GBP", settingsBody.getCurrency());
         Assert.assertEquals(0, settingsBody.getNotificationsConfirmations());
-        Assert.assertEquals(0, settingsBody.getAutoEmailBackup());
-        Assert.assertEquals(0, settingsBody.getNeverSaveAuthType());
+        Assert.assertFalse(settingsBody.isAutoEmailBackup());
+        Assert.assertFalse(settingsBody.isNeverSaveAuthType());
         Assert.assertEquals("john@mail.com", settingsBody.getEmail());
-        Assert.assertEquals(0, settingsBody.getSmsVerified());
-        Assert.assertEquals(0, settingsBody.getIsApiAccessEnabled());
+        Assert.assertFalse(settingsBody.isSmsVerified());
+        Assert.assertFalse(settingsBody.isApiAccessEnabled());
         Assert.assertEquals(0, settingsBody.getAuthType());
         Assert.assertEquals("211.160.45.230", settingsBody.getMyIp());
-        Assert.assertEquals(0, settingsBody.getEmailVerified());
+        Assert.assertFalse(settingsBody.isEmailVerified());
         Assert.assertEquals("GB", settingsBody.getCountryCode());
         Assert.assertEquals(0, settingsBody.getLoggingLevel());
         Assert.assertEquals("49819a7c-2426-49da-90fd-9dabbd837cc8", settingsBody.getGuid());
-
     }
 
     @Test

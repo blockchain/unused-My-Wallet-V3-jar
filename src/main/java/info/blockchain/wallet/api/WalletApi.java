@@ -186,4 +186,12 @@ public class WalletApi {
             "plain",
             BlockchainFramework.getApiCode());
     }
+
+    public static Call<ResponseBody> getHistoricPrice(long satoshis, String currency, long timeInMillis){
+        return getServerApiInstance().getHistoricPrice(
+            satoshis,
+            currency,
+            timeInMillis,
+            BlockchainFramework.getApiCode());
+    }
 }
