@@ -12,6 +12,7 @@ import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
+import info.blockchain.wallet.pairing.Pairing;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
@@ -35,6 +36,7 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -188,6 +190,30 @@ public class PayloadManager {
             } else {
                 throw new ServerConnectionException(errorMessage);
             }
+        }
+    }
+
+    public void initializeAndDecryptFromQR(@Nonnull String qrData) throws Exception {
+
+        Pair qrComponents = Pairing.getQRComponentsFromRawString(qrData);
+        Call<ResponseBody> call = WalletApi.fetchPairingEncryptionPassword((String)qrComponents.getLeft());
+
+        Response<ResponseBody> exe = call.execute();
+
+        if(exe.isSuccessful()) {
+            String encryptionPassword = exe.body().string();
+            String encryptionPairingCode = (String)qrComponents.getRight();
+            String guid = (String)qrComponents.getLeft();
+
+            String[] sharedKeyAndPassword = Pairing.getSharedKeyAndPassword(encryptionPairingCode, encryptionPassword);
+            String sharedKey = sharedKeyAndPassword[0];
+            String hexEncodedPassword = sharedKeyAndPassword[1];
+            String password = new String(Hex.decode(hexEncodedPassword), "UTF-8");
+
+            initializeAndDecrypt(sharedKey, guid, password);
+
+        } else {
+            throw new ServerConnectionException(exe.errorBody().string());
         }
     }
 
