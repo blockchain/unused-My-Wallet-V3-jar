@@ -66,12 +66,16 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
         String mnemonic = "all all all all all all all all all all all all";
         String seedHex = "0660cc198330660cc198330660cc1983";
 
-        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My Bitcoin Wallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
             .getPayload();
 
         Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
+        Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
+        Assert.assertEquals("My Bitcoin Wallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
+        Assert.assertEquals("My Bitcoin Wallet 2", walletBody.getHdWallets().get(0).getAccounts().get(1).getLabel());
+        Assert.assertEquals("My Bitcoin Wallet 3", walletBody.getHdWallets().get(0).getAccounts().get(2).getLabel());
     }
 
     @Test
@@ -86,28 +90,5 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
             .getPayload();
 
         Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
-    }
-
-    @Test
-    public void recoverFromMnemonic_3() throws Exception {
-
-        String mnemonic = "rural globe champion coral donate glad cotton choice near beyond carpet library";
-        String seedHex = "bd8c6898181410c50c31419382b88b40";
-
-        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
-
-        Wallet walletBody = PayloadManager.getInstance()
-            .getPayload();
-
-        Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
-
-        PayloadManager.getInstance().initializeAndDecrypt(PayloadManager.getInstance().getPayload().getSharedKey(), PayloadManager.getInstance().getPayload().getGuid(), "SomePassword");
-
-//        PayloadManager.getInstance().initializeAndDecrypt("73cae651-f27f-451c-8dc0-df1736444f02",
-//            "2b66b3b9-e73c-4436-8470-179f9865bfd1", "aaaaaaaaaA");
-//
-//        02-24 10:11:58.396 23817-25468/piuk.blockchain.android D/vos: sharedKey: 73cae651-f27f-451c-8dc0-df1736444f02
-//        02-24 10:11:58.396 23817-25468/piuk.blockchain.android D/vos: guid: 2b66b3b9-e73c-4436-8470-179f9865bfd1
-//        02-24 10:11:58.396 23817-25468/piuk.blockchain.android D/vos: password: aaaaaaaaaA
     }
 }

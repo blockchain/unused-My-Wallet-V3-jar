@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -317,7 +318,7 @@ public class HDWallet {
     }
 
     public static HDWallet recoverFromMnemonic(String mnemonic, String passphrase,
-        String defaultAccountName, int accountSize) throws Exception {
+        String defaultAccountName, int walletSize) throws Exception {
 
         //Start with initial wallet size of 1.
         //After wallet is recovered we'll check how many accounts to restore
@@ -332,42 +333,27 @@ public class HDWallet {
         HDWallet hdWalletBody = new HDWallet();
         hdWalletBody.setAccounts(new ArrayList<Account>());
 
-        int walletSize = 1;
-        int accountNumber = 1;
-        if (accountSize <= 0) {
-            int index = 0;
-
-            final int lookAheadTotal = 10;
-            int lookAhead = lookAheadTotal;
-
-            while (lookAhead > 0) {
-
-                String xpub = bip44Wallet.getAccount(index).getXpub();
-                String xpriv = bip44Wallet.getAccount(index).getXPriv();
-                if (hasTransactions(blockExplorer, xpub)) {
-                    lookAhead = lookAheadTotal;
-                    walletSize++;
-                }
-
-                bip44Wallet.addAccount();
-
-                String label = defaultAccountName;
-                if (accountNumber > 1) {
-                    label = defaultAccountName + " " + accountNumber;
-                }
-                hdWalletBody.addAccount(label, xpriv, xpub);
-                accountNumber++;
-
-                index++;
-                lookAhead--;
-            }
-        } else {
-            walletSize = accountSize;
+        if(walletSize <= 0) {
+            walletSize = getDeterminedSize(1, 5, 0, blockExplorer, bip44Wallet);
         }
 
         bip44Wallet = HDWalletFactory
             .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
                 mnemonic, passphrase, walletSize);
+
+        //Set accounts
+        int accountNumber = 1;
+        for(HDAccount account : bip44Wallet.getAccounts()) {
+            String xpub = account.getXpub();
+            String xpriv = account.getXPriv();
+            String label = defaultAccountName;
+            if (accountNumber > 1) {
+                label = defaultAccountName + " " + accountNumber;
+            }
+
+            hdWalletBody.addAccount(label, xpriv, xpub);
+            accountNumber++;
+        }
 
         hdWalletBody.setSeedHex(Hex.toHexString(bip44Wallet.getSeed()));
         hdWalletBody.setPassphrase(bip44Wallet.getPassphrase());
@@ -375,6 +361,43 @@ public class HDWallet {
         hdWalletBody.setDefaultAccountIdx(0);
 
         return hdWalletBody;
+    }
+
+    private static int getDeterminedSize(int walletSize, int trySize, int currentGap, BlockExplorer blockExplorer, info.blockchain.wallet.bip44.HDWallet bip44Wallet) throws Exception {
+
+        LinkedList<String> xpubs = new LinkedList<>();
+
+        for(int i = 0; i < trySize; i++) {
+            HDAccount account = bip44Wallet.addAccount();
+            xpubs.add(account.getXpub());
+        }
+
+        Response<HashMap<String, Balance>> exe = blockExplorer
+            .getBalance(xpubs, BlockExplorer.TX_FILTER_ALL).execute();
+
+        if(!exe.isSuccessful()) {
+            throw new Exception(exe.code() + " " + exe.errorBody().string());
+        }
+
+        HashMap<String, Balance> map = exe.body();
+
+        final int lookAheadTotal = 10;
+        for (String xpub : xpubs) {
+
+            //If account has txs
+            if(map.get(xpub).getNTx() > 0L) {
+                walletSize++;
+                currentGap = 0;
+            } else {
+                currentGap++;
+            }
+
+            if(currentGap >= lookAheadTotal) {
+                return walletSize;
+            }
+        }
+
+        return getDeterminedSize(walletSize, trySize*2, currentGap, blockExplorer, bip44Wallet);
     }
 
     public static boolean hasTransactions(BlockExplorer blockExplorer, String xpub)

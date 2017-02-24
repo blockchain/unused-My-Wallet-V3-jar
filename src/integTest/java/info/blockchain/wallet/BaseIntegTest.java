@@ -21,6 +21,10 @@ public abstract class BaseIntegTest {
         PersistentUrls.getInstance().setCurrentApiUrl("https://api.blockchain.info/");
         PersistentUrls.getInstance().setCurrentServerUrl("https://blockchain.info/");
 
+//        PersistentUrls.getInstance().setCurrentEnvironment(Environment.DEV);
+//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
+//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
+
         //Initialize framework
         BlockchainFramework.init(new FrameworkInterface() {
             @Override

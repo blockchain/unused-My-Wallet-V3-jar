@@ -24,7 +24,6 @@ import info.blockchain.wallet.util.Tools;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -32,7 +31,6 @@ import javax.annotation.Nullable;
 import okhttp3.ResponseBody;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
@@ -248,7 +246,7 @@ public class PayloadManager {
             //set new checksum
             walletBaseBody.setPayloadChecksum(newPayloadChecksum);
         } else{
-            throw new ServerConnectionException(exe.errorBody().string());
+            throw new ServerConnectionException(exe.code()+" - "+exe.errorBody().string());
         }
     }
 
