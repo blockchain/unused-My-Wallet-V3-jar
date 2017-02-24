@@ -87,6 +87,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
         Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
+        Assert.assertEquals("0660cc198330660cc198330660cc1983", walletBody.getHdWallets().get(0).getSeedHex());
 
         Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
 
@@ -136,6 +137,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
         Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
+        Assert.assertEquals("0660cc198330660cc198330660cc1983", walletBody.getHdWallets().get(0).getSeedHex());
 
         Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
 
@@ -208,10 +210,10 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().addAccount("Some Label", null);
+        PayloadManager.getInstance().addAccount(0, "Some Label", null);
         Assert.assertEquals(2, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().addAccount("Some Label", null);
+        PayloadManager.getInstance().addAccount(0, "Some Label", null);
         Assert.assertEquals(3, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
 
     }

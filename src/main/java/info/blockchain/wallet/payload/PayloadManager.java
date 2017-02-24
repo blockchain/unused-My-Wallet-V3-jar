@@ -14,6 +14,7 @@ import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.pairing.Pairing;
 import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.payload.data.WalletBase;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,6 +43,9 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class PayloadManager {
+
+    //Assume we only support 1 hdWallet
+    private final int HD_WALLET_INDEX = 0;
 
     private WalletBase walletBaseBody;
     private String tempPassword; //Stored to encrypt before saving
@@ -95,13 +100,7 @@ public class PayloadManager {
         walletBaseBody = new WalletBase();
         walletBaseBody.setWalletBody(new Wallet(defaultAccountName));
 
-        boolean success = saveNewWallet(email);
-
-        if(!success) {
-            //revert on save fail
-            walletBaseBody = null;
-            throw new ServerConnectionException("Failed to save new wallet to server.");
-        }
+        saveNewWallet(email);
 
         return walletBaseBody.getWalletBody();
     }
@@ -118,15 +117,14 @@ public class PayloadManager {
 
         tempPassword = password;
         walletBaseBody = new WalletBase();
-        walletBaseBody.setWalletBody(Wallet.recoverFromMnemonic(mnemonic, defaultAccountName));
 
-        boolean success = saveNewWallet(email);
+        Wallet walletBody = new Wallet();
+        HDWallet hdWallet = HDWallet.recoverFromMnemonic(mnemonic, defaultAccountName);
+        walletBody.setHdWallets(Arrays.asList(hdWallet));
 
-        if(!success) {
-            //revert on save fail
-            walletBaseBody = null;
-            throw new ServerConnectionException("Failed to save new wallet to server.");
-        }
+        walletBaseBody.setWalletBody(walletBody);
+
+        saveNewWallet(email);
 
         return walletBaseBody.getWalletBody();
     }
@@ -227,8 +225,7 @@ public class PayloadManager {
         }
     }
 
-    private boolean saveNewWallet(String email) throws Exception {
-
+    private void saveNewWallet(String email) throws Exception {
         validateSave();
 
         //Encrypt and wrap payload
@@ -250,10 +247,8 @@ public class PayloadManager {
         if(exe.isSuccessful()) {
             //set new checksum
             walletBaseBody.setPayloadChecksum(newPayloadChecksum);
-
-            return true;
         } else{
-            return false;
+            throw new ServerConnectionException(exe.errorBody().string());
         }
     }
 
@@ -311,14 +306,15 @@ public class PayloadManager {
     /**
      * Adds a new account to hd wallet and saves to server.
      * Reverts on save failure.
+     * @param hdWalletIndex
      * @param label
      * @param secondPassword
      * @return
      * @throws Exception
      */
-    public Account addAccount(String label, @Nullable String secondPassword)
+    public Account addAccount(int hdWalletIndex, String label, @Nullable String secondPassword)
         throws Exception {
-        Account accountBody = walletBaseBody.getWalletBody().addAccount(label, secondPassword);
+        Account accountBody = walletBaseBody.getWalletBody().addAccount(hdWalletIndex, label, secondPassword);
 
         boolean success = save();
 
@@ -508,8 +504,10 @@ public class PayloadManager {
      */
     public void generateNodes(@Nullable String secondPassword) throws Exception{
 
+        walletBaseBody.getWalletBody().decryptHDWallet(HD_WALLET_INDEX, secondPassword);
+
         boolean success = metadataNodeFactory.saveMetadataHdNodes(
-            walletBaseBody.getWalletBody().getMasterKey(secondPassword));
+            walletBaseBody.getWalletBody().getHdWallets().get(HD_WALLET_INDEX).getMasterKey());
         if (!success) {
             throw new MetadataException("All Metadata nodes might not have saved.");
         }

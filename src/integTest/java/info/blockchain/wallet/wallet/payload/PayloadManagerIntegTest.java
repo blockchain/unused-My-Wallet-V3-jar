@@ -8,10 +8,13 @@ import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
+import info.blockchain.wallet.payload.data.WalletWrapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import retrofit2.Call;
 
@@ -50,7 +53,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
 
         //Check that mnemonic exists
         try {
-            Assert.assertEquals(walletBody.getMnemonic(null).size(), 12);
+            Assert.assertEquals(walletBody.getHdWallets().get(0).getMnemonic().size(), 12);
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail("upgradeV2PayloadToV3 failed");
@@ -58,13 +61,53 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
     }
 
     @Test
-    public void te() throws IOException {
-        Call<MultiAddress> call = MultiAddressFactory
-            .getMultiAddress(Arrays.asList("xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt"),
-                null,
-                BlockExplorer.TX_FILTER_ALL,
-                1, 0);
+    public void recoverFromMnemonic_1() throws Exception {
 
-        System.out.println(call.execute().body().toJson());
+        String mnemonic = "all all all all all all all all all all all all";
+        String seedHex = "0660cc198330660cc198330660cc1983";
+
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
+
+        Wallet walletBody = PayloadManager.getInstance()
+            .getPayload();
+
+        Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
+    }
+
+    @Test
+    public void recoverFromMnemonic_2() throws Exception {
+
+        String mnemonic = "one defy stock very oven junk neutral weather sweet pyramid celery sorry";
+        String seedHex = "9aa737587979dcf2a53fc5dbb5e09467";
+
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
+
+        Wallet walletBody = PayloadManager.getInstance()
+            .getPayload();
+
+        Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
+    }
+
+    @Test
+    public void recoverFromMnemonic_3() throws Exception {
+
+        String mnemonic = "rural globe champion coral donate glad cotton choice near beyond carpet library";
+        String seedHex = "bd8c6898181410c50c31419382b88b40";
+
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
+
+        Wallet walletBody = PayloadManager.getInstance()
+            .getPayload();
+
+        Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
+
+        PayloadManager.getInstance().initializeAndDecrypt(PayloadManager.getInstance().getPayload().getSharedKey(), PayloadManager.getInstance().getPayload().getGuid(), "SomePassword");
+
+//        PayloadManager.getInstance().initializeAndDecrypt("73cae651-f27f-451c-8dc0-df1736444f02",
+//            "2b66b3b9-e73c-4436-8470-179f9865bfd1", "aaaaaaaaaA");
+//
+//        02-24 10:11:58.396 23817-25468/piuk.blockchain.android D/vos: sharedKey: 73cae651-f27f-451c-8dc0-df1736444f02
+//        02-24 10:11:58.396 23817-25468/piuk.blockchain.android D/vos: guid: 2b66b3b9-e73c-4436-8470-179f9865bfd1
+//        02-24 10:11:58.396 23817-25468/piuk.blockchain.android D/vos: password: aaaaaaaaaA
     }
 }

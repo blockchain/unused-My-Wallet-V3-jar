@@ -8,29 +8,16 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.Balance;
-import info.blockchain.api.data.UnspentOutput;
-import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.bip44.HDAccount;
-import info.blockchain.wallet.bip44.HDAddress;
-import info.blockchain.wallet.bip44.HDWalletFactory;
-import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
-import info.blockchain.wallet.exceptions.PayloadException;
-import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
-import info.blockchain.wallet.util.PrivateKeyFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +27,10 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
-import retrofit2.Response;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -55,10 +40,6 @@ import retrofit2.Response;
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
 public class Wallet {
-
-    private static final int DEFAULT_MNEMONIC_LENGTH = 12;
-    private static final int DEFAULT_NEW_WALLET_SIZE = 1;
-    private static final String DEFAULT_PASSPHRASE = "";
 
     @JsonProperty("guid")
     private String guid;
@@ -96,15 +77,15 @@ public class Wallet {
     @JsonProperty("address_book")
     private List<AddressBook> addressBook;
 
-    //Have to handle HD here.
-    //Wallet contains doubleEncryption hash to to handle encrypt/decrypt
-    //for HD and legacy.
-    private info.blockchain.wallet.bip44.HDWallet HD;
-
     public Wallet() {
+        guid = UUID.randomUUID().toString();
+        sharedKey = UUID.randomUUID().toString();
+        txNotes = new HashMap<>();
+        keys = new ArrayList<>();
+        options = Options.getDefaultOptions();
     }
 
-    public Wallet(String defaultAccountName) throws IOException, MnemonicLengthException {
+    public Wallet(String defaultAccountName) throws Exception {
 
         guid = UUID.randomUUID().toString();
         sharedKey = UUID.randomUUID().toString();
@@ -112,37 +93,7 @@ public class Wallet {
         keys = new ArrayList<>();
         options = Options.getDefaultOptions();
 
-        //Bip44
-        this.HD = HDWalletFactory
-            .createWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                DEFAULT_MNEMONIC_LENGTH, DEFAULT_PASSPHRASE, DEFAULT_NEW_WALLET_SIZE);
-
-        HDWallet hdWalletBody = new HDWallet();
-
-        List<HDAccount> hdAccounts = this.HD.getAccounts();
-        List<Account> accountBodyList = new ArrayList<>();
-        int accountNumber = 1;
-        for (int i = 0; i < hdAccounts.size(); i++) {
-
-            String label = defaultAccountName;
-            if (accountNumber > 1) {
-                label = defaultAccountName + " " + accountNumber;
-            }
-
-            Account accountBody = new Account();
-            accountBody.setLabel(label);
-            accountBody.setXpriv(this.HD.getAccount(0).getXPriv());
-            accountBody.setXpub(this.HD.getAccount(0).getXpub());
-            accountBodyList.add(accountBody);
-
-            accountNumber++;
-        }
-
-        hdWalletBody.setSeedHex(this.HD.getSeedHex());
-        hdWalletBody.setDefaultAccountIdx(0);
-        hdWalletBody.setMnemonicVerified(false);
-        hdWalletBody.setPassphrase(DEFAULT_PASSPHRASE);
-        hdWalletBody.setAccounts(accountBodyList);
+        HDWallet hdWalletBody = new HDWallet(defaultAccountName);
 
         hdWallets = new ArrayList<>();
         hdWallets.add(hdWalletBody);
@@ -176,32 +127,6 @@ public class Wallet {
         return tagNames;
     }
 
-    private int fixPbkdf2Iterations() {
-
-        //Use default initially
-        int iterations = WalletWrapper.DEFAULT_PBKDF2_ITERATIONS_V2;
-
-        //Old wallets may contain 'wallet_options' key - we'll use this now
-        if (walletOptions != null && walletOptions.getPbkdf2Iterations() > 0) {
-            iterations = walletOptions.getPbkdf2Iterations();
-        }
-
-        //'options' key override wallet_options key - we'll use this now
-        if (options != null && options.getPbkdf2Iterations() > 0) {
-            iterations = options.getPbkdf2Iterations();
-        }
-
-        //If wallet doesn't contain 'option' - use default
-        if(options == null) {
-            options = Options.getDefaultOptions();
-        }
-
-        //Set iterations
-        options.setPbkdf2Iterations(iterations);
-
-        return iterations;
-    }
-
     public Options getOptions() {
         fixPbkdf2Iterations();
         return options;
@@ -217,63 +142,6 @@ public class Wallet {
 
     public List<LegacyAddress> getLegacyAddressList() {
         return keys;
-    }
-
-    public List<String> getLegacyAddressStringList() {
-
-        List<String> addrs = new ArrayList<>();
-        for (LegacyAddress legacyAddress : keys) {
-            addrs.add(legacyAddress.getAddress());
-        }
-
-        return addrs;
-    }
-
-    public List<String> getWatchOnlyAddressStringList() {
-
-        List<String> addrs = new ArrayList<>();
-        for (LegacyAddress legacyAddress : keys) {
-            if (legacyAddress.isWatchOnly()) {
-                addrs.add(legacyAddress.getAddress());
-            }
-        }
-
-        return addrs;
-    }
-
-    public List<String> getLegacyAddressStringList(long tag) {
-
-        List<String> addrs = new ArrayList<>();
-        for (LegacyAddress legacyAddress : keys) {
-            if (legacyAddress.getTag() == tag) {
-                addrs.add(legacyAddress.getAddress());
-            }
-        }
-
-        return addrs;
-    }
-
-    public List<LegacyAddress> getLegacyAddressList(long tag) {
-
-        List<LegacyAddress> addrs = new ArrayList<>();
-        for (LegacyAddress legacyAddress : keys) {
-            if (legacyAddress.getTag() == tag) {
-                addrs.add(legacyAddress);
-            }
-        }
-
-        return addrs;
-    }
-
-    public boolean containsLegacyAddress(String addr) {
-
-        for (LegacyAddress legacyAddress : keys) {
-            if (legacyAddress.getAddress().equals(addr)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public List<AddressBook> getAddressBook() {
@@ -329,7 +197,7 @@ public class Wallet {
     }
 
     public boolean isUpgraded() {
-        return (hdWallets != null);
+        return (hdWallets != null && hdWallets.size() > 0);
     }
 
     public static Wallet fromJson(String json)
@@ -342,133 +210,20 @@ public class Wallet {
             .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
             .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-        Wallet walletBody = mapper.readValue(json, Wallet.class);
-        walletBody.initHD();
-        return walletBody;
-    }
-
-    private void initHD()
-        throws DecryptionException, DecoderException, MnemonicWordException, MnemonicChecksumException,
-        MnemonicLengthException, InvalidCipherTextException, IOException {
-
-        //V1 won't have hdWallets
-        if(hdWallets != null){
-            if(isDoubleEncryption()) {
-                ArrayList<String> xpubList = new ArrayList<>();
-                for(Account account : getHdWallets().get(0).getAccounts()) {
-                    xpubList.add(account.getXpub());
-                }
-
-                //Wallet still double encrypted at this point
-                //pass xpubs to give watch only wallet
-                HD = HDWalletFactory
-                    .restoreWatchOnlyWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
-                        xpubList);
-            } else {
-                HD = HDWalletFactory
-                    .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                        getHdWallets().get(0).getSeedHex(), getHdWallets().get(0).getPassphrase(), DEFAULT_NEW_WALLET_SIZE);
-            }
-        }
+        return mapper.readValue(json, Wallet.class);
     }
 
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public static Wallet recoverFromMnemonic(String mnemonic, String defaultAccountName)
-        throws Exception {
-        return recoverFromMnemonic(mnemonic, "", defaultAccountName, 0);
-    }
+    public void addHDWallet(HDWallet hdWallet) {
 
-    public static Wallet recoverFromMnemonic(String mnemonic, String defaultAccountName,
-        int accountSize) throws Exception {
-        return recoverFromMnemonic(mnemonic, "", defaultAccountName, accountSize);
-    }
-
-    public static Wallet recoverFromMnemonic(String mnemonic, String passphrase,
-        String defaultAccountName) throws Exception {
-        return recoverFromMnemonic(mnemonic, passphrase, defaultAccountName, 0);
-    }
-
-    public static Wallet recoverFromMnemonic(String mnemonic, String passphrase,
-        String defaultAccountName, int accountSize) throws Exception {
-
-        //Start with initial wallet size of 1.
-        //After wallet is recovered we'll check how many accounts to restore
-        info.blockchain.wallet.bip44.HDWallet hdWallet = HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                mnemonic, passphrase, DEFAULT_NEW_WALLET_SIZE);
-
-        BlockExplorer blockExplorer = new BlockExplorer(
-            BlockchainFramework.getRetrofitServerInstance(),
-            BlockchainFramework.getApiCode());
-
-        HDWallet hdWalletBody = new HDWallet();
-        hdWalletBody.setAccounts(new ArrayList<Account>());
-
-        int walletSize = 1;
-        int accountNumber = 1;
-        if (accountSize <= 0) {
-            int index = 0;
-
-            final int lookAheadTotal = 10;
-            int lookAhead = lookAheadTotal;
-
-            while (lookAhead > 0) {
-
-                String xpub = hdWallet.getAccount(index).getXpub();
-                String xpriv = hdWallet.getAccount(index).getXPriv();
-                if (hasTransactions(blockExplorer, xpub)) {
-                    lookAhead = lookAheadTotal;
-                    walletSize++;
-                }
-
-                hdWallet.addAccount();
-
-                String label = defaultAccountName;
-                if (accountNumber > 1) {
-                    label = defaultAccountName + " " + accountNumber;
-                }
-                hdWalletBody.addAccount(label, xpriv, xpub);
-                accountNumber++;
-
-                index++;
-                lookAhead--;
-            }
-        } else {
-            walletSize = accountSize;
+        if (hdWallets == null) {
+            hdWallets = new ArrayList<>();
         }
 
-        hdWallet = HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                mnemonic, passphrase, walletSize);
-
-        Wallet walletBody = new Wallet();
-        walletBody.guid = UUID.randomUUID().toString();
-        walletBody.sharedKey = UUID.randomUUID().toString();
-        walletBody.txNotes = new HashMap<>();
-        walletBody.keys = new ArrayList<>();
-        walletBody.options = Options.getDefaultOptions();
-        walletBody.HD = hdWallet;
-        walletBody.setHdWallets(Arrays.asList(hdWalletBody));
-
-        return walletBody;
-    }
-
-    public static boolean hasTransactions(BlockExplorer blockExplorer, String xpub)
-        throws Exception {
-
-        Response<HashMap<String, Balance>> exe = blockExplorer
-            .getBalance(Arrays.asList(xpub), BlockExplorer.TX_FILTER_ALL).execute();
-
-        if (!exe.isSuccessful()) {
-            throw new Exception(exe.code() + " " + exe.errorBody().string());
-        }
-
-        HashMap<String, Balance> body = exe.body();
-
-        return body.get(xpub).getNTx() > 0L;
+        hdWallets.add(hdWallet);
     }
 
     /**
@@ -537,58 +292,36 @@ public class Wallet {
         //Check if payload has 2nd password
         validateSecondPassword(secondPassword);
 
-        if (getHdWallets() == null || getHdWallets().size() == 0) {
+        if (!isUpgraded()) {
 
-            int attempts = 0;
-            boolean isEmpty;
+            //Create new hd wallet
+            HDWallet hdWalletBody = new HDWallet(defaultAccountName);
+            addHDWallet(hdWalletBody);
 
-            BlockExplorer blockExplorer = new BlockExplorer(
-                BlockchainFramework.getRetrofitServerInstance(),
-                BlockchainFramework.getApiCode());
+            //Double encrypt if need
+            if (!StringUtils.isEmpty(secondPassword)) {
 
-            do {
+                //Double encrypt seedHex
+                String doubleEncryptedSeedHex = DoubleEncryptionFactory.encrypt(
+                    hdWalletBody.getSeedHex(),
+                    getSharedKey(),
+                    secondPassword,
+                    getOptions().getPbkdf2Iterations());
+                hdWalletBody.setSeedHex(doubleEncryptedSeedHex);
 
-                attempts++;
+                //Double encrypt private keys
+                for(Account account : hdWalletBody.getAccounts()) {
 
-                //Create new hd wallet
-                Wallet wallet = new Wallet(defaultAccountName);
-                HDWallet hdWalletBody = wallet.getHdWallets().get(0);
-
-                //Double encrypt if need
-                if (!StringUtils.isEmpty(secondPassword)) {
-
-                    //Double encrypt seedHex
-                    String doubleEncryptedSeedHex = DoubleEncryptionFactory.encrypt(
-                        hdWalletBody.getSeedHex(),
+                    String encryptedXPriv = DoubleEncryptionFactory.encrypt(
+                        account.getXpriv(),
                         getSharedKey(),
                         secondPassword,
                         getOptions().getPbkdf2Iterations());
-                    hdWalletBody.setSeedHex(doubleEncryptedSeedHex);
 
-                    //Double encrypt private key
-                    for(Account account : hdWalletBody.getAccounts()) {
+                    account.setXpriv(encryptedXPriv);
 
-                        String encryptedXPriv = DoubleEncryptionFactory.encrypt(
-                            account.getXpriv(),
-                            getSharedKey(),
-                            secondPassword,
-                            getOptions().getPbkdf2Iterations());
-
-                        account.setXpriv(encryptedXPriv);
-
-                    }
                 }
-
-                setHdWallets(Arrays.asList(hdWalletBody));
-
-                hdWalletBody.getAccounts().get(0).setLabel(defaultAccountName);
-
-                isEmpty = !hasTransactions(blockExplorer, hdWalletBody.getAccounts().get(0).getXpub());
-
-            } while (!isEmpty && attempts < 3);
-
-            if(!isEmpty)
-                throw new PayloadException("Failed to upgrade to V3!");
+            }
         }
     }
 
@@ -639,54 +372,45 @@ public class Wallet {
         return addressBody;
     }
 
-    public Account addAccount(String label, @Nullable String secondPassword)
-        throws Exception {
+    public void decryptHDWallet(int hdWalletIndex, String secondPassword)
+        throws MnemonicWordException, DecryptionException, IOException, DecoderException,
+        MnemonicChecksumException, MnemonicLengthException, InvalidCipherTextException, HDWalletException {
 
         validateSecondPassword(secondPassword);
-        decryptHDWallet(secondPassword);
 
-        HD.addAccount();
+        HDWallet hdWallet = hdWallets.get(hdWalletIndex);
+        hdWallet.decryptHDWallet(secondPassword, sharedKey, getOptions().getPbkdf2Iterations());
+    }
 
-        HDAccount newlyDerived = HD.getAccount(HD.getAccounts().size() - 1);
-        String xpriv = newlyDerived.getXPriv();
-        String xpub = newlyDerived.getXpub();
-
+    private void encryptAccount(Account account, String secondPassword)
+        throws UnsupportedEncodingException, EncryptionException {
         //Double encryption
         if(secondPassword != null) {
-            String encrypted = DoubleEncryptionFactory.encrypt(
-                xpriv,
+            String encryptedPrivateKey = DoubleEncryptionFactory.encrypt(
+                account.getXpriv(),
                 sharedKey,
                 secondPassword,
                 getOptions().getPbkdf2Iterations());
-            xpriv = encrypted;
+            account.setXpriv(encryptedPrivateKey);
         }
-
-        return getHdWallets().get(0).addAccount(label, xpriv, xpub);
     }
 
-    private void decryptHDWallet(@Nullable String secondPassword)
-        throws IOException, DecryptionException, InvalidCipherTextException, DecoderException,
-        MnemonicLengthException, MnemonicWordException, MnemonicChecksumException {
+    public Account addAccount(int hdWalletIndex, String label, @Nullable String secondPassword)
+        throws Exception {
 
-        if(getHdWallets() == null || getHdWallets().size() == 0) {
-            throw new MnemonicLengthException("No HDWallet to decrypt!");
-        }
+        validateSecondPassword(secondPassword);
 
-        if(secondPassword != null) {
+        //Double decryption if need
+        decryptHDWallet(hdWalletIndex, secondPassword);
 
-            String encryptedSeedHex = getHdWallets().get(0).getSeedHex();
+        HDWallet hdWallet = hdWallets.get(hdWalletIndex);
 
-            String decryptedSeedHex = DoubleEncryptionFactory.decrypt(
-                encryptedSeedHex, sharedKey, secondPassword,
-                getOptions().getPbkdf2Iterations());
+        Account account = hdWallet.addAccount(label);
 
-            HD = HDWalletFactory
-                .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
-                    Language.US,
-                    decryptedSeedHex,
-                    getHdWallets().get(0).getPassphrase(),
-                    getHdWallets().get(0).getAccounts().size());
-        }
+        //Double encryption if need
+        encryptAccount(account, secondPassword);
+
+        return account;
     }
 
     public LegacyAddress setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
@@ -728,76 +452,92 @@ public class Wallet {
         return matchingAddressBody;
     }
 
-    public DeterministicKey getMasterKey(@Nullable String secondPassword)
-        throws DecryptionException, MnemonicWordException, DecoderException, IOException,
-        MnemonicChecksumException, MnemonicLengthException, InvalidCipherTextException {
+    public List<String> getLegacyAddressStringList() {
 
-        validateSecondPassword(secondPassword);
-        decryptHDWallet(secondPassword);
-        return HD.getMasterKey();
+        List<String> addrs = new ArrayList<>();
+        for (LegacyAddress legacyAddress : keys) {
+            addrs.add(legacyAddress.getAddress());
+        }
+
+        return addrs;
     }
 
-    public List<String> getMnemonic(@Nullable String secondPassword)
-        throws DecryptionException, MnemonicWordException, DecoderException, IOException,
-        MnemonicChecksumException, MnemonicLengthException, InvalidCipherTextException {
+    public List<String> getWatchOnlyAddressStringList() {
 
-        validateSecondPassword(secondPassword);
-        decryptHDWallet(secondPassword);
-        return HD.getMnemonic();
-    }
-
-    public List<ECKey> getHDKeysForSigning(@Nullable String secondPassword, Account account, SpendableUnspentOutputs unspentOutputBundle)
-        throws Exception {
-
-        validateSecondPassword(secondPassword);
-        decryptHDWallet(secondPassword);
-
-
-        List<ECKey> keys = new ArrayList<>();
-
-        HDAccount hdAccount = getHDAccountFromAccountBody(account);
-        if (hdAccount != null) {
-            for (UnspentOutput unspent : unspentOutputBundle.getSpendableOutputs()) {
-                String[] split = unspent.getXpub().getPath().split("/");
-                int chain = Integer.parseInt(split[1]);
-                int addressIndex = Integer.parseInt(split[2]);
-
-                HDAddress hdAddress = hdAccount.getChain(chain).getAddressAt(addressIndex);
-                ECKey walletKey = PrivateKeyFactory
-                    .getKey(PrivateKeyFactory.WIF_COMPRESSED, hdAddress.getPrivateKeyString());
-                keys.add(walletKey);
+        List<String> addrs = new ArrayList<>();
+        for (LegacyAddress legacyAddress : keys) {
+            if (legacyAddress.isWatchOnly()) {
+                addrs.add(legacyAddress.getAddress());
             }
         }
 
-        return keys;
+        return addrs;
     }
 
-    private HDAccount getHDAccountFromAccountBody(Account accountBody) {
-        for(HDAccount account : HD.getAccounts()) {
-            if(account.getXpub().equals(accountBody.getXpub())) {
-                return account;
+    public List<String> getLegacyAddressStringList(long tag) {
+
+        List<String> addrs = new ArrayList<>();
+        for (LegacyAddress legacyAddress : keys) {
+            if (legacyAddress.getTag() == tag) {
+                addrs.add(legacyAddress.getAddress());
             }
         }
-        return null;
+
+        return addrs;
     }
 
-    //no need for second pw. only using HD xpubs
-    // TODO: 16/02/2017 Investigate better way to do this
-    public BiMap<String, Integer> getXpubToAccountIndexMap() {
+    public List<LegacyAddress> getLegacyAddressList(long tag) {
 
-        BiMap<String, Integer> xpubToAccountIndexMap = HashBiMap.create();
-
-        List<HDAccount> accountList = HD.getAccounts();
-
-        for (HDAccount account : accountList) {
-            xpubToAccountIndexMap.put(account.getXpub(), account.getId());
+        List<LegacyAddress> addrs = new ArrayList<>();
+        for (LegacyAddress legacyAddress : keys) {
+            if (legacyAddress.getTag() == tag) {
+                addrs.add(legacyAddress);
+            }
         }
 
-        return xpubToAccountIndexMap;
+        return addrs;
     }
 
-    // TODO: 16/02/2017 Investigate better way to do this
-    public Map<Integer, String> getAccountIndexToXpubMap() {
-        return getXpubToAccountIndexMap().inverse();
+    public boolean containsLegacyAddress(String addr) {
+
+        for (LegacyAddress legacyAddress : keys) {
+            if (legacyAddress.getAddress().equals(addr)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * In case wallet was encrypted with iterations other than what is specified in options, we
+     * will ensure next encryption and options get updated accordingly.
+     * @return
+     */
+    private int fixPbkdf2Iterations() {
+
+        //Use default initially
+        int iterations = WalletWrapper.DEFAULT_PBKDF2_ITERATIONS_V2;
+
+        //Old wallets may contain 'wallet_options' key - we'll use this now
+        if (walletOptions != null && walletOptions.getPbkdf2Iterations() > 0) {
+            iterations = walletOptions.getPbkdf2Iterations();
+            options.setPbkdf2Iterations(iterations);
+        }
+
+        //'options' key override wallet_options key - we'll use this now
+        if (options != null && options.getPbkdf2Iterations() > 0) {
+            iterations = options.getPbkdf2Iterations();
+        }
+
+        //If wallet doesn't contain 'option' - use default
+        if(options == null) {
+            options = Options.getDefaultOptions();
+        }
+
+        //Set iterations
+        options.setPbkdf2Iterations(iterations);
+
+        return iterations;
     }
 }

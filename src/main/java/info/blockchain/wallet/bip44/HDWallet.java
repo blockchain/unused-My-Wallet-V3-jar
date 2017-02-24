@@ -137,8 +137,11 @@ public class HDWallet {
     /**
      * Add new account.
      */
-    public void addAccount() {
-        accounts.add(new HDAccount(params, dkRoot, accounts.size()));
+    public HDAccount addAccount() {
+        HDAccount account = new HDAccount(params, dkRoot, accounts.size());
+        accounts.add(account);
+
+        return account;
     }
 
     /**

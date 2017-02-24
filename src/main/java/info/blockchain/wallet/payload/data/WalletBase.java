@@ -201,7 +201,15 @@ public class WalletBase {
     }
 
     public static WalletBase fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, WalletBase.class);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+            .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+            .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
+        return mapper.readValue(json, WalletBase.class);
     }
 
     public String toJson() throws JsonProcessingException {

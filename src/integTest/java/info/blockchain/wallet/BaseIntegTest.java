@@ -4,6 +4,7 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.PersistentUrls.Environment;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import retrofit2.Retrofit;
