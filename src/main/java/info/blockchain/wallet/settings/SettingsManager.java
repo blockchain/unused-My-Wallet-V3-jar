@@ -5,6 +5,7 @@ import info.blockchain.wallet.api.data.Settings;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 
+@SuppressWarnings("WeakerAccess")
 public class SettingsManager {
 
     //API methods
@@ -40,6 +41,11 @@ public class SettingsManager {
     }
 
     public SettingsManager(String guid, String sharedKey) {
+        this.guid = guid;
+        this.sharedKey = sharedKey;
+    }
+
+    public void initSettings(String guid, String sharedKey) {
         this.guid = guid;
         this.sharedKey = sharedKey;
     }
