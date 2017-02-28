@@ -1,11 +1,9 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BaseIntegTest;
-import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
-import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
-import info.blockchain.wallet.settings.SettingsManager;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import okhttp3.ResponseBody;
@@ -26,7 +24,7 @@ public class WalletApiIntegTest extends BaseIntegTest{
 
     @Test
     public void getDynamicFee() throws Exception {
-        Response<FeesList> call = WalletApi.getDynamicFee().execute();
+        Response<FeeList> call = WalletApi.getDynamicFee().execute();
         Assert.assertNotNull(call.body());
         Assert.assertNotNull(call.body().toJson());
     }
@@ -122,18 +120,18 @@ public class WalletApiIntegTest extends BaseIntegTest{
         Assert.assertTrue(call.body().size() > 0);
     }
 
-    @Test
-    public void fetchSettings() throws Exception {
-        Response<Settings> call = WalletApi.fetchSettings(SettingsManager.METHOD_GET_INFO, guid, sharedKey).execute();
-        Assert.assertNotNull(call.body());
-        Assert.assertNotNull(call.body().toJson());
-    }
-
-    @Test
-    public void updateSettings() throws Exception {
-        Response<ResponseBody> call = WalletApi.updateSettings(
-            SettingsManager.METHOD_UPDATE_EMAIL, guid, sharedKey, "a@a.com").execute();
-        Assert.assertNotNull(call.body());
-        Assert.assertNotNull(call.body().string());
-    }
+//    @Test
+//    public void fetchSettings() throws Exception {
+//        Response<Settings> call = WalletApi.fetchSettings(SettingsManager.METHOD_GET_INFO, guid, sharedKey).execute();
+//        Assert.assertNotNull(call.body());
+//        Assert.assertNotNull(call.body().toJson());
+//    }
+//
+//    @Test
+//    public void updateSettings() throws Exception {
+//        Response<ResponseBody> call = WalletApi.updateSettings(
+//            SettingsManager.METHOD_UPDATE_EMAIL, guid, sharedKey, "a@a.com").execute();
+//        Assert.assertNotNull(call.body());
+//        Assert.assertNotNull(call.body().string());
+//    }
 }

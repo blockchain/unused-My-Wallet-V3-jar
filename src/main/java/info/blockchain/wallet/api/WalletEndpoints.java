@@ -1,6 +1,6 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
@@ -81,7 +81,7 @@ public interface WalletEndpoints {
         @Query("api_code") String apiCode);
 
     @GET("fees")
-    Call<FeesList> getFees();
+    Call<FeeList> getFees();
 
     @GET("v2/randombytes")
     Call<ResponseBody> getRandomBytes(

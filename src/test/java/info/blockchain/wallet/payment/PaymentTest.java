@@ -3,8 +3,8 @@ package info.blockchain.wallet.payment;
 import info.blockchain.MockedResponseTest;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.test_data.UnspentTestData;
-import info.blockchain.wallet.api.data.Fees;
-import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.Fee;
+import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -74,10 +74,10 @@ public class PaymentTest extends MockedResponseTest {
     public void testGetDynamicFee() throws Exception {
 
         mockInterceptor.setResponseString("{\"mempool\":57126,\"default\":{\"fee\":65000,\"surge\":false,\"ok\":true},\"estimate\":[{\"fee\":71500,\"surge\":false,\"ok\":true},{\"fee\":65300,\"surge\":false,\"ok\":true},{\"fee\":65200,\"surge\":false,\"ok\":true},{\"fee\":65100,\"surge\":false,\"ok\":true},{\"fee\":65000,\"surge\":false,\"ok\":true},{\"fee\":59090.90909090909,\"surge\":false,\"ok\":true}]}");
-        Call<FeesList> dynamicFee = Payment.getDynamicFee();
+        Call<FeeList> dynamicFee = Payment.getDynamicFee();
 
-        Response<FeesList> exe = dynamicFee.execute();
-        FeesList fee = exe.body();
+        Response<FeeList> exe = dynamicFee.execute();
+        FeeList fee = exe.body();
 
         Assert.assertEquals(57126, fee.getMempool());
         Assert.assertEquals(65000, fee.getDefaultFee().getFee(), 0.0);
@@ -108,7 +108,7 @@ public class PaymentTest extends MockedResponseTest {
         Assert.assertTrue(fee.getEstimate().get(5).isOk());
         Assert.assertFalse(fee.getEstimate().get(5).isSurge());
 
-        Fees defaultFee = Payment.getDefaultFee();
+        Fee defaultFee = Payment.getDefaultFee();
         Assert.assertEquals(35000, defaultFee.getFee(), 0.0);
         Assert.assertTrue(defaultFee.isOk());
         Assert.assertFalse(defaultFee.isSurge());

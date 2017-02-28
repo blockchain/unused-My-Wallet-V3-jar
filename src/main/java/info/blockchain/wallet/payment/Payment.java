@@ -4,8 +4,8 @@ import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
-import info.blockchain.wallet.api.data.Fees;
-import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.Fee;
+import info.blockchain.wallet.api.data.FeeList;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -42,12 +42,25 @@ public class Payment {
         return info.blockchain.wallet.payment.Fees.isAdequateFee(inputs, outputs, absoluteFee);
     }
 
-    public static Call<FeesList> getDynamicFee() {
+    public static Call<FeeList> getDynamicFee() {
         return WalletApi.getDynamicFee();
     }
 
-    public static Fees getDefaultFee() {
-        return WalletApi.getDefaultFee();
+    public static Fee getDefaultFee() {
+
+        Fee fee = null;
+        try {
+            fee = Fee.fromJson(""
+                + "{\n"
+                + "     \"fee\": 35000,\n"
+                + "     \"surge\": false,\n"
+                + "     \"ok\": true\n"
+                + "}");
+        } catch (IOException e) {
+            //This won't happen
+            e.printStackTrace();
+        }
+        return fee;
     }
 
     /**********************************************************************************************/

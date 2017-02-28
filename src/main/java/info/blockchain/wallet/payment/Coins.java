@@ -87,7 +87,7 @@ class Coins {
             spendWorthyList.add(output);
             collectedAmount = collectedAmount.add(output.getValue());
 
-            //Fees
+            //Fee
             int coinCount = spendWorthyList.size();
             BigInteger paymentAmountNoChange = estimateAmount(coinCount, paymentAmount, feePerKb, 1);
             BigInteger paymentAmountWithChange = estimateAmount(coinCount, paymentAmount, feePerKb, 2);

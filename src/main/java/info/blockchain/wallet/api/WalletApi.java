@@ -1,8 +1,8 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.data.Fees;
-import info.blockchain.wallet.api.data.FeesList;
+import info.blockchain.wallet.api.data.Fee;
+import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
@@ -43,24 +43,8 @@ public class WalletApi {
         return walletServer;
     }
 
-    public static Call<FeesList> getDynamicFee() {
+    public static Call<FeeList> getDynamicFee() {
         return getBaseApiInstance().getFees();
-    }
-
-    public static Fees getDefaultFee() {
-        Fees fee = null;
-        try {
-            fee = Fees.fromJson(""
-                + "{\n"
-                + "     \"fee\": 35000,\n"
-                + "     \"surge\": false,\n"
-                + "     \"ok\": true\n"
-                + "}");
-        } catch (IOException e) {
-            //This won't happen
-            e.printStackTrace();
-        }
-        return fee;
     }
 
     public static Call<ResponseBody> getRandomBytes() {

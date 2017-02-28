@@ -6,38 +6,37 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
+import java.io.IOException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(getterVisibility = Visibility.NONE)
-public class FeesList {
+public class Fee {
 
-    @JsonProperty("mempool")
-    private int mempool;
+    @JsonProperty("fee")
+    private double fee;
 
-    @JsonProperty("default")
-    private Fees defaultFee;
+    @JsonProperty("surge")
+    private boolean surge;
 
-    @JsonProperty("estimate")
-    private ArrayList<Fees> estimate;
+    @JsonProperty("ok")
+    private boolean ok;
 
-    public int getMempool() {
-        return mempool;
+    public double getFee() {
+        return fee;
     }
 
-    public Fees getDefaultFee() {
-        return defaultFee;
+    public boolean isSurge() {
+        return surge;
     }
 
-    public ArrayList<Fees> getEstimate() {
-        return estimate;
+    public boolean isOk() {
+        return ok;
     }
 
     @JsonIgnore
-    public String toJson() throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(this);
+    public static Fee fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Fee.class);
     }
 }
