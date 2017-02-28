@@ -1,7 +1,10 @@
 package info.blockchain.wallet.payload;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.exceptions.AccountLockedException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
@@ -12,6 +15,7 @@ import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.pairing.Pairing;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.HDWallet;
@@ -24,6 +28,7 @@ import info.blockchain.wallet.util.Tools;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -304,15 +309,14 @@ public class PayloadManager {
     /**
      * Adds a new account to hd wallet and saves to server.
      * Reverts on save failure.
-     * @param hdWalletIndex
      * @param label
      * @param secondPassword
      * @return
      * @throws Exception
      */
-    public Account addAccount(int hdWalletIndex, String label, @Nullable String secondPassword)
+    public Account addAccount(String label, @Nullable String secondPassword)
         throws Exception {
-        Account accountBody = walletBaseBody.getWalletBody().addAccount(hdWalletIndex, label, secondPassword);
+        Account accountBody = walletBaseBody.getWalletBody().addAccount(HD_WALLET_INDEX, label, secondPassword);
 
         boolean success = save();
 
@@ -442,6 +446,34 @@ public class PayloadManager {
         }
 
         return Tools.getECKeyFromKeyAndAddress(decryptedPrivateKey, legacyAddress.getAddress());
+    }
+
+    public String getNextReceiveAddress(Account account) throws IOException, HDWalletException {
+
+        Call<MultiAddress> multiAddress = MultiAddressFactory
+            .getMultiAddress(Arrays.asList(account.getXpub()), null,
+                BlockExplorer.TX_FILTER_ALL, 1, 0);
+
+        int nextIndex = MultiAddressFactory.getNextReceiveAddress(multiAddress.execute().body(), account.getXpub());
+
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+            .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
+    }
+
+    public String getNextChangeAddress(Account account) throws IOException, HDWalletException {
+
+        Call<MultiAddress> multiAddress = MultiAddressFactory
+            .getMultiAddress(Arrays.asList(account.getXpub()), null,
+                BlockExplorer.TX_FILTER_ALL, 1, 0);
+
+        int nextIndex = MultiAddressFactory.getNextChangeAddress(multiAddress.execute().body(), account.getXpub());
+
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+            .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getChange().getAddressAt(nextIndex).getAddressString();
     }
 
     //********************************************************************************************//
