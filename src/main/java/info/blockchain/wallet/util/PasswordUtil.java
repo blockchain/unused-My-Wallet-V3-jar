@@ -22,7 +22,7 @@ public final class PasswordUtil {
         throw new AssertionError("This class isn't meant to be instantiated");
     }
 
-    {
+    static {
         patternsWeight = new HashMap<>();
         patternsWeight.put(Pattern.compile("^\\d+$"), WEIGHT_BAD_PATTERN);                          // all digits
         patternsWeight.put(Pattern.compile("^[a-z]+\\d$"), WEIGHT_BAD_PATTERN);                     // all lower then 1 digit
