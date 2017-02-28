@@ -2,8 +2,9 @@ package info.blockchain.wallet.settings;
 
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Settings;
+
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 
 @SuppressWarnings("WeakerAccess")
 public class SettingsManager {
@@ -20,6 +21,7 @@ public class SettingsManager {
     public static final String METHOD_UPDATE_CURRENCY = "update-currency";
     public static final String METHOD_UPDATE_PASSWORD_HINT_1 = "update-password-hint1";
     public static final String METHOD_UPDATE_AUTH_TYPE = "update-auth-type";
+    public static final String METHOD_UPDATE_BLOCK_TOR_IPS = "update-block-tor-ips";
 
     //Unused API methods
     /*
@@ -29,9 +31,24 @@ public class SettingsManager {
     public static final String METHOD_UPDATE_IP_LOCK = "update-ip-lock";
     public static final String METHOD_UPDATE_IP_LOCK_ON = "update-ip-lock-on";
     public static final String METHOD_UPDATE_LANGUAGE = "update-language";
-    public static final String METHOD_UPDATE_BLOCK_TOR_IPS = "update-block-tor-ips";
     public static final String METHOD_UPDATE_LOGGING_LEVEL = "update-logging-level";
     */
+
+    // Notification Settings
+    public static final int NOTIFICATION_ON = 2;
+    public static final int NOTIFICATION_OFF = 0;
+
+    public static final int NOTIFICATION_TYPE_NONE = 0;
+    public static final int NOTIFICATION_TYPE_EMAIL = 1;
+    public static final int NOTIFICATION_TYPE_SMS = 32;
+    public static final int NOTIFICATION_TYPE_ALL = 33;
+
+    // Auth Settings
+    public static final int AUTH_TYPE_OFF = 0;
+    public static final int AUTH_TYPE_YUBI_KEY = 1;
+    public static final int AUTH_TYPE_EMAIL = 2;
+    public static final int AUTH_TYPE_GOOGLE_AUTHENTICATOR = 4;
+    public static final int AUTH_TYPE_SMS = 5;
 
     private String guid;
     private String sharedKey;
@@ -50,15 +67,15 @@ public class SettingsManager {
         this.sharedKey = sharedKey;
     }
 
-    public Call<Settings> getInfo()  {
+    public Observable<Settings> getInfo()  {
         return WalletApi.fetchSettings(METHOD_GET_INFO, guid, sharedKey);
     }
 
-    public Call<ResponseBody> updateSetting(String method, String payload) {
+    public Observable<ResponseBody> updateSetting(String method, String payload) {
         return WalletApi.updateSettings(method, guid, sharedKey, payload);
     }
 
-    public Call<ResponseBody> updateSetting(String method, int payload) {
+    public Observable<ResponseBody> updateSetting(String method, int payload) {
         return WalletApi.updateSettings(method, guid, sharedKey, payload+"");
     }
 }

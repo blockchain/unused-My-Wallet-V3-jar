@@ -4,7 +4,10 @@ import info.blockchain.wallet.api.data.FeesList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
+
 import java.util.ArrayList;
+
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -25,7 +28,7 @@ public interface WalletEndpoints {
         @Query("api_code") String apiCode);
 
     @POST("wallet")
-    Call<Settings> fetchSettings(
+    Observable<Settings> fetchSettings(
         @Query("method") String method,
         @Query("guid") String guid,
         @Query("sharedKey") String sharedKey,
@@ -33,7 +36,7 @@ public interface WalletEndpoints {
         @Query("api_code") String apiCode);
 
     @POST("wallet")
-    Call<ResponseBody> updateSettings(
+    Observable<ResponseBody> updateSettings(
         @Query("method") String method,
         @Query("guid") String guid,
         @Query("sharedKey") String sharedKey,

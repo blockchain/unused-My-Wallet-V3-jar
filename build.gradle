@@ -75,6 +75,7 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.5'
     compile group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.2.0'
     compile group: 'com.squareup.retrofit2', name: 'converter-jackson', version: '2.2.0'
+    compile group: 'com.squareup.retrofit2', name: 'adapter-rxjava2', version: '2.2.0'
     compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '3.6.0'
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.6.0'
     compile group: 'com.squareup.okio', name: 'okio', version: '1.11.0'

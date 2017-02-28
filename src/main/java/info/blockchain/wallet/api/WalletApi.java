@@ -6,16 +6,21 @@ import info.blockchain.wallet.api.data.FeesList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
+
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.spongycastle.util.encoders.Hex;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Nullable;
+
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 
 public class WalletApi {
@@ -172,13 +177,13 @@ public class WalletApi {
         return getBaseApiInstance().getAllMerchants();
     }
 
-    public static Call<Settings> fetchSettings(String method, String guid, String sharedKey){
+    public static Observable<Settings> fetchSettings(String method, String guid, String sharedKey){
         return getServerApiInstance().fetchSettings(method,
             guid, sharedKey,"plain",
             BlockchainFramework.getApiCode());
     }
 
-    public static Call<ResponseBody> updateSettings(String method, String guid, String sharedKey, String payload){
+    public static Observable<ResponseBody> updateSettings(String method, String guid, String sharedKey, String payload){
         return getServerApiInstance().updateSettings(method,
             guid, sharedKey,
             payload,
