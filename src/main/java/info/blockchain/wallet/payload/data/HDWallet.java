@@ -240,7 +240,7 @@ public class HDWallet {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public ArrayList<String> getActive() {
+    public List<String> getActive() {
 
         ArrayList<String> xpubs = new ArrayList<>();
 
@@ -439,7 +439,15 @@ public class HDWallet {
         return keys;
     }
 
-    private HDAccount getHDAccountFromAccountBody(Account accountBody) throws HDWalletException {
+    public HDAccount getHDAccountFromAccountBody(Account accountBody) throws HDWalletException {
+
+        if(HD == null) {
+            try {
+                instantiateBip44Wallet();
+            } catch (Exception e) {
+                throw new HDWalletException(e);
+            }
+        }
 
         if(HD == null) {
             throw new HDWalletException("HD wallet not instantiated");

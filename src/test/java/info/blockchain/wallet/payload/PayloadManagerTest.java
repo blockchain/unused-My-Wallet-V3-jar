@@ -542,10 +542,10 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().addAccount(0, "Some Label", null);
+        PayloadManager.getInstance().addAccount("Some Label", null);
         Assert.assertEquals(2, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().addAccount(0, "Some Label", null);
+        PayloadManager.getInstance().addAccount("Some Label", null);
         Assert.assertEquals(3, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
 
     }
