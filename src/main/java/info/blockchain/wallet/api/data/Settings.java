@@ -94,6 +94,9 @@ public class Settings {
     @JsonProperty("email")
     private String email;
 
+    @JsonProperty("sms_number")
+    private String smsNumber;
+
     @JsonProperty("sms_verified")
     private int smsVerified;
 
@@ -167,6 +170,10 @@ public class Settings {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getSmsNumber() {
+        return smsNumber;
     }
 
     public boolean isSmsVerified() {
