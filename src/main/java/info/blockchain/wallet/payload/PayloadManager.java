@@ -25,15 +25,7 @@ import info.blockchain.wallet.payload.data.WalletBase;
 import info.blockchain.wallet.payload.data.WalletWrapper;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.Tools;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import okhttp3.ResponseBody;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
@@ -42,6 +34,17 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -79,6 +82,10 @@ public class PayloadManager {
 
     public String getTempPassword() {
         return tempPassword;
+    }
+
+    public void setTempPassword(String tempPassword) {
+        this.tempPassword = tempPassword;
     }
 
     public MetadataNodeFactory getMetadataNodeFactory() {
