@@ -361,6 +361,24 @@ public class PayloadManager {
     }
 
     /**
+     * Inserts a {@link LegacyAddress} into the user's {@link Wallet} and then syncs the wallet with
+     * the server. Will remove/revert the LegacyAddress if the sync was unsuccessful.
+     *
+     * @param legacyAddress The {@link LegacyAddress} to be added
+     * @throws Exception Possible if saving the Wallet fails
+     */
+    public void addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
+        List<LegacyAddress> currentAddresses = walletBaseBody.getWalletBody().getLegacyAddressList();
+        walletBaseBody.getWalletBody().getLegacyAddressList().add(legacyAddress);
+
+        if (!save()) {
+            // Revert on sync fail
+            walletBaseBody.getWalletBody().setLegacyAddressList(currentAddresses);
+            throw new Exception("Failed to save added Legacy Address.");
+        }
+    }
+
+    /**
      * Sets private key to existing matching legacy address. If no match is found the key will be added
      * to the wallet non the less.
      * @param key ECKey for existing legacy address
