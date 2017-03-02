@@ -91,6 +91,10 @@ public class PayloadManager {
         return password;
     }
 
+    public void setTempPassword(String password) {
+        this.password = password;
+    }
+
     public MetadataNodeFactory getMetadataNodeFactory() {
         return metadataNodeFactory;
     }
@@ -372,6 +376,24 @@ public class PayloadManager {
         }
 
         return success;
+    }
+
+    /**
+     * Inserts a {@link LegacyAddress} into the user's {@link Wallet} and then syncs the wallet with
+     * the server. Will remove/revert the LegacyAddress if the sync was unsuccessful.
+     *
+     * @param legacyAddress The {@link LegacyAddress} to be added
+     * @throws Exception Possible if saving the Wallet fails
+     */
+    public void addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
+        List<LegacyAddress> currentAddresses = walletBaseBody.getWalletBody().getLegacyAddressList();
+        walletBaseBody.getWalletBody().getLegacyAddressList().add(legacyAddress);
+
+        if (!save()) {
+            // Revert on sync fail
+            walletBaseBody.getWalletBody().setLegacyAddressList(currentAddresses);
+            throw new Exception("Failed to save added Legacy Address.");
+        }
     }
 
     /**
