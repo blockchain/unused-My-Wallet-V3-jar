@@ -1,6 +1,8 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.MockedResponseTest;
+import info.blockchain.api.data.MultiAddress;
+import info.blockchain.api.data.Transaction.Direction;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
@@ -34,7 +36,12 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void create() throws Exception {
 
-        mockInterceptor.setResponseString("MyWallet save successful.");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        //Responses for multi address, 'All' and individual xpub
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
@@ -63,8 +70,9 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         String mnemonic = "all all all all all all all all all all all all";
 
-        LinkedList<String> xpubs = new LinkedList<>();
-        xpubs.add("{\n"
+        LinkedList<String> responseList = new LinkedList<>();
+        //Responses for checking how many accounts to recover
+        responseList.add("{\n"
             + "    \"xpub6BiVtCpG9fQQ77Qr7WArXSG3yWYm2bkRYpoSYtRkVEAk5nrcULBG8AeRYMMKVUXAsNeXdR7TGuL6SkUc4RF2YC7X4afLyZrT9NrrUFyotkH\": {\n"
             + "        \"final_balance\": 0,\n"
             + "        \"n_tx\": 23,\n"
@@ -91,7 +99,7 @@ public class PayloadManagerTest extends MockedResponseTest {
             + "        \"total_received\": 15137242\n"
             + "    }\n"
             + "}");
-        xpubs.add("{\n"
+        responseList.add("{\n"
             + "    \"xpub6BiVtCpG9fQQGq7bXBjjf5zyguEXHrmxDu4t7pdTFUtDWD5epi4ecKmWBTMHvPQtRmQnby8gET7ArTzxjL4SNYdD2RYSdjk7fwYeEDMzkce\": {\n"
             + "        \"final_balance\": 0,\n"
             + "        \"n_tx\": 2,\n"
@@ -143,7 +151,7 @@ public class PayloadManagerTest extends MockedResponseTest {
             + "        \"total_received\": 0\n"
             + "    }\n"
             + "}");
-        xpubs.add("{\n"
+        responseList.add("{\n"
             + "    \"xpub6BiVtCpG9fQR4Bp1D4k4P1a48uHPJPtHmnHjrvwpZgg47sJfg9e5wqjEVZs1YdhR3EsfWo16qPcA7fsk6Hzr5e8VAjNbgmVy67DGkoGJfv4\": {\n"
             + "        \"final_balance\": 0,\n"
             + "        \"n_tx\": 0,\n"
@@ -245,8 +253,23 @@ public class PayloadManagerTest extends MockedResponseTest {
             + "        \"total_received\": 0\n"
             + "    }\n"
             + "}");
-        xpubs.add("HDWallet successfully synced with server");
-        mockInterceptor.setResponseStringList(xpubs);
+        responseList.add("HDWallet successfully synced with server");
+
+        //responses for initializing multi address
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+
+        mockInterceptor.setResponseStringList(responseList);
 
         PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
@@ -497,7 +520,11 @@ public class PayloadManagerTest extends MockedResponseTest {
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
             Charset.forName("utf-8"));
 
-        mockInterceptor.setResponseString(walletBase);
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83125.51953450,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S. dollar\",\"conversion\":83125.51953450,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().initializeAndDecrypt("any", "any", "SomeTestPassword");
     }
 
@@ -522,7 +549,11 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void save() throws Exception {
 
-        mockInterceptor.setResponseString("MyWallet save successful.");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83125.51953450,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S. dollar\",\"conversion\":83125.51953450,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
 
         mockInterceptor.setResponseString("MyWallet save successful.");
@@ -537,7 +568,11 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void addAccount() throws Exception {
 
-        mockInterceptor.setResponseString("MyWallet save successful.");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83125.51953450,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S. dollar\",\"conversion\":83125.51953450,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
@@ -553,12 +588,16 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void addLegacyAddress() throws Exception {
 
-        mockInterceptor.setResponseString("MyWallet save successful.");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83125.51953450,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S. dollar\",\"conversion\":83125.51953450,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
-        LinkedList<String> responseList = new LinkedList<>();
+        responseList = new LinkedList<>();
         responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         responseList.add("MyWallet save successful");
         mockInterceptor.setResponseStringList(responseList);
@@ -577,12 +616,16 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void setKeyForLegacyAddress() throws Exception {
 
-        mockInterceptor.setResponseString("MyWallet save successful.");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83125.51953450,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S. dollar\",\"conversion\":83125.51953450,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
-        LinkedList<String> responseList = new LinkedList<>();
+        responseList = new LinkedList<>();
         responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         responseList.add("MyWallet save successful");
         mockInterceptor.setResponseStringList(responseList);
@@ -604,12 +647,16 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void setKeyForLegacyAddress_NoSuchAddressException() throws Exception {
 
-        mockInterceptor.setResponseString("MyWallet save successful.");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83125.51953450,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S. dollar\",\"conversion\":83125.51953450,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
-        LinkedList<String> responseList = new LinkedList<>();
+        responseList = new LinkedList<>();
         responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         responseList.add("MyWallet save successful");
         mockInterceptor.setResponseStringList(responseList);
@@ -638,12 +685,16 @@ public class PayloadManagerTest extends MockedResponseTest {
     @Test
     public void setKeyForLegacyAddress_saveFail_revert() throws Exception {
 
-        mockInterceptor.setResponseString("MyWallet save successful.");
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83193.98341112,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S.dollar\",\"conversion\":83193.98341112,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        responseList.add("{\"recommend_include_fee\":true,\"sharedcoin_endpoint\":\"https://api.sharedcoin.com\",\"info\":{\"nconnected\":199,\"conversion\":83125.51953450,\"symbol_local\":{\"code\":\"USD\",\"symbol\":\"$\",\"name\":\"U.S. dollar\",\"conversion\":83125.51953450,\"symbolAppearsAfter\":false,\"local\":true},\"symbol_btc\":{\"code\":\"BTC\",\"symbol\":\"BTC\",\"name\":\"Bitcoin\",\"conversion\":100000000.00000000,\"symbolAppearsAfter\":true,\"local\":false},\"latest_block\":{\"block_index\":1467925,\"hash\":\"0000000000000000009f45dca81e45f31f85f0d62ead9f730e2c68049c0b2065\",\"height\":455266,\"time\":1488367871}},\"wallet\":{\"n_tx\":0,\"n_tx_filtered\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0},\"addresses\":[{\"address\":\"xpub6BsQU7jwGZa3rX4ZJ783pBQCRmA7vHxYmvrEbxnMBNojxT8a8dpAKWdUdXhAR9rd2sXU6WFhYtX7oijyxEkyWZvGN6SCwo562houBR3BcXS\",\"n_tx\":0,\"total_received\":0,\"total_sent\":0,\"final_balance\":0,\"gap_limit\":20,\"change_index\":0,\"account_index\":0}],\"txs\":[]}");
+        mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
         Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
-        LinkedList<String> responseList = new LinkedList<>();
+        responseList = new LinkedList<>();
         responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         responseList.add("MyWallet save successful");
         mockInterceptor.setResponseStringList(responseList);
@@ -663,5 +714,152 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         //Ensure private key reverted on save fail
         Assert.assertNull(legacyAddressBody.getPrivateKey());
+    }
+
+    @Test
+    public void getMultiAddress() throws Exception {
+
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_4.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m1.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m2.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m3.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m4.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m5.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m6.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m7.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m8.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m9.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m10.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m11.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m12.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m13.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m14.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m15.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m16.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m17.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m18.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m19.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m20.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_4_m21.txt").toURI())), Charset.forName("utf-8")));
+
+        mockInterceptor.setResponseStringList(responseList);
+
+        PayloadManager.getInstance().initializeAndDecrypt("04ada428-151b-4fa8-95b5-10e4447fd1c1", "e1062383-14f4-4e9c-818e-d9cce739b57f", "MyTestWallet");
+
+        //'All' accounts balance and transactions
+        MultiAddress all = PayloadManager.getInstance()
+            .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL);
+        Assert.assertEquals(235077,all.getWallet().getFinalBalance().longValue());
+        Assert.assertEquals(294,all.getWallet().getNTx());
+
+        MultiAddress account1 = PayloadManager.getInstance()
+            .getMultiAddress("xpub6CRaPB9182vBdT99Aj435Jy9hdqp6NPQUvf6xfz2ghScwNf4jwX6T5BXrJGknn3VorS3RAopzxhWfHKdcaHxSoYq3XH4kfByKQ9p9Zjbz4p");
+        Assert.assertEquals(0,account1.getAddresses().get(0).getFinalBalance().longValue());
+        Assert.assertEquals(2,account1.getAddresses().get(0).getNTx());
+
+        MultiAddress account2 = PayloadManager.getInstance()
+            .getMultiAddress("xpub6CRaPB9182vBgWDgyqx8DFJwMQ3gbrDW2gk3puMPcqmBxE84pNjoaYqFqmK7gGVzUPxwuHnE4rXsoboQTnvH5utSAtSw9GBnJb6g7WhzQ1z");
+        Assert.assertEquals(0,account2.getAddresses().get(0).getFinalBalance().longValue());
+        Assert.assertEquals(0,account2.getAddresses().get(0).getNTx());
+
+        MultiAddress address1 = PayloadManager.getInstance()
+            .getMultiAddress("1Nqz4vjxdk4sy6uGNqnXaC49QMt2aDNt2Q");
+        Assert.assertEquals(0,address1.getAddresses().get(0).getFinalBalance().longValue());
+        Assert.assertEquals(144,address1.getAddresses().get(0).getNTx());
+
+        MultiAddress address2 = PayloadManager.getInstance()
+            .getMultiAddress("18HuxnpyuhAUYiCSSiLhv5589ebJuSSU5A");
+        Assert.assertEquals(0,address2.getAddresses().get(0).getFinalBalance().longValue());
+        Assert.assertEquals(44,address2.getAddresses().get(0).getNTx());
+
+        MultiAddress address4 = PayloadManager.getInstance()
+            .getMultiAddress("15CuVHzfZsPHpfQ1GJFzZ93LGe7ZrHdBb8");
+        Assert.assertEquals(85100,address4.getAddresses().get(0).getFinalBalance().longValue());
+        Assert.assertEquals(18,address4.getAddresses().get(0).getNTx());
+
+        MultiAddress address5 = PayloadManager.getInstance()
+            .getMultiAddress("19hxgds7jLo68q4qXLHtTP2qWFxZBKYNfA");
+        Assert.assertEquals(86977,address5.getAddresses().get(0).getFinalBalance().longValue());
+        Assert.assertEquals(24,address5.getAddresses().get(0).getNTx());
+
+        Assert.assertEquals(51979, address5.getTxs().get(0).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(0).getDirection());
+
+        Assert.assertEquals(-21000, address5.getTxs().get(1).getResult().longValue());
+        Assert.assertEquals(Direction.SENT, address5.getTxs().get(1).getDirection());
+
+        Assert.assertEquals(-34094, address5.getTxs().get(2).getResult().longValue());
+        Assert.assertEquals(Direction.SENT, address5.getTxs().get(2).getDirection());
+
+        Assert.assertEquals(-112206, address5.getTxs().get(3).getResult().longValue());
+        Assert.assertEquals(Direction.SENT, address5.getTxs().get(3).getDirection());
+
+        Assert.assertEquals(546, address5.getTxs().get(4).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(4).getDirection());
+
+        Assert.assertEquals(546, address5.getTxs().get(5).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(5).getDirection());
+
+        Assert.assertEquals(112206, address5.getTxs().get(6).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(6).getDirection());
+
+        Assert.assertEquals(2000, address5.getTxs().get(7).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(7).getDirection());
+
+        Assert.assertEquals(3000, address5.getTxs().get(8).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(8).getDirection());
+
+        Assert.assertEquals(4000, address5.getTxs().get(9).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(9).getDirection());
+
+        Assert.assertEquals(5000, address5.getTxs().get(10).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(10).getDirection());
+
+        Assert.assertEquals(-251741, address5.getTxs().get(11).getResult().longValue());
+        Assert.assertEquals(Direction.SENT, address5.getTxs().get(11).getDirection());
+
+        Assert.assertEquals(49440, address5.getTxs().get(12).getResult().longValue());
+        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(12).getDirection());
+
+
+        //Transfers
+//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(13).getDirection());
+//        Assert.assertEquals(202301, address5.getTxs().get(13).getResult().longValue());
+//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(13).getDirection());
+//
+//        Assert.assertEquals(22101, address5.getTxs().get(14).getResult().longValue());
+//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(14).getDirection());
+//
+//        Assert.assertEquals(23457, address5.getTxs().get(15).getResult().longValue());
+//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(15).getDirection());
+//
+//        Assert.assertEquals(5027, address5.getTxs().get(16).getResult().longValue());
+//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(16).getDirection());
+
     }
 }

@@ -8,16 +8,21 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +36,7 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
+import retrofit2.Response;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -539,5 +545,44 @@ public class Wallet {
         options.setPbkdf2Iterations(iterations);
 
         return iterations;
+    }
+
+    //Assume 1 hdWallet
+    public MultiAddress getWalletBalanceAndTransactions(int limit, int offset)
+        throws IOException, ApiException {
+        List<String> all = getLegacyAddressStringList();
+
+        if(getHdWallets() != null) {
+            List<String> xpubs = getHdWallets().get(0).getActive();
+            all.addAll(xpubs);
+        }
+
+        Response<MultiAddress> call = MultiAddressFactory
+            .getMultiAddress(all, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+
+        if(call.isSuccessful()) {
+            return call.body();
+        } else {
+            throw new ApiException(call.errorBody().string());
+        }
+    }
+
+    public MultiAddress getAccountBalanceAndTransactions(String xpub, int limit, int offset)
+        throws IOException, ApiException {
+        List<String> all = getLegacyAddressStringList();
+
+        if(getHdWallets() != null) {
+            List<String> xpubs = getHdWallets().get(0).getActive();
+            all.addAll(xpubs);
+        }
+
+        Response<MultiAddress> call = MultiAddressFactory
+            .getMultiAddress(all, xpub, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+
+        if(call.isSuccessful()) {
+            return call.body();
+        } else {
+            throw new ApiException(call.errorBody().string());
+        }
     }
 }

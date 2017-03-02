@@ -2,10 +2,12 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.MultiAddress;
+import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.exceptions.AccountLockedException;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
@@ -30,7 +32,12 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import okhttp3.ResponseBody;
@@ -51,8 +58,11 @@ public class PayloadManager {
     private final int HD_WALLET_INDEX = 0;
 
     private WalletBase walletBaseBody;
-    private String tempPassword; //Stored to encrypt before saving
+    private String password;
     private MetadataNodeFactory metadataNodeFactory;
+
+    private HashMap<String, MultiAddress> multiAddressMap;
+    public static final String MULTI_ADDRESS_ALL = "all";
 
     private static PayloadManager instance = new PayloadManager();
 
@@ -66,7 +76,7 @@ public class PayloadManager {
 
     public void wipe() {
         walletBaseBody = null;
-        tempPassword = null;
+        password = null;
     }
 
     public Wallet getPayload() {
@@ -78,7 +88,7 @@ public class PayloadManager {
     }
 
     public String getTempPassword() {
-        return tempPassword;
+        return password;
     }
 
     public MetadataNodeFactory getMetadataNodeFactory() {
@@ -99,11 +109,13 @@ public class PayloadManager {
     public Wallet create(@Nonnull String defaultAccountName, @Nonnull String email, @Nonnull String password)
         throws Exception {
 
-        tempPassword = password;
+        this.password = password;
         walletBaseBody = new WalletBase();
         walletBaseBody.setWalletBody(new Wallet(defaultAccountName));
 
         saveNewWallet(email);
+
+        instantiateMultiAddress();
 
         return walletBaseBody.getWalletBody();
     }
@@ -118,7 +130,7 @@ public class PayloadManager {
     public Wallet recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
         @Nonnull String email, @Nonnull String password) throws Exception {
 
-        tempPassword = password;
+        this.password = password;
         walletBaseBody = new WalletBase();
 
         Wallet walletBody = new Wallet();
@@ -128,6 +140,8 @@ public class PayloadManager {
         walletBaseBody.setWalletBody(walletBody);
 
         saveNewWallet(email);
+
+        instantiateMultiAddress();
 
         return walletBaseBody.getWalletBody();
     }
@@ -151,6 +165,8 @@ public class PayloadManager {
             walletBaseBody.getWalletBody().setHdWallets(null);
         }
 
+        instantiateMultiAddress();
+
         return success;
     }
 
@@ -172,16 +188,17 @@ public class PayloadManager {
      */
     public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull String password)
         throws IOException, InvalidCredentialsException, AccountLockedException, ServerConnectionException,
-        DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
+        DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException,
+        ApiException {
 
-        tempPassword = password;
+        this.password = password;
 
         Call<ResponseBody> call = WalletApi.fetchWalletData(guid, sharedKey);
         Response<ResponseBody> exe = call.execute();
 
         if(exe.isSuccessful()){
             walletBaseBody = WalletBase.fromJson(exe.body().string());
-            walletBaseBody.decryptPayload(tempPassword);
+            walletBaseBody.decryptPayload(this.password);
         } else {
             String errorMessage = exe.errorBody().string();
             if (errorMessage != null && errorMessage.contains("Unknown Wallet Identifier")) {
@@ -192,6 +209,8 @@ public class PayloadManager {
                 throw new ServerConnectionException(errorMessage);
             }
         }
+
+        instantiateMultiAddress();
     }
 
     public void initializeAndDecryptFromQR(@Nonnull String qrData) throws Exception {
@@ -216,6 +235,8 @@ public class PayloadManager {
         } else {
             throw new ServerConnectionException(exe.errorBody().string());
         }
+
+        instantiateMultiAddress();
     }
 
     private void validateSave() throws HDWalletException {
@@ -232,7 +253,7 @@ public class PayloadManager {
         validateSave();
 
         //Encrypt and wrap payload
-        Pair pair = walletBaseBody.encryptAndWrapPayload(tempPassword);
+        Pair pair = walletBaseBody.encryptAndWrapPayload(password);
         WalletWrapper payloadWrapper = (WalletWrapper) pair.getRight();
         String newPayloadChecksum = (String) pair.getLeft();
 
@@ -270,7 +291,7 @@ public class PayloadManager {
         validateSave();
 
         //Encrypt and wrap payload
-        Pair pair = walletBaseBody.encryptAndWrapPayload(tempPassword);
+        Pair pair = walletBaseBody.encryptAndWrapPayload(password);
         WalletWrapper payloadWrapper = (WalletWrapper) pair.getRight();
         String newPayloadChecksum = (String) pair.getLeft();
         String oldPayloadChecksum = walletBaseBody.getPayloadChecksum();
@@ -518,7 +539,7 @@ public class PayloadManager {
     public boolean loadNodes() throws Exception {
         if (metadataNodeFactory == null) {
             metadataNodeFactory = new MetadataNodeFactory(walletBaseBody.getWalletBody().getGuid(),
-                walletBaseBody.getWalletBody().getSharedKey(), tempPassword);
+                walletBaseBody.getWalletBody().getSharedKey(), password);
         }
         return metadataNodeFactory.isMetadataUsable();
     }
@@ -541,5 +562,99 @@ public class PayloadManager {
         if (!success) {
             throw new MetadataException("All Metadata nodes might not have saved.");
         }
+    }
+
+    //********************************************************************************************//
+    //*                                     Multi_address                                        *//
+    //********************************************************************************************//
+
+    /**
+     * Loads the first 50 txs for all accounts and legacy addresses.
+     * Must happen on wallet initialization.
+     * @throws IOException
+     * @throws ApiException
+     */
+    private void instantiateMultiAddress() throws IOException, ApiException {
+
+        LinkedHashSet<String> all = new LinkedHashSet<>();
+        if(getPayload().getHdWallets() != null) {
+            List<String> xpubs = getPayload().getHdWallets().get(0).getActive();
+            all.addAll(xpubs);
+        }
+        all.addAll(getPayload().getLegacyAddressStringList());
+
+        MultiAddress multiAddress = getPayload()
+            .getWalletBalanceAndTransactions(50, 0);
+
+        multiAddressMap = new HashMap<>();
+        MultiAddressFactory.sort(multiAddress.getTxs());
+        MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+        multiAddressMap.put(MULTI_ADDRESS_ALL, multiAddress);
+
+        List<Account> accounts = getPayload().getHdWallets().get(HD_WALLET_INDEX).getAccounts();
+        for (Account account : accounts) {
+
+            String xpub = account.getXpub();
+
+            multiAddress = getPayload()
+                .getAccountBalanceAndTransactions(xpub, 50, 0);
+
+            MultiAddressFactory.sort(multiAddress.getTxs());
+            MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+            multiAddressMap.put(xpub, multiAddress);
+        }
+
+        List<LegacyAddress> legacyAddressList = getPayload()
+            .getLegacyAddressList(LegacyAddress.NORMAL_ADDRESS);
+
+        for(LegacyAddress legacyAddress : legacyAddressList) {
+
+            String address = legacyAddress.getAddress();
+
+            multiAddress = getPayload()
+                .getAccountBalanceAndTransactions(address, 50, 0);
+
+            MultiAddressFactory.sort(multiAddress.getTxs());
+            MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+            multiAddressMap.put(address, multiAddress);
+        }
+    }
+
+    public void updateMultiAddress(String context, int limit, int offset)
+        throws IOException, ApiException {
+
+        LinkedHashSet<String> all = new LinkedHashSet<>();
+        if(getPayload().getHdWallets() != null) {
+            List<String> xpubs = getPayload().getHdWallets().get(0).getActive();
+            all.addAll(xpubs);
+        }
+        all.addAll(getPayload().getLegacyAddressStringList());
+
+        MultiAddress multiAddress;
+
+        if(context.equals(MULTI_ADDRESS_ALL)) {
+            multiAddress = getPayload()
+                .getWalletBalanceAndTransactions(limit, offset);
+        } else {
+            multiAddress = getPayload()
+                .getAccountBalanceAndTransactions(context, limit, offset);
+        }
+
+        ArrayList<Transaction> txs = multiAddressMap.get(context).getTxs();
+        txs.addAll(multiAddress.getTxs());
+
+        //Remove duplicates
+        Set<Transaction> hs = new HashSet<>();
+        hs.addAll(txs);
+        txs.clear();
+        txs.addAll(hs);
+
+        //Sort
+        MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+        MultiAddressFactory.sort(multiAddress.getTxs());
+    }
+
+    public MultiAddress getMultiAddress(String context) {
+        return multiAddressMap.get(context);
     }
 }
