@@ -553,7 +553,7 @@ public class PayloadManager {
 
         MultiAddress multiAddress = multiAddressMap.get(address);
 
-        if(multiAddress != null) {
+        if(multiAddress != null && multiAddress.getWallet() != null) {
             balance = multiAddress.getWallet().getFinalBalance();
         }
 
@@ -561,27 +561,31 @@ public class PayloadManager {
     }
 
     public BigInteger getWalletBalance() {
-        BigInteger balance = BigInteger.ZERO;
-
-        MultiAddress multiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL);
-
-        if(multiAddress != null) {
-            balance = multiAddress.getWallet().getFinalBalance();
-        }
-
-        return balance;
+        return getAddressBalance(MULTI_ADDRESS_ALL);
     }
 
     public BigInteger getImportedAddressesBalance() {
-        BigInteger balance = BigInteger.ZERO;
+        return getAddressBalance(MULTI_ADDRESS_ALL_LEGACY);
+    }
 
-        MultiAddress multiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL_LEGACY);
+    public List<Transaction> getWalletTransactions() {
+        return getAddressesTransactions(MULTI_ADDRESS_ALL);
+    }
 
-        if(multiAddress != null) {
-            balance = multiAddress.getWallet().getFinalBalance();
+    public List<Transaction> getImportedAddressesTransactions() {
+        return getAddressesTransactions(MULTI_ADDRESS_ALL_LEGACY);
+    }
+
+    public List<Transaction> getAddressesTransactions(String address) {
+        List<Transaction> txs = new ArrayList<>();
+
+        MultiAddress multiAddress = multiAddressMap.get(address);
+
+        if(multiAddress != null && multiAddress.getTxs() != null) {
+            txs.addAll(multiAddress.getTxs());
         }
 
-        return balance;
+        return txs;
     }
 
     /**
@@ -691,9 +695,9 @@ public class PayloadManager {
 
         LinkedHashSet<String> all = getAllAccountsAndAddresses();
 
+        //Wallet total balance
         MultiAddress multiAddress = getPayload()
             .getWalletBalanceAndTransactions(50, 0);
-
         multiAddressMap = new HashMap<>();
         MultiAddressFactory.sort(multiAddress.getTxs());
         MultiAddressFactory
@@ -701,6 +705,7 @@ public class PayloadManager {
                 multiAddress);
         multiAddressMap.put(MULTI_ADDRESS_ALL, multiAddress);
 
+        //Individual account balances
         List<Account> accounts = getPayload().getHdWallets().get(HD_WALLET_INDEX).getAccounts();
         for (Account account : accounts) {
 
@@ -716,6 +721,7 @@ public class PayloadManager {
             multiAddressMap.put(xpub, multiAddress);
         }
 
+        //Individual address balances
         List<LegacyAddress> legacyAddressList = getPayload()
             .getLegacyAddressList(LegacyAddress.NORMAL_ADDRESS);
 
@@ -732,6 +738,15 @@ public class PayloadManager {
                     multiAddress);
             multiAddressMap.put(address, multiAddress);
         }
+
+        //Imported addresses balances
+        multiAddress = getPayload()
+            .getLegacyBalanceAndTransactions(50, 0);
+        MultiAddressFactory.sort(multiAddress.getTxs());
+        MultiAddressFactory
+            .flagTransactionDirection(all, getPayload().getWatchOnlyAddressStringList(),
+                multiAddress);
+        multiAddressMap.put(MULTI_ADDRESS_ALL_LEGACY, multiAddress);
     }
 
     /**

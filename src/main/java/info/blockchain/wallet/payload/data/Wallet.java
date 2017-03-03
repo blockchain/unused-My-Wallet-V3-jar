@@ -592,7 +592,7 @@ public class Wallet {
         Response<MultiAddress> call = MultiAddressFactory
             .getMultiAddress(all, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
 
-        if(call.isSuccessful()) {
+        if (call.isSuccessful()) {
             return call.body();
         } else {
             throw new ApiException(call.errorBody().string());

@@ -41,6 +41,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         //Responses for multi address, 'All' and individual xpub
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
 
@@ -82,6 +83,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         //responses for initializing multi address
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
@@ -172,6 +174,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add(walletBase);
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().initializeAndDecrypt("any", "any", "SomeTestPassword");
     }
@@ -201,6 +204,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("MyWallet save successful.");
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
 
@@ -220,6 +224,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("MyWallet save successful.");
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
@@ -230,12 +235,14 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().addAccount("Some Label", null);
         Assert.assertEquals(2, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
 
         responseList = new LinkedList<>();
         responseList.add("MyWallet save successful");
+        responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
@@ -253,6 +260,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("MyWallet save successful.");
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
@@ -264,6 +272,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().addLegacyAddress("Some Label", null);
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
@@ -271,6 +280,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList = new LinkedList<>();
         responseList.add("3e2b33d63ba45320f42d2b1de6d7ebd3ea810c35348927fd34424fe9bc53c07a");
         responseList.add("MyWallet save successful");
+        responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
@@ -288,6 +298,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("MyWallet save successful.");
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
@@ -296,6 +307,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList = new LinkedList<>();
         responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         responseList.add("MyWallet save successful");
+        responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
@@ -322,6 +334,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("MyWallet save successful.");
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
@@ -330,6 +343,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList = new LinkedList<>();
         responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         responseList.add("MyWallet save successful");
+        responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
@@ -345,6 +359,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         responseList = new LinkedList<>();
         responseList.add("MyWallet save successful");
+        responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
@@ -369,6 +384,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("MyWallet save successful.");
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
@@ -377,6 +393,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList = new LinkedList<>();
         responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
         responseList.add("MyWallet save successful");
+        responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
         responseList.add("{}");
@@ -449,6 +466,7 @@ public class PayloadManagerTest extends MockedResponseTest {
             "multiaddress/wallet_v3_4_m20.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
             "multiaddress/wallet_v3_4_m21.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add("{}");
 
         mockInterceptor.setResponseStringList(responseList);
 
@@ -544,5 +562,47 @@ public class PayloadManagerTest extends MockedResponseTest {
 //        Assert.assertEquals(5027, address5.getTxs().get(16).getResult().longValue());
 //        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(16).getDirection());
 
+    }
+
+    @Test
+    public void getMultiAddress2() throws Exception {
+
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_5.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m2.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m3.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m4.txt").toURI())), Charset.forName("utf-8")));
+        mockInterceptor.setResponseStringList(responseList);
+
+        PayloadManager.getInstance().initializeAndDecrypt("06f6fa9c-d0fe-403d-815a-111ee26888e2", "4750d125-5344-4b79-9cf9-6e3c97bc9523", "MyTestWallet");
+
+        Assert.assertEquals(164379, PayloadManager.getInstance().getWalletBalance().longValue());
+        Assert.assertEquals(86977, PayloadManager.getInstance().getImportedAddressesBalance().longValue());
+
+        Assert.assertEquals(77402, PayloadManager.getInstance()
+            .getAddressBalance("xpub6CeAwhuTvFTiL8oskqNsFrQ1SHdw8cPj6DkiHCVgKstCBEn7FAyPMUELmH4UUGhXJHLZV5oCrd7Cyi4R1yHw4VEQcW1kskR4Yb9RjsgwRPU")
+            .longValue());
+        Assert.assertEquals(86977, PayloadManager.getInstance()
+            .getAddressBalance("19hxgds7jLo68q4qXLHtTP2qWFxZBKYNfA")
+            .longValue());
+
+
+        Assert.assertEquals(25, PayloadManager.getInstance().getWalletTransactions().size());
+        Assert.assertEquals(24, PayloadManager.getInstance().getImportedAddressesTransactions().size());
+
+        Assert.assertEquals(1, PayloadManager.getInstance()
+            .getMultiAddress("xpub6CeAwhuTvFTiL8oskqNsFrQ1SHdw8cPj6DkiHCVgKstCBEn7FAyPMUELmH4UUGhXJHLZV5oCrd7Cyi4R1yHw4VEQcW1kskR4Yb9RjsgwRPU")
+            .getTxs().size());
+        Assert.assertEquals(24, PayloadManager.getInstance()
+            .getMultiAddress("19hxgds7jLo68q4qXLHtTP2qWFxZBKYNfA")
+            .getTxs().size());
     }
 }

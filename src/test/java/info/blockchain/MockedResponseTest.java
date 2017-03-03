@@ -60,7 +60,7 @@ public abstract class MockedResponseTest {
 
         return new OkHttpClient.Builder()
             .addInterceptor(mockInterceptor)//Mock responses
-//            .addInterceptor(loggingInterceptor)//Extensive logging
+            .addInterceptor(loggingInterceptor)//Extensive logging
             .build();
     }
 
