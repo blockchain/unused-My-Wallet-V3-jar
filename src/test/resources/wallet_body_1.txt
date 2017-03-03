@@ -12,6 +12,7 @@
         "html5_notifications": false,
         "logout_time": 3600000
     },
+    "tag_names": [],
     "hd_wallets": [
         {
             "accounts": [

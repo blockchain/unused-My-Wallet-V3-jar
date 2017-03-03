@@ -23,8 +23,6 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import retrofit2.Call;
 
-// TODO: 17/02/2017  Order txs - TxMostRecentDateComparator
-// TODO: 22/02/2017  Not 100% yet
 public class MultiAddressFactory {
 
     public static Call<MultiAddress> getMultiAddress(List<String> addressList, String context,
@@ -132,8 +130,8 @@ public class MultiAddressFactory {
     }
 
     public static void sort(ArrayList<Transaction> txs) {
-        Collections
-            .sort(txs, new TxMostRecentDateComparator());
+        if(txs == null) return;
+        Collections.sort(txs, new TxMostRecentDateComparator());
     }
 
     public static class TxMostRecentDateComparator implements Comparator<Transaction> {
@@ -158,125 +156,148 @@ public class MultiAddressFactory {
         }
     }
 
-    public static void flagTransactionDirection(LinkedHashSet<String> ownAddressesAndXpubs, List<Transaction> txs) {
+    public static void flagTransactionDirection(LinkedHashSet<String> ownAddressesAndXpubs
+        , List<String> watchOnlyAddresses
+        , MultiAddress multiAddress) {
+
+        List<Transaction> txs = multiAddress.getTxs();
+        if(txs == null) return;
 
         List<String> own_hd_addresses = new ArrayList<>();
         List<String> moveToAddrArray = new ArrayList<>();
 
         for(Transaction tx : txs) {
 
+            //Set confirmations
+            long latestBlock = multiAddress.getInfo().getLatestBlock().getHeight();
+            long txBlockHeight = tx.getBlockHeight();
+            if(latestBlock > 0 && txBlockHeight > 0) {
+                tx.setConfirmations((int) ((latestBlock - txBlockHeight) + 1));
+            } else {
+                tx.setConfirmations(0);
+            }
+
+            //Set direction
             if(tx.getResult().signum() > 0) {
                 tx.setDirection(Direction.RECEIVED);
             } else {
                 tx.setDirection(Direction.SENT);
             }
 
-//            BigInteger moveAmount = BigInteger.ZERO;
-//            Direction direction = Direction.SENT;
-//
-//            ArrayList<String> ownInput = new ArrayList<>();
-//            ArrayList<String> ownOutput = new ArrayList<>();
-//
-//            ArrayList<BigInteger> amountListOut = new ArrayList<>();
-//            ArrayList<BigInteger> amountListIn = new ArrayList<>();
-//
-//            String inputAddr = null;
-//            long inputs_amount = 0L;
-//
-//            String outputAddr = null;
-//            long outputs_amount = 0L;
-//
-//            for(Input input : tx.getInputs()) {
-//
-//                Output prevOut = input.getPrevOut();
-//
-//                if(prevOut != null) {
-//
-//                    inputAddr = prevOut.getAddr();
-//
-//                    if (prevOut.getXpub() != null) {
-////                        Xpub xpubBody = prevOut.getXpub();
-//
-//                        if (prevOut.getAddr() != null && !own_hd_addresses
-//                            .contains(prevOut.getAddr())) {
-//                            own_hd_addresses.add(prevOut.getAddr());
-//                            direction = Direction.TRANSFERRED;
-//                        }
-//                    } else {
-//                        //(Legacy to HD transfer check)
-//                        //If contained in our own legacy addresses - it is a move
-//                        //We still need to calculate the move amount below
-//                        if (ownAddressesAndXpubs.contains(prevOut.getAddr())) {
-//                            direction = Direction.TRANSFERRED;
-//
-//                            BigInteger amountInput = prevOut.getValue();
-//                            if (ownInput.contains(inputAddr)) {
-//                                int index = ownInput.indexOf(inputAddr);
-//                                amountListIn.set(index, amountListIn.get(index).add(amountInput));
-//                            } else {
-//                                ownInput.add(inputAddr);
-//                                amountListIn.add(amountInput);
-//                            }
-//                        }
-//                    }
-//
-//                    inputs_amount += prevOut.getValue().longValue();
-//                }
-//            }
-//
-//            for(Output output :tx.getOut()) {
-//
-//                outputAddr = output.getAddr();
-//
-//                if(output.getXpub() != null) {
-//
-//                    Xpub xpubBody = output.getXpub();
-//
-//                    if(xpubBody.getPath().startsWith("M/0/")) {
-//                        moveAmount = moveAmount.add(output.getValue());
-//                        System.out.println("a) "+moveAmount);
-//                        moveToAddrArray.add(xpubBody.getM());
-//                    }
-//                    if (output.getAddr() != null
-//                        && !own_hd_addresses.contains(output.getAddr())) {
-//                        own_hd_addresses.add(output.getAddr());
-//                    }
-//
-//                } else {
-//
-//                    //If output is own legacy or hd address = move
-//                    if(output.getAddr() != null
-//                        && ownAddressesAndXpubs.contains(output.getAddr())
-//                        && own_hd_addresses.contains(output.getAddr())) {
-//
-//                        BigInteger amountOutput = output.getValue();
-//
-//                        //Don't add change coming back
-//                        if (inputAddr != null && !inputAddr.equals(outputAddr)) {
-//                            moveAmount = moveAmount.add(output.getValue());
-//
-//                            if (ownOutput.contains(outputAddr)) {
-//                                int index = ownOutput.indexOf(outputAddr);
-//                                amountListOut.set(index, amountListOut.get(index).add(amountOutput));
-//                            } else {
-//                                ownOutput.add(outputAddr);
-//                                amountListOut.add(amountOutput);
-//                            }
-//
-//                            moveToAddrArray.add(output.getAddr());
-//                            direction = Direction.TRANSFERRED;
-//                        }
-//
-//                    } else {
-//                        //one foreign address is enough to not call it move anymore
-//                        direction = Direction.SENT;
-//                    }
-//
-//                }
-//
-//                outputs_amount += output.getValue().longValue();
-//            }
-//
+            BigInteger moveAmount = BigInteger.ZERO;
+            Direction direction = Direction.SENT;
+
+            ArrayList<String> ownInput = new ArrayList<>();
+            ArrayList<String> ownOutput = new ArrayList<>();
+
+            ArrayList<BigInteger> amountListOut = new ArrayList<>();
+            ArrayList<BigInteger> amountListIn = new ArrayList<>();
+
+            String inputAddr = null;
+            long inputs_amount = 0L;
+
+            String outputAddr = null;
+            long outputs_amount = 0L;
+
+            for(Input input : tx.getInputs()) {
+
+                Output prevOut = input.getPrevOut();
+
+                if(prevOut != null) {
+
+                    inputAddr = prevOut.getAddr();
+
+                    if(watchOnlyAddresses.contains(inputAddr)) {
+                        tx.setWatchOnly(true);
+                    }
+
+                    if (prevOut.getXpub() != null) {
+//                        Xpub xpubBody = prevOut.getXpub();
+
+                        if (prevOut.getAddr() != null && !own_hd_addresses
+                            .contains(prevOut.getAddr())) {
+                            own_hd_addresses.add(prevOut.getAddr());
+                            direction = Direction.TRANSFERRED;
+                        }
+                    } else {
+                        //(Legacy to HD transfer check)
+                        //If contained in our own legacy addresses - it is a move
+                        //We still need to calculate the move amount below
+                        if (ownAddressesAndXpubs.contains(prevOut.getAddr())) {
+                            direction = Direction.TRANSFERRED;
+
+                            BigInteger amountInput = prevOut.getValue();
+                            if (ownInput.contains(inputAddr)) {
+                                int index = ownInput.indexOf(inputAddr);
+                                amountListIn.set(index, amountListIn.get(index).add(amountInput));
+                            } else {
+                                ownInput.add(inputAddr);
+                                amountListIn.add(amountInput);
+                            }
+                        }
+                    }
+
+                    inputs_amount += prevOut.getValue().longValue();
+                }
+            }
+
+            for(Output output :tx.getOut()) {
+
+                outputAddr = output.getAddr();
+
+                if(watchOnlyAddresses.contains(outputAddr)) {
+                    tx.setWatchOnly(true);
+                }
+
+                if(output.getXpub() != null) {
+
+                    Xpub xpubBody = output.getXpub();
+
+                    if(xpubBody.getPath().startsWith("M/0/")) {
+                        moveAmount = moveAmount.add(output.getValue());
+                        moveToAddrArray.add(xpubBody.getM());
+                    }
+                    if (output.getAddr() != null
+                        && !own_hd_addresses.contains(output.getAddr())) {
+                        own_hd_addresses.add(output.getAddr());
+                    }
+
+                } else {
+
+                    //If output is own legacy or hd address = move
+                    if(output.getAddr() != null
+                        && ownAddressesAndXpubs.contains(output.getAddr())
+                        && own_hd_addresses.contains(output.getAddr())) {
+
+                        BigInteger amountOutput = output.getValue();
+
+                        //Don't add change coming back
+                        if (inputAddr != null && !inputAddr.equals(outputAddr)) {
+                            moveAmount = moveAmount.add(output.getValue());
+
+                            if (ownOutput.contains(outputAddr)) {
+                                int index = ownOutput.indexOf(outputAddr);
+                                amountListOut.set(index, amountListOut.get(index).add(amountOutput));
+                            } else {
+                                ownOutput.add(outputAddr);
+                                amountListOut.add(amountOutput);
+                            }
+
+                            moveToAddrArray.add(output.getAddr());
+                            direction = Direction.TRANSFERRED;
+                        }
+
+                    } else {
+                        //one foreign address is enough to not call it move anymore
+                        direction = Direction.SENT;
+                    }
+
+                }
+
+                outputs_amount += output.getValue().longValue();
+            }
+
+            // TODO: 03/03/2017  Some transferred cases might not have been covered yet
 //            for (String address : ownOutput) {
 //                int index = ownOutput.indexOf(address);
 //                BigInteger outputAmount = amountListOut.get(index);
@@ -311,22 +332,15 @@ public class MultiAddressFactory {
 //
 //                tx.setResult(inputAmount);
 //            }
-//
-//            if (Math.abs(inputs_amount - outputs_amount) == Math.abs(tx.getResult().longValue())) {
-//                direction = Direction.TRANSFERRED;
-//            }
-//
-//            if(direction == Direction.TRANSFERRED) {
-//                tx.setDirection(Direction.TRANSFERRED);
-//                tx.setResult(moveAmount);
-//                System.out.println("Move - "+moveAmount);
-//            } else {
-//                if(tx.getResult().signum() > 0) {
-//                    tx.setDirection(Direction.RECEIVED);
-//                } else {
-//                    tx.setDirection(Direction.SENT);
-//                }
-//            }
+
+            if (Math.abs(inputs_amount - outputs_amount) == Math.abs(tx.getResult().longValue())) {
+                direction = Direction.TRANSFERRED;
+            }
+
+            if(direction == Direction.TRANSFERRED) {
+                tx.setDirection(Direction.TRANSFERRED);
+                tx.setResult(moveAmount);
+            }
         }
     }
 }

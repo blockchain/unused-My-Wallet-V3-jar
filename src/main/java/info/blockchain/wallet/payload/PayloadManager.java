@@ -26,9 +26,11 @@ import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.payload.data.WalletBase;
 import info.blockchain.wallet.payload.data.WalletWrapper;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
+import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.Tools;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +65,7 @@ public class PayloadManager {
 
     private HashMap<String, MultiAddress> multiAddressMap;
     public static final String MULTI_ADDRESS_ALL = "all";
+    public static final String MULTI_ADDRESS_ALL_LEGACY = "all_legacy";
 
     private static PayloadManager instance = new PayloadManager();
 
@@ -351,6 +354,8 @@ public class PayloadManager {
             throw new Exception("Failed to save added account.");
         }
 
+        instantiateMultiAddress();
+
         return accountBody;
     }
 
@@ -375,6 +380,8 @@ public class PayloadManager {
             walletBaseBody.getWalletBody().getLegacyAddressList().remove(legacyAddressBody);
         }
 
+        instantiateMultiAddress();
+
         return success;
     }
 
@@ -386,6 +393,9 @@ public class PayloadManager {
      * @throws Exception Possible if saving the Wallet fails
      */
     public void addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
+
+        // TODO: 02/03/2017  second password
+
         List<LegacyAddress> currentAddresses = walletBaseBody.getWalletBody().getLegacyAddressList();
         walletBaseBody.getWalletBody().getLegacyAddressList().add(legacyAddress);
 
@@ -394,6 +404,8 @@ public class PayloadManager {
             walletBaseBody.getWalletBody().setLegacyAddressList(currentAddresses);
             throw new Exception("Failed to save added Legacy Address.");
         }
+
+        instantiateMultiAddress();
     }
 
     /**
@@ -446,13 +458,30 @@ public class PayloadManager {
             newlyAdded.setPrivateKey(null);
         }
 
+        instantiateMultiAddress();
+
         return newlyAdded;
 
     }
 
     //********************************************************************************************//
-    //*                 Shortcut methods(Remove from Android first then delete)                  *//
+    //*                                 Shortcut methods                                         *//
     //********************************************************************************************//
+
+    private LinkedHashSet<String> getAllAccountsAndAddresses() {
+        LinkedHashSet<String> all = new LinkedHashSet<>();
+
+        //Add all accounts
+        if(getPayload().getHdWallets() != null) {
+            List<String> xpubs = getPayload().getHdWallets().get(0).getActive();
+            all.addAll(xpubs);
+        }
+
+        //Add all addresses, archived or not
+        all.addAll(getPayload().getLegacyAddressStringList());
+
+        return all;
+    }
 
     public boolean validateSecondPassword(String secondPassword) {
 
@@ -517,6 +546,68 @@ public class PayloadManager {
             .getHDAccountFromAccountBody(account);
 
         return hdAccount.getChange().getAddressAt(nextIndex).getAddressString();
+    }
+
+    public BigInteger getAddressBalance(String address) {
+        BigInteger balance = BigInteger.ZERO;
+
+        MultiAddress multiAddress = multiAddressMap.get(address);
+
+        if(multiAddress != null) {
+            balance = multiAddress.getWallet().getFinalBalance();
+        }
+
+        return balance;
+    }
+
+    public BigInteger getWalletBalance() {
+        BigInteger balance = BigInteger.ZERO;
+
+        MultiAddress multiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL);
+
+        if(multiAddress != null) {
+            balance = multiAddress.getWallet().getFinalBalance();
+        }
+
+        return balance;
+    }
+
+    public BigInteger getImportedAddressesBalance() {
+        BigInteger balance = BigInteger.ZERO;
+
+        MultiAddress multiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL_LEGACY);
+
+        if(multiAddress != null) {
+            balance = multiAddress.getWallet().getFinalBalance();
+        }
+
+        return balance;
+    }
+
+    /**
+     * Updates address balance as well as wallet balance.
+     * This is used to immediately update balances after a successful transaction which speeds
+     * up the balance the UI reflects without the need to wait for incoming websocket notification.
+     * @param amount
+     * @throws Exception
+     */
+    public void subtractAmountFromAddressBalance(String address, BigInteger amount) throws Exception {
+
+        //Update individual address
+        MultiAddress addressMultiAddress = multiAddressMap.get(address);
+        if(addressMultiAddress == null) {
+            throw new Exception("No info for this address. updateMultiAddress should be called first.");
+        }
+        BigInteger newBalance = getAddressBalance(address).subtract(amount);
+        addressMultiAddress.getWallet().setFinalBalance(newBalance);
+
+        //Update wallet balance
+        MultiAddress allMultiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL);
+        if(allMultiAddress == null) {
+            throw new Exception("No info for wallet. updateMultiAddress should be called first.");
+        }
+        newBalance = getWalletBalance().subtract(amount);
+        allMultiAddress.getWallet().setFinalBalance(newBalance);
     }
 
     //********************************************************************************************//
@@ -598,19 +689,16 @@ public class PayloadManager {
      */
     private void instantiateMultiAddress() throws IOException, ApiException {
 
-        LinkedHashSet<String> all = new LinkedHashSet<>();
-        if(getPayload().getHdWallets() != null) {
-            List<String> xpubs = getPayload().getHdWallets().get(0).getActive();
-            all.addAll(xpubs);
-        }
-        all.addAll(getPayload().getLegacyAddressStringList());
+        LinkedHashSet<String> all = getAllAccountsAndAddresses();
 
         MultiAddress multiAddress = getPayload()
             .getWalletBalanceAndTransactions(50, 0);
 
         multiAddressMap = new HashMap<>();
         MultiAddressFactory.sort(multiAddress.getTxs());
-        MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+        MultiAddressFactory
+            .flagTransactionDirection(all, getPayload().getWatchOnlyAddressStringList(),
+                multiAddress);
         multiAddressMap.put(MULTI_ADDRESS_ALL, multiAddress);
 
         List<Account> accounts = getPayload().getHdWallets().get(HD_WALLET_INDEX).getAccounts();
@@ -622,7 +710,9 @@ public class PayloadManager {
                 .getAccountBalanceAndTransactions(xpub, 50, 0);
 
             MultiAddressFactory.sort(multiAddress.getTxs());
-            MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+            MultiAddressFactory
+                .flagTransactionDirection(all, getPayload().getWatchOnlyAddressStringList(),
+                    multiAddress);
             multiAddressMap.put(xpub, multiAddress);
         }
 
@@ -637,27 +727,35 @@ public class PayloadManager {
                 .getAccountBalanceAndTransactions(address, 50, 0);
 
             MultiAddressFactory.sort(multiAddress.getTxs());
-            MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+            MultiAddressFactory
+                .flagTransactionDirection(all, getPayload().getWatchOnlyAddressStringList(),
+                    multiAddress);
             multiAddressMap.put(address, multiAddress);
         }
     }
 
+    /**
+     * Updates internal balacne and transaction list
+     * @param context Xpub, legacy address or MULTI_ADDRESS_ALL / MULTI_ADDRESS_ALL_LEGACY flag
+     * @param limit Amount of transactions per page
+     * @param offset Page offset
+     * @throws IOException
+     * @throws ApiException
+     */
     public void updateMultiAddress(String context, int limit, int offset)
         throws IOException, ApiException {
 
-        LinkedHashSet<String> all = new LinkedHashSet<>();
-        if(getPayload().getHdWallets() != null) {
-            List<String> xpubs = getPayload().getHdWallets().get(0).getActive();
-            all.addAll(xpubs);
-        }
-        all.addAll(getPayload().getLegacyAddressStringList());
+        LinkedHashSet<String> all = getAllAccountsAndAddresses();
 
         MultiAddress multiAddress;
 
-        if(context.equals(MULTI_ADDRESS_ALL)) {
+        if (context.equals(MULTI_ADDRESS_ALL)) {
             multiAddress = getPayload()
                 .getWalletBalanceAndTransactions(limit, offset);
-        } else {
+        } else if(context.equals(MULTI_ADDRESS_ALL_LEGACY)) {
+            multiAddress = getPayload()
+                .getLegacyBalanceAndTransactions(limit, offset);
+        }else {
             multiAddress = getPayload()
                 .getAccountBalanceAndTransactions(context, limit, offset);
         }
@@ -672,7 +770,9 @@ public class PayloadManager {
         txs.addAll(hs);
 
         //Sort
-        MultiAddressFactory.flagTransactionDirection(all, multiAddress.getTxs());
+        MultiAddressFactory
+            .flagTransactionDirection(all, getPayload().getWatchOnlyAddressStringList(),
+                multiAddress);
         MultiAddressFactory.sort(multiAddress.getTxs());
     }
 

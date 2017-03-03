@@ -6,6 +6,7 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.PersistentUrls.Environment;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import retrofit2.Retrofit;
@@ -55,7 +56,7 @@ public abstract class MockedResponseTest {
 
     private static OkHttpClient getOkHttpClient() {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        loggingInterceptor.setLevel(Level.BASIC);
 
         return new OkHttpClient.Builder()
             .addInterceptor(mockInterceptor)//Mock responses

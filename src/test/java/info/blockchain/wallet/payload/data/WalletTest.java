@@ -129,7 +129,7 @@ public class WalletTest extends MockedResponseTest{
         String jsonString = wallet.toJson();
 
         JSONObject jsonObject = new JSONObject(jsonString);
-        Assert.assertEquals(9, jsonObject.keySet().size());
+        Assert.assertEquals(10, jsonObject.keySet().size());
     }
 
     @Test

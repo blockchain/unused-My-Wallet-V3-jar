@@ -22,7 +22,6 @@ import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ public class Wallet {
     private Map<String, List<Integer>> txTags;
 
     @JsonProperty("tag_names")
-    private Map<Integer, String> tagNames;
+    private List<Map<Integer, String>> tagNames;
 
     @JsonProperty("options")
     private Options options;
@@ -129,7 +128,7 @@ public class Wallet {
         return txTags;
     }
 
-    public Map<Integer, String> getTagNames() {
+    public List<Map<Integer, String>> getTagNames() {
         return tagNames;
     }
 
@@ -178,7 +177,7 @@ public class Wallet {
         this.txTags = txTags;
     }
 
-    public void setTagNames(Map<Integer, String> tagNames) {
+    public void setTagNames(List<Map<Integer, String>> tagNames) {
         this.tagNames = tagNames;
     }
 
@@ -578,6 +577,20 @@ public class Wallet {
 
         Response<MultiAddress> call = MultiAddressFactory
             .getMultiAddress(all, xpub, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+
+        if(call.isSuccessful()) {
+            return call.body();
+        } else {
+            throw new ApiException(call.errorBody().string());
+        }
+    }
+
+    public MultiAddress getLegacyBalanceAndTransactions(int limit, int offset)
+        throws IOException, ApiException {
+        List<String> all = getLegacyAddressStringList();
+
+        Response<MultiAddress> call = MultiAddressFactory
+            .getMultiAddress(all, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
 
         if(call.isSuccessful()) {
             return call.body();
