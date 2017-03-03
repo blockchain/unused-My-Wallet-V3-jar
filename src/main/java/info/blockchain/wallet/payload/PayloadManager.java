@@ -473,7 +473,7 @@ public class PayloadManager {
 
         //Add all accounts
         if(getPayload().getHdWallets() != null) {
-            List<String> xpubs = getPayload().getHdWallets().get(0).getActive();
+            List<String> xpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
             all.addAll(xpubs);
         }
 
@@ -706,10 +706,8 @@ public class PayloadManager {
         multiAddressMap.put(MULTI_ADDRESS_ALL, multiAddress);
 
         //Individual account balances
-        List<Account> accounts = getPayload().getHdWallets().get(HD_WALLET_INDEX).getAccounts();
-        for (Account account : accounts) {
-
-            String xpub = account.getXpub();
+        List<String> xpubs = getPayload().getHdWallets().get(HD_WALLET_INDEX).getActiveXpubs();
+        for (String xpub : xpubs) {
 
             multiAddress = getPayload()
                 .getAccountBalanceAndTransactions(xpub, 50, 0);

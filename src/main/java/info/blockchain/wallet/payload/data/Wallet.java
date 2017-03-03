@@ -552,7 +552,7 @@ public class Wallet {
         List<String> all = getLegacyAddressStringList();
 
         if(getHdWallets() != null) {
-            List<String> xpubs = getHdWallets().get(0).getActive();
+            List<String> xpubs = getHdWallets().get(0).getActiveXpubs();
             all.addAll(xpubs);
         }
 
@@ -571,7 +571,7 @@ public class Wallet {
         List<String> all = getLegacyAddressStringList();
 
         if(getHdWallets() != null) {
-            List<String> xpubs = getHdWallets().get(0).getActive();
+            List<String> xpubs = getHdWallets().get(0).getActiveXpubs();
             all.addAll(xpubs);
         }
 
@@ -587,7 +587,7 @@ public class Wallet {
 
     public MultiAddress getLegacyBalanceAndTransactions(int limit, int offset)
         throws IOException, ApiException {
-        List<String> all = getLegacyAddressStringList();
+        List<String> all = getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
 
         Response<MultiAddress> call = MultiAddressFactory
             .getMultiAddress(all, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();

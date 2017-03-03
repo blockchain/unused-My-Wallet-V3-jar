@@ -240,7 +240,10 @@ public class HDWallet {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public List<String> getActive() {
+    /**
+     * @return Non-archived account xpubs
+     */
+    public List<String> getActiveXpubs() {
 
         ArrayList<String> xpubs = new ArrayList<>();
 
