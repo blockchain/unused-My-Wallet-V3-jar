@@ -2,12 +2,22 @@ package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.PersistentUrls.Environment;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+
+import java.util.concurrent.Callable;
+
+import io.reactivex.Scheduler;
+import io.reactivex.functions.Function;
+import io.reactivex.internal.schedulers.TrampolineScheduler;
+import io.reactivex.plugins.RxJavaPlugins;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 @Ignore
@@ -20,10 +30,6 @@ public abstract class BaseIntegTest {
         PersistentUrls.getInstance().setCurrentEnvironment(Environment.PRODUCTION);
         PersistentUrls.getInstance().setCurrentApiUrl("https://api.blockchain.info/");
         PersistentUrls.getInstance().setCurrentServerUrl("https://blockchain.info/");
-
-//        PersistentUrls.getInstance().setCurrentEnvironment(Environment.DEV);
-//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
-//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
 
         //Initialize framework
         BlockchainFramework.init(new FrameworkInterface() {
@@ -54,20 +60,50 @@ public abstract class BaseIntegTest {
         });
     }
 
+    @Before
+    public void setupRxCalls() {
+        RxJavaPlugins.reset();
+
+        RxJavaPlugins.setInitIoSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
+            @Override
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+                return TrampolineScheduler.instance();
+            }
+        });
+        RxJavaPlugins.setInitComputationSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
+            @Override
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+                return TrampolineScheduler.instance();
+            }
+        });
+        RxJavaPlugins.setInitNewThreadSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
+            @Override
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+                return TrampolineScheduler.instance();
+            }
+        });
+    }
+
+    @After
+    public void tearDownRxCalls() {
+        RxJavaPlugins.reset();
+    }
+
     private static OkHttpClient getOkHttpClient() {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         return new OkHttpClient.Builder()
 //            .addInterceptor(loggingInterceptor)//Extensive logging
-            .build();
+                .build();
     }
 
     private static Retrofit getRetrofit(String url, OkHttpClient client) {
         return new Retrofit.Builder()
-            .baseUrl(url)
-            .client(client)
-            .addConverterFactory(JacksonConverterFactory.create())
-            .build();
+                .baseUrl(url)
+                .client(client)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
     }
 }

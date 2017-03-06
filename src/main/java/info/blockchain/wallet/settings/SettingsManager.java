@@ -52,9 +52,11 @@ public class SettingsManager {
 
     private String guid;
     private String sharedKey;
+    // This is an explicit dependency and should be injected in the future
+    private WalletApi walletApi;
 
     public SettingsManager() {
-        // No-op
+        walletApi = new WalletApi();
     }
 
     public SettingsManager(String guid, String sharedKey) {
@@ -68,14 +70,14 @@ public class SettingsManager {
     }
 
     public Observable<Settings> getInfo()  {
-        return WalletApi.fetchSettings(METHOD_GET_INFO, guid, sharedKey);
+        return walletApi.fetchSettings(METHOD_GET_INFO, guid, sharedKey);
     }
 
     public Observable<ResponseBody> updateSetting(String method, String payload) {
-        return WalletApi.updateSettings(method, guid, sharedKey, payload);
+        return walletApi.updateSettings(method, guid, sharedKey, payload);
     }
 
     public Observable<ResponseBody> updateSetting(String method, int payload) {
-        return WalletApi.updateSettings(method, guid, sharedKey, payload+"");
+        return walletApi.updateSettings(method, guid, sharedKey, payload+"");
     }
 }

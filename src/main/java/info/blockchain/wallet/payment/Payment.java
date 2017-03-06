@@ -6,20 +6,26 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import javax.annotation.Nonnull;
-import okhttp3.ResponseBody;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 
+@SuppressWarnings({"WeakerAccess", "SameParameterValue"})
 public class Payment {
 
     public static final BigInteger PUSHTX_MIN = BigInteger
@@ -42,8 +48,8 @@ public class Payment {
         return info.blockchain.wallet.payment.Fees.isAdequateFee(inputs, outputs, absoluteFee);
     }
 
-    public static Call<FeeList> getDynamicFee() {
-        return WalletApi.getDynamicFee();
+    public static Observable<FeeList> getDynamicFee() {
+        return new WalletApi().getDynamicFee();
     }
 
     public static Fee getDefaultFee() {

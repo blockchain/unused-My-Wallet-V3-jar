@@ -26,23 +26,8 @@ import info.blockchain.wallet.payload.data.Wallet;
 import info.blockchain.wallet.payload.data.WalletBase;
 import info.blockchain.wallet.payload.data.WalletWrapper;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
-import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.Tools;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import okhttp3.ResponseBody;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
@@ -51,21 +36,42 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
+@SuppressWarnings("WeakerAccess")
 public class PayloadManager {
 
+    public static final String MULTI_ADDRESS_ALL = "all";
+    public static final String MULTI_ADDRESS_ALL_LEGACY = "all_legacy";
+
     //Assume we only support 1 hdWallet
-    private final int HD_WALLET_INDEX = 0;
+    private static final int HD_WALLET_INDEX = 0;
 
     private WalletBase walletBaseBody;
     private String password;
     private MetadataNodeFactory metadataNodeFactory;
-
+    // This is an explicit dependency and should be injected for easier testing
+    private WalletApi walletApi;
     private HashMap<String, MultiAddress> multiAddressMap;
-    public static final String MULTI_ADDRESS_ALL = "all";
-    public static final String MULTI_ADDRESS_ALL_LEGACY = "all_legacy";
 
     private static PayloadManager instance = new PayloadManager();
 
@@ -74,7 +80,7 @@ public class PayloadManager {
     }
 
     private PayloadManager() {
-        //no-op
+        walletApi = new WalletApi();
     }
 
     public void wipe() {
@@ -200,7 +206,7 @@ public class PayloadManager {
 
         this.password = password;
 
-        Call<ResponseBody> call = WalletApi.fetchWalletData(guid, sharedKey);
+        Call<ResponseBody> call = walletApi.fetchWalletData(guid, sharedKey);
         Response<ResponseBody> exe = call.execute();
 
         if(exe.isSuccessful()){
@@ -223,7 +229,7 @@ public class PayloadManager {
     public void initializeAndDecryptFromQR(@Nonnull String qrData) throws Exception {
 
         Pair qrComponents = Pairing.getQRComponentsFromRawString(qrData);
-        Call<ResponseBody> call = WalletApi.fetchPairingEncryptionPassword((String)qrComponents.getLeft());
+        Call<ResponseBody> call = walletApi.fetchPairingEncryptionPasswordCall((String)qrComponents.getLeft());
 
         Response<ResponseBody> exe = call.execute();
 
@@ -265,7 +271,7 @@ public class PayloadManager {
         String newPayloadChecksum = (String) pair.getLeft();
 
         //Save to server
-        Call<Void> call = WalletApi.insertWallet(
+        Call<ResponseBody> call = walletApi.insertWallet(
             walletBaseBody.getWalletBody().getGuid(),
             walletBaseBody.getWalletBody().getSharedKey(),
             null,
@@ -274,7 +280,7 @@ public class PayloadManager {
             email,
             BlockchainFramework.getDevice());
 
-        Response<Void> exe = call.execute();
+        Response<ResponseBody> exe = call.execute();
         if(exe.isSuccessful()) {
             //set new checksum
             walletBaseBody.setPayloadChecksum(newPayloadChecksum);
@@ -310,7 +316,7 @@ public class PayloadManager {
                 LegacyAddress.NORMAL_ADDRESS,
                 walletBaseBody.getWalletBody().getLegacyAddressList());
         }
-        Call<Void> call = WalletApi.updateWallet(
+        Call<ResponseBody> call = walletApi.updateWallet(
             walletBaseBody.getWalletBody().getGuid(),
             walletBaseBody.getWalletBody().getSharedKey(),
             syncAddresses,
@@ -319,7 +325,7 @@ public class PayloadManager {
             oldPayloadChecksum,
             BlockchainFramework.getDevice());
 
-        Response<Void> exe = call.execute();
+        Response<ResponseBody> exe = call.execute();
         if(exe.isSuccessful()) {
             //set new checksum
             walletBaseBody.setPayloadChecksum(newPayloadChecksum);
@@ -624,9 +630,9 @@ public class PayloadManager {
      * @return
      * @throws Exception
      */
-    public Call<ResponseBody> unregisterMdid(ECKey node) throws Exception {
+    public Observable<ResponseBody> unregisterMdid(ECKey node) throws Exception {
         String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
-        return WalletApi.unregisterMdid(walletBaseBody.getWalletBody().getGuid(),
+        return walletApi.unregisterMdid(walletBaseBody.getWalletBody().getGuid(),
             walletBaseBody.getWalletBody().getSharedKey(),
             signedGuid);
     }
@@ -637,9 +643,9 @@ public class PayloadManager {
      * @return
      * @throws Exception
      */
-    public Call<ResponseBody> registerMdid(ECKey node) throws Exception {
+    public Observable<ResponseBody> registerMdid(ECKey node) throws Exception {
         String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
-        return WalletApi.registerMdid(walletBaseBody.getWalletBody().getGuid(),
+        return walletApi.registerMdid(walletBaseBody.getWalletBody().getGuid(),
             walletBaseBody.getWalletBody().getSharedKey(),
             signedGuid);
     }
