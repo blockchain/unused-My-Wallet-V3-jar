@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.blockchain.wallet.payload.data.Account;
+
 import java.io.IOException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,19 +19,8 @@ import java.io.IOException;
     isGetterVisibility = Visibility.NONE)
 public class Status {
 
-    @JsonProperty("code")
-    private int code;
-
     @JsonProperty("success")
     private String success;
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
 
     public String getSuccess() {
         return success;

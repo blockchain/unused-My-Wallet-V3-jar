@@ -6,13 +6,7 @@ import info.blockchain.test_data.UnspentTestData;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.util.PrivateKeyFactory;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import okhttp3.ResponseBody;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
@@ -20,6 +14,16 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import io.reactivex.observers.TestObserver;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -74,10 +78,11 @@ public class PaymentTest extends MockedResponseTest {
     public void testGetDynamicFee() throws Exception {
 
         mockInterceptor.setResponseString("{\"mempool\":57126,\"default\":{\"fee\":65000,\"surge\":false,\"ok\":true},\"estimate\":[{\"fee\":71500,\"surge\":false,\"ok\":true},{\"fee\":65300,\"surge\":false,\"ok\":true},{\"fee\":65200,\"surge\":false,\"ok\":true},{\"fee\":65100,\"surge\":false,\"ok\":true},{\"fee\":65000,\"surge\":false,\"ok\":true},{\"fee\":59090.90909090909,\"surge\":false,\"ok\":true}]}");
-        Call<FeeList> dynamicFee = Payment.getDynamicFee();
+        final TestObserver<FeeList> testObserver = Payment.getDynamicFee().test();
 
-        Response<FeeList> exe = dynamicFee.execute();
-        FeeList fee = exe.body();
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        FeeList fee = testObserver.values().get(0);
 
         Assert.assertEquals(57126, fee.getMempool());
         Assert.assertEquals(65000, fee.getDefaultFee().getFee(), 0.0);

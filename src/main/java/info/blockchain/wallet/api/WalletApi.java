@@ -1,96 +1,107 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
-
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
+import retrofit2.Call;
+import retrofit2.Response;
 
 import javax.annotation.Nullable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
 
-import io.reactivex.Observable;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-
+@SuppressWarnings({"WeakerAccess", "SameParameterValue"})
 public class WalletApi {
 
     private static WalletEndpoints walletApi;
     private static WalletEndpoints walletServer;
 
-    private static WalletEndpoints getBaseApiInstance() {
+    private WalletEndpoints getBaseApiInstance() {
         if (walletApi == null) {
-            walletApi = BlockchainFramework.getRetrofitApiInstance().create(WalletEndpoints.class);
+            walletApi = BlockchainFramework.getRetrofitApiInstance().
+                    create(WalletEndpoints.class);
         }
         return walletApi;
     }
 
-    private static WalletEndpoints getServerApiInstance() {
+    private WalletEndpoints getServerApiInstance() {
         if (walletServer == null) {
             walletServer = BlockchainFramework.getRetrofitServerInstance()
-                .create(WalletEndpoints.class);
+                    .create(WalletEndpoints.class);
         }
         return walletServer;
     }
 
-    public static Call<FeeList> getDynamicFee() {
+    public Observable<FeeList> getDynamicFee() {
         return getBaseApiInstance().getFees();
     }
 
-    public static Call<ResponseBody> getRandomBytes() {
+    public Call<ResponseBody> getRandomBytesCall() {
+        return getBaseApiInstance().getRandomBytesCall(32, "hex");
+    }
+
+    public Observable<ResponseBody> getRandomBytes() {
         return getBaseApiInstance().getRandomBytes(32, "hex");
     }
 
-    public static Call<ResponseBody> updateFirebaseNotificationToken(String token, String guid,
-        String sharedKey)
-        throws Exception {
+    public Observable<ResponseBody> updateFirebaseNotificationToken(String token,
+                                                                    String guid,
+                                                                    String sharedKey) {
 
         return getServerApiInstance().postToWallet("update-firebase",
-            guid,
-            sharedKey,
-            token,
-            token.length(),
-            BlockchainFramework.getApiCode());
+                guid,
+                sharedKey,
+                token,
+                token.length(),
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<ResponseBody> registerMdid(String guid, String sharedKey,
-        String signedGuid) {
+    public Observable<ResponseBody> registerMdid(String guid,
+                                                 String sharedKey,
+                                                 String signedGuid) {
+
         return getServerApiInstance().postToWallet("register-mdid",
-            guid, sharedKey, signedGuid, signedGuid.length(),
-            BlockchainFramework.getApiCode());
+                guid, sharedKey, signedGuid, signedGuid.length(),
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<ResponseBody> unregisterMdid(String guid, String sharedKey,
-        String signedGuid) {
+    public Observable<ResponseBody> unregisterMdid(String guid,
+                                                   String sharedKey,
+                                                   String signedGuid) {
+
         return getServerApiInstance().postToWallet("unregister-mdid",
-            guid, sharedKey, signedGuid, signedGuid.length(),
-            BlockchainFramework.getApiCode());
+                guid, sharedKey, signedGuid, signedGuid.length(),
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<Status> setAccess(String key, String value, String pin) {
+    public Observable<Response<Status>> setAccess(String key, String value, String pin) {
         String hex = Hex.toHexString(value.getBytes());
-        return getServerApiInstance().pinStore(key, pin, hex,"put", BlockchainFramework.getApiCode());
+        return getServerApiInstance().pinStore(key, pin, hex, "put", BlockchainFramework.getApiCode());
     }
 
-    public static Call<Status> validateAccess(String key, String pin) {
+    public Observable<Response<Status>> validateAccess(String key, String pin) {
         return getServerApiInstance().pinStore(key, pin, null, "get", BlockchainFramework.getApiCode());
     }
 
     @Deprecated
-    public static Call<Void> saveWallet(boolean isNew, String guid, String sharedKey,
-        List<String> activeAddressList, JSONObject encryptedPayload,
-        boolean syncPubkeys, String newChecksum, String oldChecksum, String email, String device)
-        throws UnsupportedEncodingException {
+    public Observable<ResponseBody> saveWallet(boolean isNew,
+                                               String guid,
+                                               String sharedKey,
+                                               List<String> activeAddressList,
+                                               JSONObject encryptedPayload,
+                                               boolean syncPubkeys,
+                                               String newChecksum,
+                                               String oldChecksum,
+                                               String email,
+                                               String device) throws UnsupportedEncodingException {
 
         String pipedAddresses = null;
         if (syncPubkeys && activeAddressList != null) {
@@ -100,87 +111,129 @@ public class WalletApi {
         String method = isNew ? "insert" : "update";
 
         return getServerApiInstance().syncWallet(method,
-            guid, sharedKey, encryptedPayload.toString(), encryptedPayload.toString().length(),
-            URLEncoder.encode(newChecksum, "utf-8"), pipedAddresses, email, device, oldChecksum,
-            BlockchainFramework.getApiCode());
+                guid,
+                sharedKey,
+                encryptedPayload.toString(),
+                encryptedPayload.toString().length(),
+                URLEncoder.encode(newChecksum, "utf-8"),
+                pipedAddresses,
+                email,
+                device,
+                oldChecksum,
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<Void> insertWallet(String guid, String sharedKey,
-        @Nullable List<String> activeAddressList, String encryptedPayload,
-        String newChecksum, String email, String device)
-        throws UnsupportedEncodingException {
+    public Call<ResponseBody> insertWallet(String guid,
+                                           String sharedKey,
+                                           @Nullable List<String> activeAddressList,
+                                           String encryptedPayload,
+                                           String newChecksum,
+                                           String email,
+                                           String device) throws UnsupportedEncodingException {
 
         String pipedAddresses = null;
         if (activeAddressList != null) {
             pipedAddresses = StringUtils.join(activeAddressList, "|");
         }
 
-        return getServerApiInstance().syncWallet("insert",
-            guid, sharedKey, encryptedPayload, encryptedPayload.length(),
-            URLEncoder.encode(newChecksum, "utf-8"), pipedAddresses, email, device, null,
-            BlockchainFramework.getApiCode());
+        return getServerApiInstance().syncWalletCall("insert",
+                guid,
+                sharedKey,
+                encryptedPayload,
+                encryptedPayload.length(),
+                URLEncoder.encode(newChecksum, "utf-8"),
+                pipedAddresses,
+                email,
+                device,
+                null,
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<Void> updateWallet(String guid, String sharedKey,
-        @Nullable List<String> activeAddressList, String encryptedPayload,
-        String newChecksum, String oldChecksum, String device)
-        throws UnsupportedEncodingException {
+    public Call<ResponseBody> updateWallet(String guid,
+                                           String sharedKey,
+                                           @Nullable List<String> activeAddressList,
+                                           String encryptedPayload,
+                                           String newChecksum,
+                                           String oldChecksum,
+                                           String device) throws UnsupportedEncodingException {
 
         String pipedAddresses = null;
         if (activeAddressList != null) {
             pipedAddresses = StringUtils.join(activeAddressList, "|");
         }
 
-        return getServerApiInstance().syncWallet("update",
-            guid, sharedKey, encryptedPayload, encryptedPayload.length(),
-            URLEncoder.encode(newChecksum, "utf-8"), pipedAddresses, null, device, oldChecksum,
-            BlockchainFramework.getApiCode());
+        return getServerApiInstance().syncWalletCall("update",
+                guid,
+                sharedKey,
+                encryptedPayload,
+                encryptedPayload.length(),
+                URLEncoder.encode(newChecksum, "utf-8"),
+                pipedAddresses,
+                null,
+                device,
+                oldChecksum,
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<ResponseBody> fetchWalletData(String guid, String sharedKey) {
+    public Call<ResponseBody> fetchWalletData(String guid, String sharedKey) {
         return getServerApiInstance().fetchWalletData("wallet.aes.json",
-            guid, sharedKey,
-            "json",
-            BlockchainFramework.getApiCode());
+                guid,
+                sharedKey,
+                "json",
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<ResponseBody> fetchEncryptedPayload(String guid) {
+    public Observable<Response<ResponseBody>> getSessionId(String guid) {
+        return getServerApiInstance().getSessionId(guid);
+    }
+
+    public Observable<Response<ResponseBody>> fetchEncryptedPayload(String guid, String sessionId) {
         return getServerApiInstance().fetchEncryptedPayload(guid,
-            "json",
-            false,
-            BlockchainFramework.getApiCode());
+                "SID=" + sessionId,
+                "json",
+                false,
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<ResponseBody> fetchPairingEncryptionPassword(final String guid) {
+    public Call<ResponseBody> fetchPairingEncryptionPasswordCall(final String guid) {
+        return getServerApiInstance().fetchPairingEncryptionPasswordCall("pairing-encryption-password",
+                guid,
+                BlockchainFramework.getApiCode());
+    }
+
+    public Observable<ResponseBody> fetchPairingEncryptionPassword(final String guid) {
         return getServerApiInstance().fetchPairingEncryptionPassword("pairing-encryption-password",
-            guid,
-            BlockchainFramework.getApiCode());
+                guid,
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<ArrayList<Merchant>> getAllMerchants() throws Exception {
+    public Observable<List<Merchant>> getAllMerchants() {
         return getBaseApiInstance().getAllMerchants();
     }
 
-    public static Observable<Settings> fetchSettings(String method, String guid, String sharedKey){
+    public Observable<Settings> fetchSettings(String method, String guid, String sharedKey) {
         return getServerApiInstance().fetchSettings(method,
-            guid, sharedKey,"plain",
-            BlockchainFramework.getApiCode());
+                guid,
+                sharedKey,
+                "plain",
+                BlockchainFramework.getApiCode());
     }
 
-    public static Observable<ResponseBody> updateSettings(String method, String guid, String sharedKey, String payload){
+    public Observable<ResponseBody> updateSettings(String method, String guid, String sharedKey, String payload) {
         return getServerApiInstance().updateSettings(method,
-            guid, sharedKey,
-            payload,
-            payload.length(),
-            "plain",
-            BlockchainFramework.getApiCode());
+                guid,
+                sharedKey,
+                payload,
+                payload.length(),
+                "plain",
+                BlockchainFramework.getApiCode());
     }
 
-    public static Call<ResponseBody> getHistoricPrice(long satoshis, String currency, long timeInMillis){
+    public Observable<ResponseBody> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
         return getServerApiInstance().getHistoricPrice(
-            satoshis,
-            currency,
-            timeInMillis,
-            BlockchainFramework.getApiCode());
+                satoshis,
+                currency,
+                timeInMillis,
+                BlockchainFramework.getApiCode());
     }
 }

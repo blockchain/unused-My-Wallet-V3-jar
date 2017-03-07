@@ -7,20 +7,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.subgraph.orchid.encoders.Hex;
+
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.util.Util;
+
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.ECKey;
+
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Nonnull;
+
 import okhttp3.ResponseBody;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.DeterministicKey;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -183,16 +186,16 @@ public class LegacyAddress {
 
     private static ECKey getRandomECKey() throws Exception {
 
-        Call<ResponseBody> call = WalletApi.getRandomBytes();
+        Call<ResponseBody> call = new WalletApi().getRandomBytesCall();
         Response<ResponseBody> exe = call.execute();
 
         if(!exe.isSuccessful()){
-            throw new Exception("ExternalEntropy.getRandomBytes failed.");
+            throw new Exception("ExternalEntropy.getRandomBytesCall failed.");
         }
 
         byte[] data = Hex.decode(exe.body().string());
 
-        if (data == null) throw new Exception("ExternalEntropy.getRandomBytes failed.");
+        if (data == null) throw new Exception("ExternalEntropy.getRandomBytesCall failed.");
 
         byte[] rdata = new byte[32];
         SecureRandom random = new SecureRandom();

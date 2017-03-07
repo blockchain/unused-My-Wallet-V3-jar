@@ -2,14 +2,17 @@ package info.blockchain.wallet.api;
 
 import info.blockchain.MockedResponseTest;
 import info.blockchain.wallet.api.data.Merchant;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import org.junit.Assert;
-import org.junit.Test;
-import retrofit2.Call;
+import java.util.List;
+
+import io.reactivex.observers.TestObserver;
 
 public class MerchantDirectoryTest extends MockedResponseTest {
 
@@ -20,9 +23,11 @@ public class MerchantDirectoryTest extends MockedResponseTest {
         String merchants = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(merchants);
-        Call<ArrayList<Merchant>> call = WalletApi.getAllMerchants();
+        final TestObserver<List<Merchant>> testObserver = new WalletApi().getAllMerchants().test();
 
-        ArrayList<Merchant> merchantList = call.execute().body();
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        List<Merchant> merchantList = testObserver.values().get(0);
         Assert.assertEquals(585, merchantList.size());
 
         Merchant merchant = merchantList.get(0);
