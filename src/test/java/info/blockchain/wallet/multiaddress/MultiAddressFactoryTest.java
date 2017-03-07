@@ -3,10 +3,12 @@ package info.blockchain.wallet.multiaddress;
 import info.blockchain.MockedResponseTest;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.MultiAddress;
+import info.blockchain.wallet.payload.data.AddressLabels;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,11 +57,8 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertTrue(MultiAddressFactory.isOwnHDAddress(body, "1CkFCfj7YQ8hjH1ReW398rax9NXCJcceE9"));
         Assert.assertFalse(MultiAddressFactory.isOwnHDAddress(body, "1PPNN4psDFyAgdjQcKBJ8GSgE4ES4GHP9c"));
 
-        Assert.assertEquals(5, MultiAddressFactory.getHighestIndexes(body, dormantXpub).getRight().intValue());
-        Assert.assertEquals(10, MultiAddressFactory.getHighestIndexes(body, dormantXpub).getLeft().intValue());
-
-        Assert.assertEquals(6, MultiAddressFactory.getNextChangeAddress(body, dormantXpub));
-        Assert.assertEquals(11, MultiAddressFactory.getNextReceiveAddress(body, dormantXpub));
+        Assert.assertEquals(5, MultiAddressFactory.getNextChangeAddress(body, dormantXpub));
+        Assert.assertEquals(10, MultiAddressFactory.getNextReceiveAddress(body, dormantXpub, new ArrayList<AddressLabels>()));
     }
 
     @Test
@@ -82,12 +81,9 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertTrue(MultiAddressFactory.isOwnHDAddress(body, "1CkFCfj7YQ8hjH1ReW398rax9NXCJcceE9"));
         Assert.assertFalse(MultiAddressFactory.isOwnHDAddress(body, "1PPNN4psDFyAgdjQcKBJ8GSgE4ES4GHP9c"));
 
-        Assert.assertEquals(5, MultiAddressFactory.getHighestIndexes(body, dormantXpub).getRight().intValue());
-        Assert.assertEquals(10, MultiAddressFactory.getHighestIndexes(body, dormantXpub).getLeft().intValue());
-
         Assert.assertEquals(dormantXpub, MultiAddressFactory.getXpubFromAddress(body, "1CAAzobQ2UrE4QUR3HJrkZs8UFA8wi5wwQ"));
 
-        Assert.assertEquals(6, MultiAddressFactory.getNextChangeAddress(body, dormantXpub));
-        Assert.assertEquals(11, MultiAddressFactory.getNextReceiveAddress(body, dormantXpub));
+        Assert.assertEquals(5, MultiAddressFactory.getNextChangeAddress(body, dormantXpub));
+        Assert.assertEquals(10, MultiAddressFactory.getNextReceiveAddress(body, dormantXpub, new ArrayList<AddressLabels>()));
     }
 }

@@ -103,9 +103,11 @@ public class HDWallet {
         IOException, HDWalletException {
         
         try{
+            int walletSize = DEFAULT_NEW_WALLET_SIZE;
+            if(accounts != null) walletSize = accounts.size();
             HD = HDWalletFactory
                 .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                    getSeedHex(), getPassphrase(), DEFAULT_NEW_WALLET_SIZE);
+                    getSeedHex(), getPassphrase(), walletSize);
         } catch (Exception e) {
 
             ArrayList<String> xpubList = new ArrayList<>();

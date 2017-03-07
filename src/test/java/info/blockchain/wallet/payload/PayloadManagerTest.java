@@ -7,13 +7,16 @@ import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.payload.data.AddressLabels;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -470,7 +473,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         mockInterceptor.setResponseStringList(responseList);
 
-        PayloadManager.getInstance().initializeAndDecrypt("04ada428-151b-4fa8-95b5-10e4447fd1c1", "e1062383-14f4-4e9c-818e-d9cce739b57f", "MyTestWallet");
+        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "MyTestWallet");
 
         //'All' accounts balance and transactions
         MultiAddress all = PayloadManager.getInstance()
@@ -604,5 +607,46 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(24, PayloadManager.getInstance()
             .getMultiAddress("19hxgds7jLo68q4qXLHtTP2qWFxZBKYNfA")
             .getTxs().size());
+    }
+
+    @Test
+    public void getNextAddress() throws Exception {
+
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_5.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m2.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m3.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m4.txt").toURI())), Charset.forName("utf-8")));
+        mockInterceptor.setResponseStringList(responseList);
+
+        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "MyTestWallet");
+
+        Wallet wallet = PayloadManager.getInstance().getPayload();
+
+        //Reserve an address to ensure it gets skipped
+        List<AddressLabels> labelList = new ArrayList<>();
+        labelList.add(AddressLabels.fromJson("{\n"
+            + "              \"index\": 1,\n"
+            + "              \"label\": \"Reserved\"\n"
+            + "            }"));
+        wallet.getHdWallets().get(0).getAccounts().get(0).setAddressLabels(labelList);
+
+        String nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(
+            wallet.getHdWallets().get(0).getAccounts().get(0));
+
+        Assert.assertEquals("1H9FdkaryqzB9xacDbJrcjXsJ9By4UVbQw", nextReceiveAddress);
+
+        String nextChangeAddress = PayloadManager.getInstance().getNextChangeAddress(
+            wallet.getHdWallets().get(0).getAccounts().get(0));
+
+        Assert.assertEquals("1GEXfMa4SMh3iUZxP8HHQy7Wo3aqce72Nm", nextChangeAddress);
     }
 }

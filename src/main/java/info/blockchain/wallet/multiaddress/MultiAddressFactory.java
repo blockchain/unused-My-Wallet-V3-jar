@@ -12,6 +12,7 @@ import info.blockchain.api.data.Xpub;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDAccount;
+import info.blockchain.wallet.payload.data.AddressLabels;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -19,8 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
 import retrofit2.Call;
 
 public class MultiAddressFactory {
@@ -53,22 +52,6 @@ public class MultiAddressFactory {
         }
 
         return false;
-    }
-
-    public static Pair<Integer, Integer> getHighestIndexes(MultiAddress body, String xpub) {
-
-        int receiveIndex = 0;
-        int changeIndex = 0;
-
-        for (Address address : body.getAddresses()) {
-
-            if (address.getAddress().equals(xpub)) {
-                receiveIndex = address.getAccountIndex();
-                changeIndex = address.getChangeIndex();
-            }
-        }
-
-        return Pair.of(receiveIndex, changeIndex);
     }
 
     public static String getXpubFromAddress(MultiAddress body, String address) {
@@ -115,10 +98,11 @@ public class MultiAddressFactory {
                 changeIndex = address.getChangeIndex();
             }
         }
-        return changeIndex + 1;
+
+        return changeIndex;
     }
 
-    public static int getNextReceiveAddress(MultiAddress body, String addressOrXpub) {
+    public static int getNextReceiveAddress(MultiAddress body, String addressOrXpub, List<AddressLabels> reservedAddresses) {
 
         int receiveIndex = 0;
         for (Address address : body.getAddresses()) {
@@ -126,7 +110,15 @@ public class MultiAddressFactory {
                 receiveIndex = address.getAccountIndex();
             }
         }
-        return receiveIndex + 1;
+
+        //Skip reserved addresses
+        for(AddressLabels reservedAddress : reservedAddresses) {
+            if(reservedAddress.getIndex() == receiveIndex) {
+                receiveIndex++;
+            }
+        }
+
+        return receiveIndex;
     }
 
     public static void sort(ArrayList<Transaction> txs) {

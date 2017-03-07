@@ -528,11 +528,9 @@ public class PayloadManager {
 
     public String getNextReceiveAddress(Account account) throws IOException, HDWalletException {
 
-        Call<MultiAddress> multiAddress = MultiAddressFactory
-            .getMultiAddress(Arrays.asList(account.getXpub()), null,
-                BlockExplorer.TX_FILTER_ALL, 1, 0);
+        MultiAddress multiAddress = multiAddressMap.get(account.getXpub());
 
-        int nextIndex = MultiAddressFactory.getNextReceiveAddress(multiAddress.execute().body(), account.getXpub());
+        int nextIndex = MultiAddressFactory.getNextReceiveAddress(multiAddress, account.getXpub(), account.getAddressLabels());
 
         HDAccount hdAccount = getPayload().getHdWallets().get(0)
             .getHDAccountFromAccountBody(account);
@@ -542,11 +540,10 @@ public class PayloadManager {
 
     public String getNextChangeAddress(Account account) throws IOException, HDWalletException {
 
-        Call<MultiAddress> multiAddress = MultiAddressFactory
-            .getMultiAddress(Arrays.asList(account.getXpub()), null,
-                BlockExplorer.TX_FILTER_ALL, 1, 0);
 
-        int nextIndex = MultiAddressFactory.getNextChangeAddress(multiAddress.execute().body(), account.getXpub());
+        MultiAddress multiAddress = multiAddressMap.get(account.getXpub());
+
+        int nextIndex = MultiAddressFactory.getNextChangeAddress(multiAddress, account.getXpub());
 
         HDAccount hdAccount = getPayload().getHdWallets().get(0)
             .getHDAccountFromAccountBody(account);
