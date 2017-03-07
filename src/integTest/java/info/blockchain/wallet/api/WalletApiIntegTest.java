@@ -148,7 +148,8 @@ public class WalletApiIntegTest extends BaseIntegTest {
 
     @Test
     public void fetchEncryptedPayload() throws Exception {
-        final TestObserver<ResponseBody> testObserver = walletApi.fetchEncryptedPayload(guid).test();
+        final TestObserver<Response<ResponseBody>> testObserver =
+                walletApi.fetchEncryptedPayload(guid, "").test();
 
         testObserver.assertComplete();
         testObserver.assertNoErrors();
@@ -158,7 +159,8 @@ public class WalletApiIntegTest extends BaseIntegTest {
 
     @Test
     public void fetchPairingEncryptionPasswordCall() throws Exception {
-        Response<ResponseBody> call = walletApi.fetchPairingEncryptionPasswordCall("").execute();
+        Response<ResponseBody> call =
+                walletApi.fetchPairingEncryptionPasswordCall("").execute();
 
         assertNotNull(call.errorBody());
         assertNotNull(call.errorBody().string());
@@ -166,7 +168,8 @@ public class WalletApiIntegTest extends BaseIntegTest {
 
     @Test
     public void fetchPairingEncryptionPasswordObservable() throws Exception {
-        final TestObserver<ResponseBody> testObserver = walletApi.fetchPairingEncryptionPassword("").test();
+        final TestObserver<ResponseBody> testObserver =
+                walletApi.fetchPairingEncryptionPassword("").test();
 
         testObserver.assertTerminated();
         testObserver.assertError(HttpException.class);

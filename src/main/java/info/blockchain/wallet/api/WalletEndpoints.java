@@ -4,17 +4,13 @@ import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
-
-import java.util.List;
-
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
+import retrofit2.http.*;
+
+import java.util.List;
 
 @SuppressWarnings("SameParameterValue")
 public interface WalletEndpoints {
@@ -95,9 +91,14 @@ public interface WalletEndpoints {
             @Query("guid") String guid,
             @Query("api_code") String apiCode);
 
+    @GET("wallet/{guid}?format=json&resend_code=false")
+    Observable<Response<ResponseBody>> getSessionId(
+            @Path("guid") String guid);
+
     @GET("wallet/{guid}")
-    Observable<ResponseBody> fetchEncryptedPayload(
+    Observable<Response<ResponseBody>> fetchEncryptedPayload(
         @Path("guid") String guid,
+        @Header("cookie") String sessionId,
         @Query("format") String format,
         @Query("resend_code") boolean resendCode,
         @Query("api_code") String apiCode);

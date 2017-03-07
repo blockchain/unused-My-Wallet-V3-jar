@@ -5,21 +5,18 @@ import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
-
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.spongycastle.util.encoders.Hex;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
-
-import javax.annotation.Nullable;
-
-import io.reactivex.Observable;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Response;
 
 @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
 public class WalletApi {
@@ -186,8 +183,13 @@ public class WalletApi {
                 BlockchainFramework.getApiCode());
     }
 
-    public Observable<ResponseBody> fetchEncryptedPayload(String guid) {
+    public Observable<Response<ResponseBody>> getSessionId(String guid) {
+        return getServerApiInstance().getSessionId(guid);
+    }
+
+    public Observable<Response<ResponseBody>> fetchEncryptedPayload(String guid, String sessionId) {
         return getServerApiInstance().fetchEncryptedPayload(guid,
+                "SID=" + sessionId,
                 "json",
                 false,
                 BlockchainFramework.getApiCode());
