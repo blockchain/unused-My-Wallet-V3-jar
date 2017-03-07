@@ -3,10 +3,15 @@ package info.blockchain.wallet.payload.data;
 import com.google.common.collect.BiMap;
 import info.blockchain.MockedResponseTest;
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payment.Payment;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.ECKey;
+import org.json.JSONObject;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -15,11 +20,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.ECKey;
-import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class HDWalletTest extends MockedResponseTest {
 
@@ -385,7 +385,7 @@ public class HDWalletTest extends MockedResponseTest {
 
         Payment payment = new Payment();
 
-        long spendAmount = 80200l + 70000l + 60000l + 50000l + 40000l + 30000l + 20000l + 10000l - Payment.DUST.longValue();
+        long spendAmount = 80200L + 70000L + 60000L + 50000L + 40000L + 30000L + 20000L + 10000L - Payment.DUST.longValue();
         long feeManual = Payment.DUST.longValue();
 
         SpendableUnspentOutputs paymentBundle = payment

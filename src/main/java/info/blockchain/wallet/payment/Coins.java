@@ -4,26 +4,26 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.script.Script;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 class Coins {
 
-    public static synchronized Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
+    public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
         BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
         return blockExplorer.getUnspentOutputs(addresses);
     }
 
-    public static synchronized Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs coins, BigInteger feePerKb){
+    public static Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs coins, BigInteger feePerKb){
 
         BigInteger sweepBalance = BigInteger.ZERO;
         BigInteger sweepFee;
@@ -54,8 +54,7 @@ class Coins {
         return Pair.of(sweepBalance, sweepFee);
     }
 
-    public static synchronized SpendableUnspentOutputs getMinimumCoinsForPayment(UnspentOutputs coins, BigInteger paymentAmount, BigInteger feePerKb)
-        throws UnsupportedEncodingException {
+    public static SpendableUnspentOutputs getMinimumCoinsForPayment(UnspentOutputs coins, BigInteger paymentAmount, BigInteger feePerKb) {
 
         List<UnspentOutput> unspentOutputs = coins.getUnspentOutputs();
         List<UnspentOutput> spendWorthyList = new ArrayList<>();
