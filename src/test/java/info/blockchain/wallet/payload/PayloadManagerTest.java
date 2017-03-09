@@ -2,6 +2,7 @@ package info.blockchain.wallet.payload;
 
 import info.blockchain.MockedResponseTest;
 import info.blockchain.api.data.Transaction;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -267,6 +269,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         responseList.add("{}");//multiaddress responses - not testing this so can be empty.
         responseList.add("{}");
         responseList.add("{}");
+        responseList.add("{}");
         mockInterceptor.setResponseStringList(responseList);
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
 
@@ -430,6 +433,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(walletBase);
+        responseList.add("{}");
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
             "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
@@ -440,8 +444,7 @@ public class PayloadManagerTest extends MockedResponseTest {
             "multiaddress/wallet_v3_5_m4.txt").toURI())), Charset.forName("utf-8")));
         mockInterceptor.setResponseStringList(responseList);
 
-        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "MyTestWallet");
-        PayloadManager.getInstance().updateAllTransactions();
+        PayloadManager.getInstance().initializeAndDecrypt("06f6fa9c-d0fe-403d-815a-111ee26888e2", "4750d125-5344-4b79-9cf9-6e3c97bc9523", "MyTestWallet");
 
         Wallet wallet = PayloadManager.getInstance().getPayload();
 
@@ -453,6 +456,8 @@ public class PayloadManagerTest extends MockedResponseTest {
             + "            }"));
         wallet.getHdWallets().get(0).getAccounts().get(0).setAddressLabels(labelList);
 
+        PayloadManager.getInstance().updateAccountTransaction(
+            wallet.getHdWallets().get(0).getAccounts().get(0).getXpub(), 50, 0, null);
         String nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(
             wallet.getHdWallets().get(0).getAccounts().get(0));
 
@@ -465,7 +470,39 @@ public class PayloadManagerTest extends MockedResponseTest {
     }
 
     @Test
-    public void getMultiAddress() throws Exception {
+    public void balance() throws Exception {
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_6.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+
+        mockInterceptor.setResponseStringList(responseList);
+
+        PayloadManager payloadManager = PayloadManager.getInstance();
+        payloadManager.initializeAndDecrypt("any", "any", "MyTestWallet");
+
+        //'All' wallet balance and transactions
+        Assert.assertEquals(743071,payloadManager.getWalletBalance().longValue());
+
+        //Imported addresses consolidated
+        Assert.assertEquals(137505, PayloadManager.getInstance().getImportedAddressesBalance().longValue());
+
+        //Account and address balances
+        String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
+        Assert.assertEquals(566349, payloadManager.getAddressBalance(first).longValue());
+
+        String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
+        Assert.assertEquals(39217, payloadManager.getAddressBalance(second).longValue());
+
+        String third = "189iKJLruPtUorasDuxmc6fMRVxz6zxpPS";
+        Assert.assertEquals(137505, payloadManager.getAddressBalance(third).longValue());
+    }
+
+    @Test
+    public void multiAddress() throws Exception {
         //guid 5350e5d5-bd65-456f-b150-e6cc089f0b26
         URI uri = getClass().getClassLoader().getResource("wallet_v3_6.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
@@ -473,46 +510,22 @@ public class PayloadManagerTest extends MockedResponseTest {
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(walletBase);
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
             "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m2.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m4.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m5.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add("{}");
-
         mockInterceptor.setResponseStringList(responseList);
 
         PayloadManager payloadManager = PayloadManager.getInstance();
         payloadManager.initializeAndDecrypt("0f28735d-0b89-405d-a40f-ee3e85c3c78c", "5350e5d5-bd65-456f-b150-e6cc089f0b26", "MyTestWallet");
-        payloadManager.updateAllTransactions();
 
-        //'All' wallet balance and transactions
-        Assert.assertEquals(743071,payloadManager.getWalletBalance().longValue());
-        Assert.assertEquals(8,payloadManager.getWalletTransactions().size());
-
-        //Imported addresses consolidated
-        Assert.assertEquals(137505, PayloadManager.getInstance().getImportedAddressesBalance().longValue());
-        Assert.assertEquals(2, PayloadManager.getInstance().getImportedAddressesTransactions().size());
-
-        //Account and address balances
-        String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
-        Assert.assertEquals(566349, payloadManager.getAddressBalance(first).longValue());
-        Assert.assertEquals(8,payloadManager.getAddressTransactions(first).size());
-
-        String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
-        Assert.assertEquals(39217, payloadManager.getAddressBalance(second).longValue());
-        Assert.assertEquals(2,payloadManager.getAddressTransactions(second).size());
-
-        String third = "189iKJLruPtUorasDuxmc6fMRVxz6zxpPS";
-        Assert.assertEquals(137505, payloadManager.getAddressBalance(third).longValue());
-        Assert.assertEquals(2,payloadManager.getAddressTransactions(third).size());
-
+        payloadManager.updateAllTransactions(50, 0, null);
 
         //Account 1
+        String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
+        mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m2.txt").toURI())), Charset.forName("utf-8")));
+        payloadManager.updateAccountTransaction(first, 50, 0, null);
+        Assert.assertEquals(8,payloadManager.getAddressTransactions(first).size());
         TransactionSummary summary = payloadManager.getAddressTransactions(first).get(0);
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
@@ -580,6 +593,11 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("My Bitcoin Wallet"));
 
         //Account 2
+        String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
+        mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+        "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
+        payloadManager.updateAccountTransaction(second, 50, 0, null);
+        Assert.assertEquals(2,payloadManager.getAddressTransactions(second).size());
         summary = payloadManager.getAddressTransactions(second).get(0);
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
@@ -598,7 +616,12 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
 
         //Imported addresses (consolidated)
+        mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m4.txt").toURI())), Charset.forName("utf-8")));
+        payloadManager.updateAddressTransactions(second, 50, 0, null);
         summary = payloadManager.getImportedAddressesTransactions().get(0);
+
+        Assert.assertEquals(2,payloadManager.getImportedAddressesTransactions().size());
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
