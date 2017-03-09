@@ -1,23 +1,24 @@
 package info.blockchain.wallet.multiaddress;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Address;
 import info.blockchain.api.data.Input;
 import info.blockchain.api.data.MultiAddress;
 import info.blockchain.api.data.Output;
 import info.blockchain.api.data.Transaction;
-import info.blockchain.api.data.Transaction.Direction;
 import info.blockchain.api.data.Xpub;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDAccount;
+import info.blockchain.wallet.bip44.HDChain;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabels;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import retrofit2.Call;
@@ -148,191 +149,180 @@ public class MultiAddressFactory {
         }
     }
 
-    public static void flagTransactionDirection(LinkedHashSet<String> ownAddressesAndXpubs
+    public static List<TransactionSummary> summarize(LinkedHashSet<String> ownAddressesAndXpubs
         , List<String> watchOnlyAddresses
         , MultiAddress multiAddress) {
 
-        List<Transaction> txs = multiAddress.getTxs();
-        if(txs == null) return;
+        List<TransactionSummary> summaryList = new ArrayList<>();
 
-        List<String> own_hd_addresses = new ArrayList<>();
-        List<String> moveToAddrArray = new ArrayList<>();
+        List<Transaction> txs = multiAddress.getTxs();
+        if(txs == null) {
+            //Address might not contain transactions
+            return summaryList;
+        }
 
         for(Transaction tx : txs) {
+
+            TransactionSummary txSummary = new TransactionSummary();
+            txSummary.inputsMap = new HashMap<>();
+            txSummary.outputsMap = new HashMap<>();
+
+            if(tx.getResult().signum() > 0) {
+                txSummary.setDirection(Direction.RECEIVED);
+            } else {
+                txSummary.setDirection(Direction.SENT);
+                //Or potential Direction.TRANSFERRED
+            }
+
+            //Inputs
+            String inputAddr;
+            BigInteger inputValue;
+            for(Input input : tx.getInputs()) {
+
+                Output prevOut = input.getPrevOut();
+                if(prevOut != null) {
+
+                    inputAddr = prevOut.getAddr();
+                    inputValue = prevOut.getValue();
+                    if(inputAddr != null) {
+
+                        //Transaction from HD account
+                        Xpub xpubBody = prevOut.getXpub();
+                        if (xpubBody != null) {
+                            //xpubBody will only show if it belongs to our account
+                            //inputAddr belongs to our own account - add it, it's a transfer/send
+                            ownAddressesAndXpubs.add(inputAddr);
+                        }
+
+                        //Flag as watch only
+                        if (watchOnlyAddresses.contains(inputAddr)) {
+                            txSummary.setWatchOnly(true);
+                        }
+
+                        //Keep track of inputs
+                        txSummary.inputsMap.put(inputAddr, inputValue);
+                    } else {
+                        //This will never happen unless server has issues
+                    }
+
+                } else {
+                    //Newly generated coin
+                }
+            }
+
+            //Outputs
+            HashMap<String, BigInteger> allOutputs = new HashMap<>();
+            String outputAddr;
+            BigInteger outputValue;
+            for(Output output :tx.getOut()) {
+
+                outputAddr = output.getAddr();
+                outputValue = output.getValue();
+                if(outputAddr != null) {
+
+                    Xpub xpubBody = output.getXpub();
+                    if (xpubBody != null) {
+
+                        //inputAddr belongs to our own account - add it
+                        ownAddressesAndXpubs.add(outputAddr);
+                        if(xpubBody.getPath().startsWith("M/"+HDChain.RECEIVE_CHAIN+"/")) {
+
+                            if(txSummary.getDirection() == Direction.SENT) {
+                                txSummary.setDirection(Direction.TRANSFERRED);
+                            }
+
+                            txSummary.outputsMap.put(outputAddr, outputValue);
+                        } else {
+                            //Change - ignore
+                        }
+
+                    } else {
+                        //If we own this address, it's a transfer
+                        if (ownAddressesAndXpubs.contains(outputAddr)) {
+
+                            if(txSummary.getDirection() == Direction.SENT) {
+                                txSummary.setDirection(Direction.TRANSFERRED);
+                            }
+
+                            //Don't add change coming back
+                            if (!txSummary.inputsMap.containsKey(outputAddr)) {
+                                txSummary.outputsMap.put(outputAddr, outputValue);
+                            }
+
+                        } else {
+                            //Addres does not belong to us
+                            txSummary.outputsMap.put(outputAddr, outputValue);
+                        }
+                    }
+
+                    //Flag as watch only
+                    if (watchOnlyAddresses.contains(outputAddr)) {
+                        txSummary.setWatchOnly(true);
+                    }
+
+                    //Keep track of outputs
+                    allOutputs.put(outputAddr, outputValue);
+                } else {
+                    //This will never happen unless server has issues
+                }
+            }
+
+            BigInteger fee = calculateFee(txSummary.inputsMap, allOutputs, txSummary.getDirection());
+            BigInteger total = calculateTotal(tx.getHash(), txSummary.outputsMap, fee, txSummary.getDirection());
+            txSummary.setHash(tx.getHash());
+            txSummary.setTotal(total);
+            txSummary.setFee(fee);
+            txSummary.setTime(tx.getTime());
+            txSummary.setDoubleSpend(tx.isDoubleSpend());
 
             //Set confirmations
             long latestBlock = multiAddress.getInfo().getLatestBlock().getHeight();
             long txBlockHeight = tx.getBlockHeight();
             if(latestBlock > 0 && txBlockHeight > 0) {
-                tx.setConfirmations((int) ((latestBlock - txBlockHeight) + 1));
+                txSummary.setConfirmations((int) ((latestBlock - txBlockHeight) + 1));
             } else {
-                tx.setConfirmations(0);
+                txSummary.setConfirmations(0);
             }
 
-            //Set direction
-            if(tx.getResult().signum() > 0) {
-                tx.setDirection(Direction.RECEIVED);
-            } else {
-                tx.setDirection(Direction.SENT);
-            }
-
-            BigInteger moveAmount = BigInteger.ZERO;
-            Direction direction = Direction.SENT;
-
-            ArrayList<String> ownInput = new ArrayList<>();
-            ArrayList<String> ownOutput = new ArrayList<>();
-
-            ArrayList<BigInteger> amountListOut = new ArrayList<>();
-            ArrayList<BigInteger> amountListIn = new ArrayList<>();
-
-            String inputAddr = null;
-            long inputs_amount = 0L;
-
-            String outputAddr = null;
-            long outputs_amount = 0L;
-
-            for(Input input : tx.getInputs()) {
-
-                Output prevOut = input.getPrevOut();
-
-                if(prevOut != null) {
-
-                    inputAddr = prevOut.getAddr();
-
-                    if(watchOnlyAddresses.contains(inputAddr)) {
-                        tx.setWatchOnly(true);
-                    }
-
-                    if (prevOut.getXpub() != null) {
-//                        Xpub xpubBody = prevOut.getXpub();
-
-                        if (prevOut.getAddr() != null && !own_hd_addresses
-                            .contains(prevOut.getAddr())) {
-                            own_hd_addresses.add(prevOut.getAddr());
-                            direction = Direction.TRANSFERRED;
-                        }
-                    } else {
-                        //(Legacy to HD transfer check)
-                        //If contained in our own legacy addresses - it is a move
-                        //We still need to calculate the move amount below
-                        if (ownAddressesAndXpubs.contains(prevOut.getAddr())) {
-                            direction = Direction.TRANSFERRED;
-
-                            BigInteger amountInput = prevOut.getValue();
-                            if (ownInput.contains(inputAddr)) {
-                                int index = ownInput.indexOf(inputAddr);
-                                amountListIn.set(index, amountListIn.get(index).add(amountInput));
-                            } else {
-                                ownInput.add(inputAddr);
-                                amountListIn.add(amountInput);
-                            }
-                        }
-                    }
-
-                    inputs_amount += prevOut.getValue().longValue();
-                }
-            }
-
-            for(Output output :tx.getOut()) {
-
-                outputAddr = output.getAddr();
-
-                if(watchOnlyAddresses.contains(outputAddr)) {
-                    tx.setWatchOnly(true);
-                }
-
-                if(output.getXpub() != null) {
-
-                    Xpub xpubBody = output.getXpub();
-
-                    if(xpubBody.getPath().startsWith("M/0/")) {
-                        moveAmount = moveAmount.add(output.getValue());
-                        moveToAddrArray.add(xpubBody.getM());
-                    }
-                    if (output.getAddr() != null
-                        && !own_hd_addresses.contains(output.getAddr())) {
-                        own_hd_addresses.add(output.getAddr());
-                    }
-
-                } else {
-
-                    //If output is own legacy or hd address = move
-                    if(output.getAddr() != null
-                        && ownAddressesAndXpubs.contains(output.getAddr())
-                        && own_hd_addresses.contains(output.getAddr())) {
-
-                        BigInteger amountOutput = output.getValue();
-
-                        //Don't add change coming back
-                        if (inputAddr != null && !inputAddr.equals(outputAddr)) {
-                            moveAmount = moveAmount.add(output.getValue());
-
-                            if (ownOutput.contains(outputAddr)) {
-                                int index = ownOutput.indexOf(outputAddr);
-                                amountListOut.set(index, amountListOut.get(index).add(amountOutput));
-                            } else {
-                                ownOutput.add(outputAddr);
-                                amountListOut.add(amountOutput);
-                            }
-
-                            moveToAddrArray.add(output.getAddr());
-                            direction = Direction.TRANSFERRED;
-                        }
-
-                    } else {
-                        //one foreign address is enough to not call it move anymore
-                        direction = Direction.SENT;
-                    }
-
-                }
-
-                outputs_amount += output.getValue().longValue();
-            }
-
-            // TODO: 03/03/2017  Some transferred cases might not have been covered yet
-//            for (String address : ownOutput) {
-//                int index = ownOutput.indexOf(address);
-//                BigInteger outputAmount = amountListOut.get(index);
-//
-//                //Check if this is just the change we get back
-//                if (ownInput.contains(address)) {
-//
-//                    BigInteger inputAmount = amountListIn.get(ownInput.indexOf(address));
-//                    if (inputAmount.longValue() < outputAmount.longValue()) {
-//                        direction = Direction.RECEIVED;
-//                        outputAmount = inputAmount.subtract(outputAmount).abs();
-//                    } else {
-//                        direction = Direction.SENT;
-//                        outputAmount = amountListIn.get(ownInput.indexOf(address))
-//                            .subtract(outputAmount).negate();
-//                    }
-//
-//                    tx.setResult(outputAmount);
-//                }
-//            }
-//
-//            for (String address : ownInput) {
-//
-//                if (ownOutput.contains(address))
-//                    continue;
-//
-//                int index = ownInput.indexOf(address);
-//                BigInteger inputAmount = amountListIn.get(index).negate();
-//
-//                if (direction != Direction.TRANSFERRED)
-//                    direction = Direction.SENT;
-//
-//                tx.setResult(inputAmount);
-//            }
-
-            if (Math.abs(inputs_amount - outputs_amount) == Math.abs(tx.getResult().longValue())) {
-                direction = Direction.TRANSFERRED;
-            }
-
-            if(direction == Direction.TRANSFERRED) {
-                tx.setDirection(Direction.TRANSFERRED);
-                tx.setResult(moveAmount);
-            }
+            summaryList.add(txSummary);
         }
+
+        return summaryList;
+    }
+
+    private static BigInteger calculateTotal(String hash, HashMap<String, BigInteger> nonChange, BigInteger fee, Direction direction) {
+
+        BigInteger total = BigInteger.ZERO;
+
+        for(BigInteger amount : nonChange.values()) {
+            total = total.add(amount);
+        }
+
+        if(direction == Direction.SENT) {
+            total = total.add(fee);
+        }
+
+        return total;
+    }
+
+    private static BigInteger calculateFee(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> outputs, Direction direction) {
+
+        if(direction == Direction.RECEIVED) {
+            //Receive doesn't have fee. We don't carry cost of tx
+            return BigInteger.ZERO;
+        }
+
+        BigInteger inputTotal = BigInteger.ZERO;
+        BigInteger outputTotal = BigInteger.ZERO;
+
+        for(BigInteger inputAmount : inputs.values()) {
+            inputTotal = inputTotal.add(inputAmount);
+        }
+
+        for(BigInteger outputAmount : outputs.values()) {
+            outputTotal = outputTotal.add(outputAmount);
+        }
+
+        return inputTotal.subtract(outputTotal);
     }
 }

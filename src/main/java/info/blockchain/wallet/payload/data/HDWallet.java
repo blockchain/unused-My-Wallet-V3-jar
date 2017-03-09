@@ -507,4 +507,21 @@ public class HDWallet {
         validateHD();
         return HD.getMnemonic();
     }
+
+    public String getLabelFromXpub(String xpub) {
+        List<Account> accounts = getAccounts();
+
+        for(Account account : accounts) {
+            if(account.getXpub().equals(xpub)) {
+                String label = account.getLabel();
+                if(label == null || label.isEmpty()){
+                    return xpub;
+                } else {
+                    return label;
+                }
+            }
+        }
+
+        return xpub;
+    }
 }

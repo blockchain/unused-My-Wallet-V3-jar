@@ -62,7 +62,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 dependencies {
-    compile group: 'info.blockchain', name: 'api-client', version: '0.1.9-SNAPSHOT'
+    compile group: 'info.blockchain', name: 'api-client', version: '0.1.10-SNAPSHOT'
     compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.5'

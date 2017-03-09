@@ -1,12 +1,13 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.MockedResponseTest;
-import info.blockchain.api.data.MultiAddress;
-import info.blockchain.api.data.Transaction.Direction;
+import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabels;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
@@ -14,7 +15,9 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import org.bitcoinj.core.Base58;
@@ -420,196 +423,6 @@ public class PayloadManagerTest extends MockedResponseTest {
     }
 
     @Test
-    public void getMultiAddress() throws Exception {
-
-        URI uri = getClass().getClassLoader().getResource("wallet_v3_4.txt").toURI();
-        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
-
-        LinkedList<String> responseList = new LinkedList<>();
-        responseList.add(walletBase);
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m1.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m2.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m3.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m4.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m5.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m6.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m7.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m8.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m9.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m10.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m11.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m12.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m13.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m14.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m15.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m16.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m17.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m18.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m19.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m20.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_4_m21.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add("{}");
-
-        mockInterceptor.setResponseStringList(responseList);
-
-        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "MyTestWallet");
-
-        //'All' accounts balance and transactions
-        MultiAddress all = PayloadManager.getInstance()
-            .getMultiAddress(PayloadManager.MULTI_ADDRESS_ALL);
-        Assert.assertEquals(235077,all.getWallet().getFinalBalance().longValue());
-        Assert.assertEquals(294,all.getWallet().getNTx());
-
-        MultiAddress account1 = PayloadManager.getInstance()
-            .getMultiAddress("xpub6CRaPB9182vBdT99Aj435Jy9hdqp6NPQUvf6xfz2ghScwNf4jwX6T5BXrJGknn3VorS3RAopzxhWfHKdcaHxSoYq3XH4kfByKQ9p9Zjbz4p");
-        Assert.assertEquals(0,account1.getAddresses().get(0).getFinalBalance().longValue());
-        Assert.assertEquals(2,account1.getAddresses().get(0).getNTx());
-
-        MultiAddress account2 = PayloadManager.getInstance()
-            .getMultiAddress("xpub6CRaPB9182vBgWDgyqx8DFJwMQ3gbrDW2gk3puMPcqmBxE84pNjoaYqFqmK7gGVzUPxwuHnE4rXsoboQTnvH5utSAtSw9GBnJb6g7WhzQ1z");
-        Assert.assertEquals(0,account2.getAddresses().get(0).getFinalBalance().longValue());
-        Assert.assertEquals(0,account2.getAddresses().get(0).getNTx());
-
-        MultiAddress address1 = PayloadManager.getInstance()
-            .getMultiAddress("1Nqz4vjxdk4sy6uGNqnXaC49QMt2aDNt2Q");
-        Assert.assertEquals(0,address1.getAddresses().get(0).getFinalBalance().longValue());
-        Assert.assertEquals(144,address1.getAddresses().get(0).getNTx());
-
-        MultiAddress address2 = PayloadManager.getInstance()
-            .getMultiAddress("18HuxnpyuhAUYiCSSiLhv5589ebJuSSU5A");
-        Assert.assertEquals(0,address2.getAddresses().get(0).getFinalBalance().longValue());
-        Assert.assertEquals(44,address2.getAddresses().get(0).getNTx());
-
-        MultiAddress address4 = PayloadManager.getInstance()
-            .getMultiAddress("15CuVHzfZsPHpfQ1GJFzZ93LGe7ZrHdBb8");
-        Assert.assertEquals(85100,address4.getAddresses().get(0).getFinalBalance().longValue());
-        Assert.assertEquals(18,address4.getAddresses().get(0).getNTx());
-
-        MultiAddress address5 = PayloadManager.getInstance()
-            .getMultiAddress("19hxgds7jLo68q4qXLHtTP2qWFxZBKYNfA");
-        Assert.assertEquals(86977,address5.getAddresses().get(0).getFinalBalance().longValue());
-        Assert.assertEquals(24,address5.getAddresses().get(0).getNTx());
-
-        Assert.assertEquals(51979, address5.getTxs().get(0).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(0).getDirection());
-
-        Assert.assertEquals(-21000, address5.getTxs().get(1).getResult().longValue());
-        Assert.assertEquals(Direction.SENT, address5.getTxs().get(1).getDirection());
-
-        Assert.assertEquals(-34094, address5.getTxs().get(2).getResult().longValue());
-        Assert.assertEquals(Direction.SENT, address5.getTxs().get(2).getDirection());
-
-        Assert.assertEquals(-112206, address5.getTxs().get(3).getResult().longValue());
-        Assert.assertEquals(Direction.SENT, address5.getTxs().get(3).getDirection());
-
-        Assert.assertEquals(546, address5.getTxs().get(4).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(4).getDirection());
-
-        Assert.assertEquals(546, address5.getTxs().get(5).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(5).getDirection());
-
-        Assert.assertEquals(112206, address5.getTxs().get(6).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(6).getDirection());
-
-        Assert.assertEquals(2000, address5.getTxs().get(7).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(7).getDirection());
-
-        Assert.assertEquals(3000, address5.getTxs().get(8).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(8).getDirection());
-
-        Assert.assertEquals(4000, address5.getTxs().get(9).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(9).getDirection());
-
-        Assert.assertEquals(5000, address5.getTxs().get(10).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(10).getDirection());
-
-        Assert.assertEquals(-251741, address5.getTxs().get(11).getResult().longValue());
-        Assert.assertEquals(Direction.SENT, address5.getTxs().get(11).getDirection());
-
-        Assert.assertEquals(49440, address5.getTxs().get(12).getResult().longValue());
-        Assert.assertEquals(Direction.RECEIVED, address5.getTxs().get(12).getDirection());
-
-
-        //Transfers
-//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(13).getDirection());
-//        Assert.assertEquals(202301, address5.getTxs().get(13).getResult().longValue());
-//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(13).getDirection());
-//
-//        Assert.assertEquals(22101, address5.getTxs().get(14).getResult().longValue());
-//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(14).getDirection());
-//
-//        Assert.assertEquals(23457, address5.getTxs().get(15).getResult().longValue());
-//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(15).getDirection());
-//
-//        Assert.assertEquals(5027, address5.getTxs().get(16).getResult().longValue());
-//        Assert.assertEquals(Direction.TRANSFERRED, address5.getTxs().get(16).getDirection());
-
-    }
-
-    @Test
-    public void getMultiAddress2() throws Exception {
-
-        URI uri = getClass().getClassLoader().getResource("wallet_v3_5.txt").toURI();
-        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
-
-        LinkedList<String> responseList = new LinkedList<>();
-        responseList.add(walletBase);
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m2.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m3.txt").toURI())), Charset.forName("utf-8")));
-        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m4.txt").toURI())), Charset.forName("utf-8")));
-        mockInterceptor.setResponseStringList(responseList);
-
-        PayloadManager.getInstance().initializeAndDecrypt("06f6fa9c-d0fe-403d-815a-111ee26888e2", "4750d125-5344-4b79-9cf9-6e3c97bc9523", "MyTestWallet");
-
-        Assert.assertEquals(164379, PayloadManager.getInstance().getWalletBalance().longValue());
-        Assert.assertEquals(86977, PayloadManager.getInstance().getImportedAddressesBalance().longValue());
-
-        Assert.assertEquals(77402, PayloadManager.getInstance()
-            .getAddressBalance("xpub6CeAwhuTvFTiL8oskqNsFrQ1SHdw8cPj6DkiHCVgKstCBEn7FAyPMUELmH4UUGhXJHLZV5oCrd7Cyi4R1yHw4VEQcW1kskR4Yb9RjsgwRPU")
-            .longValue());
-        Assert.assertEquals(86977, PayloadManager.getInstance()
-            .getAddressBalance("19hxgds7jLo68q4qXLHtTP2qWFxZBKYNfA")
-            .longValue());
-
-
-        Assert.assertEquals(25, PayloadManager.getInstance().getWalletTransactions().size());
-        Assert.assertEquals(24, PayloadManager.getInstance().getImportedAddressesTransactions().size());
-
-        Assert.assertEquals(1, PayloadManager.getInstance()
-            .getMultiAddress("xpub6CeAwhuTvFTiL8oskqNsFrQ1SHdw8cPj6DkiHCVgKstCBEn7FAyPMUELmH4UUGhXJHLZV5oCrd7Cyi4R1yHw4VEQcW1kskR4Yb9RjsgwRPU")
-            .getTxs().size());
-        Assert.assertEquals(24, PayloadManager.getInstance()
-            .getMultiAddress("19hxgds7jLo68q4qXLHtTP2qWFxZBKYNfA")
-            .getTxs().size());
-    }
-
-    @Test
     public void getNextAddress() throws Exception {
 
         URI uri = getClass().getClassLoader().getResource("wallet_v3_5.txt").toURI();
@@ -628,6 +441,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         mockInterceptor.setResponseStringList(responseList);
 
         PayloadManager.getInstance().initializeAndDecrypt("any", "any", "MyTestWallet");
+        PayloadManager.getInstance().updateAllTransactions();
 
         Wallet wallet = PayloadManager.getInstance().getPayload();
 
@@ -648,5 +462,157 @@ public class PayloadManagerTest extends MockedResponseTest {
             wallet.getHdWallets().get(0).getAccounts().get(0));
 
         Assert.assertEquals("1GEXfMa4SMh3iUZxP8HHQy7Wo3aqce72Nm", nextChangeAddress);
+    }
+
+    @Test
+    public void getMultiAddress() throws Exception {
+        //guid 5350e5d5-bd65-456f-b150-e6cc089f0b26
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_6.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m2.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m4.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m5.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add("{}");
+
+        mockInterceptor.setResponseStringList(responseList);
+
+        PayloadManager payloadManager = PayloadManager.getInstance();
+        payloadManager.initializeAndDecrypt("0f28735d-0b89-405d-a40f-ee3e85c3c78c", "5350e5d5-bd65-456f-b150-e6cc089f0b26", "MyTestWallet");
+        payloadManager.updateAllTransactions();
+
+        //'All' wallet balance and transactions
+        Assert.assertEquals(743071,payloadManager.getWalletBalance().longValue());
+        Assert.assertEquals(8,payloadManager.getWalletTransactions().size());
+
+        //Imported addresses consolidated
+        Assert.assertEquals(137505, PayloadManager.getInstance().getImportedAddressesBalance().longValue());
+        Assert.assertEquals(2, PayloadManager.getInstance().getImportedAddressesTransactions().size());
+
+        //Account and address balances
+        String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
+        Assert.assertEquals(566349, payloadManager.getAddressBalance(first).longValue());
+        Assert.assertEquals(8,payloadManager.getAddressTransactions(first).size());
+
+        String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
+        Assert.assertEquals(39217, payloadManager.getAddressBalance(second).longValue());
+        Assert.assertEquals(2,payloadManager.getAddressTransactions(second).size());
+
+        String third = "189iKJLruPtUorasDuxmc6fMRVxz6zxpPS";
+        Assert.assertEquals(137505, payloadManager.getAddressBalance(third).longValue());
+        Assert.assertEquals(2,payloadManager.getAddressTransactions(third).size());
+
+
+        //Account 1
+        TransactionSummary summary = payloadManager.getAddressTransactions(first).get(0);
+        Assert.assertEquals(68563, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
+
+        summary = payloadManager.getAddressTransactions(first).get(1);
+        Assert.assertEquals(138068, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.SENT, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1LQwNvEMnYjNCNxeUJzDfD8mcSqhm2ouPp"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AdTcerDBY735kDhQWit5Scroae6piQ2yw"));
+
+        summary = payloadManager.getAddressTransactions(first).get(2);
+        Assert.assertEquals(800100, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("19CMnkUgBnTBNiTWXwoZr6Gb3aeXKHvuGG"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("My Bitcoin Wallet"));
+
+        summary = payloadManager.getAddressTransactions(first).get(3);
+        Assert.assertEquals(35194, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.SENT, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1PQ9ZYhv9PwbWQQN74XRqUCjC32JrkyzB9"));
+
+        summary = payloadManager.getAddressTransactions(first).get(4);
+        Assert.assertEquals(98326, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
+
+        summary = payloadManager.getAddressTransactions(first).get(5);
+        Assert.assertEquals(160640, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1BZe6YLaf2HiwJdnBbLyKWAqNia7foVe1w"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("My Bitcoin Wallet"));
+
+        summary = payloadManager.getAddressTransactions(first).get(6);
+        Assert.assertEquals(9833, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+
+        summary = payloadManager.getAddressTransactions(first).get(7);
+        Assert.assertEquals(40160, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1Baa1cjB1CyBVSjw8SkFZ2YBuiwKnKLXhe"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("My Bitcoin Wallet"));
+
+        //Account 2
+        summary = payloadManager.getAddressTransactions(second).get(0);
+        Assert.assertEquals(68563, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
+
+        summary = payloadManager.getAddressTransactions(second).get(1);
+        Assert.assertEquals(9833, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+
+        //Imported addresses (consolidated)
+        summary = payloadManager.getImportedAddressesTransactions().get(0);
+        Assert.assertEquals(68563, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
+
+        summary = payloadManager.getImportedAddressesTransactions().get(1);
+        Assert.assertEquals(98326, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
     }
 }

@@ -585,17 +585,26 @@ public class Wallet {
         }
     }
 
-    public MultiAddress getLegacyBalanceAndTransactions(int limit, int offset)
-        throws IOException, ApiException {
-        List<String> all = getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
+    /**
+     * Returns label if match found, otherwise just returns address.
+     * @param address
+     * @return
+     */
+    public String getLabelFromLegacyAddress(String address) {
 
-        Response<MultiAddress> call = MultiAddressFactory
-            .getMultiAddress(all, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+        List<LegacyAddress> addresses = getLegacyAddressList();
 
-        if (call.isSuccessful()) {
-            return call.body();
-        } else {
-            throw new ApiException(call.errorBody().string());
+        for(LegacyAddress legacyAddress : addresses) {
+            if(legacyAddress.getAddress().equals(address)) {
+                String label = legacyAddress.getLabel();
+                if(label == null || label.isEmpty()){
+                    return address;
+                } else {
+                    return label;
+                }
+            }
         }
+
+        return address;
     }
 }
