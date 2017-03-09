@@ -24,14 +24,6 @@ import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nullable;
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -41,6 +33,10 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Response;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.*;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -72,7 +68,7 @@ public class HDWallet {
 
     //bip44 Wallet needed for address derivation
     private info.blockchain.wallet.bip44.HDWallet HD;
-    
+
     public void decryptHDWallet(@Nullable String validatedSecondPassword, String sharedKey, int iterations)
         throws IOException, DecryptionException, InvalidCipherTextException, DecoderException,
         MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, HDWalletException {
@@ -97,11 +93,11 @@ public class HDWallet {
                     accounts.size());
         }
     }
-    
+
     public void instantiateBip44Wallet()
         throws DecoderException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException,
         IOException, HDWalletException {
-        
+
         try{
             int walletSize = DEFAULT_NEW_WALLET_SIZE;
             if(accounts != null) walletSize = accounts.size();
@@ -114,7 +110,7 @@ public class HDWallet {
             for(Account account : getAccounts()) {
                 xpubList.add(account.getXpub());
             }
-            
+
             HD = HDWalletFactory
                 .restoreWatchOnlyWallet(PersistentUrls.getInstance().getCurrentNetworkParams(),
                     xpubList);
@@ -275,7 +271,7 @@ public class HDWallet {
         if(HD == null) {
             throw new HDWalletException("HD wallet not instantiated");
         }
-        
+
         info.blockchain.wallet.bip44.HDWallet bip44Wallet = HD;
         HDAccount hdAccount = bip44Wallet.addAccount();
 
@@ -435,7 +431,7 @@ public class HDWallet {
                 int addressIndex = Integer.parseInt(split[2]);
 
                 HDAddress hdAddress = hdAccount.getChain(chain).getAddressAt(addressIndex);
-                ECKey walletKey = PrivateKeyFactory
+                ECKey walletKey = new PrivateKeyFactory()
                     .getKey(PrivateKeyFactory.WIF_COMPRESSED, hdAddress.getPrivateKeyString());
                 keys.add(walletKey);
             }
@@ -457,7 +453,7 @@ public class HDWallet {
         if(HD == null) {
             throw new HDWalletException("HD wallet not instantiated");
         }
-        
+
         for(HDAccount account : HD.getAccounts()) {
             if(account.getXpub().equals(accountBody.getXpub())) {
                 return account;
@@ -473,7 +469,7 @@ public class HDWallet {
         if(HD == null) {
             throw new HDWalletException("HD wallet not instantiated");
         }
-        
+
         BiMap<String, Integer> xpubToAccountIndexMap = HashBiMap.create();
 
         List<HDAccount> accountList = HD.getAccounts();
