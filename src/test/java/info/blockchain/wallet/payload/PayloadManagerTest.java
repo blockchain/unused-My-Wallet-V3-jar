@@ -530,16 +530,16 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("125QEfWq3eKzAQQHeqcMcDMeZGm13hVRvU"));//My Bitcoin Account
         Assert.assertEquals(2, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
         summary = payloadManager.getAddressTransactions(first).get(1);
         Assert.assertEquals(138068, summary.getTotal().longValue());
         Assert.assertEquals(Direction.SENT, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1CQpuTQrJQLW6PEar17zsd9EV14cZknqWJ"));//My Bitcoin Wallet
         Assert.assertEquals(2, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1LQwNvEMnYjNCNxeUJzDfD8mcSqhm2ouPp"));
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AdTcerDBY735kDhQWit5Scroae6piQ2yw"));
@@ -550,13 +550,13 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getInputsMap().size());
         Assert.assertTrue(summary.getInputsMap().keySet().contains("19CMnkUgBnTBNiTWXwoZr6Gb3aeXKHvuGG"));
         Assert.assertEquals(1, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1CQpuTQrJQLW6PEar17zsd9EV14cZknqWJ"));//My Bitcoin Wallet
 
         summary = payloadManager.getAddressTransactions(first).get(3);
         Assert.assertEquals(35194, summary.getTotal().longValue());
         Assert.assertEquals(Direction.SENT, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("15HjFY96ZANBkN5kvPRgrXH93jnntqs32n"));//My Bitcoin Wallet
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1PQ9ZYhv9PwbWQQN74XRqUCjC32JrkyzB9"));
 
@@ -564,7 +564,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(98326, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1Peysd3qYDe35yNp6KB1ZkbVYHr42JT9zZ"));//My Bitcoin Wallet
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
@@ -574,15 +574,15 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getInputsMap().size());
         Assert.assertTrue(summary.getInputsMap().keySet().contains("1BZe6YLaf2HiwJdnBbLyKWAqNia7foVe1w"));
         Assert.assertEquals(1, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Peysd3qYDe35yNp6KB1ZkbVYHr42JT9zZ"));//My Bitcoin Wallet
 
         summary = payloadManager.getAddressTransactions(first).get(6);
         Assert.assertEquals(9833, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("17ijgwpGsVQRzMjsdAfdmeP53kpw9yvXur"));//My Bitcoin Wallet
         Assert.assertEquals(1, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AtunWT3F6WvQc3aaPuPbNGeBpVF3ZPM5r"));//Savings account
 
         summary = payloadManager.getAddressTransactions(first).get(7);
         Assert.assertEquals(40160, summary.getTotal().longValue());
@@ -590,7 +590,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getInputsMap().size());
         Assert.assertTrue(summary.getInputsMap().keySet().contains("1Baa1cjB1CyBVSjw8SkFZ2YBuiwKnKLXhe"));
         Assert.assertEquals(1, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("17ijgwpGsVQRzMjsdAfdmeP53kpw9yvXur"));//My Bitcoin Wallet
 
         //Account 2
         String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
@@ -602,18 +602,18 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("125QEfWq3eKzAQQHeqcMcDMeZGm13hVRvU"));//My Bitcoin Wallet
         Assert.assertEquals(2, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
         summary = payloadManager.getAddressTransactions(second).get(1);
         Assert.assertEquals(9833, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("17ijgwpGsVQRzMjsdAfdmeP53kpw9yvXur"));//My Bitcoin Wallet
         Assert.assertEquals(1, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AtunWT3F6WvQc3aaPuPbNGeBpVF3ZPM5r"));//Savings account
 
         //Imported addresses (consolidated)
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
@@ -625,16 +625,16 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("125QEfWq3eKzAQQHeqcMcDMeZGm13hVRvU"));//My Bitcoin Wallet
         Assert.assertEquals(2, summary.getOutputsMap().size());
-        Assert.assertTrue(summary.getOutputsMap().keySet().contains("Savings account"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
         summary = payloadManager.getImportedAddressesTransactions().get(1);
         Assert.assertEquals(98326, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
-        Assert.assertTrue(summary.getInputsMap().keySet().contains("My Bitcoin Wallet"));
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1Peysd3qYDe35yNp6KB1ZkbVYHr42JT9zZ"));//My Bitcoin Wallet
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
     }

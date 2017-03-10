@@ -748,7 +748,6 @@ public class PayloadManager {
         }
 
         List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress);
-        updateTransactionSummaryLabels(summaryList);
         transactionSummaryMap.put(xpub, summaryList);
 
         if(callback != null)callback.onComplete(getAddressTransactions(xpub));
@@ -762,6 +761,7 @@ public class PayloadManager {
      * @throws IOException
      * @throws ApiException
      */
+    // TODO: 09/03/2017 Imported addresses needs sorting out
     public void updateAddressTransactions(String address, int limit, int offset, TransactionCallback callback) {
 
         LinkedHashSet<String> all = getAllAccountsAndAddresses();
@@ -781,7 +781,6 @@ public class PayloadManager {
         MultiAddressFactory.sort(multiAddress.getTxs());
         multiAddressMap.put(address, multiAddress);
         List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress);
-        updateTransactionSummaryLabels(summaryList);
         transactionSummaryMap.put(address, summaryList);
 
         //Consolidate for 'Imported addresses'
@@ -795,38 +794,9 @@ public class PayloadManager {
         }
         multiAddressMap.put(MULTI_ADDRESS_ALL_LEGACY, existing);
         summaryList = MultiAddressFactory.summarize(all, watchOnly, existing);
-        updateTransactionSummaryLabels(summaryList);
         transactionSummaryMap.put(MULTI_ADDRESS_ALL_LEGACY, summaryList);
 
         if(callback != null)callback.onComplete(getAddressTransactions(address));
-    }
-
-    /**
-     * Replaces addresses/xpubs with labels where possible
-     * @param transactionSummaries
-     */
-    private void updateTransactionSummaryLabels(List<TransactionSummary> transactionSummaries) {
-
-        for(TransactionSummary summary : transactionSummaries) {
-
-            //Label inputs
-            HashMap<String, BigInteger> inputsMapClone = (HashMap)summary.getInputsMap().clone();
-            Set<Entry<String, BigInteger>> set = summary.getInputsMap().entrySet();
-            for(Entry<String, BigInteger> item : set) {
-                BigInteger value = inputsMapClone.remove(item.getKey());
-                inputsMapClone.put(getLabelFromAddress(item.getKey()), value);
-            }
-            summary.setInputsMap(inputsMapClone);
-
-            //Label outputs
-            HashMap<String, BigInteger> outputsMapClone = (HashMap)summary.getOutputsMap().clone();
-            set = summary.getOutputsMap().entrySet();
-            for(Entry<String, BigInteger> item : set) {
-                BigInteger value = outputsMapClone.remove(item.getKey());
-                outputsMapClone.put(getLabelFromAddress(item.getKey()), value);
-            }
-            summary.setOutputsMap(outputsMapClone);
-        }
     }
 
     /**
