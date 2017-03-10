@@ -1,8 +1,6 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.MockedResponseTest;
-import info.blockchain.api.data.Transaction;
-import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
@@ -16,12 +14,9 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -456,7 +451,7 @@ public class PayloadManagerTest extends MockedResponseTest {
             + "            }"));
         wallet.getHdWallets().get(0).getAccounts().get(0).setAddressLabels(labelList);
 
-        PayloadManager.getInstance().updateAccountTransaction(
+        PayloadManager.getInstance().getAccountTransactions(
             wallet.getHdWallets().get(0).getAccounts().get(0).getXpub(), 50, 0);
         String nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(
             wallet.getHdWallets().get(0).getAccounts().get(0));
@@ -518,15 +513,15 @@ public class PayloadManagerTest extends MockedResponseTest {
         PayloadManager payloadManager = PayloadManager.getInstance();
         payloadManager.initializeAndDecrypt("0f28735d-0b89-405d-a40f-ee3e85c3c78c", "5350e5d5-bd65-456f-b150-e6cc089f0b26", "MyTestWallet");
 
-        payloadManager.updateAllTransactions(50, 0);
-
         //Account 1
         String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
             "multiaddress/wallet_v3_6_m2.txt").toURI())), Charset.forName("utf-8")));
-        payloadManager.updateAccountTransaction(first, 50, 0);
-        Assert.assertEquals(8,payloadManager.getAddressTransactions(first).size());
-        TransactionSummary summary = payloadManager.getAddressTransactions(first).get(0);
+
+        List<TransactionSummary> transactionSummaries = payloadManager
+            .getAccountTransactions(first, 50, 0);
+        Assert.assertEquals(8,transactionSummaries.size());
+        TransactionSummary summary = transactionSummaries.get(0);
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -535,7 +530,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        summary = payloadManager.getAddressTransactions(first).get(1);
+        summary = transactionSummaries.get(1);
         Assert.assertEquals(138068, summary.getTotal().longValue());
         Assert.assertEquals(Direction.SENT, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -544,7 +539,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1LQwNvEMnYjNCNxeUJzDfD8mcSqhm2ouPp"));
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AdTcerDBY735kDhQWit5Scroae6piQ2yw"));
 
-        summary = payloadManager.getAddressTransactions(first).get(2);
+        summary = transactionSummaries.get(2);
         Assert.assertEquals(800100, summary.getTotal().longValue());
         Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -552,7 +547,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1CQpuTQrJQLW6PEar17zsd9EV14cZknqWJ"));//My Bitcoin Wallet
 
-        summary = payloadManager.getAddressTransactions(first).get(3);
+        summary = transactionSummaries.get(3);
         Assert.assertEquals(35194, summary.getTotal().longValue());
         Assert.assertEquals(Direction.SENT, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -560,7 +555,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1PQ9ZYhv9PwbWQQN74XRqUCjC32JrkyzB9"));
 
-        summary = payloadManager.getAddressTransactions(first).get(4);
+        summary = transactionSummaries.get(4);
         Assert.assertEquals(98326, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -568,7 +563,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        summary = payloadManager.getAddressTransactions(first).get(5);
+        summary = transactionSummaries.get(5);
         Assert.assertEquals(160640, summary.getTotal().longValue());
         Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -576,7 +571,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Peysd3qYDe35yNp6KB1ZkbVYHr42JT9zZ"));//My Bitcoin Wallet
 
-        summary = payloadManager.getAddressTransactions(first).get(6);
+        summary = transactionSummaries.get(6);
         Assert.assertEquals(9833, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -584,7 +579,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, summary.getOutputsMap().size());
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AtunWT3F6WvQc3aaPuPbNGeBpVF3ZPM5r"));//Savings account
 
-        summary = payloadManager.getAddressTransactions(first).get(7);
+        summary = transactionSummaries.get(7);
         Assert.assertEquals(40160, summary.getTotal().longValue());
         Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -595,10 +590,11 @@ public class PayloadManagerTest extends MockedResponseTest {
         //Account 2
         String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-        "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
-        payloadManager.updateAccountTransaction(second, 50, 0);
-        Assert.assertEquals(2,payloadManager.getAddressTransactions(second).size());
-        summary = payloadManager.getAddressTransactions(second).get(0);
+            "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
+        transactionSummaries = payloadManager
+            .getAccountTransactions(second, 50, 0);
+        Assert.assertEquals(2,transactionSummaries.size());
+        summary = transactionSummaries.get(0);
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -607,7 +603,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        summary = payloadManager.getAddressTransactions(second).get(1);
+        summary = transactionSummaries.get(1);
         Assert.assertEquals(9833, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -618,10 +614,11 @@ public class PayloadManagerTest extends MockedResponseTest {
         //Imported addresses (consolidated)
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
             "multiaddress/wallet_v3_6_m4.txt").toURI())), Charset.forName("utf-8")));
-        payloadManager.updateAddressTransactions(second, 50, 0);
-        summary = payloadManager.getImportedAddressesTransactions().get(0);
+        transactionSummaries = payloadManager.getImportedAddressesTransactions(50, 0);
+        Assert.assertEquals(2, transactionSummaries.size());
 
-        Assert.assertEquals(2,payloadManager.getImportedAddressesTransactions().size());
+        summary = transactionSummaries.get(0);
+        Assert.assertEquals(2,transactionSummaries.size());
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());
@@ -630,7 +627,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
         Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        summary = payloadManager.getImportedAddressesTransactions().get(1);
+        summary = transactionSummaries.get(1);
         Assert.assertEquals(98326, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());

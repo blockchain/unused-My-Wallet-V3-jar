@@ -1,6 +1,7 @@
 package info.blockchain.wallet.multiaddress;
 
 import java.math.BigInteger;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class TransactionSummary {
@@ -100,5 +101,27 @@ public class TransactionSummary {
 
     public void setDoubleSpend(boolean doubleSpend) {
         isDoubleSpend = doubleSpend;
+    }
+
+    public static class TxMostRecentDateComparator implements Comparator<TransactionSummary> {
+
+        public int compare(TransactionSummary t1, TransactionSummary t2) {
+
+            final int BEFORE = -1;
+            final int EQUAL = 0;
+            final int AFTER = 1;
+
+            int ret;
+
+            if (t1.getTime() > t2.getTime()) {
+                ret = BEFORE;
+            } else if (t1.getTime() < t2.getTime()) {
+                ret = AFTER;
+            } else {
+                ret = EQUAL;
+            }
+
+            return ret;
+        }
     }
 }

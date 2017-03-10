@@ -30,7 +30,6 @@ import info.blockchain.wallet.payload.data.WalletWrapper;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.Tools;
 
-import java.util.Collection;
 import java.util.Map.Entry;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -79,7 +78,6 @@ public class PayloadManager {
     //Key = address/xpub, Value = Multiaddress response from endpoint
     private HashMap<String, MultiAddress> multiAddressMap;
     //Key = address, Value = list of summarized transactions
-    private HashMap<String, List<TransactionSummary>> transactionSummaryMap;
     private HashMap<String, BigInteger> balanceMap;
 
     private static PayloadManager instance = new PayloadManager();
@@ -91,7 +89,6 @@ public class PayloadManager {
     private PayloadManager() {
         walletApi = new WalletApi();
         blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
-        transactionSummaryMap = new HashMap<>();
         multiAddressMap = new HashMap<>();
         balanceMap = new HashMap<>();
     }
@@ -198,6 +195,7 @@ public class PayloadManager {
 
     /**
      * Initializes a wallet from provided credentials.
+     * Calls balance api to show wallet balances on wallet load.
      * @param sharedKey
      * @param guid
      * @throws IOException
@@ -564,27 +562,6 @@ public class PayloadManager {
         return hdAccount.getChange().getAddressAt(nextIndex).getAddressString();
     }
 
-    public List<TransactionSummary> getWalletTransactions() {
-        return getAddressTransactions(MULTI_ADDRESS_ALL);
-    }
-
-    public List<TransactionSummary> getImportedAddressesTransactions() {
-        return getAddressTransactions(MULTI_ADDRESS_ALL_LEGACY);
-    }
-
-    /**
-     *
-     * @param address or xpub
-     * @return
-     */
-    public List<TransactionSummary> getAddressTransactions(String address) {
-        if(transactionSummaryMap.containsKey(address)) {
-            return transactionSummaryMap.get(address);
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
     /**
      * Updates address balance as well as wallet balance.
      * This is used to immediately update balances after a successful transaction which speeds
@@ -595,20 +572,20 @@ public class PayloadManager {
     public void subtractAmountFromAddressBalance(String address, BigInteger amount) throws Exception {
 
         //Update individual address
-        MultiAddress addressMultiAddress = multiAddressMap.get(address);
-        if(addressMultiAddress == null) {
-            throw new Exception("No info for this address. updateMultiAddress should be called first.");
+        BigInteger currentBalance = balanceMap.get(address);
+        if(currentBalance == null) {
+            throw new Exception("No info for this address. updateAllBalances should be called first.");
         }
-        BigInteger newBalance = getAddressBalance(address).subtract(amount);
-        addressMultiAddress.getWallet().setFinalBalance(newBalance);
+        BigInteger newBalance = currentBalance.subtract(amount);
+        balanceMap.put(address, newBalance);
 
         //Update wallet balance
-        MultiAddress allMultiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL);
-        if(allMultiAddress == null) {
-            throw new Exception("No info for wallet. updateMultiAddress should be called first.");
+        currentBalance = balanceMap.get(MULTI_ADDRESS_ALL);
+        if(currentBalance == null) {
+            throw new Exception("No info for this address. updateAllBalances should be called first.");
         }
-        newBalance = getWalletBalance().subtract(amount);
-        allMultiAddress.getWallet().setFinalBalance(newBalance);
+        newBalance = currentBalance.subtract(amount);
+        balanceMap.put(MULTI_ADDRESS_ALL, newBalance);
     }
 
     //********************************************************************************************//
@@ -692,19 +669,19 @@ public class PayloadManager {
     }
 
     /**
-     * Updates internal balance and transaction list for all wallet accounts/addresses
+     * Gets transaction list for all wallet accounts/addresses
      * @param limit Amount of transactions per page
      * @param offset Page offset
      * @return List of tx summaries for all wallet transactions
      * @throws IOException
      * @throws ApiException
      */
-    public List<TransactionSummary> updateAllTransactions(int limit, int offset) throws IOException, ApiException {
-        return updateAccountTransaction(MULTI_ADDRESS_ALL, limit, offset);
+    public List<TransactionSummary> getAllTransactions(int limit, int offset) throws IOException, ApiException {
+        return getAccountTransactions(MULTI_ADDRESS_ALL, limit, offset);
     }
 
     /**
-     * Updates internal balance and transaction list
+     * Gets transaction list for account
      * @param xpub
      * @param limit Amount of transactions per page
      * @param offset Page offset
@@ -712,7 +689,7 @@ public class PayloadManager {
      * @throws IOException
      * @throws ApiException
      */
-    public List<TransactionSummary> updateAccountTransaction(String xpub, int limit, int offset)
+    public List<TransactionSummary> getAccountTransactions(String xpub, int limit, int offset)
         throws IOException, ApiException {
 
         LinkedHashSet<String> all = getAllAccountsAndAddresses();
@@ -723,68 +700,49 @@ public class PayloadManager {
             return new ArrayList<>();
         }
 
-        MultiAddressFactory.sort(multiAddress.getTxs());
-
         MultiAddress existing = multiAddressMap.get(xpub);
         if(existing != null && existing.getTxs() != null) {
 
-            multiAddress.getTxs().addAll(existing.getTxs());
+            ArrayList<Transaction> txs = multiAddress.getTxs();
+            txs.addAll(existing.getTxs());
 
             //Remove duplicates
             Set<Transaction> hs = new HashSet<>();
-            hs.addAll(multiAddress.getTxs());
-            multiAddress.getTxs().clear();
-            multiAddress.getTxs().addAll(hs);
+            hs.addAll(txs);
+            txs.clear();
+            txs.addAll(hs);
+            multiAddress.setTxs(txs);
 
             multiAddressMap.put(xpub, multiAddress);
         } else {
             multiAddressMap.put(xpub, multiAddress);
         }
 
-        List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress);
-        transactionSummaryMap.put(xpub, summaryList);
-
+        List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress, null);
         return summaryList;
     }
 
     /**
      * Updates internal balance and transaction list for imported addresses
-     * @param address
      * @param limit Amount of transactions per page
      * @param offset Page offset
      * @return Consolidated list of tx summaries for specified imported transactions
      * @throws IOException
      * @throws ApiException
      */
-    // TODO: 09/03/2017 Imported addresses needs sorting out
-    public List<TransactionSummary> updateAddressTransactions(String address, int limit, int offset)
+    public List<TransactionSummary> getImportedAddressesTransactions(int limit, int offset)
         throws IOException, ApiException {
 
         LinkedHashSet<String> all = getAllAccountsAndAddresses();
         List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
+        List<String> legacy = getPayload().getLegacyAddressStringList();
 
-        MultiAddress multiAddress = getMultiAddress(address, limit, offset);
+        MultiAddress multiAddress = getMultiAddress(MULTI_ADDRESS_ALL, limit, offset);
         if(multiAddress == null || multiAddress.getTxs() == null) {
             return new ArrayList<>();
         }
 
-        MultiAddressFactory.sort(multiAddress.getTxs());
-        multiAddressMap.put(address, multiAddress);
-        List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress);
-        transactionSummaryMap.put(address, summaryList);
-
-        //Consolidate for 'Imported addresses'
-        MultiAddress existing = multiAddressMap.get(MULTI_ADDRESS_ALL_LEGACY);
-        if(existing != null && existing.getTxs() != null) {
-            existing.getTxs().addAll(multiAddress.getTxs());
-            existing.getWallet().setFinalBalance(existing.getWallet().getFinalBalance()
-                .add(multiAddress.getWallet().getFinalBalance()));
-        } else {
-            existing = multiAddress;
-        }
-        multiAddressMap.put(MULTI_ADDRESS_ALL_LEGACY, existing);
-        summaryList = MultiAddressFactory.summarize(all, watchOnly, existing);
-        transactionSummaryMap.put(MULTI_ADDRESS_ALL_LEGACY, summaryList);
+        List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress, legacy);
 
         return summaryList;
     }

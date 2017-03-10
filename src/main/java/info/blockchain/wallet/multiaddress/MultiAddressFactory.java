@@ -151,7 +151,8 @@ public class MultiAddressFactory {
 
     public static List<TransactionSummary> summarize(LinkedHashSet<String> ownAddressesAndXpubs
         , List<String> watchOnlyAddresses
-        , MultiAddress multiAddress) {
+        , MultiAddress multiAddress
+        , List<String> legacy) {
 
         List<TransactionSummary> summaryList = new ArrayList<>();
 
@@ -160,6 +161,8 @@ public class MultiAddressFactory {
             //Address might not contain transactions
             return summaryList;
         }
+
+        boolean isLegacy = false;
 
         for(Transaction tx : txs) {
 
@@ -197,6 +200,11 @@ public class MultiAddressFactory {
                         //Flag as watch only
                         if (watchOnlyAddresses.contains(inputAddr)) {
                             txSummary.setWatchOnly(true);
+                        }
+
+                        //Flag as imported legacy address
+                        if (legacy != null && legacy.contains(inputAddr)) {
+                            isLegacy = true;
                         }
 
                         //Keep track of inputs
@@ -260,11 +268,21 @@ public class MultiAddressFactory {
                         txSummary.setWatchOnly(true);
                     }
 
+                    //Flag as imported legacy address
+                    if (legacy != null && legacy.contains(outputAddr)) {
+                        isLegacy = true;
+                    }
+
                     //Keep track of outputs
                     allOutputs.put(outputAddr, outputValue);
                 } else {
                     //This will never happen unless server has issues
                 }
+            }
+
+            //If we are filtering for legacy and nothing found
+            if (legacy != null && !isLegacy) {
+                continue;
             }
 
             BigInteger fee = calculateFee(txSummary.inputsMap, allOutputs, txSummary.getDirection());
