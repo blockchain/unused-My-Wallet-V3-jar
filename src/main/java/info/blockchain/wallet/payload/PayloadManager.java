@@ -7,31 +7,16 @@ import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.HDAccount;
-import info.blockchain.wallet.exceptions.AccountLockedException;
-import info.blockchain.wallet.exceptions.ApiException;
-import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.EncryptionException;
-import info.blockchain.wallet.exceptions.HDWalletException;
-import info.blockchain.wallet.exceptions.InvalidCredentialsException;
-import info.blockchain.wallet.exceptions.MetadataException;
-import info.blockchain.wallet.exceptions.NoSuchAddressException;
-import info.blockchain.wallet.exceptions.ServerConnectionException;
-import info.blockchain.wallet.exceptions.UnsupportedVersionException;
+import info.blockchain.wallet.exceptions.*;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.pairing.Pairing;
-import info.blockchain.wallet.payload.data.Account;
-import info.blockchain.wallet.payload.data.HDWallet;
-import info.blockchain.wallet.payload.data.LegacyAddress;
-import info.blockchain.wallet.payload.data.Wallet;
-import info.blockchain.wallet.payload.data.WalletBase;
-import info.blockchain.wallet.payload.data.WalletWrapper;
+import info.blockchain.wallet.payload.data.*;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.Tools;
-
-import java.util.Collection;
-import java.util.Map.Entry;
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
@@ -40,26 +25,17 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
+import retrofit2.Call;
+import retrofit2.Response;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import io.reactivex.Observable;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Response;
+import java.util.*;
+import java.util.Map.Entry;
 
 @SuppressWarnings("WeakerAccess")
 public class PayloadManager {
@@ -263,6 +239,30 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+    }
+
+    /**
+     * Initializes a wallet from a Payload string from manual pairing. Should decode both V3 and V1 wallets successfully.
+     *
+     * @param payload  The Payload in String format that you wish to decrypt and initialise
+     * @param password The password for the payload
+     * @throws HDWalletException   Thrown for a variety of reasons, wraps actual exception and is fatal
+     * @throws DecryptionException Thrown if the password is incorrect
+     */
+    public void initializeAndDecryptFromPayload(String payload,
+                                                String password) throws HDWalletException, DecryptionException {
+
+        try {
+            walletBaseBody = WalletBase.fromJson(payload);
+            walletBaseBody.decryptPayload(password);
+            setTempPassword(password);
+
+            updateAllBalances();
+        } catch (DecryptionException decryptionException) {
+            throw decryptionException;
+        } catch (Exception e) {
+            throw new HDWalletException(e);
+        }
     }
 
     private void validateSave() throws HDWalletException {
