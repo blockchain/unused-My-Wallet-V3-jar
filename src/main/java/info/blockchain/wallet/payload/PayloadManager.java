@@ -54,7 +54,7 @@ public class PayloadManager {
     private WalletApi walletApi;
     private BlockExplorer blockExplorer;
     //Key = address/xpub, Value = Multiaddress response from endpoint
-    private HashMap<String, MultiAddress> multiAddressMap;
+    private HashMap<String, MultiAddress> multiAddressMap;//only used for HD next address, check if address is hd
     //Key = address, Value = list of summarized transactions
     private HashMap<String, BigInteger> balanceMap;
 
@@ -702,23 +702,7 @@ public class PayloadManager {
             return new ArrayList<>();
         }
 
-        MultiAddress existing = multiAddressMap.get(xpub);
-        if(existing != null && existing.getTxs() != null) {
-
-            ArrayList<Transaction> txs = multiAddress.getTxs();
-            txs.addAll(existing.getTxs());
-
-            //Remove duplicates
-            Set<Transaction> hs = new HashSet<>();
-            hs.addAll(txs);
-            txs.clear();
-            txs.addAll(hs);
-            multiAddress.setTxs(txs);
-
-            multiAddressMap.put(xpub, multiAddress);
-        } else {
-            multiAddressMap.put(xpub, multiAddress);
-        }
+        multiAddressMap.put(xpub, multiAddress);
 
         List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress, null);
         return summaryList;

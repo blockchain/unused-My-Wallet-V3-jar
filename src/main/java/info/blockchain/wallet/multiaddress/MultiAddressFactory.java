@@ -162,9 +162,9 @@ public class MultiAddressFactory {
             return summaryList;
         }
 
-        boolean isLegacy = false;
-
         for(Transaction tx : txs) {
+
+            boolean isLegacy = false;
 
             TransactionSummary txSummary = new TransactionSummary();
             txSummary.inputsMap = new HashMap<>();

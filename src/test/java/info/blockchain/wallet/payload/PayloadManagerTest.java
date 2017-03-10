@@ -613,7 +613,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         //Imported addresses (consolidated)
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m4.txt").toURI())), Charset.forName("utf-8")));
+            "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
         transactionSummaries = payloadManager.getImportedAddressesTransactions(50, 0);
         Assert.assertEquals(2, transactionSummaries.size());
 
