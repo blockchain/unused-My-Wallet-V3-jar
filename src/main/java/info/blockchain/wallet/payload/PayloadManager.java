@@ -691,42 +691,36 @@ public class PayloadManager {
         }
     }
 
-    public interface TransactionCallback {
-        void onComplete(List<TransactionSummary> addressTransactions);
-        void onFail(String error);
-    }
-
     /**
-     * Updates internal balance and transaction list for wallet 'All'
+     * Updates internal balance and transaction list for all wallet accounts/addresses
+     * @param limit Amount of transactions per page
+     * @param offset Page offset
+     * @return List of tx summaries for all wallet transactions
      * @throws IOException
      * @throws ApiException
      */
-    public void updateAllTransactions(int limit, int offset, TransactionCallback callback) throws IOException, ApiException {
-        updateAccountTransaction(MULTI_ADDRESS_ALL, limit, offset, callback);
+    public List<TransactionSummary> updateAllTransactions(int limit, int offset) throws IOException, ApiException {
+        return updateAccountTransaction(MULTI_ADDRESS_ALL, limit, offset);
     }
 
     /**
      * Updates internal balance and transaction list
-     * @param xpub Xpub, MULTI_ADDRESS_ALL
+     * @param xpub
      * @param limit Amount of transactions per page
      * @param offset Page offset
+     * @return List of tx summaries for specified xpubs transactions
      * @throws IOException
      * @throws ApiException
      */
-    public void updateAccountTransaction(String xpub, int limit, int offset, TransactionCallback callback) {
+    public List<TransactionSummary> updateAccountTransaction(String xpub, int limit, int offset)
+        throws IOException, ApiException {
 
         LinkedHashSet<String> all = getAllAccountsAndAddresses();
         List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
 
-        MultiAddress multiAddress = null;
-        try {
-            multiAddress = getMultiAddress(xpub, limit, offset);
-        } catch (IOException | ApiException e) {
-            e.printStackTrace();
-            if(callback != null)callback.onFail(e.getMessage());
-        }
+        MultiAddress multiAddress = getMultiAddress(xpub, limit, offset);
         if(multiAddress == null || multiAddress.getTxs() == null) {
-            return;
+            return new ArrayList<>();
         }
 
         MultiAddressFactory.sort(multiAddress.getTxs());
@@ -750,32 +744,28 @@ public class PayloadManager {
         List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress);
         transactionSummaryMap.put(xpub, summaryList);
 
-        if(callback != null)callback.onComplete(getAddressTransactions(xpub));
+        return summaryList;
     }
 
     /**
-     * Updates internal balance and transaction list
+     * Updates internal balance and transaction list for imported addresses
      * @param address
      * @param limit Amount of transactions per page
      * @param offset Page offset
+     * @return Consolidated list of tx summaries for specified imported transactions
      * @throws IOException
      * @throws ApiException
      */
     // TODO: 09/03/2017 Imported addresses needs sorting out
-    public void updateAddressTransactions(String address, int limit, int offset, TransactionCallback callback) {
+    public List<TransactionSummary> updateAddressTransactions(String address, int limit, int offset)
+        throws IOException, ApiException {
 
         LinkedHashSet<String> all = getAllAccountsAndAddresses();
         List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
 
-        MultiAddress multiAddress = null;
-        try {
-            multiAddress = getMultiAddress(address, limit, offset);
-        } catch (IOException | ApiException e) {
-            e.printStackTrace();
-            if(callback != null)callback.onFail(e.getMessage());
-        }
+        MultiAddress multiAddress = getMultiAddress(address, limit, offset);
         if(multiAddress == null || multiAddress.getTxs() == null) {
-            return;
+            return new ArrayList<>();
         }
 
         MultiAddressFactory.sort(multiAddress.getTxs());
@@ -796,7 +786,7 @@ public class PayloadManager {
         summaryList = MultiAddressFactory.summarize(all, watchOnly, existing);
         transactionSummaryMap.put(MULTI_ADDRESS_ALL_LEGACY, summaryList);
 
-        if(callback != null)callback.onComplete(getAddressTransactions(address));
+        return summaryList;
     }
 
     /**
