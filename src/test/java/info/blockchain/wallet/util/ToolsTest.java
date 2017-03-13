@@ -1,6 +1,8 @@
 package info.blockchain.wallet.util;
 
+import info.blockchain.wallet.bip44.HDChain;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.bitcoinj.core.Transaction;

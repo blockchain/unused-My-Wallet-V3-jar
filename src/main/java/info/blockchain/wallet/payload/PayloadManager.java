@@ -774,6 +774,14 @@ public class PayloadManager {
         return hdAccount.getChange().getAddressAt(nextIndex).getAddressString();
     }
 
+    public void incrementNextReceiveAddress(Account account) {
+        multiAddressFactory.incrementNextReceiveAddress(account.getXpub(), account.getAddressLabels());
+    }
+
+    public void incrementNextChangeAddress(Account account) {
+        multiAddressFactory.incrementNextChangeAddress(account.getXpub());
+    }
+
     //********************************************************************************************//
     //*                                        Balance                                           *//
     //********************************************************************************************//

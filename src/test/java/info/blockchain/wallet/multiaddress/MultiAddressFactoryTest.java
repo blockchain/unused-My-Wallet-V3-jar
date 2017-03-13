@@ -42,7 +42,6 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
         Assert.assertEquals(1, summary.get(0).getOutputsMap().size());
         Assert.assertEquals(20000, summary.get(0).getTotal().longValue());
-        Assert.assertEquals(92525, summary.get(0).getConfirmations());
         Assert.assertEquals(Direction.SENT, summary.get(0).getDirection());
         Assert.assertEquals(10000, summary.get(0).getFee().longValue());
         Assert.assertEquals(1436437493, summary.get(0).getTime());
@@ -64,7 +63,6 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
         Assert.assertEquals(1, summary.get(0).getOutputsMap().size());
         Assert.assertEquals(20000, summary.get(0).getTotal().longValue());
-        Assert.assertEquals(63636, summary.get(0).getConfirmations());
         Assert.assertEquals(Direction.SENT, summary.get(0).getDirection());
         Assert.assertEquals(10000, summary.get(0).getFee().longValue());
         Assert.assertEquals(1452868237, summary.get(0).getTime());
@@ -93,7 +91,6 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
         Assert.assertEquals(1, summary.get(0).getOutputsMap().size());
         Assert.assertEquals(20000, summary.get(0).getTotal().longValue());
-        Assert.assertEquals(63636, summary.get(0).getConfirmations());
         Assert.assertEquals(Direction.SENT, summary.get(0).getDirection());
         Assert.assertEquals(10000, summary.get(0).getFee().longValue());
         Assert.assertEquals(1452868237, summary.get(0).getTime());

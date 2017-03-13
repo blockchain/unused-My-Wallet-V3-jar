@@ -7,6 +7,7 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
+import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressLabels;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
@@ -449,19 +450,30 @@ public class PayloadManagerTest extends MockedResponseTest {
             + "              \"index\": 1,\n"
             + "              \"label\": \"Reserved\"\n"
             + "            }"));
-        wallet.getHdWallets().get(0).getAccounts().get(0).setAddressLabels(labelList);
 
-        PayloadManager.getInstance().getAccountTransactions(
-            wallet.getHdWallets().get(0).getAccounts().get(0).getXpub(), 50, 0);
-        String nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(
-            wallet.getHdWallets().get(0).getAccounts().get(0));
+        Account account = wallet.getHdWallets().get(0).getAccounts().get(0);
+        account.setAddressLabels(labelList);
 
+        //set up indexes first
+        PayloadManager.getInstance().getAccountTransactions(account.getXpub(), 50, 0);
+
+        //Next Receive
+        String nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(account);
         Assert.assertEquals("1H9FdkaryqzB9xacDbJrcjXsJ9By4UVbQw", nextReceiveAddress);
 
-        String nextChangeAddress = PayloadManager.getInstance().getNextChangeAddress(
-            wallet.getHdWallets().get(0).getAccounts().get(0));
+        //Increment receive and check
+        PayloadManager.getInstance().incrementNextReceiveAddress(account);
+        nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(account);
+        Assert.assertEquals("18DU2RjyadUmRK7sHTBHtbJx5VcwthHyF7", nextReceiveAddress);
 
+        //Next Change
+        String nextChangeAddress = PayloadManager.getInstance().getNextChangeAddress(account);
         Assert.assertEquals("1GEXfMa4SMh3iUZxP8HHQy7Wo3aqce72Nm", nextChangeAddress);
+
+        //Increment Change and check
+        PayloadManager.getInstance().incrementNextChangeAddress(account);
+        nextChangeAddress = PayloadManager.getInstance().getNextChangeAddress(account);
+        Assert.assertEquals("1NzpLHV6LLVFCYdYA5woYL9pHJ48KQJc9K", nextChangeAddress);
     }
 
     @Test
