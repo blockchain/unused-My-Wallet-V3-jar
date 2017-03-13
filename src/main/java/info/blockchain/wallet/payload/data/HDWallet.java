@@ -386,7 +386,7 @@ public class HDWallet {
         for (String xpub : xpubs) {
 
             //If account has txs
-            if(map.get(xpub).getNTx() > 0L) {
+            if(map.get(xpub).getTxCount() > 0L) {
                 walletSize++;
                 currentGap = 0;
             } else {
@@ -413,7 +413,7 @@ public class HDWallet {
 
         HashMap<String, Balance> body = exe.body();
 
-        return body.get(xpub).getNTx() > 0L;
+        return body.get(xpub).getTxCount() > 0L;
     }
 
     public List<ECKey> getHDKeysForSigning(Account account, SpendableUnspentOutputs unspentOutputBundle)

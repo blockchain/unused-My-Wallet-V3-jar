@@ -1,9 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.Balance;
 import info.blockchain.api.data.MultiAddress;
-import info.blockchain.api.data.Transaction;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.HDAccount;
@@ -16,7 +14,6 @@ import info.blockchain.wallet.payload.data.*;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.Tools;
 
-import java.util.Map.Entry;
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import org.apache.commons.codec.DecoderException;
@@ -53,10 +50,9 @@ public class PayloadManager {
     // This is an explicit dependency and should be injected for easier testing
     private WalletApi walletApi;
     private BlockExplorer blockExplorer;
-    //Key = address/xpub, Value = Multiaddress response from endpoint
-    private HashMap<String, MultiAddress> multiAddressMap;//only used for HD next address, check if address is hd
-    //Key = address, Value = list of summarized transactions
-    private HashMap<String, BigInteger> balanceMap;
+
+    private MultiAddressFactory multiAddressFactory;
+    private BalanceManager balanceManager;
 
     private static PayloadManager instance = new PayloadManager();
 
@@ -67,8 +63,8 @@ public class PayloadManager {
     private PayloadManager() {
         walletApi = new WalletApi();
         blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
-        multiAddressMap = new HashMap<>();
-        balanceMap = new HashMap<>();
+        multiAddressFactory = new MultiAddressFactory(blockExplorer);
+        balanceManager = new BalanceManager(blockExplorer);
     }
 
     public void wipe() {
@@ -539,57 +535,6 @@ public class PayloadManager {
         return Tools.getECKeyFromKeyAndAddress(decryptedPrivateKey, legacyAddress.getAddress());
     }
 
-    public String getNextReceiveAddress(Account account) throws IOException, HDWalletException {
-
-        MultiAddress multiAddress = multiAddressMap.get(account.getXpub());
-
-        int nextIndex = MultiAddressFactory.getNextReceiveAddress(multiAddress, account.getXpub(), account.getAddressLabels());
-
-        HDAccount hdAccount = getPayload().getHdWallets().get(0)
-            .getHDAccountFromAccountBody(account);
-
-        return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
-    }
-
-    public String getNextChangeAddress(Account account) throws IOException, HDWalletException {
-
-
-        MultiAddress multiAddress = multiAddressMap.get(account.getXpub());
-
-        int nextIndex = MultiAddressFactory.getNextChangeAddress(multiAddress, account.getXpub());
-
-        HDAccount hdAccount = getPayload().getHdWallets().get(0)
-            .getHDAccountFromAccountBody(account);
-
-        return hdAccount.getChange().getAddressAt(nextIndex).getAddressString();
-    }
-
-    /**
-     * Updates address balance as well as wallet balance.
-     * This is used to immediately update balances after a successful transaction which speeds
-     * up the balance the UI reflects without the need to wait for incoming websocket notification.
-     * @param amount
-     * @throws Exception
-     */
-    public void subtractAmountFromAddressBalance(String address, BigInteger amount) throws Exception {
-
-        //Update individual address
-        BigInteger currentBalance = balanceMap.get(address);
-        if(currentBalance == null) {
-            throw new Exception("No info for this address. updateAllBalances should be called first.");
-        }
-        BigInteger newBalance = currentBalance.subtract(amount);
-        balanceMap.put(address, newBalance);
-
-        //Update wallet balance
-        currentBalance = balanceMap.get(MULTI_ADDRESS_ALL);
-        if(currentBalance == null) {
-            throw new Exception("No info for this address. updateAllBalances should be called first.");
-        }
-        newBalance = currentBalance.subtract(amount);
-        balanceMap.put(MULTI_ADDRESS_ALL, newBalance);
-    }
-
     //********************************************************************************************//
     //*                                        Metadata                                          *//
     //********************************************************************************************//
@@ -661,15 +606,6 @@ public class PayloadManager {
     //*                                     Multi_address                                        *//
     //********************************************************************************************//
 
-    private MultiAddress getMultiAddress(String context, int limit, int offset) throws IOException, ApiException{
-
-        if (context.equals(MULTI_ADDRESS_ALL)) {
-            return getPayload().getWalletBalanceAndTransactions(limit, offset);
-        } else {
-            return getPayload().getAccountBalanceAndTransactions(context, limit, offset);
-        }
-    }
-
     /**
      * Gets transaction list for all wallet accounts/addresses
      * @param limit Amount of transactions per page
@@ -680,6 +616,26 @@ public class PayloadManager {
      */
     public List<TransactionSummary> getAllTransactions(int limit, int offset) throws IOException, ApiException {
         return getAccountTransactions(MULTI_ADDRESS_ALL, limit, offset);
+    }
+
+    /**
+     * Updates internal balance and transaction list for imported addresses
+     * @param limit Amount of transactions per page
+     * @param offset Page offset
+     * @return Consolidated list of tx summaries for specified imported transactions
+     * @throws IOException
+     * @throws ApiException
+     */
+    public List<TransactionSummary> getImportedAddressesTransactions(int limit, int offset)
+        throws IOException, ApiException {
+        List<String> activeXpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
+        List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
+        List<String> activeLegacy = getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
+
+        ArrayList<String> all = new ArrayList<>(activeXpubs);
+        all.addAll(activeLegacy);
+
+        return multiAddressFactory.getAccountTransactions(all, watchOnly, activeLegacy, null, limit, offset);
     }
 
     /**
@@ -694,43 +650,14 @@ public class PayloadManager {
     public List<TransactionSummary> getAccountTransactions(String xpub, int limit, int offset)
         throws IOException, ApiException {
 
-        LinkedHashSet<String> all = getAllAccountsAndAddresses();
+        List<String> activeXpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
         List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
+        List<String> activeLegacy = getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
 
-        MultiAddress multiAddress = getMultiAddress(xpub, limit, offset);
-        if(multiAddress == null || multiAddress.getTxs() == null) {
-            return new ArrayList<>();
-        }
+        ArrayList<String> all = new ArrayList<>(activeXpubs);
+        all.addAll(activeLegacy);
 
-        multiAddressMap.put(xpub, multiAddress);
-
-        List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress, null);
-        return summaryList;
-    }
-
-    /**
-     * Updates internal balance and transaction list for imported addresses
-     * @param limit Amount of transactions per page
-     * @param offset Page offset
-     * @return Consolidated list of tx summaries for specified imported transactions
-     * @throws IOException
-     * @throws ApiException
-     */
-    public List<TransactionSummary> getImportedAddressesTransactions(int limit, int offset)
-        throws IOException, ApiException {
-
-        LinkedHashSet<String> all = getAllAccountsAndAddresses();
-        List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
-        List<String> legacy = getPayload().getLegacyAddressStringList();
-
-        MultiAddress multiAddress = getMultiAddress(MULTI_ADDRESS_ALL, limit, offset);
-        if(multiAddress == null || multiAddress.getTxs() == null) {
-            return new ArrayList<>();
-        }
-
-        List<TransactionSummary> summaryList = MultiAddressFactory.summarize(all, watchOnly, multiAddress, legacy);
-
-        return summaryList;
+        return multiAddressFactory.getAccountTransactions(all, watchOnly, null, xpub, limit, offset);
     }
 
     /**
@@ -740,19 +667,7 @@ public class PayloadManager {
      * @return
      */
     public boolean isOwnHDAddress(String address) {
-        MultiAddress multiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL);
-        return MultiAddressFactory.isOwnHDAddress(multiAddress, address);
-    }
-
-    /**
-     * Calculates which xpub an address belongs to in wallet.
-     * Make sure multi address is up to date before executing this method.
-     * @param address
-     * @return
-     */
-    public String getXpubFromAddress(String address) {
-        MultiAddress multiAddress = multiAddressMap.get(MULTI_ADDRESS_ALL);
-        return MultiAddressFactory.getXpubFromAddress(multiAddress, address);
+        return multiAddressFactory.isOwnHDAddress(address);
     }
 
     /**
@@ -763,7 +678,7 @@ public class PayloadManager {
     public String getLabelFromAddress(String address) {
 
         String label;
-        String xpub = getXpubFromAddress(address);
+        String xpub = multiAddressFactory.getAddressFromXpub(address);
 
         if(xpub != null) {
             label = getPayload().getHdWallets().get(HD_WALLET_INDEX).getLabelFromXpub(xpub);
@@ -778,6 +693,40 @@ public class PayloadManager {
         return label;
     }
 
+    /**
+     * Gets next receive address. Excludes reserved addresses.
+     * @param account
+     * @return
+     * @throws IOException
+     * @throws HDWalletException
+     */
+    public String getNextReceiveAddress(Account account) throws IOException, HDWalletException {
+
+        int nextIndex = multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+            .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
+    }
+
+    /**
+     * Gets next change address.
+     * @param account
+     * @return
+     * @throws IOException
+     * @throws HDWalletException
+     */
+    public String getNextChangeAddress(Account account) throws IOException, HDWalletException {
+
+        int nextIndex = multiAddressFactory.getNextChangeAddressIndex(account.getXpub());
+
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+            .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getChange().getAddressAt(nextIndex).getAddressString();
+    }
+
     //********************************************************************************************//
     //*                                        Balance                                           *//
     //********************************************************************************************//
@@ -788,7 +737,7 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getAddressBalance(String address) {
-        return balanceMap.get(address);
+        return balanceManager.getAddressBalance(address);
     }
 
     /**
@@ -796,7 +745,7 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getWalletBalance() {
-        return balanceMap.get(MULTI_ADDRESS_ALL);
+        return balanceManager.getWalletBalance();
     }
 
     /**
@@ -804,7 +753,7 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getImportedAddressesBalance() {
-        return balanceMap.get(MULTI_ADDRESS_ALL_LEGACY);
+        return balanceManager.getImportedAddressesBalance();
     }
 
     /**
@@ -817,38 +766,21 @@ public class PayloadManager {
      * @throws IOException
      */
     public void updateAllBalances() throws ServerConnectionException, IOException {
-        Call<HashMap<String, Balance>> call = blockExplorer.getBalance(new ArrayList<>(getAllAccountsAndAddresses()),
-            BlockExplorer.TX_FILTER_ALL);
 
         List<String> legacyAddressList = getPayload().getLegacyAddressStringList();
+        ArrayList<String> all = new ArrayList<>(getAllAccountsAndAddresses());
 
-        BigInteger walletFinalBalance = BigInteger.ZERO;
-        BigInteger importedFinalBalance = BigInteger.ZERO;
+        balanceManager.updateAllBalances(legacyAddressList, all);
+    }
 
-        Response<HashMap<String, Balance>> exe = call.execute();
-        if(exe.isSuccessful()) {
-
-            Set<Entry<String, Balance>> set = exe.body().entrySet();
-            for(Entry<String, Balance> item : set) {
-                String address = item.getKey();
-                Balance balance = item.getValue();
-
-                balanceMap.put(address, balance.getFinalBalance());
-
-                //Consolidate 'All'
-                walletFinalBalance = walletFinalBalance.add(balance.getFinalBalance());
-
-                //Consolidate 'Imported'
-                if(legacyAddressList.contains(address)) {
-                    importedFinalBalance = importedFinalBalance.add(balance.getFinalBalance());
-                }
-            }
-
-            balanceMap.put(MULTI_ADDRESS_ALL, walletFinalBalance);
-            balanceMap.put(MULTI_ADDRESS_ALL_LEGACY, importedFinalBalance);
-
-        } else {
-            throw new ServerConnectionException(exe.errorBody().string());
-        }
+    /**
+     * Updates address balance as well as wallet balance.
+     * This is used to immediately update balances after a successful transaction which speeds
+     * up the balance the UI reflects without the need to wait for incoming websocket notification.
+     * @param amount
+     * @throws Exception
+     */
+    public void subtractAmountFromAddressBalance(String address, BigInteger amount) throws Exception {
+        balanceManager.subtractAmountFromAddressBalance(address, amount);
     }
 }

@@ -1,5 +1,7 @@
 package info.blockchain.wallet.multiaddress;
 
+import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
+
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Address;
 import info.blockchain.api.data.Input;
@@ -7,10 +9,8 @@ import info.blockchain.api.data.MultiAddress;
 import info.blockchain.api.data.Output;
 import info.blockchain.api.data.Transaction;
 import info.blockchain.api.data.Xpub;
-import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.bip44.HDChain;
+import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabels;
 import java.io.IOException;
@@ -19,98 +19,81 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import retrofit2.Call;
+import retrofit2.Response;
 
 public class MultiAddressFactory {
 
-    public static Call<MultiAddress> getMultiAddress(List<String> addressList, String context,
-        int filter, int limit,
-        int offset) throws IOException {
+    private BlockExplorer blockExplorer;
 
-        BlockExplorer blockExplorer = new BlockExplorer(
-            BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
-        return blockExplorer
-            .getMultiAddress(addressList, context, filter, limit, offset);
+    private HashMap<String, Integer> nextReceiveAddressMap;
+    private HashMap<String, Integer> nextChangeAddressMap;
+
+    private HashMap<String, String> addressToXpubMap;
+
+    public MultiAddressFactory(BlockExplorer blockExplorer) {
+        this.blockExplorer = blockExplorer;
+        this.addressToXpubMap = new HashMap<>();
+        this.nextReceiveAddressMap = new HashMap<>();
+        this.nextChangeAddressMap = new HashMap<>();
     }
 
-    public static boolean isOwnHDAddress(MultiAddress body, String address) {
-
-        for (Transaction tx : body.getTxs()) {
-            for (Input input : tx.getInputs()) {
-                Output prevOut = input.getPrevOut();
-                if (prevOut.getXpub() != null && address.equals(prevOut.getAddr())) {
-                    return true;
-                }
-            }
-
-            for (Output out : tx.getOut()) {
-                if (out.getXpub() != null && address.equals(out.getAddr())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    public String getAddressFromXpub(String address) {
+        return addressToXpubMap.get(address);
     }
 
-    public static String getXpubFromAddress(MultiAddress body, String address) {
+    private MultiAddress getMultiAddress(List<String> allActive, String context, int limit, int offset) throws IOException, ApiException{
 
-        final int lookAhead = 10;
+        if (context!=null && context.equals(MULTI_ADDRESS_ALL)) {
 
-        for (Address addr : body.getAddresses()) {
+            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
 
-            String xpubOrAddress = addr.getAddress();
-
-            for (int i = 0; i <= addr.getAccountIndex() + lookAhead; i++) {
-                try {
-                    HDAccount account = new HDAccount(
-                        PersistentUrls.getInstance().getCurrentNetworkParams(), xpubOrAddress);
-                    if (address.equals(account.getReceive().getAddressAt(i).getAddressString())) {
-                        return xpubOrAddress;
-                    }
-                } catch (Exception e) {
-                    //might be address
-                }
+            if(call.isSuccessful()) {
+                return call.body();
+            } else {
+                throw new ApiException(call.errorBody().string());
             }
 
-            for (int i = 0; i <= addr.getChangeIndex() + lookAhead; i++) {
-                try {
-                    HDAccount account = new HDAccount(
-                        PersistentUrls.getInstance().getCurrentNetworkParams(), xpubOrAddress);
-                    if (address.equals(account.getChange().getAddressAt(i).getAddressString())) {
-                        return xpubOrAddress;
-                    }
-                } catch (Exception e) {
-                    //might be address
-                }
+        } else {
+            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, context, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+
+            if(call.isSuccessful()) {
+                return call.body();
+            } else {
+                throw new ApiException(call.errorBody().string());
             }
         }
-
-        return null;
     }
 
-    public static int getNextChangeAddress(MultiAddress body, String addressOrXpub) {
+    public List<TransactionSummary> getAccountTransactions(ArrayList<String> all, List<String> watchOnly, List<String> activeLegacy, String xpub, int limit, int offset)
+        throws IOException, ApiException {
 
-        int changeIndex = 0;
-        for (Address address : body.getAddresses()) {
-            if(address.getAddress().equals(addressOrXpub)) {
-                changeIndex = address.getChangeIndex();
-            }
+        MultiAddress multiAddress = getMultiAddress(all, xpub, limit, offset);
+        if(multiAddress == null || multiAddress.getTxs() == null) {
+            return new ArrayList<>();
         }
 
-        return changeIndex;
+        List<TransactionSummary> summaryList = summarize(all, watchOnly, multiAddress, activeLegacy);
+        return summaryList;
     }
 
-    public static int getNextReceiveAddress(MultiAddress body, String addressOrXpub, List<AddressLabels> reservedAddresses) {
+    public int getNextChangeAddressIndex(String xpub) {
 
-        int receiveIndex = 0;
-        for (Address address : body.getAddresses()) {
-            if(address.getAddress().equals(addressOrXpub)) {
-                receiveIndex = address.getAccountIndex();
-            }
+        if(!nextChangeAddressMap.containsKey(xpub)) {
+            return 0;
         }
+
+        return nextChangeAddressMap.get(xpub);
+    }
+
+    public int getNextReceiveAddressIndex(String xpub, List<AddressLabels> reservedAddresses) {
+
+        if(!nextReceiveAddressMap.containsKey(xpub)) {
+            return 0;
+        }
+
+        Integer receiveIndex = nextReceiveAddressMap.get(xpub);
 
         //Skip reserved addresses
         for(AddressLabels reservedAddress : reservedAddresses) {
@@ -122,12 +105,16 @@ public class MultiAddressFactory {
         return receiveIndex;
     }
 
-    public static void sort(ArrayList<Transaction> txs) {
+    public void sort(ArrayList<Transaction> txs) {
         if(txs == null) return;
         Collections.sort(txs, new TxMostRecentDateComparator());
     }
 
-    public static class TxMostRecentDateComparator implements Comparator<Transaction> {
+    public boolean isOwnHDAddress(String address) {
+        return addressToXpubMap.containsKey(address);
+    }
+
+    public class TxMostRecentDateComparator implements Comparator<Transaction> {
 
         public int compare(Transaction t1, Transaction t2) {
 
@@ -149,12 +136,18 @@ public class MultiAddressFactory {
         }
     }
 
-    public static List<TransactionSummary> summarize(LinkedHashSet<String> ownAddressesAndXpubs
+    public List<TransactionSummary> summarize(ArrayList<String> ownAddressesAndXpubs
         , List<String> watchOnlyAddresses
         , MultiAddress multiAddress
         , List<String> legacy) {
 
         List<TransactionSummary> summaryList = new ArrayList<>();
+
+        //Set next address indexes
+        for(Address address : multiAddress.getAddresses()) {
+            nextReceiveAddressMap.put(address.getAddress(),address.getAccountIndex());
+            nextChangeAddressMap.put(address.getAddress(),address.getChangeIndex());
+        }
 
         List<Transaction> txs = multiAddress.getTxs();
         if(txs == null) {
@@ -169,6 +162,10 @@ public class MultiAddressFactory {
             TransactionSummary txSummary = new TransactionSummary();
             txSummary.inputsMap = new HashMap<>();
             txSummary.outputsMap = new HashMap<>();
+
+            //Map which address belongs to which xpub.
+            txSummary.inputsXpubMap = new HashMap<>();
+            txSummary.outputsXpubMap = new HashMap<>();
 
             if(tx.getResult().signum() > 0) {
                 txSummary.setDirection(Direction.RECEIVED);
@@ -195,6 +192,7 @@ public class MultiAddressFactory {
                             //xpubBody will only show if it belongs to our account
                             //inputAddr belongs to our own account - add it, it's a transfer/send
                             ownAddressesAndXpubs.add(inputAddr);
+                            txSummary.inputsXpubMap.put(inputAddr, xpubBody.getM());
                         }
 
                         //Flag as watch only
@@ -240,6 +238,7 @@ public class MultiAddressFactory {
                             }
 
                             txSummary.outputsMap.put(outputAddr, outputValue);
+                            txSummary.outputsXpubMap.put(outputAddr, xpubBody.getM());
                         } else {
                             //Change - ignore
                         }
@@ -302,13 +301,17 @@ public class MultiAddressFactory {
                 txSummary.setConfirmations(0);
             }
 
+            //Helper for testing if address belongs to us
+            addressToXpubMap.putAll(txSummary.getInputsXpubMap());
+            addressToXpubMap.putAll(txSummary.getOutputsXpubMap());
+
             summaryList.add(txSummary);
         }
 
         return summaryList;
     }
 
-    private static BigInteger calculateTotal(String hash, HashMap<String, BigInteger> nonChange, BigInteger fee, Direction direction) {
+    private BigInteger calculateTotal(String hash, HashMap<String, BigInteger> nonChange, BigInteger fee, Direction direction) {
 
         BigInteger total = BigInteger.ZERO;
 
@@ -323,7 +326,7 @@ public class MultiAddressFactory {
         return total;
     }
 
-    private static BigInteger calculateFee(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> outputs, Direction direction) {
+    private BigInteger calculateFee(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> outputs, Direction direction) {
 
         if(direction == Direction.RECEIVED) {
             //Receive doesn't have fee. We don't carry cost of tx

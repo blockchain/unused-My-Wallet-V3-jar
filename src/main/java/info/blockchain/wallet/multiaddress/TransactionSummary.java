@@ -20,8 +20,13 @@ public class TransactionSummary {
     private boolean isWatchOnly;
     private boolean isDoubleSpend;
 
+    //Address - Amount map
     HashMap<String, BigInteger> inputsMap = new HashMap<>();
     HashMap<String, BigInteger> outputsMap = new HashMap<>();
+
+    //Address - xpub map (Fastest way to convert address to xpub)
+    HashMap<String, String> inputsXpubMap = new HashMap<>();
+    HashMap<String, String> outputsXpubMap = new HashMap<>();
 
     public String getHash() {
         return hash;
@@ -101,6 +106,22 @@ public class TransactionSummary {
 
     public void setDoubleSpend(boolean doubleSpend) {
         isDoubleSpend = doubleSpend;
+    }
+
+    public HashMap<String, String> getInputsXpubMap() {
+        return inputsXpubMap;
+    }
+
+    public void setInputsXpubMap(HashMap<String, String> inputsXpubMap) {
+        this.inputsXpubMap = inputsXpubMap;
+    }
+
+    public HashMap<String, String> getOutputsXpubMap() {
+        return outputsXpubMap;
+    }
+
+    public void setOutputsXpubMap(HashMap<String, String> outputsXpubMap) {
+        this.outputsXpubMap = outputsXpubMap;
     }
 
     public static class TxMostRecentDateComparator implements Comparator<TransactionSummary> {

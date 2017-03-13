@@ -104,7 +104,7 @@ public class PaymentTx {
             Sha256Hash txHash = Sha256Hash.wrap(hash.getBytes());
 
             TransactionOutPointConnected outPoint = new TransactionOutPointConnected(networkParams,
-                unspentCoin.getTxOutputN(),
+                unspentCoin.getTxOutputCount(),
                 txHash);
 
             //outPoint needs connected output here

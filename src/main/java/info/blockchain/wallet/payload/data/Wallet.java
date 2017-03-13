@@ -546,45 +546,6 @@ public class Wallet {
         return iterations;
     }
 
-    //Assume 1 hdWallet
-    public MultiAddress getWalletBalanceAndTransactions(int limit, int offset)
-        throws IOException, ApiException {
-        List<String> all = getLegacyAddressStringList();
-
-        if(getHdWallets() != null) {
-            List<String> xpubs = getHdWallets().get(0).getActiveXpubs();
-            all.addAll(xpubs);
-        }
-
-        Response<MultiAddress> call = MultiAddressFactory
-            .getMultiAddress(all, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
-
-        if(call.isSuccessful()) {
-            return call.body();
-        } else {
-            throw new ApiException(call.errorBody().string());
-        }
-    }
-
-    public MultiAddress getAccountBalanceAndTransactions(String xpub, int limit, int offset)
-        throws IOException, ApiException {
-        List<String> all = getLegacyAddressStringList();
-
-        if(getHdWallets() != null) {
-            List<String> xpubs = getHdWallets().get(0).getActiveXpubs();
-            all.addAll(xpubs);
-        }
-
-        Response<MultiAddress> call = MultiAddressFactory
-            .getMultiAddress(all, xpub, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
-
-        if(call.isSuccessful()) {
-            return call.body();
-        } else {
-            throw new ApiException(call.errorBody().string());
-        }
-    }
-
     /**
      * Returns label if match found, otherwise just returns address.
      * @param address
