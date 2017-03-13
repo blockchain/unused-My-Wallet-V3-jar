@@ -2,6 +2,7 @@ package info.blockchain.wallet.util;
 
 import com.google.common.primitives.UnsignedBytes;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -122,5 +122,18 @@ public class Tools {
         }
 
         return addressList;
+    }
+
+    public static List<String> getAddressList(int chain, String xpub, int startIndex, int endIndex) {
+        HDAccount hdAccount = new HDAccount(PersistentUrls.getInstance().getCurrentNetworkParams(),
+            xpub);
+
+        List<String> list = new ArrayList<>();
+
+        for (int i = startIndex; i < endIndex; i++) {
+            list.add(hdAccount.getChain(chain).getAddressAt(i).getAddressString());
+        }
+
+        return list;
     }
 }

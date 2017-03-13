@@ -30,6 +30,7 @@ public class MultiAddressFactory {
     private HashMap<String, Integer> nextReceiveAddressMap;
     private HashMap<String, Integer> nextChangeAddressMap;
 
+    //Field for testing if address belongs to us - Quicker than derivation
     private HashMap<String, String> addressToXpubMap;
 
     public MultiAddressFactory(BlockExplorer blockExplorer) {
@@ -112,6 +113,22 @@ public class MultiAddressFactory {
 
     public boolean isOwnHDAddress(String address) {
         return addressToXpubMap.containsKey(address);
+    }
+
+    public void incrementNextReceiveAddress(String xpub, List<AddressLabels> reservedAddresses) {
+
+        int receiveIndex = getNextReceiveAddressIndex(xpub, reservedAddresses);
+        receiveIndex++;
+
+        nextReceiveAddressMap.put(xpub, receiveIndex);
+    }
+
+    public void incrementNextChangeAddress(String xpub) {
+
+        int index = getNextChangeAddressIndex(xpub);
+        index++;
+
+        nextChangeAddressMap.put(xpub, index);
     }
 
     public class TxMostRecentDateComparator implements Comparator<Transaction> {
@@ -301,7 +318,6 @@ public class MultiAddressFactory {
                 txSummary.setConfirmations(0);
             }
 
-            //Helper for testing if address belongs to us
             addressToXpubMap.putAll(txSummary.getInputsXpubMap());
             addressToXpubMap.putAll(txSummary.getOutputsXpubMap());
 
