@@ -1,7 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.MultiAddress;
+import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.HDAccount;
@@ -13,7 +13,6 @@ import info.blockchain.wallet.pairing.Pairing;
 import info.blockchain.wallet.payload.data.*;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.Tools;
-
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import org.apache.commons.codec.DecoderException;
@@ -535,6 +534,31 @@ public class PayloadManager {
         return Tools.getECKeyFromKeyAndAddress(decryptedPrivateKey, legacyAddress.getAddress());
     }
 
+    /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their respective addresses.
+     *
+     * @param addresses A List of addresses as Strings
+     * @return A {@link LinkedHashMap} where they key is the address String, and the value is a {@link Balance} object
+     * @throws IOException  Thrown if there are network issues
+     * @throws ApiException Thrown if the call isn't successful
+     */
+    public LinkedHashMap<String, Balance> getBalanceOfAddresses(List<String> addresses) throws IOException, ApiException {
+        LinkedHashMap<String, Balance> map = new LinkedHashMap<>();
+
+        final Response<HashMap<String, Balance>> response = balanceManager.getBalanceOfAddresses(addresses).execute();
+        if (response.isSuccessful()) {
+            final HashMap<String, Balance> balanceHashMap = response.body();
+            // Place into map to maintain order, as API may return them in a random order
+            for (String address : addresses) {
+                map.put(address, balanceHashMap.get(address));
+            }
+
+            return map;
+        } else {
+            throw new ApiException(response.code() + ": " + response.errorBody().string());
+        }
+    }
+
     //********************************************************************************************//
     //*                                        Metadata                                          *//
     //********************************************************************************************//
@@ -708,6 +732,29 @@ public class PayloadManager {
             .getHDAccountFromAccountBody(account);
 
         return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
+    }
+
+    /**
+     * Allows you to generate a receive address at an arbitrary number of positions on the chain
+     * from the next valid unused address. For example, the passing 5 as the position will generate
+     * an address which correlates with the next available address + 5 positions.
+     *
+     * @param account  The {@link Account} you wish to generate an address from
+     * @param position Represents how many positions on the chain beyond what is already used
+     *                 that you wish to generate
+     * @return A bitcoin address
+     */
+    @Nullable
+    public String getReceiveAddressAtPosition(Account account, int position) {
+        try {
+            HDAccount hdAccount = getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
+            int nextIndex = multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+            int receiveAddressIndex = multiAddressFactory.findNextUnreservedReceiveAddressIndex(account, nextIndex + position);
+
+            return hdAccount.getReceive().getAddressAt(receiveAddressIndex).getAddressString();
+        } catch (HDWalletException e) {
+            return null;
+        }
     }
 
     /**

@@ -1,27 +1,19 @@
 package info.blockchain.wallet.multiaddress;
 
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
-
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.Address;
-import info.blockchain.api.data.Input;
-import info.blockchain.api.data.MultiAddress;
-import info.blockchain.api.data.Output;
-import info.blockchain.api.data.Transaction;
-import info.blockchain.api.data.Xpub;
+import info.blockchain.api.data.*;
 import info.blockchain.wallet.bip44.HDChain;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
+import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressLabels;
+import retrofit2.Response;
+
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import retrofit2.Call;
-import retrofit2.Response;
+import java.util.*;
+
+import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
 
 public class MultiAddressFactory {
 
@@ -114,6 +106,21 @@ public class MultiAddressFactory {
         return addressToXpubMap.containsKey(address);
     }
 
+    public int findNextUnreservedReceiveAddressIndex(Account account, int addressPosition) {
+        return isReserved(account, addressPosition)
+                ? findNextUnreservedReceiveAddressIndex(account, addressPosition + 1)
+                : addressPosition;
+    }
+
+    private boolean isReserved(Account account, int position) {
+        for (AddressLabels reservedAddress : account.getAddressLabels()) {
+            if (reservedAddress.getIndex() == position) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public class TxMostRecentDateComparator implements Comparator<Transaction> {
 
         public int compare(Transaction t1, Transaction t2) {
@@ -136,10 +143,10 @@ public class MultiAddressFactory {
         }
     }
 
-    public List<TransactionSummary> summarize(ArrayList<String> ownAddressesAndXpubs
-        , List<String> watchOnlyAddresses
-        , MultiAddress multiAddress
-        , List<String> legacy) {
+    public List<TransactionSummary> summarize(ArrayList<String> ownAddressesAndXpubs,
+                                              List<String> watchOnlyAddresses,
+                                              MultiAddress multiAddress,
+                                              List<String> legacy) {
 
         List<TransactionSummary> summaryList = new ArrayList<>();
 

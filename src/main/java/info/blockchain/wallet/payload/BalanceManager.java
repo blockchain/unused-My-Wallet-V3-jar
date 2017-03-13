@@ -1,20 +1,20 @@
 package info.blockchain.wallet.payload;
 
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL_LEGACY;
-
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
+import retrofit2.Call;
+import retrofit2.Response;
+
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import retrofit2.Call;
-import retrofit2.Response;
+
+import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
+import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL_LEGACY;
 
 public class BalanceManager {
 
@@ -90,5 +90,9 @@ public class BalanceManager {
         } else {
             throw new ServerConnectionException(exe.errorBody().string());
         }
+    }
+
+    public Call<HashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
+        return blockExplorer.getBalance(addresses, BlockExplorer.TX_FILTER_ALL);
     }
 }
