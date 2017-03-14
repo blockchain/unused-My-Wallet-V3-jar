@@ -236,4 +236,10 @@ public class WalletApi {
                 timeInMillis,
                 BlockchainFramework.getApiCode());
     }
+
+    public Observable<Status> logEvent(String name) {
+        return getServerApiInstance().logEvent(
+            name,
+            BlockchainFramework.getApiCode());
+    }
 }

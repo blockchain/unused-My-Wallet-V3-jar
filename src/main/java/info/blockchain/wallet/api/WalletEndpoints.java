@@ -133,4 +133,9 @@ public interface WalletEndpoints {
         @Query("currency") String currency,
         @Query("time") long time,
         @Query("api_code") String apiCode);
+
+    @GET("event")
+    Observable<Status> logEvent(
+        @Query("name") String name,
+        @Query("api_code") String apiCode);
 }
