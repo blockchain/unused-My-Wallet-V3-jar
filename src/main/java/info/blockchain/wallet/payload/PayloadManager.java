@@ -53,9 +53,12 @@ public class PayloadManager {
     private MultiAddressFactory multiAddressFactory;
     private BalanceManager balanceManager;
 
-    private static PayloadManager instance = new PayloadManager();
+    private static PayloadManager instance;
 
     public static PayloadManager getInstance() {
+        if (instance == null) {
+            instance = new PayloadManager();
+        }
         return instance;
     }
 
