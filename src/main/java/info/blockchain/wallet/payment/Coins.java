@@ -45,8 +45,13 @@ class Coins {
             }
         }
 
-        //All inputs, 1 output = no change
-        sweepFee = Fees.estimatedFee(usableCoins.size(), 1, feePerKb);
+        //All inputs, 1 output = no change. (Correct way)
+        //sweepFee = Fees.estimatedFee(usableCoins.size(), 1, feePerKb);
+
+        //Assume 2 outputs to line up with web. Not 100% correct but acceptable to
+        //keep values across platforms constant.
+        sweepFee = Fees.estimatedFee(usableCoins.size(), 2, feePerKb);
+
         sweepBalance = sweepBalance.subtract(sweepFee);
 
         sweepBalance = BigInteger.valueOf(Math.max(sweepBalance.longValue(), 0));

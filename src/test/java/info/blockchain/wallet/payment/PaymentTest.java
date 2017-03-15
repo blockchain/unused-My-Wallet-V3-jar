@@ -149,7 +149,11 @@ public class PaymentTest extends MockedResponseTest {
         UnspentOutputs unspentOutputs = new UnspentOutputs().fromJson(UnspentTestData.apiResponseString);
         Pair<BigInteger, BigInteger> sweepBundle = subject.getSweepableCoins(unspentOutputs, BigInteger.valueOf(30000L));
 
-        long feeManual = calculateFee(1, UnspentTestData.UNSPENT_OUTPUTS_COUNT, BigInteger.valueOf(30000L));
+//        long feeManual = calculateFee(1, UnspentTestData.UNSPENT_OUTPUTS_COUNT, BigInteger.valueOf(30000L));
+
+        //Assume 2 outputs to line up with web. Not 100% correct but acceptable to
+        //keep values across platforms constant.
+        long feeManual = calculateFee(2, UnspentTestData.UNSPENT_OUTPUTS_COUNT, BigInteger.valueOf(30000L));
 
         assertEquals(feeManual, sweepBundle.getRight().longValue());
         assertEquals(UnspentTestData.BALANCE - feeManual, sweepBundle.getLeft().longValue());
