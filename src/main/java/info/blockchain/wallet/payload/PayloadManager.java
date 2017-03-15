@@ -53,9 +53,12 @@ public class PayloadManager {
     private MultiAddressFactory multiAddressFactory;
     private BalanceManager balanceManager;
 
-    private static PayloadManager instance = new PayloadManager();
+    private static PayloadManager instance;
 
     public static PayloadManager getInstance() {
+        if (instance == null) {
+            instance = new PayloadManager();
+        }
         return instance;
     }
 
@@ -702,7 +705,7 @@ public class PayloadManager {
     public String getLabelFromAddress(String address) {
 
         String label;
-        String xpub = multiAddressFactory.getAddressFromXpub(address);
+        String xpub = multiAddressFactory.getXpubFromAddress(address);
 
         if(xpub != null) {
             label = getPayload().getHdWallets().get(HD_WALLET_INDEX).getLabelFromXpub(xpub);
@@ -715,6 +718,16 @@ public class PayloadManager {
         }
 
         return label;
+    }
+
+    /**
+     * Returns an xPub from an address if the address belongs to this wallet.
+     * @param address The address you want to query
+     * @return  An xPub as a String
+     */
+    @Nullable
+    public String getXpubFromAddress(String address) {
+        return multiAddressFactory.getXpubFromAddress(address);
     }
 
     /**

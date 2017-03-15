@@ -32,7 +32,7 @@ public class MultiAddressFactory {
         this.nextChangeAddressMap = new HashMap<>();
     }
 
-    public String getAddressFromXpub(String address) {
+    public String getXpubFromAddress(String address) {
         return addressToXpubMap.get(address);
     }
 
