@@ -67,6 +67,7 @@ public class PayloadManager {
         blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
         multiAddressFactory = new MultiAddressFactory(blockExplorer);
         balanceManager = new BalanceManager(blockExplorer);
+        walletBaseBody = new WalletBase();
     }
 
     public void wipe() {
