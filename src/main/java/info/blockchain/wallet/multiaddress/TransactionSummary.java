@@ -19,6 +19,7 @@ public class TransactionSummary {
     private int confirmations;
     private boolean isWatchOnly;
     private boolean isDoubleSpend;
+    private boolean isPending;//Sent to server but not confirmed
 
     //Address - Amount map
     HashMap<String, BigInteger> inputsMap = new HashMap<>();
@@ -122,6 +123,14 @@ public class TransactionSummary {
 
     public void setOutputsXpubMap(HashMap<String, String> outputsXpubMap) {
         this.outputsXpubMap = outputsXpubMap;
+    }
+
+    public boolean isPending() {
+        return isPending;
+    }
+
+    public void setPending(boolean pending) {
+        isPending = pending;
     }
 
     public static class TxMostRecentDateComparator implements Comparator<TransactionSummary> {
