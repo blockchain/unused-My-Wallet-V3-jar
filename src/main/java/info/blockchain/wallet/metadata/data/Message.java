@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.blockchain.wallet.contacts.data.Contact;
 import java.io.IOException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -95,8 +94,8 @@ public class Message {
     }
 
     @JsonIgnore
-    public Message fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, getClass());
+    public static Message fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Message.class);
     }
 
     @JsonIgnore

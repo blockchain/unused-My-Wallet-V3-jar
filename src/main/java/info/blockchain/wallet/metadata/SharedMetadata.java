@@ -3,10 +3,8 @@ package info.blockchain.wallet.metadata;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import info.blockchain.BlockchainFramework;
-import info.blockchain.api.MetadataEndpoints;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.exceptions.ValidationException;
@@ -15,21 +13,18 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.MessageProcessRequest;
 import info.blockchain.wallet.metadata.data.Trusted;
-
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.spongycastle.crypto.InvalidCipherTextException;
-import org.spongycastle.util.encoders.Base64;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
 import okhttp3.ResponseBody;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.util.encoders.Base64;
 import retrofit2.Call;
 import retrofit2.Response;
 

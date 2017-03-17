@@ -1,38 +1,22 @@
 package info.blockchain.wallet.util;
 
-import info.blockchain.api.Balance;
-
-import info.blockchain.api.PersistentUrls;
-import info.blockchain.bip44.WalletFactory;
-import java.util.StringJoiner;
+import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.api.PersistentUrls;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.core.Wallet;
-import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
-import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
+public class PrivateKeyFactoryTest extends MockedResponseTest {
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class PrivateKeyFactoryTest {
-
-    PrivateKeyFactory privateKeyFactory;
-
+    private PrivateKeyFactory privateKeyFactory;
     //Mini key
-    String uncompressedAddress = "16FFsrfKxeKt7JWhtpB4VrGBjQ1kKv5o3p";
-    String compressedAddress = "1H2E6b2Ny6UeQ6bM5V2pSxAwZaVYAaaYUH";
-    String balanceApiResponse = "{\n" +
+    private String uncompressedAddress = "16FFsrfKxeKt7JWhtpB4VrGBjQ1kKv5o3p";
+    private String compressedAddress = "1H2E6b2Ny6UeQ6bM5V2pSxAwZaVYAaaYUH";
+    private String balanceApiResponse = "{\n" +
             "    \""+uncompressedAddress+"\": {\n" +
             "        \"final_balance\": %d,\n" +
             "        \"n_tx\": 22,\n" +
@@ -46,9 +30,8 @@ public class PrivateKeyFactoryTest {
             "}";
 
     @Before
-    public void setUp() throws Exception {
-//        PersistentUrls.getInstance().setCurrentNetworkParams(TestNet3Params.get());
-        privateKeyFactory = new PrivateKeyFactory(mock(Balance.class));
+    public void setup() throws Exception {
+        privateKeyFactory = new PrivateKeyFactory();
     }
 
     @Test
@@ -56,11 +39,11 @@ public class PrivateKeyFactoryTest {
 
         String miniKey = "SmZxHc2PURmBHgKKXo97rEYWfnQKYu";
         String format = privateKeyFactory.getFormat(miniKey);
-        assertThat(format, is(PrivateKeyFactory.MINI));
+        Assert.assertEquals(PrivateKeyFactory.MINI, format);
 
         String miniKey2 = "SxuRMDrSNbwozww4twnedUPouUmGST";
         String format2 = privateKeyFactory.getFormat(miniKey2);
-        assertThat(format2, is(PrivateKeyFactory.MINI));
+        Assert.assertEquals(PrivateKeyFactory.MINI, format2);
     }
 
     @Test
@@ -68,7 +51,7 @@ public class PrivateKeyFactoryTest {
 
         String key = "22mPQQDMarsk4UcUuNH34PhebdftEtrQuftXDg5kA4QG";
         String format = privateKeyFactory.getFormat(key);
-        assertThat(format, is(PrivateKeyFactory.BASE58));
+        Assert.assertEquals(PrivateKeyFactory.BASE58, format);
     }
 
     @Test
@@ -76,7 +59,7 @@ public class PrivateKeyFactoryTest {
 
         String key = "vICceVGqzvxqnB7haMDSB1q+XtBJ2kYraP45sjPd3CA=";
         String format = privateKeyFactory.getFormat(key);
-        assertThat(format, is(PrivateKeyFactory.BASE64));
+        Assert.assertEquals(PrivateKeyFactory.BASE64, format);
     }
 
     @Test
@@ -84,7 +67,7 @@ public class PrivateKeyFactoryTest {
 
         String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
         String format = privateKeyFactory.getFormat(key);
-        assertThat(format, is(PrivateKeyFactory.HEX_COMPRESSED));
+        Assert.assertEquals(PrivateKeyFactory.HEX_COMPRESSED, format);
     }
 
     @Test
@@ -97,7 +80,7 @@ public class PrivateKeyFactoryTest {
         }
 
         String format = privateKeyFactory.getFormat(key);
-        assertThat(format, is(PrivateKeyFactory.WIF_COMPRESSED));
+        Assert.assertEquals(PrivateKeyFactory.WIF_COMPRESSED, format);
     }
 
     @Test
@@ -110,7 +93,7 @@ public class PrivateKeyFactoryTest {
         }
 
         String format = privateKeyFactory.getFormat(key);
-        assertThat(format, is(PrivateKeyFactory.WIF_UNCOMPRESSED));
+        Assert.assertEquals(PrivateKeyFactory.WIF_UNCOMPRESSED, format);
     }
 
     @Test
@@ -118,7 +101,7 @@ public class PrivateKeyFactoryTest {
 
         String key = "6PfY1oK1kJX7jYDPMGBkcECCYwzH2qTCHfMdz67cBJrL7oZvpH8H8jfH2j";
         String format = privateKeyFactory.getFormat(key);
-        assertThat(format, is(PrivateKeyFactory.BIP38));
+        Assert.assertEquals(PrivateKeyFactory.BIP38, format);
     }
 
     @Test
@@ -126,10 +109,7 @@ public class PrivateKeyFactoryTest {
 
         //Arrange
         String compressedByDefault = String.format(balanceApiResponse, 0 ,0);
-
-        Balance mockApi = mock(Balance.class);
-        PrivateKeyFactory privateKeyFactory = new PrivateKeyFactory(mockApi);
-        when(mockApi.getBalance(any(ArrayList.class))).thenReturn(new JSONObject(compressedByDefault));
+        mockInterceptor.setResponseString(compressedByDefault);
 
         //Act
         String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
@@ -138,7 +118,7 @@ public class PrivateKeyFactoryTest {
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
-        assertThat(address.toString(), is(compressedAddress));
+        Assert.assertEquals(compressedAddress, address.toString());
         Assert.assertTrue(ecKey.isCompressed());
     }
 
@@ -147,9 +127,7 @@ public class PrivateKeyFactoryTest {
 
         //Arrange
         String uncompressedWithBalance = String.format(balanceApiResponse, 1000 ,0);
-        Balance mockApi = mock(Balance.class);
-        PrivateKeyFactory privateKeyFactory = new PrivateKeyFactory(mockApi);
-        when(mockApi.getBalance(any(ArrayList.class))).thenReturn(new JSONObject(uncompressedWithBalance));
+        mockInterceptor.setResponseString(uncompressedWithBalance);
 
         //Act
         String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
@@ -159,7 +137,7 @@ public class PrivateKeyFactoryTest {
 
         //Assert
         if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams) {
-            assertThat(address.toString(), is(uncompressedAddress));
+            Assert.assertEquals(uncompressedAddress, address.toString());
             Assert.assertTrue(!ecKey.isCompressed());
         }
     }
@@ -169,9 +147,7 @@ public class PrivateKeyFactoryTest {
 
         //Arrange
         String compressedWithBalance = String.format(balanceApiResponse, 0 ,1000);
-        Balance mockApi = mock(Balance.class);
-        PrivateKeyFactory privateKeyFactory = new PrivateKeyFactory(mockApi);
-        when(mockApi.getBalance(any(ArrayList.class))).thenReturn(new JSONObject(compressedWithBalance));
+        mockInterceptor.setResponseString(compressedWithBalance);
 
         //Act
         String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
@@ -180,7 +156,7 @@ public class PrivateKeyFactoryTest {
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
-        assertThat(address.toString(), is(compressedAddress));
+        Assert.assertEquals(compressedAddress, address.toString());
         Assert.assertTrue(ecKey.isCompressed());
     }
 
@@ -192,7 +168,7 @@ public class PrivateKeyFactoryTest {
         ECKey key1 = privateKeyFactory.getKey(PrivateKeyFactory.HEX_COMPRESSED, key);
 
         //Assert
-        assertThat(format, is(PrivateKeyFactory.HEX_COMPRESSED));
-        assertThat(key1.toAddress(MainNetParams.get()).toString(), is("1NLLkARpefxpXaMb7ZhHmc2DYNoVUnzBAz"));
+        Assert.assertEquals(PrivateKeyFactory.HEX_COMPRESSED, format);
+        Assert.assertEquals("1NLLkARpefxpXaMb7ZhHmc2DYNoVUnzBAz", key1.toAddress(MainNetParams.get()).toString());
     }
 }

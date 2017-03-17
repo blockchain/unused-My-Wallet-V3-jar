@@ -1,15 +1,18 @@
 package info.blockchain.wallet.pairing;
 
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.util.CharSequenceX;
-
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class Pairing {
 
-    public PairingQRComponents getQRComponentsFromRawString(String rawString) throws Exception {
-
-        PairingQRComponents result = new PairingQRComponents();
+    /**
+     *
+     * @param rawString
+     * @return Pair. Left = guid, Right = encryptedPairingCode
+     * @throws Exception
+     */
+    public static Pair getQRComponentsFromRawString(String rawString) throws Exception {
 
         if (rawString == null || rawString.length() == 0 || rawString.charAt(0) != '1') {
             throw new Exception("QR string null or empty.");
@@ -21,19 +24,16 @@ public class Pairing {
             throw new Exception("QR string does not have 3 components.");
         }
 
-        result.guid = components[1];
-        if (result.guid.length() != 36) {
+        if (components[1].length() != 36) {
             throw new Exception("GUID should be 36 characters in length.");
         }
 
-        result.encryptedPairingCode = components[2];
-
-        return result;
+        return Pair.of(components[1], components[2]);
     }
 
-    public String[] getSharedKeyAndPassword(String encryptedPairingCode, String encryptionPassword) throws Exception {
+    public static String[] getSharedKeyAndPassword(String encryptedPairingCode, String encryptionPassword) throws Exception {
 
-        String decryptedPairingCode = AESUtil.decrypt(encryptedPairingCode, new CharSequenceX(encryptionPassword), AESUtil.QR_CODE_PBKDF_2ITERATIONS);
+        String decryptedPairingCode = AESUtil.decrypt(encryptedPairingCode, encryptionPassword, AESUtil.QR_CODE_PBKDF_2ITERATIONS);
 
         if (decryptedPairingCode == null) {
             throw new Exception("Pairing code decryption failed.");
@@ -52,4 +52,3 @@ public class Pairing {
         return sharedKeyAndPassword;
     }
 }
-

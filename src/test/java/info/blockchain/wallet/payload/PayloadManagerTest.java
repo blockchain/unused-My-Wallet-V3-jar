@@ -1,95 +1,31 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.bip44.*;
-import info.blockchain.bip44.Account;
-import info.blockchain.test_data.PayloadTestData;
-import info.blockchain.util.RestClient;
+import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
-import info.blockchain.wallet.util.CharSequenceX;
-import info.blockchain.wallet.util.DoubleEncryptionFactory;
-
-import org.bitcoinj.core.AddressFormatException;
+import info.blockchain.wallet.multiaddress.TransactionSummary;
+import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.AddressLabels;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.Wallet;
-import org.json.JSONObject;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
-public class PayloadManagerTest {
-
-    @Mock
-    private PayloadManager mockPayloadManager;
-
-    // TODO: 30/09/16 Investigate changing integration tests to unit tests
-    PayloadManager payloadManager;
-    String password = "password";
-    String label = "Account 1";
-    Payload payload;
-
-    @Before
-    public void setUp() throws Exception {
-
-        //Set environment
-//        PersistentUrls.getInstance().setCurrentEnvironment(PersistentUrls.Environment.DEV);
-//        PersistentUrls.getInstance().setCurrentApiUrl("https://api.dev.blockchain.info/");
-//        PersistentUrls.getInstance().setCurrentServerUrl("https://explorer.dev.blockchain.info/");
-
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-
-                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-                OkHttpClient okHttpClient = new OkHttpClient.Builder()
-//                        .addInterceptor(loggingInterceptor)//Extensive logging
-                        .build();
-
-                return RestClient.getRetrofitInstance(okHttpClient);
-            }
-
-            @Override
-            public Retrofit getRetrofitServerInstance() {
-                return null;
-            }
-        });
-
-        MockitoAnnotations.initMocks(this);
-
-        payloadManager = PayloadManager.getInstance();
-        payload = payloadManager.createHDWallet(password, label);
-
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-                return RestClient.getRetrofitInstance(new OkHttpClient());
-            }
-
-            @Override
-            public Retrofit getRetrofitServerInstance() {
-                return null;
-            }
-        });
-    }
+public class PayloadManagerTest extends MockedResponseTest {
 
     @After
     public void tearDown() throws Exception {
@@ -97,406 +33,618 @@ public class PayloadManagerTest {
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withValidVars_shouldPass() throws Exception {
-
-        payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
-            public void onSuccess() {
-                assertThat("Payload successfully fetch and decrypted", true);
-            }
-        });
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {
-        }
+    public void getInstance() throws Exception {
+        Assert.assertNotNull(PayloadManager.getInstance());
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidGuid_shouldThrow_AuthenticationException() {
+    public void create() throws Exception {
 
-        try {
-            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid() + "addSomeTextToFail", new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
-                public void onSuccess() {
-                    assertThat("onSuccess", false);
-                }
-            });
-        } catch (Exception e) {
-            if (e instanceof InvalidCredentialsException) {
-                assertThat("Invalid Guid successfully detected", true);
-            } else {
-                assertThat("Auth should not pass with invalid guid", false);
-            }
-        }
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {
-        }
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        //Responses for multi address, 'All' and individual xpub
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
+
+        Wallet walletBody = PayloadManager.getInstance()
+            .getPayload();
+
+        Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
+        Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
+
+        Assert.assertEquals(1, walletBody.getHdWallets().get(0).getAccounts().size());
+
+        Assert.assertEquals(5000, walletBody.getOptions().getPbkdf2Iterations());
+        Assert.assertEquals(600000, walletBody.getOptions().getLogoutTime());
+        Assert.assertEquals(10000, walletBody.getOptions().getFeePerKb());
+    }
+
+    @Test(expected = ServerConnectionException.class)
+    public void create_ServerConnectionException() throws Exception {
+
+        mockInterceptor.setResponseString("Save failed.");
+        mockInterceptor.setResponseCode(500);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
     }
 
     @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidPassword_shouldThrow_DecryptionException() {
-
-        try {
-            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password + "addSomeTextToFail"), new PayloadManager.InitiatePayloadListener() {
-                public void onSuccess() {
-                    assertThat("onSuccess", false);
-                }
-            });
-        } catch (Exception e) {
-            assertThat("InitiatePayload failed as expected", true);
-        }
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void getPayloadFromServerAndDecrypt_withInvalidSharedKey_shouldThrow_AuthenticationException() {
-
-        try {
-            payloadManager.initiatePayload(payload.getSharedKey() + "addSomeTextToFail", payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
-                public void onSuccess() {
-                    assertThat("onSuccess", false);
-                }
-            });
-        } catch (Exception e) {
-            if (e instanceof InvalidCredentialsException) {
-                assertThat("Invalid shared key successfully detected", true);
-            } else {
-                assertThat("Auth should not pass with invalid shared key", false);
-            }
-        }
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void getPayloadFromServerAndDecrypt_withIncompatibleVersion_shouldThrow_UnsupportedVersionException() throws Exception {
-
-        payloadManager.setVersion(4.0);
-
-        payloadManager.savePayloadToServer();
-
-        try {
-            payloadManager.initiatePayload(payload.getSharedKey(), payload.getGuid(), new CharSequenceX(password), new PayloadManager.InitiatePayloadListener() {
-                public void onSuccess() {
-                    assertThat("Incompatible version should not pass", false);
-                }
-            });
-        } catch (Exception e) {
-            if (e instanceof UnsupportedVersionException) {
-                assertThat("Unsupported version detected", true);
-            } else {
-                assertThat("Unsupported version should not pass", false);
-            }
-        } finally {
-            payloadManager.setVersion(3.0);
-        }
-        try {
-            Thread.sleep(500);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void upgradeV2PayloadToV3_shouldPass() throws Exception {
-
-        final PayloadManager payloadManager = PayloadManager.getInstance();
-
-        //Create HD
-        String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password", label);
-        payload.setHdWalletList(new ArrayList<HDWallet>());//remove hd
-
-        //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", null);
-
-        payloadManager.addLegacyAddress(legacyAddress);
-
-        final String guidOriginal = payloadManager.getPayload().getGuid();
-
-        //Now we have legacy wallet (only addresses)
-        payloadManager.upgradeV2PayloadToV3(new CharSequenceX(""), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
-            public void onDoubleEncryptionPasswordError() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
-            }
-
-            public void onUpgradeSuccess() {
-
-                assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
-                assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
-
-                String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
-                try {
-                    assertThat(payloadManager.getMnemonic().length, is(12));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    assertThat("upgradeV2PayloadToV3 failed", false);
-                }
-            }
-
-            public void onUpgradeFail() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
-            }
-        });
-
-        PayloadManager.getInstance().wipe();
-    }
-
-    @Test
-    public void upgradeV2PayloadToV3_withSecondPassword_shouldPass() throws Exception {
-
-        final String secondPassword = "password2";
-        final PayloadManager payloadManager = PayloadManager.getInstance();
-
-        //Create HD
-        String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password", label);
-        payload.setHdWalletList(new ArrayList<HDWallet>());//remove hd
-
-        //Set second password
-        String hash = DoubleEncryptionFactory.getInstance().getHash(payload.getSharedKey(), secondPassword, payload.getDoubleEncryptionPbkdf2Iterations());
-        payload.setDoublePasswordHash(hash);
-        payload.setDoubleEncrypted(true);
-
-        //Add legacy (way too much extra to docleanup newLegacyAddress() soon)
-        LegacyAddress legacyAddress = payloadManager.generateLegacyAddress("android", "6.6", secondPassword);
-        payloadManager.addLegacyAddress(legacyAddress);
-
-        final String guidOriginal = payloadManager.getPayload().getGuid();
-
-        //Now we have legacy wallet (only addresses)
-        payloadManager.upgradeV2PayloadToV3(new CharSequenceX(secondPassword), true, "My Bci Wallet", new PayloadManager.UpgradePayloadListener() {
-            public void onDoubleEncryptionPasswordError() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
-            }
-
-            public void onUpgradeSuccess() {
-
-                assertThat(payloadManager.getPayload().getGuid(), is(guidOriginal));
-                assertThat("Payload not flagged as upgraded", payloadManager.getPayload().isUpgraded());
-
-                String xpriv = payloadManager.getPayload().getHdWallet().getAccounts().get(0).getXpriv();
-                assertThat("Xpriv may not be null or empty after upgrade", xpriv != null && !xpriv.isEmpty());
-                try {
-                    assertThat(payloadManager.getMnemonic().length, is(12));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    assertThat("upgradeV2PayloadToV3 failed", false);
-                }
-            }
-
-            public void onUpgradeFail() {
-                assertThat("upgradeV2PayloadToV3 failed", false);
-            }
-        });
-
-        PayloadManager.getInstance().wipe();
-    }
-
-    @Test
-    public void createWallet_shouldPass() throws Exception {
-
-        PayloadManager payloadManager = PayloadManager.getInstance();
-
-        String label = "Account 1";
-        Payload payload = payloadManager.createHDWallet("password", label);
-
-        assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
-        assertThat(payload.getHdWallet().getAccounts().get(0).getLabel(), is(label));
-        assertThat(payload, is(payloadManager.getPayload()));
-        assertThat("Checksum should not be null", payloadManager.getCheckSum() != null);
-
-        PayloadManager.getInstance().wipe();
-    }
-
-    @Test
-    public void restoreWallet_withMnemonicNoPassphrase_shouldPass() throws Exception {
-
-        PayloadManager payloadManager = PayloadManager.getInstance();
+    public void recoverFromMnemonic() throws Exception {
 
         String mnemonic = "all all all all all all all all all all all all";
 
-        String seedHex = "0660cc198330660cc198330660cc1983";//All all ...
-        String xpub1 = "xpub6BiVtCpG9fQPxnPmHXG8PhtzQdWC2Su4qWu6XW9tpWFYhxydCLJGrWBJZ5H6qTAHdPQ7pQhtpjiYZVZARo14qHiay2fvrX996oEP42u8wZy";
-        String xpub2 = "xpub6BiVtCpG9fQQ1EW99bMSYwySbPWvzTFRQZCFgTmV3samLSZAYU7C3f4Je9vkNh7h1GAWi5Fn93BwoGBy9EAXbWTTgTnVKAbthHpxM1fXVRL";
-        String xpub3 = "xpub6BiVtCpG9fQQ4xJHzNkdmqspAeMdBTDFZ2kYM39RzDYMAcb4wtkWZNSu7k3BbJgoPgTzx62G69mBiUjDnD3EJrTA5ZYZg4vfz1YWcGBnX2x";
-        String xpub4 = "xpub6BiVtCpG9fQQ77Qr7WArXSG3yWYm2bkRYpoSYtRkVEAk5nrcULBG8AeRYMMKVUXAsNeXdR7TGuL6SkUc4RF2YC7X4afLyZrT9NrrUFyotkH";
-        String xpub5 = "xpub6BiVtCpG9fQQ8pVjVF7jm3kLahkNbQRkWGUvzsKQpXWYvhYD4d4UDADxZUL4xp9UwsDT5YgwNKofTWRtwJgnHkbNxuzLDho4mxfS9KLesGP";
+        LinkedList<String> responseList = new LinkedList<>();
+        //Responses for checking how many accounts to recover
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_all_balance_1.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_all_balance_2.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_all_balance_3.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add("HDWallet successfully synced with server");
 
-        Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "");
+        //responses for initializing multi address
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
 
-        assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
-        assertThat(payload.getHdWallet().getSeedHex(), is(seedHex));
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9xj9UhHNKHr6kJKJBVj82ZxFrbfhczBDUHyVj7kHGAiZqAeUenz2JhrphnMMYVKcWcVPFJESngtKsVa4FYEvFfWUTtZThCoZdwDeS9qQnqm"));
+        Wallet walletBody = PayloadManager.getInstance()
+            .getPayload();
 
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9xj9UhHNKHr6nkRg3ZpSBp2i3MgSazXa3LGet5MsVY3nTeE1zvnwVrjpnsJGEtEvvcm8fwoUBVpnHcioJfFqRUaZ6ijXEuwUuv2Q5RM6dGR"));
+        Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
+        Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
+        Assert.assertEquals("0660cc198330660cc198330660cc1983", walletBody.getHdWallets().get(0).getSeedHex());
 
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9xj9UhHNKHr6rUDptMDdQhw5ccX8mzVQBopwYejpRt1NHpFvQMSG1a8RGRJjZRE8rRJJ6N9g1GcB6yWEgkXCzGBweq934jS9LfBuViQRxRw"));
+        Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
 
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9xj9UhHNKHr6tdLP1UdrAJKKRUiGd92aBbsqkW28vtdmCzXTvns1aNKwh5uM1nSbdD8Y4x9VBnTLrDDEbREnu9KYnDyvt8QRPtPWQ78UgAG"));
-
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9xj9UhHNKHr6vLRGPDajPuoc2futBwhu93ZLCUuoGBya3uD4X5kDfMuUiEHz7HPWPpkgCHiwNbLWjxa6QrqfjmPmVr146GUt8D5shiXkQpC"));
-
-        PayloadManager.getInstance().wipe();
+        Assert.assertEquals(5000, walletBody.getOptions().getPbkdf2Iterations());
+        Assert.assertEquals(600000, walletBody.getOptions().getLogoutTime());
+        Assert.assertEquals(10000, walletBody.getOptions().getFeePerKb());
     }
 
-    @Test
-    public void restoreWallet_withMnemonicWithPassphrase_shouldPass() throws Exception {
-
-        PayloadManager payloadManager = PayloadManager.getInstance();
+    @Test(expected = ServerConnectionException.class)
+    public void recoverFromMnemonic_ServerConnectionException() throws Exception {
 
         String mnemonic = "all all all all all all all all all all all all";
-        String passphrase = "myPassphrase";
 
-        String seedHex = "0660cc198330660cc198330660cc1983";//All all ...
-        String xpub1 = "xpub6D45Bi15NLqVpUqw9ku1ucJw6AKa5mgU3fbodx96sbj8rWw91TPkZ1TVbhMNUVihSLHGJk5pdCXBb56r2tiPRrvp439uxq4S3D8Emxs8WiZ";
-        String xpub2 = "xpub6D45Bi15NLqVrLDEFqomu3YrS197BMHMdk9xy4Kp21g8CzABvQ1o7DNbL5aiFoksJYvpaJGW5aEXF7qFHFHejgvSV4UXu9LXoRaNfcek7sN";
-        String xpub3 = "xpub6D45Bi15NLqVtw4aMeT9xCXmE8YX4SBeeAozaYGeCgDPK8SwVDeLwGQv9wW6x8Ex41ERUHwT9KKgKF2d9jXaYe9M4XUitPGTgk7UERTJ1dm";
-        String xpub4 = "xpub6D45Bi15NLqVwVjzUWpR6Nw1bdJZiEHqLg4k9MpFMFnLqBJTS1P5Zym4sgfdYMTP87yJFK1MkeXUxviHE3emBfd8k3NyZf2GPLoaKYfEQti";
-        String xpub5 = "xpub6D45Bi15NLqVyTd6H8nZG7KZ6LjHaw3WBeAtsGVJ4pHxkZdj7ersAWJvejFtNHCe95JGXjVJuZ8pvSMmRdf84FUbrnpPCfhJj5SoEk67Um6";
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_all_balance_1.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_all_balance_2.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_all_balance_3.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add("Save failed");
+        mockInterceptor.setResponseStringList(responseList);
 
-        Payload payload = payloadManager.restoreHDWallet("password", mnemonic, "", passphrase);
+        //checking if xpubs has txs succeeds but then savinf fails
+        LinkedList<Integer> codes = new LinkedList<>();
+        codes.add(200);
+        codes.add(200);
+        codes.add(200);
+        codes.add(500);
+        mockInterceptor.setResponseCodeList(codes);
 
-        assertThat(payload.getGuid().length(), is(36));//GUIDs are 36 in length
-        assertThat(payload.getHdWallet().getSeedHex(), is(seedHex));
+        PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpub(), is(xpub1));
-        assertThat(payload.getHdWallet().getAccounts().get(0).getXpriv().substring(4), is("9z4inCUBXyHCbzmU3jN1YUNCY8V5gJxcgSgCqZjVKGC9yibzTv5W1D91kRvVoaqPGNj9CosizY3nLnZheTYqZ4aYYWfAqMw9vz4F8mxj3KG"));
+        Wallet walletBody = PayloadManager.getInstance()
+            .getPayload();
 
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpub(), is(xpub2));
-        assertThat(payload.getHdWallet().getAccounts().get(1).getXpriv().substring(4), is("9z4inCUBXyHCdr8m9pGmXuc7syJcmtZWGXENAfvCTg99LBq3NrhYZR47Umizc4tUtm8meaD58sTLuAyfNoTLWL7ELKtLKCSRuBnCgFfr2KX"));
+        Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
+        Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
+        Assert.assertEquals("0660cc198330660cc198330660cc1983", walletBody.getHdWallets().get(0).getSeedHex());
 
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpub(), is(xpub3));
-        assertThat(payload.getHdWallet().getAccounts().get(2).getXpriv().substring(4), is("9z4inCUBXyHCgSz7Fcv9b4b2g6i2eyToGwtPn9s2eLgQSL7nwgL6PU6SJfAdunPLraJbaPWLHzGBxu78ETqBPk36JgBiUxUB1hfeMVaci1q"));
+        Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
 
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpub(), is(xpub4));
-        assertThat(payload.getHdWallet().getAccounts().get(3).getXpriv().substring(4), is("9z4inCUBXyHCj1fXNVHQjEzH3bU5JmZyyT99LyQdnvFMxNyJtU4q2BSb2PfLNBMLDCgkC9Fv7cyCstkc1AyWZW8YXZc1aPJFTpJkcL9MpF7"));
+        Assert.assertEquals(5000, walletBody.getOptions().getPbkdf2Iterations());
+        Assert.assertEquals(600000, walletBody.getOptions().getLogoutTime());
+        Assert.assertEquals(10000, walletBody.getOptions().getFeePerKb());
+    }
 
-        payloadManager.addAccount("", null);
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpub(), is(xpub5));
-        assertThat(payload.getHdWallet().getAccounts().get(4).getXpriv().substring(4), is("9z4inCUBXyHCkyYdB7FYtyNpYJtoBUKepRFJ4t5gWUkysmJaa7YcchzSoTJQ9TgEG78i3LcnWvkxr5eiYbxUkDN7s8NWPVwf7bgx7DGYFqF"));
+    @Test(expected = UnsupportedVersionException.class)
+    public void initializeAndDecrypt_unsupported_version() throws Exception {
 
-        PayloadManager.getInstance().wipe();
+        URI uri = getClass().getClassLoader()
+            .getResource("wallet_v4_unsupported.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
+            Charset.forName("utf-8"));
+
+        mockInterceptor.setResponseString(walletBase);
+        PayloadManager.getInstance().initializeAndDecrypt("any_shared_key", "any_guid", "SomeTestPassword");
     }
 
     @Test
-    public void restoreWallet_withMnemonic_shouldContainCorrectReceiveAddresses() throws Exception {
+    public void initializeAndDecrypt() throws Exception {
+
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_3.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
+            Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "SomeTestPassword");
+    }
+
+    @Test(expected = InvalidCredentialsException.class)
+    public void initializeAndDecrypt_invalidGuid() throws Exception {
+
+        URI uri = getClass().getClassLoader().getResource("invalid_guid.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
+            Charset.forName("utf-8"));
+
+        mockInterceptor.setResponseString(walletBase);
+        mockInterceptor.setResponseCode(500);
+        PayloadManager.getInstance().initializeAndDecrypt("any", "any", "SomeTestPassword");
+    }
+
+    @Test(expected = HDWalletException.class)
+    public void save_HDWalletException() throws Exception {
+        //Nothing to save
+        PayloadManager.getInstance().save();
+    }
+
+    @Test
+    public void save() throws Exception {
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
+
+        mockInterceptor.setResponseString("MyWallet save successful.");
+        PayloadManager.getInstance().save();
+    }
+
+    @Test
+    public void upgradeV2PayloadToV3() throws Exception{
+        //Tested in integration tests
+    }
+
+    @Test
+    public void addAccount() throws Exception {
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
+
+        Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
+
+        responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().addAccount("Some Label", null);
+        Assert.assertEquals(2, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
+
+        responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().addAccount("Some Label", null);
+        Assert.assertEquals(3, PayloadManager.getInstance().getPayload().getHdWallets().get(0).getAccounts().size());
+
+    }
+
+    @Test
+    public void addLegacyAddress() throws Exception {
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
+
+        Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().addLegacyAddress("Some Label", null);
+        Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        responseList = new LinkedList<>();
+        responseList.add("3e2b33d63ba45320f42d2b1de6d7ebd3ea810c35348927fd34424fe9bc53c07a");
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().addLegacyAddress("Some Label", null);
+        Assert.assertEquals(2, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+    }
+
+    @Test
+    public void setKeyForLegacyAddress() throws Exception {
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
+
+        Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().addLegacyAddress("Some Label", null);
+        Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        LegacyAddress legacyAddressBody = PayloadManager.getInstance().getPayload()
+            .getLegacyAddressList().get(0);
+
+        ECKey ecKey = DeterministicKey
+            .fromPrivate(Base58.decode(legacyAddressBody.getPrivateKey()));
+
+
+        legacyAddressBody.setPrivateKey(null);
+        mockInterceptor.setResponseString("MyWallet save successful.");
+        PayloadManager.getInstance().setKeyForLegacyAddress(ecKey,null);
+    }
+
+    @Test
+    public void setKeyForLegacyAddress_NoSuchAddressException() throws Exception {
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
+
+        Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().addLegacyAddress("Some Label", null);
+        Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        LegacyAddress existingLegacyAddressBody = PayloadManager.getInstance().getPayload()
+            .getLegacyAddressList().get(0);
+
+        //Try non matching ECKey
+        ECKey ecKey = new ECKey();
+
+        responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+
+        LegacyAddress newlyAdded = PayloadManager.getInstance()
+            .setKeyForLegacyAddress(ecKey, null);
+
+        //Ensure new address is created if no match found
+        Assert.assertNotNull(newlyAdded);
+        Assert.assertNotNull(newlyAdded.getPrivateKey());
+        Assert.assertNotNull(newlyAdded.getAddress());
+        Assert.assertNotEquals(existingLegacyAddressBody.getPrivateKey(), newlyAdded.getPrivateKey());
+        Assert.assertNotEquals(existingLegacyAddressBody.getAddress(), newlyAdded.getAddress());
+    }
+
+    @Test
+    public void setKeyForLegacyAddress_saveFail_revert() throws Exception {
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add("MyWallet save successful.");
+        responseList.add("{}");//multiaddress responses - not testing this so can be empty.
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().create("My HDWallet", "name@email.com", "MyTestWallet");
+
+        Assert.assertEquals(0, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        responseList = new LinkedList<>();
+        responseList.add("cb600366ef7a94b991aa04557fc1d9c272ba00df6b1d9791d71c66efa0ae7fe9");
+        responseList.add("MyWallet save successful");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        responseList.add("{}");
+        mockInterceptor.setResponseStringList(responseList);
+        PayloadManager.getInstance().addLegacyAddress("Some Label", null);
+        Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
+
+        LegacyAddress legacyAddressBody = PayloadManager.getInstance().getPayload()
+            .getLegacyAddressList().get(0);
+
+        ECKey ecKey = DeterministicKey
+            .fromPrivate(Base58.decode(legacyAddressBody.getPrivateKey()));
+
+        legacyAddressBody.setPrivateKey(null);
+        mockInterceptor.setResponseCode(500);
+        mockInterceptor.setResponseString("Oops something went wrong");
+        PayloadManager.getInstance().setKeyForLegacyAddress(ecKey,null);
+
+        //Ensure private key reverted on save fail
+        Assert.assertNull(legacyAddressBody.getPrivateKey());
+    }
+
+    @Test
+    public void getNextAddress() throws Exception {
+
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_5.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add("{}");
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m2.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m3.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_5_m4.txt").toURI())), Charset.forName("utf-8")));
+        mockInterceptor.setResponseStringList(responseList);
+
+        PayloadManager.getInstance().initializeAndDecrypt("06f6fa9c-d0fe-403d-815a-111ee26888e2", "4750d125-5344-4b79-9cf9-6e3c97bc9523", "MyTestWallet");
+
+        Wallet wallet = PayloadManager.getInstance().getPayload();
+
+        //Reserve an address to ensure it gets skipped
+        List<AddressLabels> labelList = new ArrayList<>();
+        labelList.add(AddressLabels.fromJson("{\n"
+            + "              \"index\": 1,\n"
+            + "              \"label\": \"Reserved\"\n"
+            + "            }"));
+
+        Account account = wallet.getHdWallets().get(0).getAccounts().get(0);
+        account.setAddressLabels(labelList);
+
+        //set up indexes first
+        PayloadManager.getInstance().getAccountTransactions(account.getXpub(), 50, 0);
+
+        //Next Receive
+        String nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(account);
+        Assert.assertEquals("1H9FdkaryqzB9xacDbJrcjXsJ9By4UVbQw", nextReceiveAddress);
+
+        //Increment receive and check
+        PayloadManager.getInstance().incrementNextReceiveAddress(account);
+        nextReceiveAddress = PayloadManager.getInstance().getNextReceiveAddress(account);
+        Assert.assertEquals("18DU2RjyadUmRK7sHTBHtbJx5VcwthHyF7", nextReceiveAddress);
+
+        //Next Change
+        String nextChangeAddress = PayloadManager.getInstance().getNextChangeAddress(account);
+        Assert.assertEquals("1GEXfMa4SMh3iUZxP8HHQy7Wo3aqce72Nm", nextChangeAddress);
+
+        //Increment Change and check
+        PayloadManager.getInstance().incrementNextChangeAddress(account);
+        nextChangeAddress = PayloadManager.getInstance().getNextChangeAddress(account);
+        Assert.assertEquals("1NzpLHV6LLVFCYdYA5woYL9pHJ48KQJc9K", nextChangeAddress);
+    }
+
+    @Test
+    public void balance() throws Exception {
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_6.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+
+        mockInterceptor.setResponseStringList(responseList);
 
         PayloadManager payloadManager = PayloadManager.getInstance();
+        payloadManager.initializeAndDecrypt("any", "any", "MyTestWallet");
 
-        String mnemonic = "all all all all all all all all all all all all";
-        payloadManager.restoreHDWallet("password", mnemonic, "");
+        //'All' wallet balance and transactions
+        Assert.assertEquals(743071,payloadManager.getWalletBalance().longValue());
 
-        assertThat(payloadManager.getNextReceiveAddress(0), is("1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL"));
+        //Imported addresses consolidated
+        Assert.assertEquals(137505, PayloadManager.getInstance().getImportedAddressesBalance().longValue());
 
-        payloadManager.addAccount("", null);
-        assertThat(payloadManager.getNextReceiveAddress(1), is("1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9"));
+        //Account and address balances
+        String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
+        Assert.assertEquals(566349, payloadManager.getAddressBalance(first).longValue());
 
-        payloadManager.addAccount("", null);
-        assertThat(payloadManager.getNextReceiveAddress(2), is("1N4rfuysGPvWuKHFnEeVdv8NE8QCNPZ9v3"));
+        String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
+        Assert.assertEquals(39217, payloadManager.getAddressBalance(second).longValue());
 
-        payloadManager.addAccount("", null);
-        assertThat(payloadManager.getNextReceiveAddress(3), is("19LcKJTDYuF8B3p4bgDoW2XXn5opPqutx3"));
-
-        PayloadManager.getInstance().wipe();
+        String third = "189iKJLruPtUorasDuxmc6fMRVxz6zxpPS";
+        Assert.assertEquals(137505, payloadManager.getAddressBalance(third).longValue());
     }
 
     @Test
-    public void generateNewLegacyAddress_withWrongSecondPassword_shouldFail() throws Exception {
+    public void multiAddress() throws Exception {
+        //guid 5350e5d5-bd65-456f-b150-e6cc089f0b26
+        URI uri = getClass().getClassLoader().getResource("wallet_v3_6.txt").toURI();
+        String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
-        when(mockPayloadManager.validateSecondPassword(anyString()))
-                .thenReturn(false);
+        LinkedList<String> responseList = new LinkedList<>();
+        responseList.add(walletBase);
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
+        mockInterceptor.setResponseStringList(responseList);
 
-        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar", "1.0", "second_password");
+        PayloadManager payloadManager = PayloadManager.getInstance();
+        payloadManager.initializeAndDecrypt("0f28735d-0b89-405d-a40f-ee3e85c3c78c", "5350e5d5-bd65-456f-b150-e6cc089f0b26", "MyTestWallet");
 
-        assertThat("Address should be null", legacyAddress == null);
-    }
+        //Account 1
+        String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
+        mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m2.txt").toURI())), Charset.forName("utf-8")));
 
-    @Test
-    public void generateNewLegacyAddress_withFailedRandomECKey_shouldFail() throws Exception {
+        List<TransactionSummary> transactionSummaries = payloadManager
+            .getAccountTransactions(first, 50, 0);
+        Assert.assertEquals(8,transactionSummaries.size());
+        TransactionSummary summary = transactionSummaries.get(0);
+        Assert.assertEquals(68563, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("125QEfWq3eKzAQQHeqcMcDMeZGm13hVRvU"));//My Bitcoin Account
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        when(mockPayloadManager.getRandomECKey())
-                .thenReturn(null);
+        summary = transactionSummaries.get(1);
+        Assert.assertEquals(138068, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.SENT, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1CQpuTQrJQLW6PEar17zsd9EV14cZknqWJ"));//My Bitcoin Wallet
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1LQwNvEMnYjNCNxeUJzDfD8mcSqhm2ouPp"));
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AdTcerDBY735kDhQWit5Scroae6piQ2yw"));
 
-        LegacyAddress legacyAddress = mockPayloadManager.generateLegacyAddress("Jar", "1.0", "second_password");
+        summary = transactionSummaries.get(2);
+        Assert.assertEquals(800100, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("19CMnkUgBnTBNiTWXwoZr6Gb3aeXKHvuGG"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1CQpuTQrJQLW6PEar17zsd9EV14cZknqWJ"));//My Bitcoin Wallet
 
-        assertThat("Address should be null", legacyAddress == null);
-    }
+        summary = transactionSummaries.get(3);
+        Assert.assertEquals(35194, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.SENT, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("15HjFY96ZANBkN5kvPRgrXH93jnntqs32n"));//My Bitcoin Wallet
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1PQ9ZYhv9PwbWQQN74XRqUCjC32JrkyzB9"));
 
-    @Test
-    public void testIsEncryptionConsistent_not_doubleEncrypted() throws Exception {
+        summary = transactionSummaries.get(4);
+        Assert.assertEquals(98326, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1Peysd3qYDe35yNp6KB1ZkbVYHr42JT9zZ"));//My Bitcoin Wallet
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        ArrayList<String> keyList = new ArrayList<>();
-        keyList.add("o9azUsu8QrsjtKe54Ah3ep6FEGj6v1fA3S8nrYt6UFd");
-        keyList.add("9DWpEiXYQ9wkYQA3UpZezsATW6sP3N9fcCetgRyfWUn4");
-        keyList.add("xprv9xgDCL6n9Y3x9njMKWiLaYY3XDeEjY8duMyreHk5WhKNxVKeYjNt85SmeZYpctXAdAgodwnWpCknp5HwNB5Np1hxeqw6dMZDgcWexU4uTcH");
-        keyList.add("xprv9xgDCL6n9Y3xDRCSvsGTnub1z1z1s1vbpsS7esVELAV7166hs2m6fj5ibth9ejDyowPEau2n7FbQVZCyVhg7KSrgy5a9VoqEge387KTwjws");
+        summary = transactionSummaries.get(5);
+        Assert.assertEquals(160640, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1BZe6YLaf2HiwJdnBbLyKWAqNia7foVe1w"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Peysd3qYDe35yNp6KB1ZkbVYHr42JT9zZ"));//My Bitcoin Wallet
 
-        Assert.assertTrue(payloadManager.isEncryptionConsistent(false, keyList));
-        Assert.assertTrue(!payloadManager.isEncryptionConsistent(true, keyList));
-    }
+        summary = transactionSummaries.get(6);
+        Assert.assertEquals(9833, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("17ijgwpGsVQRzMjsdAfdmeP53kpw9yvXur"));//My Bitcoin Wallet
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AtunWT3F6WvQc3aaPuPbNGeBpVF3ZPM5r"));//Savings account
 
-    @Test
-    public void testIsEncryptionConsistent_doubleEncrypted() throws Exception {
+        summary = transactionSummaries.get(7);
+        Assert.assertEquals(40160, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1Baa1cjB1CyBVSjw8SkFZ2YBuiwKnKLXhe"));
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("17ijgwpGsVQRzMjsdAfdmeP53kpw9yvXur"));//My Bitcoin Wallet
 
-        ArrayList<String> keyList = new ArrayList<>();
-        keyList.add("kG4+ziqbauAwP+wbGT2UM9d5f7yGL2kazOSs4KlYempP68qTQ9YtV5od5dQg3Jxpi4t5Q4faCMqraKpnQ1Gq3Q==");
-        keyList.add("6icDz7UDWlESNqNiGEFolP3UqTVES9xIZQ9Ld4E0ND6PF/4KStmoGP9ADOV43a+KIMyR1Ook+ap7zJ8l8Wn0bA==");
-        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
-        keyList.add("NQyZWdgZmJ4k8NBZjw6n64UIiXtW3zhnnfsZnfzU6YXHovucf2pLOtHq/lxqPzxWMzZuThmWBsdI+ns/HNAGB9s6Rad5Q6R55j5wx+Gd8KvSEK57U+3VZah5oWusdMZNz2hfKIn49EoZszw9bKsEjGzRxxd1D1FLny1pci5gtD4=");
+        //Account 2
+        String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
+        mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
+        transactionSummaries = payloadManager
+            .getAccountTransactions(second, 50, 0);
+        Assert.assertEquals(2,transactionSummaries.size());
+        summary = transactionSummaries.get(0);
+        Assert.assertEquals(68563, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("125QEfWq3eKzAQQHeqcMcDMeZGm13hVRvU"));//My Bitcoin Wallet
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        Assert.assertTrue(payloadManager.isEncryptionConsistent(true, keyList));
-        Assert.assertTrue(!payloadManager.isEncryptionConsistent(false, keyList));
-    }
+        summary = transactionSummaries.get(1);
+        Assert.assertEquals(9833, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("17ijgwpGsVQRzMjsdAfdmeP53kpw9yvXur"));//My Bitcoin Wallet
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1AtunWT3F6WvQc3aaPuPbNGeBpVF3ZPM5r"));//Savings account
 
-    @Test
-    public void testIsEncryptionConsistent_not_doubleEncrypted_corrupt() throws Exception {
+        //Imported addresses (consolidated)
+        mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+            "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
+        transactionSummaries = payloadManager.getImportedAddressesTransactions(50, 0);
+        Assert.assertEquals(2, transactionSummaries.size());
 
-        ArrayList<String> keyList = new ArrayList<>();
-        keyList.add("o9azUsu8QrsjtKe54Ah3ep6FEGj6v1fA3S8nrYt6UFd");
-        keyList.add("6icDz7UDWlESNqNiGEFolP3UqTVES9xIZQ9Ld4E0ND6PF/4KStmoGP9ADOV43a+KIMyR1Ook+ap7zJ8l8Wn0bA==");
+        summary = transactionSummaries.get(0);
+        Assert.assertEquals(2,transactionSummaries.size());
+        Assert.assertEquals(68563, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("125QEfWq3eKzAQQHeqcMcDMeZGm13hVRvU"));//My Bitcoin Wallet
+        Assert.assertEquals(2, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw"));//Savings account
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
 
-        Assert.assertTrue(!payloadManager.isEncryptionConsistent(false, keyList));
-
-        keyList = new ArrayList<>();
-        keyList.add("xprv9xgDCL6n9Y3x9njMKWiLaYY3XDeEjY8duMyreHk5WhKNxVKeYjNt85SmeZYpctXAdAgodwnWpCknp5HwNB5Np1hxeqw6dMZDgcWexU4uTcH");
-        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
-
-        Assert.assertTrue(!payloadManager.isEncryptionConsistent(false, keyList));
-    }
-
-    @Test
-    public void testIsEncryptionConsistent_doubleEncrypted_corrupt() throws Exception {
-
-        ArrayList<String> keyList = new ArrayList<>();
-        keyList.add("kG4+ziqbauAwP+wbGT2UM9d5f7yGL2kazOSs4KlYempP68qTQ9YtV5od5dQg3Jxpi4t5Q4faCMqraKpnQ1Gq3Q==");
-        keyList.add("9DWpEiXYQ9wkYQA3UpZezsATW6sP3N9fcCetgRyfWUn4");
-        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
-        keyList.add("NQyZWdgZmJ4k8NBZjw6n64UIiXtW3zhnnfsZnfzU6YXHovucf2pLOtHq/lxqPzxWMzZuThmWBsdI+ns/HNAGB9s6Rad5Q6R55j5wx+Gd8KvSEK57U+3VZah5oWusdMZNz2hfKIn49EoZszw9bKsEjGzRxxd1D1FLny1pci5gtD4=");
-
-        Assert.assertTrue(!payloadManager.isEncryptionConsistent(true, keyList));
-
-        keyList = new ArrayList<>();
-        keyList.add("Dn2ZVo45cuAEnf6Mj4d22EqYfyUJSLsuhfx2khqAv1DTcNJKNH9SAqBAK2zhmLWUvdQFNOtQu0o+RqLpTzOuiFVz6myIsmDTXh0+BZPUw29LkSflIei6+NgCa2HhvOL4jHjXhO4emu/UM5GeV/4PaYKN0qA+hnFT/DuV8pllfTE=");
-        keyList.add("xprv9xgDCL6n9Y3x9njMKWiLaYY3XDeEjY8duMyreHk5WhKNxVKeYjNt85SmeZYpctXAdAgodwnWpCknp5HwNB5Np1hxeqw6dMZDgcWexU4uTcH");
-
-        Assert.assertTrue(!payloadManager.isEncryptionConsistent(true, keyList));
+        summary = transactionSummaries.get(1);
+        Assert.assertEquals(98326, summary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
+        Assert.assertEquals(1, summary.getInputsMap().size());
+        Assert.assertTrue(summary.getInputsMap().keySet().contains("1Peysd3qYDe35yNp6KB1ZkbVYHr42JT9zZ"));//My Bitcoin Wallet
+        Assert.assertEquals(1, summary.getOutputsMap().size());
+        Assert.assertTrue(summary.getOutputsMap().keySet().contains("189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"));
     }
 }

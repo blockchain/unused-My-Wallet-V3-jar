@@ -1,15 +1,14 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.api.MetadataEndpoints;
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.MetadataUtil;
-
+import java.io.IOException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -17,9 +16,6 @@ import org.json.JSONException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
-
-import java.io.IOException;
-
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -116,7 +112,7 @@ public class Metadata {
     public void putMetadata(String payload) throws IOException, InvalidCipherTextException, MetadataException {
 
         //Ensure json syntax is correct
-        if(!FormatsUtil.getInstance().isValidJson(payload))
+        if(!FormatsUtil.isValidJson(payload))
             throw new JSONException("Payload is not a valid json object.");
 
         byte[] encryptedPayloadBytes;

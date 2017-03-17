@@ -1,10 +1,13 @@
 package info.blockchain.wallet.contacts;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
+import info.blockchain.MockInterceptor;
 import info.blockchain.util.RestClient;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.bip44.HDWallet;
+import info.blockchain.wallet.bip44.HDWalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
@@ -12,24 +15,20 @@ import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
-import info.blockchain.wallet.metadata.MockInterceptor;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
-
-import org.bitcoinj.crypto.DeterministicKey;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.spongycastle.crypto.InvalidCipherTextException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import retrofit2.Retrofit;
 
 public class ContactsTest {
@@ -43,7 +42,7 @@ public class ContactsTest {
     @Before
     public void setup() throws Exception {
 
-        mockInterceptor = new MockInterceptor();
+        mockInterceptor = MockInterceptor.getInstance();
 
         //Set environment
         BlockchainFramework.init(new FrameworkInterface() {
@@ -57,25 +56,40 @@ public class ContactsTest {
                         .addInterceptor(mockInterceptor)//Mock responses
                         .addInterceptor(loggingInterceptor)//Extensive logging
                         .build();
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
                 return null;
             }
+
+            @Override
+            public String getApiCode() {
+                return null;
+            }
+
+            @Override
+            public String getDevice() {
+                return null;
+            }
+
+            @Override
+            public String getAppVersion() {
+                return null;
+            }
         });
     }
 
-    private Wallet getWallet() throws Exception {
+    private HDWallet getWallet() throws Exception {
 
-        return new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c",
-                "",
-                1);
+        return HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                "15e23aa73d25994f1921a1256f93f72c", "", 1);
     }
 
     private Contacts init() throws Exception{
-        Wallet b_wallet = getWallet();
+        HDWallet b_wallet = getWallet();
         DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
 

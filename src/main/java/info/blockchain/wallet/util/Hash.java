@@ -1,9 +1,8 @@
 package info.blockchain.wallet.util;
 
-import org.spongycastle.util.encoders.Hex;
-
 import java.io.Serializable;
 import java.util.Arrays;
+import org.spongycastle.util.encoders.Hex;
 
 public class Hash implements Serializable {
 

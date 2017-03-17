@@ -1,0 +1,29 @@
+{
+    "guid": "e5eba801-c8bc-4a64-99ba-094e12a80766",
+    "sharedKey": "db81b289-8cac-46a9-ac0d-0c0658ec0dfa",
+    "double_encryption": false,
+    "tx_notes": {},
+    "hd_wallets": [
+        {
+            "accounts": [
+                {
+                    "label": "My Bitcoin Wallet",
+                    "archived": false,
+                    "xpriv": "xprv9xvLaqAsee2mgFsgMQsVLCTh858tA559kD9wczD5nYGJMa4M56MvLgYGGn75MSdDFZSBYeYeCgAZdqKQitXux3ebiTi67eYH1a1VS2rdKZW",
+                    "xpub": "xpub6BugzLhmV1b4tjx9TSQVhLQRg6yNZXo17S5YRNchLsoHENPVcdgAtUrk82X5LNuaViWoxsqMhCd3UBxhQRHvyrUeqqA7tupvSpkoC73nhL1",
+                    "cache": {
+                        "receiveAccount": "xpub6EwJFaULAi1c8MRJH7mGSbWUzfQEuspEH1nqCCQXAcWKjStsFJrQXwzGVUnkWwxfegDWr5DDXKLrYDWTFdkq9qFxK1n3LUxphLtTcUn4bfD",
+                        "changeAccount": "xpub6EwJFaULAi1cCCYB2SiQy25KKFs4SRkWu1kwgrGqnFUbEDWvAMWuLiErSkUcRBUR6eTcU14cxYSPQ8scuHeWrL79fppGaVxrwy38yRvbVXz"
+                    },
+                    "address_labels": []
+                }
+            ],
+            "seed_hex": "bfb70136ef9f973e866dff00817b8070",
+            "passphrase": "somePassPhrase",
+            "mnemonic_verified": false,
+            "default_account_idx": 2
+        }
+    ],
+    "keys": [],
+    "address_book": []
+}

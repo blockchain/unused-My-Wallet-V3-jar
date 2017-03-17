@@ -1,14 +1,13 @@
 package info.blockchain.wallet.crypto;
 
-import info.blockchain.wallet.util.CharSequenceX;
+
 
 import org.bitcoinj.core.Sha256Hash;
+import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.crypto.paddings.ISO10126d2Padding;
 import org.spongycastle.crypto.paddings.ISO7816d4Padding;
 import org.spongycastle.crypto.paddings.ZeroBytePadding;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Created by riaanvos on 19/04/16.
@@ -16,7 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class AESUtilTest {
 
     String cleartext = "test data";
-    CharSequenceX pw = new CharSequenceX("password");
+    String pw = "password";
     int iterations = AESUtil.QR_CODE_PBKDF_2ITERATIONS;
 
     @Test
@@ -30,7 +29,7 @@ public class AESUtilTest {
             success = false;
         }
 
-        assertThat("Encryption failed", success);
+        Assert.assertTrue("Encryption failed", success);
     }
 
     @Test
@@ -38,9 +37,9 @@ public class AESUtilTest {
         try {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
             String decrypted = AESUtil.decrypt(encrypted, pw, iterations);
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed as expected.", false);
+            Assert.assertTrue("Encryption failed as expected.", false);
         }
     }
 
@@ -48,11 +47,10 @@ public class AESUtilTest {
     public void decryptFailIncorrectPasswordTest() {
         try {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
-            String decrypted = AESUtil.decrypt(encrypted, new CharSequenceX("bogus"), iterations);
-
-            assertThat("Decryption (cleartext 'test data') successful with incorrect password as : " + decrypted, !decrypted.equals("bogus"));
+            String decrypted = AESUtil.decrypt(encrypted, "bogus", iterations);
+            Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
-            assertThat("Encryption failed as expected.", true);
+            Assert.assertTrue("Encryption failed as expected.", true);
         }
     }
 
@@ -61,9 +59,9 @@ public class AESUtilTest {
         try {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
             String decrypted = AESUtil.decrypt(encrypted, pw, iterations + 1);
-            assertThat("Decryption (cleartext 'test data') successful with incorrect iterations as : " + decrypted, cleartext.equals(decrypted));
+            Assert.assertNotEquals(cleartext, decrypted);
         } catch (Exception e) {
-            assertThat("Encryption failed as expected.", true);
+            Assert.assertTrue("Encryption failed as expected.", true);
         }
     }
 
@@ -73,9 +71,9 @@ public class AESUtilTest {
             String encrypted = AESUtil.encryptWithSetMode(cleartext, pw, iterations, AESUtil.MODE_OFB, new ISO10126d2Padding());
             String decrypted = AESUtil.decryptWithSetMode(encrypted, pw, iterations, AESUtil.MODE_OFB, new ISO10126d2Padding());
 
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed as expected.", false);
+            Assert.assertTrue("Encryption failed as expected.", false);
         }
     }
 
@@ -85,9 +83,9 @@ public class AESUtilTest {
             String encrypted = AESUtil.encryptWithSetMode(cleartext, pw, iterations, AESUtil.MODE_OFB, new ZeroBytePadding());
             String decrypted = AESUtil.decryptWithSetMode(encrypted, pw, iterations, AESUtil.MODE_OFB, new ZeroBytePadding());
 
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed", false);
+            Assert.assertTrue("Encryption failed", false);
         }
     }
 
@@ -97,9 +95,9 @@ public class AESUtilTest {
             String encrypted = AESUtil.encryptWithSetMode(cleartext, pw, iterations, AESUtil.MODE_OFB, new ISO7816d4Padding());
             String decrypted = AESUtil.decryptWithSetMode(encrypted, pw, iterations, AESUtil.MODE_OFB, new ISO7816d4Padding());
 
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed", false);
+            Assert.assertTrue("Encryption failed", false);
         }
     }
 
@@ -109,9 +107,9 @@ public class AESUtilTest {
             String encrypted = AESUtil.encryptWithSetMode(cleartext, pw, iterations, AESUtil.MODE_OFB, null);
             String decrypted = AESUtil.decryptWithSetMode(encrypted, pw, iterations, AESUtil.MODE_OFB, null);
 
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed", false);
+            Assert.assertTrue("Encryption failed", false);
         }
     }
 
@@ -121,9 +119,9 @@ public class AESUtilTest {
             String encrypted = AESUtil.encryptWithSetMode(cleartext, pw, iterations, AESUtil.MODE_CBC, new ISO10126d2Padding());
             String decrypted = AESUtil.decryptWithSetMode(encrypted, pw, iterations, AESUtil.MODE_CBC, new ISO10126d2Padding());
 
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed", false);
+            Assert.assertTrue("Encryption failed", false);
         }
     }
 
@@ -133,9 +131,9 @@ public class AESUtilTest {
             String encrypted = AESUtil.encryptWithSetMode(cleartext, pw, iterations, AESUtil.MODE_CBC, new ZeroBytePadding());
             String decrypted = AESUtil.decryptWithSetMode(encrypted, pw, iterations, AESUtil.MODE_CBC, new ZeroBytePadding());
 
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed", false);
+            Assert.assertTrue("Encryption failed", false);
         }
     }
 
@@ -145,9 +143,9 @@ public class AESUtilTest {
             String encrypted = AESUtil.encryptWithSetMode(cleartext, pw, iterations, AESUtil.MODE_CBC, new ISO7816d4Padding());
             String decrypted = AESUtil.decryptWithSetMode(encrypted, pw, iterations, AESUtil.MODE_CBC, new ISO7816d4Padding());
 
-            assertThat("Decryption failed", decrypted.equals(cleartext));
+            Assert.assertTrue("Decryption failed", decrypted.equals(cleartext));
         } catch (Exception e) {
-            assertThat("Encryption failed", false);
+            Assert.assertTrue("Encryption failed", false);
         }
     }
 
@@ -156,9 +154,9 @@ public class AESUtilTest {
 
         try {
             AESUtil.encrypt(cleartext, null, iterations);
-            assertThat("Encryption successful with NULL password", false);
+            Assert.assertTrue("Encryption successful with NULL password", false);
         } catch (Exception e) {
-            assertThat("Encryption failed as expected.", true);
+            Assert.assertTrue("Encryption failed as expected.", true);
         }
     }
 
@@ -168,9 +166,9 @@ public class AESUtilTest {
         try {
             String encrypted = AESUtil.encrypt(cleartext, pw, iterations);
             String decrypted = AESUtil.decrypt(encrypted, null, iterations);
-            assertThat("Decryption successful with NULL password", false);
+            Assert.assertTrue("Decryption successful with NULL password", false);
         } catch (Exception e) {
-            assertThat("Decryption failed as expected.", true);
+            Assert.assertTrue("Decryption failed as expected.", true);
         }
     }
 
@@ -184,6 +182,6 @@ public class AESUtilTest {
         byte[] encrypted = AESUtil.encryptWithKey(keyBytes, data);
         String decrypted = AESUtil.decryptWithKey(keyBytes, new String(encrypted));
 
-        assertThat("Decryption", decrypted.equals(data));
+        Assert.assertTrue("Decryption", decrypted.equals(data));
     }
 }

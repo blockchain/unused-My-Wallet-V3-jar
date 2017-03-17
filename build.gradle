@@ -1,12 +1,15 @@
 plugins {
     id 'java'
     id 'maven'
+    id 'maven-publish'
     id 'jacoco'
     id "com.github.kt3k.coveralls" version "2.7.1"
 }
 
-group = 'info.blockchain.wallet'
-version = '6.1.40'
+group = 'info.blockchain'
+version = PROJECT_VERSION
+
+apply from: "integTest.gradle"
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -15,40 +18,65 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-task sourcesJar(type: Jar, dependsOn:classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+repositories {
+    maven {
+        url nexusUrl + '/repository/maven-public/'
+        credentials(PasswordCredentials) {
+            username nexusUsername
+            password nexusPassword
+        }
+    }
 }
 
-repositories {
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
 
-    if (hasProperty('nexusUrl')) {
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+
+    repositories {
+        project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
         maven {
-            url nexusUrl + '/repository/maven-public/'
+            url "${nexusUrl}/repository/maven-${project.repo}/"
             credentials(PasswordCredentials) {
                 username nexusUsername
                 password nexusPassword
             }
         }
-    } else {
-        mavenCentral()
     }
 }
 
+task sourceJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 dependencies {
-    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.13.1'
+    compile group: 'info.blockchain', name: 'api-client', version: '0.1.13-SNAPSHOT'
+    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.5'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.3'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.4'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     compile group: 'io.mikael', name: 'urlbuilder', version: '2.0.8'
     compile group: 'org.json', name: 'json', version: '20160810'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.5'
-    compile group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.1.0'
-    compile group: 'com.squareup.retrofit2', name: 'converter-jackson', version: '2.1.0'
-    compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '3.3.1'
+    compile group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.2.0'
+    compile group: 'com.squareup.retrofit2', name: 'converter-jackson', version: '2.2.0'
+    compile group: 'com.squareup.retrofit2', name: 'adapter-rxjava2', version: '2.2.0'
+    compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '3.6.0'
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.6.0'
     compile group: 'com.squareup.okio', name: 'okio', version: '1.11.0'
     compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'

@@ -1,51 +1,61 @@
-package info.blockchain.wallet.multiaddr;
-
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.util.RestClient;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-
-public class MultiAddrFactoryTest {
-
-    //Address with lost private key, so multiaddress response won't change
-    private final String dormantAddress = "15sAyHb9zBsZbVnaSXz2UivTZYxnjjrEkX";
-    private final long dormantAddressBalance = 10000L;
-
-    private final String dormantXpub = "xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt";
-    private final long dormantXpubBalance = 10000L;
-
-    @Before
-    public void setup() {
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-                return RestClient.getRetrofitInstance(new OkHttpClient());
-            }
-
-            @Override
-            public Retrofit getRetrofitServerInstance() {
-                return null;
-            }
-        });
-    }
-
-    @Test
-    public void refreshLegacyAddressData() throws Exception {
-        MultiAddrFactory.getInstance().refreshLegacyAddressData(new String[]{dormantAddress}, false);
-        assertThat(MultiAddrFactory.getInstance().getLegacyBalance(), is(dormantAddressBalance));
-    }
-
-    @Test
-    public void refreshXPUBData() throws Exception {
-        MultiAddrFactory.getInstance().refreshXPUBData(new String[]{dormantXpub});
-        assertThat(MultiAddrFactory.getInstance().getXpubBalance(), is(dormantXpubBalance));
-    }
-}
+//package info.blockchain.wallet.multiaddr;
+//
+//import info.blockchain.MockedResponseTest;
+//import info.blockchain.wallet.payload.data.PayloadTest;
+//import java.net.URI;
+//import java.nio.charset.Charset;
+//import java.nio.file.Files;
+//import java.nio.file.Paths;
+//import java.util.Arrays;
+//import org.junit.Assert;
+//import org.junit.Before;
+//import org.junit.Test;
+//
+//public class MultiAddrFactoryTest extends MockedResponseTest {
+//
+//    String dormantAddress = "1jH7K4RJrQBXijtLj1JpzqPRhR7MdFtaW";
+//    String dormantXpub = "xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt";
+//
+//    @Before
+//    public void setUp() throws Exception {
+//
+//        URI uri = PayloadTest.class.getClassLoader().getResource("multi_address_1jH7K.txt").toURI();
+//        String response = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+//        mockInterceptor.setResponseString(response);
+//        MultiAddrFactory.getInstance().refreshLegacyAddressData(Arrays.asList(dormantAddress), false);
+//
+//        uri = PayloadTest.class.getClassLoader().getResource("multi_address_xpub6CFg.txt").toURI();
+//        response = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+//        mockInterceptor.setResponseString(response);
+//        MultiAddrFactory.getInstance().refreshXPUBData(Arrays.asList(dormantXpub));
+//    }
+//
+//    @Test
+//    public void refreshLegacyAddressData() throws Exception {
+//
+//
+//        Assert.assertEquals(0, MultiAddrFactory.getInstance().getLegacyBalance());
+//        Assert.assertEquals(0, MultiAddrFactory.getInstance().getLegacyTxs().size());
+//    }
+//
+//    @Test
+//    public void refreshXPUBData() throws Exception {
+//
+//        Assert.assertEquals(10000L, MultiAddrFactory.getInstance().getXpubBalance());
+//
+//        Assert.assertTrue(MultiAddrFactory.getInstance().isOwnHDAddress("1CAAzobQ2UrE4QUR3HJrkZs8UFA8wi5wwQ"));
+//        Assert.assertTrue(MultiAddrFactory.getInstance().isOwnHDAddress("1KTKN43STRsmRSNtChuDUzQtcQGMXyBMN1"));
+//        Assert.assertTrue(MultiAddrFactory.getInstance().isOwnHDAddress("1CkFCfj7YQ8hjH1ReW398rax9NXCJcceE9"));
+//        Assert.assertFalse(MultiAddrFactory.getInstance().isOwnHDAddress("1PPNN4psDFyAgdjQcKBJ8GSgE4ES4GHP9c"));
+//
+//
+//        Assert.assertEquals(5, MultiAddrFactory.getInstance().getHighestTxChangeIdx(dormantXpub));
+//        Assert.assertEquals(10, MultiAddrFactory.getInstance().getHighestTxReceiveIdx(dormantXpub));
+//
+//        Assert.assertEquals(dormantXpub, MultiAddrFactory.getInstance().getAddress2Xpub().get("1CAAzobQ2UrE4QUR3HJrkZs8UFA8wi5wwQ"));
+//
+//        Assert.assertEquals(34, MultiAddrFactory.getInstance().getXpubTxs().get(dormantXpub).size());
+//        Assert.assertEquals(34, MultiAddrFactory.getInstance().getAllXpubTxs().size());
+//        Assert.assertEquals(10000L, MultiAddrFactory.getInstance().getXpubAmounts().get(dormantXpub).longValue());
+//    }
+//}

@@ -1,0 +1,27 @@
+{
+    "xpub6BiVtCpG9fQQ77Qr7WArXSG3yWYm2bkRYpoSYtRkVEAk5nrcULBG8AeRYMMKVUXAsNeXdR7TGuL6SkUc4RF2YC7X4afLyZrT9NrrUFyotkH": {
+        "final_balance": 0,
+        "n_tx": 23,
+        "total_received": 22154257
+    },
+    "xpub6BiVtCpG9fQQ4xJHzNkdmqspAeMdBTDFZ2kYM39RzDYMAcb4wtkWZNSu7k3BbJgoPgTzx62G69mBiUjDnD3EJrTA5ZYZg4vfz1YWcGBnX2x": {
+        "final_balance": 0,
+        "n_tx": 20,
+        "total_received": 18192818
+    },
+    "xpub6BiVtCpG9fQQ1EW99bMSYwySbPWvzTFRQZCFgTmV3samLSZAYU7C3f4Je9vkNh7h1GAWi5Fn93BwoGBy9EAXbWTTgTnVKAbthHpxM1fXVRL": {
+        "final_balance": 0,
+        "n_tx": 36,
+        "total_received": 12099702
+    },
+    "xpub6BiVtCpG9fQQ8pVjVF7jm3kLahkNbQRkWGUvzsKQpXWYvhYD4d4UDADxZUL4xp9UwsDT5YgwNKofTWRtwJgnHkbNxuzLDho4mxfS9KLesGP": {
+        "final_balance": 0,
+        "n_tx": 20,
+        "total_received": 11963629
+    },
+    "xpub6BiVtCpG9fQQCgxA541qm9qZ9VrGLScde4zsAMj2d15ewiMysCAnbgvSDSZXhFUdsyA2BfzzMrMFJbC4VSkXbzrXLZRitAmUVURmivxxqMJ": {
+        "final_balance": 0,
+        "n_tx": 20,
+        "total_received": 15137242
+    }
+}

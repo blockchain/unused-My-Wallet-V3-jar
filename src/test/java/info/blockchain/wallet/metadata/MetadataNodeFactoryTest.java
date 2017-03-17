@@ -1,18 +1,17 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
+import info.blockchain.MockInterceptor;
 import info.blockchain.util.RestClient;
-
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 public class MetadataNodeFactoryTest {
@@ -29,7 +28,7 @@ public class MetadataNodeFactoryTest {
     @Before
     public void setup() throws Exception {
 
-        mockInterceptor = new MockInterceptor();
+        mockInterceptor = MockInterceptor.getInstance();
 
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
@@ -42,11 +41,26 @@ public class MetadataNodeFactoryTest {
                         .addInterceptor(mockInterceptor)//Mock responses
                         .build();
 
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
+                return null;
+            }
+
+            @Override
+            public String getDevice() {
+                return null;
+            }
+
+            @Override
+            public String getAppVersion() {
                 return null;
             }
         });
@@ -61,7 +75,7 @@ public class MetadataNodeFactoryTest {
         String metadataB58 = "xprv9twfkEhG8UPRWCrX3HnowyQk7vMCVeGY5ZHWsLANZqxqBaiAHPN3MvuuFedVNBhixki7WBvYW8gcg2mCemfV6XNNpCZ31JusEHUhdmdhsvp";
         String sharedMetadataB58 = "xprv9twfkEhLiMZnQ5Gjf8w2f5wn5ASrQ9qMVwLo458shQmfMWhus8oo9aecvsAmSDXfgGbX2xQgeXi9Luj9ao5xGLKGjCj7gKiwvBGnjhdVEji";
 
-        mockInterceptor.setResponseString("{\"version\":1,\"payload\":\"mUVohkLFB4m2vZy4PjtupD4Yuk6smwWp7FfIyvWnzDOMieiEXOejVvbQ3oPBl/Ln4aQp6ZuLt5y0zL8XUaI0FDleazn4hzeiv34fZGj9xzvj0WMISlcNJfR0qU3e4pfK5HmsM5HMwlxri2Ozb8/mZXJFnr5CfibGsNwqYhn1v+bmcOam3B79jtRJ8sINRC0jJYkqaF5yOow74YYcKaKEgeumDf/cZVl1Kcd2i/n6i63ujPWt1gqfzeOi6naIWyq508U5hduwtkFpG5ONLajXjRf13I0lipClIUSo13ZfKUdqd2zMdDTgPkLhF5hjWYxybEMA7BRSzptaSaVj4IbikQHmdAKQID4WmEbqPMDpUb0=\",\"signature\":\"HxiSlotRSXVGF8rnwkHYgBsiFlCNFTQ4Y1Y+xaufODKLJGv+JFsdttvqNqPNCNX8aqWgq9+z0fL1/5DXkr4fnGI=\",\"prev_magic_hash\":\"7327d31adae585c360ed746b3626f32c4ed9db8675f1ff468448c5d6081b3f34\",\"type_id\":-1,\"created_at\":1481716675000,\"updated_at\":1481724489000,\"address\":\"1G8NqfMPq8WWHgrTNfnAWr1gSwCmYn4XaS\"}");
+        mockInterceptor.setResponseString("{\"status\": \"success\"}");
         metadataNodeFactory.saveMetadataHdNodes(HDKeyDerivation.createMasterPrivateKey(Hex.decode(masterKeyHex)));
 
         Assert.assertTrue(metadataNodeFactory.getMetadataNode().serializePrivB58(MainNetParams.get()).equals(metadataB58));
