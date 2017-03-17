@@ -1,7 +1,7 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.MockInterceptor;
-import info.blockchain.util.RestClient;
+import info.blockchain.wallet.MockInterceptor;
+import info.blockchain.wallet.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import okhttp3.OkHttpClient;
@@ -46,6 +46,11 @@ public class MetadataNodeFactoryTest {
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public Retrofit getRetrofitSFOXInstance() {
                 return null;
             }
 

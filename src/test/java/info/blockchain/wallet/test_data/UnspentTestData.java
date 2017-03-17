@@ -1,4 +1,4 @@
-package info.blockchain.test_data;
+package info.blockchain.wallet.test_data;
 
 /**
  * Created by riaanvos on 25/04/16.

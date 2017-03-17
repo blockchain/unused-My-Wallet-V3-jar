@@ -1,7 +1,7 @@
 package info.blockchain.wallet.contacts;
 
-import info.blockchain.MockInterceptor;
-import info.blockchain.util.RestClient;
+import info.blockchain.wallet.MockInterceptor;
+import info.blockchain.wallet.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.PersistentUrls;
@@ -61,6 +61,11 @@ public class ContactsTest {
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public Retrofit getRetrofitSFOXInstance() {
                 return null;
             }
 

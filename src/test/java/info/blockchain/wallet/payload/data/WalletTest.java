@@ -1,7 +1,6 @@
 package info.blockchain.wallet.payload.data;
 
-import com.google.common.collect.BiMap;
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
@@ -14,9 +13,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;

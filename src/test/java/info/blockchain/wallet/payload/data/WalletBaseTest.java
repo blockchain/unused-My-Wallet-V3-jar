@@ -1,6 +1,6 @@
 package info.blockchain.wallet.payload.data;
 
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;

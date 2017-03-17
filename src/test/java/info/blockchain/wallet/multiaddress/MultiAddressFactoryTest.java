@@ -1,6 +1,6 @@
 package info.blockchain.wallet.multiaddress;
 
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabels;

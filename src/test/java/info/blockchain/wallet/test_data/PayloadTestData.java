@@ -1,4 +1,4 @@
-package info.blockchain.test_data;
+package info.blockchain.wallet.test_data;
 
 public class PayloadTestData {
 

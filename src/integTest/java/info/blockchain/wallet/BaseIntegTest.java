@@ -44,6 +44,11 @@ public abstract class BaseIntegTest {
             }
 
             @Override
+            public Retrofit getRetrofitSFOXInstance() {
+                return null;
+            }
+
+            @Override
             public String getApiCode() {
                 return null;
             }

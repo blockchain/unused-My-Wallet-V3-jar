@@ -1,4 +1,4 @@
-package info.blockchain.util;
+package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.api.PersistentUrls;
 import okhttp3.OkHttpClient;

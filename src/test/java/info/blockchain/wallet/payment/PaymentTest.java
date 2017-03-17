@@ -1,8 +1,8 @@
 package info.blockchain.wallet.payment;
 
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.test_data.UnspentTestData;
+import info.blockchain.wallet.test_data.UnspentTestData;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.util.PrivateKeyFactory;

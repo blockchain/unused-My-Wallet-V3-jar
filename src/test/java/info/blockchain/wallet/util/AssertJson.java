@@ -1,4 +1,4 @@
-package info.blockchain.util;
+package info.blockchain.wallet.util;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -1,6 +1,6 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.payload.data.WalletBase;
 
 import org.junit.Test;

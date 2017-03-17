@@ -1,7 +1,7 @@
 package info.blockchain.wallet.payload.data;
 
 import com.google.common.collect.BiMap;
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payment.Payment;

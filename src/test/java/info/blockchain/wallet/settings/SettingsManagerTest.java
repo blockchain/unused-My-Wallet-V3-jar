@@ -1,13 +1,7 @@
 package info.blockchain.wallet.settings;
 
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.wallet.api.data.Settings;
-import java.io.IOException;
-import okhttp3.ResponseBody;
-import org.junit.Assert;
-import org.junit.Test;
-import retrofit2.Call;
 
 public class SettingsManagerTest extends MockedResponseTest {
 

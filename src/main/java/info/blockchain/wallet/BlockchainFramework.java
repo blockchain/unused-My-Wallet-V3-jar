@@ -21,6 +21,10 @@ public final class BlockchainFramework {
         return blockchainInterface.getRetrofitServerInstance();
     }
 
+    public static Retrofit getRetrofitSFOXInstance() {
+        return blockchainInterface.getRetrofitSFOXInstance();
+    }
+
     public static String getApiCode() {
         return blockchainInterface.getApiCode();
     }

@@ -1,6 +1,6 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.bip44.HDWalletFactory.Language;

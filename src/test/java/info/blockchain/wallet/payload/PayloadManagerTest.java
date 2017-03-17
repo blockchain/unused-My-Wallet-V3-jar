@@ -1,6 +1,6 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.MockedResponseTest;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.InvalidCredentialsException;
 import info.blockchain.wallet.exceptions.ServerConnectionException;

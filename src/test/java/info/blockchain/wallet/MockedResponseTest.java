@@ -1,10 +1,7 @@
-package info.blockchain;
+package info.blockchain.wallet;
 
-import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.PersistentUrls.Environment;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,6 +32,7 @@ public abstract class MockedResponseTest {
         PersistentUrls.getInstance().setCurrentEnvironment(Environment.PRODUCTION);
         PersistentUrls.getInstance().setCurrentApiUrl("https://api.blockchain.info/");
         PersistentUrls.getInstance().setCurrentServerUrl("https://blockchain.info/");
+        PersistentUrls.getInstance().setCurrentSFOXUrl("https://api.staging.sfox.com/");
 
         //Initialize framework
         BlockchainFramework.init(new FrameworkInterface() {
@@ -46,6 +44,11 @@ public abstract class MockedResponseTest {
             @Override
             public Retrofit getRetrofitServerInstance() {
                 return getRetrofit(PersistentUrls.getInstance().getCurrentBaseServerUrl(), getOkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitSFOXInstance() {
+                return getRetrofit(PersistentUrls.getInstance().getCurrentSFOXUrl(), getOkHttpClient());
             }
 
             @Override
