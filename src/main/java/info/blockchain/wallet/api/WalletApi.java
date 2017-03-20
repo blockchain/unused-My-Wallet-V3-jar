@@ -91,38 +91,6 @@ public class WalletApi {
         return getServerApiInstance().pinStore(key, pin, null, "get", BlockchainFramework.getApiCode());
     }
 
-    @Deprecated
-    public Observable<ResponseBody> saveWallet(boolean isNew,
-                                               String guid,
-                                               String sharedKey,
-                                               List<String> activeAddressList,
-                                               JSONObject encryptedPayload,
-                                               boolean syncPubkeys,
-                                               String newChecksum,
-                                               String oldChecksum,
-                                               String email,
-                                               String device) throws UnsupportedEncodingException {
-
-        String pipedAddresses = null;
-        if (syncPubkeys && activeAddressList != null) {
-            pipedAddresses = StringUtils.join(activeAddressList, "|");
-        }
-
-        String method = isNew ? "insert" : "update";
-
-        return getServerApiInstance().syncWallet(method,
-                guid,
-                sharedKey,
-                encryptedPayload.toString(),
-                encryptedPayload.toString().length(),
-                URLEncoder.encode(newChecksum, "utf-8"),
-                pipedAddresses,
-                email,
-                device,
-                oldChecksum,
-                BlockchainFramework.getApiCode());
-    }
-
     public Call<ResponseBody> insertWallet(String guid,
                                            String sharedKey,
                                            @Nullable List<String> activeAddressList,

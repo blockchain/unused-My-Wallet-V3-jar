@@ -15,81 +15,88 @@ import java.util.List;
 @SuppressWarnings("SameParameterValue")
 public interface WalletEndpoints {
 
-
+    @FormUrlEncoded
     @POST("wallet")
     Observable<ResponseBody> postToWallet(
-        @Query("method") String method,
-        @Query("guid") String guid,
-        @Query("sharedKey") String sharedKey,
-        @Query("payload") String payload,
-        @Query("length") int length,
-        @Query("api_code") String apiCode);
+        @Field("method") String method,
+        @Field("guid") String guid,
+        @Field("sharedKey") String sharedKey,
+        @Field("payload") String payload,
+        @Field("length") int length,
+        @Field("api_code") String apiCode);
 
+    @FormUrlEncoded
     @POST("wallet")
     Observable<Settings> fetchSettings(
-        @Query("method") String method,
-        @Query("guid") String guid,
-        @Query("sharedKey") String sharedKey,
-        @Query("format") String format,
-        @Query("api_code") String apiCode);
+        @Field("method") String method,
+        @Field("guid") String guid,
+        @Field("sharedKey") String sharedKey,
+        @Field("format") String format,
+        @Field("api_code") String apiCode);
 
+    @FormUrlEncoded
     @POST("wallet")
     Observable<ResponseBody> updateSettings(
-        @Query("method") String method,
-        @Query("guid") String guid,
-        @Query("sharedKey") String sharedKey,
-        @Query("payload") String payload,
-        @Query("length") int length,
-        @Query("format") String format,
-        @Query("api_code") String apiCode);
+        @Field("method") String method,
+        @Field("guid") String guid,
+        @Field("sharedKey") String sharedKey,
+        @Field("payload") String payload,
+        @Field("length") int length,
+        @Field("format") String format,
+        @Field("api_code") String apiCode);
 
+    @FormUrlEncoded
     @POST("wallet")
     Call<ResponseBody> fetchWalletData(
-        @Query("method") String method,
-        @Query("guid") String guid,
-        @Query("sharedKey") String sharedKey,
-        @Query("format") String format,
-        @Query("api_code") String apiCode);
+        @Field("method") String method,
+        @Field("guid") String guid,
+        @Field("sharedKey") String sharedKey,
+        @Field("format") String format,
+        @Field("api_code") String apiCode);
 
+    @FormUrlEncoded
     @POST("wallet")
     Observable<ResponseBody> syncWallet(
-        @Query("method") String method,
-        @Query("guid") String guid,
-        @Query("sharedKey") String sharedKey,
-        @Query("payload") String payload,
-        @Query("length") int length,
-        @Query("checksum") String checksum,
-        @Query("active") String active,
-        @Query("email") String email,
-        @Query("device") String device,
-        @Query("old_checksum") String old_checksum,
-        @Query("api_code") String apiCode);
+        @Field("method") String method,
+        @Field("guid") String guid,
+        @Field("sharedKey") String sharedKey,
+        @Field("payload") String payload,
+        @Field("length") int length,
+        @Field("checksum") String checksum,
+        @Field("active") String active,
+        @Field("email") String email,
+        @Field("device") String device,
+        @Field("old_checksum") String old_checksum,
+        @Field("api_code") String apiCode);
 
+    @FormUrlEncoded
     @POST("wallet")
     Call<ResponseBody> syncWalletCall(
-            @Query("method") String method,
-            @Query("guid") String guid,
-            @Query("sharedKey") String sharedKey,
-            @Query("payload") String payload,
-            @Query("length") int length,
-            @Query("checksum") String checksum,
-            @Query("active") String active,
-            @Query("email") String email,
-            @Query("device") String device,
-            @Query("old_checksum") String old_checksum,
-            @Query("api_code") String apiCode);
+            @Field("method") String method,
+            @Field("guid") String guid,
+            @Field("sharedKey") String sharedKey,
+            @Field(value = "payload", encoded = false) String payload,
+            @Field("length") int length,
+            @Field("checksum") String checksum,
+            @Field("active") String active,
+            @Field("email") String email,
+            @Field("device") String device,
+            @Field("old_checksum") String old_checksum,
+            @Field("api_code") String apiCode);
 
+    @FormUrlEncoded
     @POST("wallet")
     Call<ResponseBody> fetchPairingEncryptionPasswordCall(
-        @Query("method") String method,
-        @Query("guid") String guid,
-        @Query("api_code") String apiCode);
+        @Field("method") String method,
+        @Field("guid") String guid,
+        @Field("api_code") String apiCode);
 
+    @FormUrlEncoded
     @POST("wallet")
     Observable<ResponseBody> fetchPairingEncryptionPassword(
-            @Query("method") String method,
-            @Query("guid") String guid,
-            @Query("api_code") String apiCode);
+            @Field("method") String method,
+            @Field("guid") String guid,
+            @Field("api_code") String apiCode);
 
     @GET("wallet/{guid}?format=json&resend_code=false")
     Observable<Response<ResponseBody>> getSessionId(

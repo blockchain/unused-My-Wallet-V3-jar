@@ -1,4 +1,4 @@
-package info.blockchain.wallet.wallet.payload;
+package info.blockchain.wallet.payload;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.MultiAddress;
@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -90,5 +91,23 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
             .getPayload();
 
         Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
+    }
+
+    @Test
+    public void initializeAndDecrypt() throws Exception {
+
+        String guid = "f4c49ecb-ac6e-4b45-add4-21dafb90d804";
+        String sharedKey = "ba600158-2216-4166-b40c-ee50b33f1835";
+        String pw = "testtesttest";
+
+        PayloadManager payloadManager = PayloadManager.getInstance();
+        payloadManager.initializeAndDecrypt(sharedKey,guid,pw);
+
+        Assert.assertEquals(guid, payloadManager.getPayload().getGuid());
+        Assert.assertEquals(sharedKey, payloadManager.getPayload().getSharedKey());
+        Assert.assertEquals(pw, payloadManager.getTempPassword());
+
+        payloadManager.getPayload().getHdWallets().get(0).getAccount(0).setLabel("Some Label");
+        Assert.assertTrue(payloadManager.save());
     }
 }

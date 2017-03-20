@@ -122,23 +122,6 @@ public class WalletApiIntegTest extends BaseIntegTest {
     }
 
     @Test
-    public void saveWallet() throws Exception {
-        final TestObserver<ResponseBody> testObserver = walletApi.saveWallet(true,
-                "",
-                "",
-                null,
-                new JSONObject("{}"),
-                false,
-                "",
-                "",
-                "",
-                "").test();
-
-        testObserver.assertTerminated();
-        testObserver.assertError(HttpException.class);
-    }
-
-    @Test
     public void fetchWalletData() throws Exception {
         Response<ResponseBody> call = walletApi.fetchWalletData(guid, sharedKey).execute();
 
