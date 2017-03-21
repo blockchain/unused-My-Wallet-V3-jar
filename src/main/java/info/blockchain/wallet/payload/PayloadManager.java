@@ -806,7 +806,9 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getAddressBalance(String address) {
-        return balanceManager.getAddressBalance(address);
+        BigInteger result = balanceManager.getAddressBalance(address);
+        if(result == null)result = BigInteger.ZERO;
+        return result;
     }
 
     /**
@@ -814,7 +816,9 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getWalletBalance() {
-        return balanceManager.getWalletBalance();
+        BigInteger result = balanceManager.getWalletBalance();
+        if(result == null)result = BigInteger.ZERO;
+        return result;
     }
 
     /**
@@ -822,7 +826,9 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getImportedAddressesBalance() {
-        return balanceManager.getImportedAddressesBalance();
+        BigInteger result = balanceManager.getImportedAddressesBalance();
+        if(result == null)result = BigInteger.ZERO;
+        return result;
     }
 
     /**
