@@ -504,20 +504,16 @@ public class HDWallet {
         return HD.getMnemonic();
     }
 
+    @Nullable
     public String getLabelFromXpub(String xpub) {
         List<Account> accounts = getAccounts();
 
-        for(Account account : accounts) {
-            if(account.getXpub().equals(xpub)) {
-                String label = account.getLabel();
-                if(label == null || label.isEmpty()){
-                    return xpub;
-                } else {
-                    return label;
-                }
+        for (Account account : accounts) {
+            if (account.getXpub().equals(xpub)) {
+                return account.getLabel();
             }
         }
 
-        return xpub;
+        return null;
     }
 }

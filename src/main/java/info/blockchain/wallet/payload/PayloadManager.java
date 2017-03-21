@@ -700,21 +700,21 @@ public class PayloadManager {
 
     /**
      * Converts any address to a label.
+     *
      * @param address Accepts account receive or change chain address, as well as legacy address.
      * @return Account or legacy address label
      */
     public String getLabelFromAddress(String address) {
-
         String label;
         String xpub = multiAddressFactory.getXpubFromAddress(address);
 
-        if(xpub != null) {
+        if (xpub != null) {
             label = getPayload().getHdWallets().get(HD_WALLET_INDEX).getLabelFromXpub(xpub);
         } else {
             label = getPayload().getLabelFromLegacyAddress(address);
         }
 
-        if(label == null || label.isEmpty()) {
+        if (label == null || label.isEmpty()) {
             label = address;
         }
 
@@ -806,7 +806,9 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getAddressBalance(String address) {
-        return balanceManager.getAddressBalance(address);
+        BigInteger result = balanceManager.getAddressBalance(address);
+        if(result == null)result = BigInteger.ZERO;
+        return result;
     }
 
     /**
@@ -814,7 +816,9 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getWalletBalance() {
-        return balanceManager.getWalletBalance();
+        BigInteger result = balanceManager.getWalletBalance();
+        if(result == null)result = BigInteger.ZERO;
+        return result;
     }
 
     /**
@@ -822,7 +826,9 @@ public class PayloadManager {
      * @return
      */
     public BigInteger getImportedAddressesBalance() {
-        return balanceManager.getImportedAddressesBalance();
+        BigInteger result = balanceManager.getImportedAddressesBalance();
+        if(result == null)result = BigInteger.ZERO;
+        return result;
     }
 
     /**

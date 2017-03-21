@@ -67,8 +67,7 @@ public class MultiAddressFactory {
             return new ArrayList<>();
         }
 
-        List<TransactionSummary> summaryList = summarize(all, watchOnly, multiAddress, activeLegacy);
-        return summaryList;
+        return summarize(all, watchOnly, multiAddress, activeLegacy);
     }
 
     public int getNextChangeAddressIndex(String xpub) {
