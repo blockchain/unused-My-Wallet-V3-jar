@@ -17,12 +17,14 @@ public class PersistentUrls {
     private static final String BASE_SERVER_URL = "https://blockchain.info/";
     private static final String BASE_WEBSOCKET_URL = "wss://ws.blockchain.info/inv";
     private static final String BASE_SFOX_URL = "https://api.staging.sfox.com/";
+    private static final String BASE_COINIFY_URL = "https://app-api.coinify.com/";
 
     // Current API urls
     private String currentApiUrl;
     private String currentServerUrl;
     private String currentWebsocketUrl;
     private String currentSFOXUrl;
+    private String currentCoinifyUrl;
     private Environment currentEnvironment;
 
     // Current Network Params
@@ -112,6 +114,10 @@ public class PersistentUrls {
         return currentSFOXUrl;
     }
 
+    public String getCurrentCoinifyUrl() {
+        return currentCoinifyUrl;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // GET DEFAULT OBJECTS
     ///////////////////////////////////////////////////////////////////////////
@@ -136,6 +142,10 @@ public class PersistentUrls {
         return BASE_SFOX_URL;
     }
 
+    public String getDefaultBaseCoinifyUrl() {
+        return BASE_COINIFY_URL;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // SET CURRENT OBJECTS
     ///////////////////////////////////////////////////////////////////////////
@@ -158,6 +168,10 @@ public class PersistentUrls {
 
     public void setCurrentSFOXUrl(String currentSFOXUrl) {
         this.currentSFOXUrl = currentSFOXUrl;
+    }
+
+    public void setCurrentCoinifyUrl(String currentCoinifyUrl) {
+        this.currentCoinifyUrl = currentCoinifyUrl;
     }
 
     public void setCurrentEnvironment(Environment currentEnvironment) {

@@ -1,8 +1,10 @@
-package info.blockchain.wallet.api.trade;
+package info.blockchain.wallet.api.trade.sfox;
 
 import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.trade.sfox.data.SFOXTransaction;
 import io.reactivex.Observable;
 import java.util.HashMap;
+import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
 public class SFOXApi {
@@ -19,7 +21,7 @@ public class SFOXApi {
         return sfoxEndpoints;
     }
 
-    public Observable<SFOXResponse> getTransactions(String accountToken) {
+    public Observable<List<SFOXTransaction>> getTransactions(String accountToken) {
 
         HashMap<String,String> headerMap = new HashMap<>();
         headerMap.put("X-SFOX-PARTNER-ID",partner);

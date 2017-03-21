@@ -1,4 +1,4 @@
-package info.blockchain.wallet.api.trade;
+package info.blockchain.wallet.api.trade.sfox.data;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -16,7 +16,7 @@ import java.io.IOException;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class SFOXResponse {
+public class SFOXTransaction {
 
     @JsonProperty("action")
     private String action;
@@ -150,8 +150,8 @@ public class SFOXResponse {
         this.status = status;
     }
 
-    public static SFOXResponse fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, SFOXResponse.class);
+    public static SFOXTransaction fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, SFOXTransaction.class);
     }
 
     public String toJson() throws JsonProcessingException {
