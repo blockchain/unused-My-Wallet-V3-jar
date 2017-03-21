@@ -700,21 +700,21 @@ public class PayloadManager {
 
     /**
      * Converts any address to a label.
+     *
      * @param address Accepts account receive or change chain address, as well as legacy address.
      * @return Account or legacy address label
      */
     public String getLabelFromAddress(String address) {
-
         String label;
         String xpub = multiAddressFactory.getXpubFromAddress(address);
 
-        if(xpub != null) {
+        if (xpub != null) {
             label = getPayload().getHdWallets().get(HD_WALLET_INDEX).getLabelFromXpub(xpub);
         } else {
             label = getPayload().getLabelFromLegacyAddress(address);
         }
 
-        if(label == null || label.isEmpty()) {
+        if (label == null || label.isEmpty()) {
             label = address;
         }
 
