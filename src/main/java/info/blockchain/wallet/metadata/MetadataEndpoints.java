@@ -7,8 +7,10 @@ import info.blockchain.wallet.metadata.data.MessageProcessRequest;
 import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.metadata.data.Trusted;
+
 import java.util.HashMap;
 import java.util.List;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -22,12 +24,20 @@ import retrofit2.http.Query;
 
 public interface MetadataEndpoints {
 
+    ///////////////////////////////////////////////////////////////////////////
+    // AUTH
+    ///////////////////////////////////////////////////////////////////////////
+
     @GET("metadata/auth")
     Call<Auth> getNonce();
 
     @POST("metadata/auth")
     Call<Auth> getToken(@Body HashMap<String, String> body);
 
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TRUSTED
+    ///////////////////////////////////////////////////////////////////////////
 
     @GET("metadata/trusted")
     Call<Trusted> getTrustedList(@Header("Authorization") String jwToken);
@@ -42,6 +52,10 @@ public interface MetadataEndpoints {
     Call<ResponseBody> deleteTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
 
+    ///////////////////////////////////////////////////////////////////////////
+    // MESSAGES
+    ///////////////////////////////////////////////////////////////////////////
+
     @POST("metadata/messages")
     Call<Message> postMessage(@Header("Authorization") String jwToken, @Body Message body);
 
@@ -55,6 +69,10 @@ public interface MetadataEndpoints {
     Call<Void> processMessage(@Header("Authorization") String jwToken, @Path("uuid") String id, @Body MessageProcessRequest body);
 
 
+    ///////////////////////////////////////////////////////////////////////////
+    // SHARING
+    ///////////////////////////////////////////////////////////////////////////
+
     @POST("metadata/share")
     Call<Invitation> postShare(@Header("Authorization") String jwToken);
 
@@ -67,6 +85,10 @@ public interface MetadataEndpoints {
     @DELETE("metadata/share" + "/{uuid}")
     Call<Invitation> deleteShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CRUD OPERATIONS
+    ///////////////////////////////////////////////////////////////////////////
 
     @PUT("metadata/{addr}")
     Call<Void> putMetadata(@Path("addr") String address, @Body MetadataRequest body);

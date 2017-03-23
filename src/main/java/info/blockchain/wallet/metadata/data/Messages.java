@@ -9,7 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Messages {
-    String[] messages;
+
+    private String[] messages;
 
     public String[] getMessages() {
         return messages;

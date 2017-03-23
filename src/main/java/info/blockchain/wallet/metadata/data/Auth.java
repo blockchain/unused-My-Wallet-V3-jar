@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Auth {
 
-    String nonce;
-    String token;
+    private String nonce;
+    private String token;
 
     public String getNonce() {
         return nonce;

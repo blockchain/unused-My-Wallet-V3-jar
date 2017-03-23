@@ -5,15 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RemoteMetadataNodes {
 
-    //private bytes as HEX
-    String metadata;
-    String mdid;
+    /**
+     * Private bytes as HEX
+     */
+    private String metadata;
+    private String mdid;
     //Add any future metadata node derivations here
 
     public String getMetadata() {

@@ -6,11 +6,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.api.PersistentUrls;
-import java.io.IOException;
-import java.util.UUID;
+
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.uri.BitcoinURI;
+
+import java.io.IOException;
+import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,6 +22,8 @@ public class FacilitatedTransaction {
     public static final String STATE_WAITING_FOR_ADDRESS = "waiting_address";
     public static final String STATE_WAITING_FOR_PAYMENT = "waiting_payment";
     public static final String STATE_PAYMENT_BROADCASTED = "payment_broadcasted";
+    public static final String STATE_DECLINED = "declined";
+    public static final String STATE_CANCELLED = "cancelled";
 
     public static final String ROLE_RPR_INITIATOR = "rpr_initiator";
     public static final String ROLE_RPR_RECEIVER = "rpr_receiver";
@@ -130,7 +135,12 @@ public class FacilitatedTransaction {
 
     @JsonIgnore
     public String toBitcoinURI() {
-        return BitcoinURI.convertToBitcoinURI(PersistentUrls.getInstance().getCurrentNetworkParams(),address, Coin.valueOf(intendedAmount), null, null);
+        return BitcoinURI.convertToBitcoinURI(
+                PersistentUrls.getInstance().getCurrentNetworkParams(),
+                address,
+                Coin.valueOf(intendedAmount),
+                null,
+                null);
     }
 
     @JsonIgnore
