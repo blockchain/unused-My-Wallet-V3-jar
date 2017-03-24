@@ -605,6 +605,7 @@ public class Contacts {
      * Digests unread payment requests and returns a list of {@link Contact} with {@link
      * FacilitatedTransaction} that need responding to.
      */
+    @Nonnull
     public List<Contact> digestUnreadPaymentRequests() throws
             SharedMetadataException,
             IOException,
@@ -615,7 +616,7 @@ public class Contacts {
         return digestUnreadPaymentRequests(getMessages(true), true);
     }
 
-    List<Contact> digestUnreadPaymentRequests(List<Message> messages, boolean markAsRead) throws
+    private List<Contact> digestUnreadPaymentRequests(List<Message> messages, boolean markAsRead) throws
             IOException,
             SharedMetadataException,
             MetadataException,
@@ -639,7 +640,6 @@ public class Contacts {
                     contact.addFacilitatedTransaction(tx);
                     unread.add(contact);
                     if (markAsRead) markMessageAsRead(message.getId(), true);
-                    save();
                     break;
                 case TYPE_PAYMENT_REQUEST_RESPONSE:
                     PaymentRequest pr = new PaymentRequest().fromJson(message.getPayload());
@@ -665,7 +665,6 @@ public class Contacts {
                     if (newlyCreated) {
                         contact.addFacilitatedTransaction(tx);
                     }
-                    save();
                     break;
                 case TYPE_PAYMENT_BROADCASTED:
                     PaymentBroadcasted pb = new PaymentBroadcasted().fromJson(message.getPayload());
@@ -677,7 +676,6 @@ public class Contacts {
 
                     unread.add(contact);
                     if (markAsRead) markMessageAsRead(message.getId(), true);
-                    save();
                     break;
                 case TYPE_DECLINE_REQUEST:
                     PaymentDeclinedResponse declined =
@@ -689,7 +687,6 @@ public class Contacts {
 
                     unread.add(contact);
                     if (markAsRead) markMessageAsRead(message.getId(), true);
-                    save();
                     break;
                 case TYPE_CANCEL_REQUEST:
                     PaymentCancelledResponse cancelled =
@@ -701,9 +698,12 @@ public class Contacts {
 
                     unread.add(contact);
                     if (markAsRead) markMessageAsRead(message.getId(), true);
-                    save();
                     break;
             }
+        }
+
+        if (!messages.isEmpty()) {
+            save();
         }
 
         return unread;
