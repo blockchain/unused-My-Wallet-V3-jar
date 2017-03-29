@@ -27,8 +27,7 @@ public class PrivateKeyFactory {
     public final static String BASE58 = "base58";
     public final static String BASE64 = "base64";
     public final static String BIP38 = "bip38";
-    public final static String HEX_UNCOMPRESSED = "hex_u";
-    public final static String HEX_COMPRESSED = "hex_c";
+    public final static String HEX = "hex";
     public final static String MINI = "mini";
     public final static String WIF_COMPRESSED = "wif_c";
     public final static String WIF_UNCOMPRESSED = "wif_u";
@@ -51,9 +50,8 @@ public class PrivateKeyFactory {
                 .matches("^[1-9A-HJ-NP-Za-km-z]{43}$")) {
             return BASE58;
         }
-        //Assume compressed
         else if (key.matches("^[A-Fa-f0-9]{64}$")) {
-            return HEX_COMPRESSED;
+            return HEX;
         } else if (key.matches("^[A-Za-z0-9/=+]{44}$")) {
             return BASE64;
         } else if (key.matches("^6P[1-9A-HJ-NP-Za-km-z]{56}$")) {
@@ -95,10 +93,8 @@ public class PrivateKeyFactory {
                 return decodeBase58PK(data);
             case BASE64:
                 return decodeBase64PK(data);
-            case HEX_UNCOMPRESSED:
-                return decodeHexPK(data, false);
-            case HEX_COMPRESSED:
-                return decodeHexPK(data, true);
+            case HEX:
+                return determineKey(data);
             case MINI:
                 return decodeMiniKey(data);
             default:
@@ -106,11 +102,15 @@ public class PrivateKeyFactory {
         }
     }
 
-    private ECKey decodeMiniKey(String hex) throws Exception {
+    private ECKey decodeMiniKey(String mini) throws Exception {
+        Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(mini.getBytes("UTF-8")));
+        return determineKey(hash.toString());
+    }
 
-        Hash hash = new Hash(MessageDigest.getInstance("SHA-256").digest(hex.getBytes("UTF-8")));
-        ECKey uncompressedKey = decodeHexPK(hash.toString(), false);
-        ECKey compressedKey = decodeHexPK(hash.toString(), true);
+    private ECKey determineKey(String hash) throws Exception {
+
+        ECKey uncompressedKey = decodeHexPK(hash, false);
+        ECKey compressedKey = decodeHexPK(hash, true);
 
         try {
             String uncompressedAddress = uncompressedKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
@@ -131,10 +131,11 @@ public class PrivateKeyFactory {
 
             HashMap<String, Balance> body = exe.body();
 
-            long uncompressedBalance = body.get(uncompressedAddress).getFinalBalance().longValue();
-            long compressedBalance = body.get(compressedAddress).getFinalBalance().longValue();
+            BigInteger uncompressedBalance = body.get(uncompressedAddress).getFinalBalance();
+            BigInteger compressedBalance = body.get(compressedAddress).getFinalBalance();
 
-            if (compressedBalance == 0 && uncompressedBalance > 0) {
+            if (compressedBalance != null && compressedBalance.compareTo(BigInteger.ZERO) == 0
+                && uncompressedBalance != null && uncompressedBalance.compareTo(BigInteger.ZERO) == 1) {
                 return uncompressedKey;
             } else {
                 return compressedKey;
@@ -167,22 +168,8 @@ public class PrivateKeyFactory {
         return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
-    private String decryptPK(String base58Priv) {
-
-		/*
-        if (this.isDoubleEncrypted()) {
-			if (this.temporySecondPassword == null || !this.validateSecondPassword(temporySecondPassword))
-				throw new Exception("You must provide a second password");
-
-			base58Priv = decryptPK(base58Priv, getSharedKey(), this.temporySecondPassword, this.getDoubleEncryptionPbkdf2Iterations());
-		}
-		*/
-
-        return base58Priv;
-    }
-
     private ECKey decodePK(String base58Priv) throws Exception {
-        return decodeBase58PK(decryptPK(base58Priv));
+        return decodeBase58PK(base58Priv);
     }
 
     private byte[] hash(byte[] data, int offset, int len) {
