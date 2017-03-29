@@ -77,7 +77,7 @@ dependencies {
     compile group: 'com.squareup.retrofit2', name: 'converter-jackson', version: '2.2.0'
     compile group: 'com.squareup.retrofit2', name: 'adapter-rxjava2', version: '2.2.0'
     compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '3.6.0'
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.6.0'
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     compile group: 'com.squareup.okio', name: 'okio', version: '1.11.0'
     compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
     testCompile group: 'junit', name: 'junit', version: '4.12'

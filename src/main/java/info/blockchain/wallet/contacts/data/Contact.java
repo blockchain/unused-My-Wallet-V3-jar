@@ -5,15 +5,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.metadata.data.Invitation;
-import io.mikael.urlbuilder.UrlBuilder;
-import io.mikael.urlbuilder.util.UrlParameterMultimap;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.annotation.Nonnull;
+
+import io.mikael.urlbuilder.UrlBuilder;
+import io.mikael.urlbuilder.util.UrlParameterMultimap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Contact {
@@ -120,7 +124,8 @@ public class Contact {
     @Nonnull
     @JsonProperty("facilitatedTransaction")
     public HashMap<String, FacilitatedTransaction> getFacilitatedTransactions() {
-        return facilitatedTransaction != null ? facilitatedTransaction : new HashMap<String, FacilitatedTransaction>();
+        return facilitatedTransaction != null
+                ? facilitatedTransaction : new HashMap<String, FacilitatedTransaction>();
     }
 
     @JsonIgnore
@@ -133,8 +138,7 @@ public class Contact {
     }
 
     @JsonProperty("facilitatedTransaction")
-    public void setFacilitatedTransactions(
-            HashMap<String, FacilitatedTransaction> facilitatedTransaction) {
+    public void setFacilitatedTransactions(HashMap<String, FacilitatedTransaction> facilitatedTransaction) {
         this.facilitatedTransaction = facilitatedTransaction;
     }
 
@@ -170,7 +174,6 @@ public class Contact {
     }
 
     public Contact fromQueryParameters(Map<String, String> queryParams) {
-
         Contact contact = new Contact();
         contact.invitationReceived = new Invitation();
         contact.invitationReceived.setId(queryParams.get("id"));
@@ -181,7 +184,6 @@ public class Contact {
     }
 
     public String createURI() throws URISyntaxException {
-
         UrlParameterMultimap urlParameterMultimap = toQueryParameters();
 
         UrlBuilder urlBuilder = UrlBuilder.empty()

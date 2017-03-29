@@ -10,9 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Trusted {
 
-    String mdid;
-    String[] contacts;
-    String contact;
+    private String mdid;
+    private String[] contacts;
+    private String contact;
 
     public String getMdid() {
         return mdid;

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Status {
 
-    String status;
+    private String status;
 
     @JsonIgnore
     public String toJson() throws JsonProcessingException {

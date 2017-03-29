@@ -3,17 +3,19 @@ package info.blockchain.wallet.metadata.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataRequest {
-    int version;
-    String payload;
-    String signature;
-    String prev_magic_hash;
-    int type_id;
+
+    private int version;
+    private String payload;
+    private String signature;
+    private String prevMagicHash;
+    private int typeId;
 
     public int getVersion() {
         return version;
@@ -39,20 +41,24 @@ public class MetadataRequest {
         this.signature = signature;
     }
 
-    public String getPrev_magic_hash() {
-        return prev_magic_hash;
+    @JsonProperty("prev_magic_hash")
+    public String getPrevMagicHash() {
+        return prevMagicHash;
     }
 
-    public void setPrev_magic_hash(String prev_magic_hash) {
-        this.prev_magic_hash = prev_magic_hash;
+    @JsonProperty("prev_magic_hash")
+    public void setPrevMagicHash(String prevMagicHash) {
+        this.prevMagicHash = prevMagicHash;
     }
 
-    public int getType_id() {
-        return type_id;
+    @JsonProperty("type_id")
+    public int getTypeId() {
+        return typeId;
     }
 
-    public void setType_id(int type_id) {
-        this.type_id = type_id;
+    @JsonProperty("type_id")
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
     }
 
     @JsonIgnore

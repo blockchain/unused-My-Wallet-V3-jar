@@ -8,7 +8,7 @@ import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.MetadataUtil;
-import java.io.IOException;
+
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -16,6 +16,9 @@ import org.json.JSONException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
+
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -78,7 +81,6 @@ public class Metadata {
     }
 
     public void fetchMagic() throws IOException, MetadataException {
-
         Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
         Response<MetadataResponse> exe = response.execute();
@@ -88,15 +90,15 @@ public class Metadata {
 
             byte[] encryptedPayloadBytes = Base64.decode(exe.body().getPayload().getBytes("utf-8"));
 
-            if(body.getPrev_magic_hash() != null){
-                byte[] prevMagicBytes = Hex.decode(body.getPrev_magic_hash());
+            if (body.getPrevMagicHash() != null) {
+                byte[] prevMagicBytes = Hex.decode(body.getPrevMagicHash());
                 magicHash = MetadataUtil.magic(encryptedPayloadBytes, prevMagicBytes);
             } else {
                 magicHash = MetadataUtil.magic(encryptedPayloadBytes, null);
             }
 
         } else {
-            if(exe.code() == 404) {
+            if (exe.code() == 404) {
                 magicHash = null;
             } else {
                 throw new MetadataException(exe.code() + " " + exe.message());
@@ -106,18 +108,19 @@ public class Metadata {
 
     /**
      * Put new metadata entry
+     *
      * @param payload JSON Stringified object
-     * @throws Exception
      */
-    public void putMetadata(String payload) throws IOException, InvalidCipherTextException, MetadataException {
+    public void putMetadata(String payload) throws IOException, InvalidCipherTextException,
+            MetadataException {
 
         //Ensure json syntax is correct
-        if(!FormatsUtil.isValidJson(payload))
+        if (!FormatsUtil.isValidJson(payload))
             throw new JSONException("Payload is not a valid json object.");
 
         byte[] encryptedPayloadBytes;
 
-        if(isEncrypted){
+        if (isEncrypted) {
             //base64 to buffer
             encryptedPayloadBytes = Base64.decode(AESUtil.encryptWithKey(encryptionKey, payload));
         } else {
@@ -134,8 +137,8 @@ public class Metadata {
         body.setVersion(METADATA_VERSION);
         body.setPayload(new String(Base64.encode(encryptedPayloadBytes)));
         body.setSignature(signature);
-        body.setPrev_magic_hash(magicHash != null ? Hex.toHexString(magicHash) : null);
-        body.setType_id(type);
+        body.setPrevMagicHash(magicHash != null ? Hex.toHexString(magicHash) : null);
+        body.setTypeId(type);
 
         Call<Void> response = getApiInstance().putMetadata(address, body);
 
@@ -152,15 +155,18 @@ public class Metadata {
         return getMetadataEntry(address, isEncrypted);
     }
 
-    public String getMetadata(String address, boolean isEncrypted) throws MetadataException, IOException, InvalidCipherTextException {
+    public String getMetadata(String address, boolean isEncrypted) throws MetadataException,
+            IOException,
+            InvalidCipherTextException {
         return getMetadataEntry(address, isEncrypted);
     }
 
     /**
      * Get metadata entry
      */
-    private String getMetadataEntry(String address, boolean isEncrypted) throws IOException,
-            InvalidCipherTextException, MetadataException {
+    private String getMetadataEntry(String address, boolean isEncrypted) throws MetadataException,
+            IOException,
+            InvalidCipherTextException {
 
         Call<MetadataResponse> response = getApiInstance().getMetadata(address);
 
@@ -168,7 +174,7 @@ public class Metadata {
 
         if (exe.isSuccessful()) {
 
-            if(isEncrypted){
+            if (isEncrypted) {
                 return AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload());
             } else {
                 return new String(Base64.decode(exe.body().getPayload()));
@@ -186,11 +192,12 @@ public class Metadata {
     /**
      * Delete metadata entry
      */
-    public void deleteMetadata(String payload) throws Exception {
+    public void deleteMetadata(String payload) throws IOException, InvalidCipherTextException,
+            MetadataException {
 
         byte[] encryptedPayloadBytes;
 
-        if(isEncrypted){
+        if (isEncrypted) {
             //base64 to buffer
             encryptedPayloadBytes = Base64.decode(AESUtil.encryptWithKey(encryptionKey, payload));
         } else {
@@ -206,13 +213,13 @@ public class Metadata {
         Response<Void> exe = response.execute();
 
         if (!exe.isSuccessful()) {
-            throw new Exception(exe.code() + " " + exe.message());
+            throw new MetadataException(exe.code() + " " + exe.message());
         } else {
             magicHash = null;
         }
     }
 
-    public static class Builder{
+    public static class Builder {
 
         //Required
         private int type;
@@ -223,31 +230,31 @@ public class Metadata {
         private byte[] encryptionKey;
 
 
-        public Builder(DeterministicKey metaDataHDNode, int type){
+        public Builder(DeterministicKey metaDataHDNode, int type) {
             this.metaDataHDNode = metaDataHDNode;
             this.type = type;
         }
 
-        public Builder setEncrypted(boolean isEncrypted){
+        public Builder setEncrypted(boolean isEncrypted) {
             this.isEncrypted = isEncrypted;
             return this;
         }
 
-        public Builder setEncryptionKey(byte[] encryptionKey){
+        public Builder setEncryptionKey(byte[] encryptionKey) {
             this.encryptionKey = encryptionKey;
             return this;
         }
 
         /**
-         * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to authorize
-         * purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
+         * purpose' / type' / 0' : https://meta.blockchain.info/{address} - signature used to
+         * authorize purpose' / type' / 1' : sha256(private key) used as 256 bit AES key
          */
         public Metadata build() throws IOException, MetadataException {
 
             DeterministicKey payloadTypeNode = MetadataUtil.deriveHardened(metaDataHDNode, type);
             DeterministicKey node = MetadataUtil.deriveHardened(payloadTypeNode, 0);
 
-            if(encryptionKey == null){
+            if (encryptionKey == null) {
                 byte[] privateKeyBuffer = MetadataUtil.deriveHardened(payloadTypeNode, 1).getPrivKeyBytes();
                 encryptionKey = Sha256Hash.hash(privateKeyBuffer);
             }
