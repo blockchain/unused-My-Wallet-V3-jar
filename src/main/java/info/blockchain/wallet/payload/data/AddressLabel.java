@@ -16,7 +16,7 @@ import java.io.IOException;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class AddressLabels {
+public class AddressLabel {
 
     @JsonProperty("index")
     private int index;
@@ -40,8 +40,8 @@ public class AddressLabels {
         this.label = label;
     }
 
-    public static AddressLabels fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, AddressLabels.class);
+    public static AddressLabel fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, AddressLabel.class);
     }
 
     public String toJson() throws JsonProcessingException {

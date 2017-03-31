@@ -762,7 +762,7 @@ public class PayloadManager {
      */
     public String getNextReceiveAddress(Account account) throws IOException, HDWalletException {
 
-        int nextIndex = multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+        int nextIndex = getNextReceiveAddressIndex(account);
 
         HDAccount hdAccount = getPayload().getHdWallets().get(0)
             .getHDAccountFromAccountBody(account);
@@ -784,13 +784,21 @@ public class PayloadManager {
     public String getReceiveAddressAtPosition(Account account, int position) {
         try {
             HDAccount hdAccount = getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
-            int nextIndex = multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+            int nextIndex = getNextReceiveAddressIndex(account);
             int receiveAddressIndex = multiAddressFactory.findNextUnreservedReceiveAddressIndex(account, nextIndex + position);
 
             return hdAccount.getReceive().getAddressAt(receiveAddressIndex).getAddressString();
         } catch (HDWalletException e) {
             return null;
         }
+    }
+
+    private int getNextReceiveAddressIndex(Account account)  {
+        return multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+    }
+
+    private int getNextChangeAddressIndex(Account account)  {
+        return multiAddressFactory.getNextChangeAddressIndex(account.getXpub());
     }
 
     /**
@@ -802,7 +810,7 @@ public class PayloadManager {
      */
     public String getNextChangeAddress(Account account) throws IOException, HDWalletException {
 
-        int nextIndex = multiAddressFactory.getNextChangeAddressIndex(account.getXpub());
+        int nextIndex = getNextChangeAddressIndex(account);
 
         HDAccount hdAccount = getPayload().getHdWallets().get(0)
             .getHDAccountFromAccountBody(account);
@@ -816,6 +824,29 @@ public class PayloadManager {
 
     public void incrementNextChangeAddress(Account account) {
         multiAddressFactory.incrementNextChangeAddress(account.getXpub());
+    }
+
+    @Nullable
+    public String getNextReceiveAddressAndReserve(Account account, String reserveLabel)
+        throws HDWalletException, EncryptionException, NoSuchAlgorithmException, IOException, ServerConnectionException {
+
+        int nextIndex = getNextReceiveAddressIndex(account);
+
+        reserveAddress(account, nextIndex, reserveLabel);
+
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+            .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
+    }
+
+    public void reserveAddress(Account account, int index, String label)
+        throws HDWalletException, EncryptionException, NoSuchAlgorithmException, IOException, ServerConnectionException {
+
+        account.addAddressLabel(index, label);
+        if(!save()) {
+            throw new ServerConnectionException("Unable to reserve address.");
+        }
     }
 
     //********************************************************************************************//

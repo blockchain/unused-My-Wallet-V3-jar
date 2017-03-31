@@ -616,7 +616,7 @@ public class Contacts {
         return digestUnreadPaymentRequests(getMessages(true), true);
     }
 
-    private List<Contact> digestUnreadPaymentRequests(List<Message> messages, boolean markAsRead) throws
+    List<Contact> digestUnreadPaymentRequests(List<Message> messages, boolean markAsRead) throws
             IOException,
             SharedMetadataException,
             MetadataException,

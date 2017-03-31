@@ -3,7 +3,7 @@ package info.blockchain.wallet.multiaddress;
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
-import info.blockchain.wallet.payload.data.AddressLabels;
+import info.blockchain.wallet.payload.data.AddressLabel;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -69,7 +69,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertEquals("34c22edb3466708b974a7549d5b3cb51e05d4444f74d2a1b41484f8711dffd04", summary.get(0).getHash());
 
         Assert.assertEquals(5, multiAddressFactory.getNextChangeAddressIndex(dormantXpub));
-        Assert.assertEquals(10, multiAddressFactory.getNextReceiveAddressIndex(dormantXpub, new ArrayList<AddressLabels>()));
+        Assert.assertEquals(10, multiAddressFactory.getNextReceiveAddressIndex(dormantXpub, new ArrayList<AddressLabel>()));
 
         Assert.assertTrue(multiAddressFactory.isOwnHDAddress("1CAAzobQ2UrE4QUR3HJrkZs8UFA8wi5wwQ"));
         Assert.assertTrue(multiAddressFactory.isOwnHDAddress("1KTKN43STRsmRSNtChuDUzQtcQGMXyBMN1"));
@@ -102,6 +102,6 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertFalse(multiAddressFactory.isOwnHDAddress("1PPNN4psDFyAgdjQcKBJ8GSgE4ES4GHP9c"));
 
         Assert.assertEquals(5, multiAddressFactory.getNextChangeAddressIndex(dormantXpub));
-        Assert.assertEquals(10, multiAddressFactory.getNextReceiveAddressIndex(dormantXpub, new ArrayList<AddressLabels>()));
+        Assert.assertEquals(10, multiAddressFactory.getNextReceiveAddressIndex(dormantXpub, new ArrayList<AddressLabel>()));
     }
 }

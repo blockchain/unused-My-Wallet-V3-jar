@@ -36,7 +36,7 @@ public class Account {
     private Cache cache;
 
     @JsonProperty("address_labels")
-    private List<AddressLabels> addressLabels;
+    private List<AddressLabel> addressLabels;
 
     public String getLabel() {
         return label;
@@ -82,15 +82,14 @@ public class Account {
         this.cache = cache;
     }
 
-    public List<AddressLabels> getAddressLabels() {
+    public List<AddressLabel> getAddressLabels() {
         return addressLabels;
     }
 
     public void setAddressLabels(
-        List<AddressLabels> addressLabels) {
+        List<AddressLabel> addressLabels) {
         this.addressLabels = addressLabels;
     }
-
 
     public static Account fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, Account.class);
@@ -98,5 +97,15 @@ public class Account {
 
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
+    }
+
+    public void addAddressLabel(int index, String reserveLabel) {
+        AddressLabel addressLabel = new AddressLabel();
+        addressLabel.setLabel(reserveLabel);
+        addressLabel.setIndex(index);
+
+        if(!addressLabels.contains(addressLabel)) {
+            addressLabels.add(addressLabel);
+        }
     }
 }
