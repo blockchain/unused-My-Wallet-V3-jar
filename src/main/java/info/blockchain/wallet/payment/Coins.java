@@ -4,8 +4,11 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.contacts.Contacts;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.script.Script;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 
@@ -18,7 +21,10 @@ import java.util.List;
 
 class Coins {
 
+    private static final Logger log = LoggerFactory.getLogger(Coins.class);
+
     public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
+        log.info("Fetching unspent coins");
         BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
         return blockExplorer.getUnspentOutputs(addresses);
     }
@@ -56,11 +62,13 @@ class Coins {
 
         sweepBalance = BigInteger.valueOf(Math.max(sweepBalance.longValue(), 0));
 
+        log.info("Filtering sweepable coins. Sweepable Balance = {}, Fee required for sweep = {}", sweepBalance, sweepFee);
         return Pair.of(sweepBalance, sweepFee);
     }
 
     public static SpendableUnspentOutputs getMinimumCoinsForPayment(UnspentOutputs coins, BigInteger paymentAmount, BigInteger feePerKb) {
 
+        log.info("Select the minimum number of outputs necessary for payment");
         List<UnspentOutput> unspentOutputs = coins.getUnspentOutputs();
         List<UnspentOutput> spendWorthyList = new ArrayList<>();
 
