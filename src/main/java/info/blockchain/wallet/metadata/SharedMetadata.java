@@ -18,6 +18,7 @@ import info.blockchain.wallet.metadata.data.Trusted;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
+import org.json.JSONObject;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 
@@ -318,7 +319,7 @@ public class SharedMetadata {
      */
     public Invitation createInvitation() throws IOException, SharedMetadataException {
         authorize();
-        Call<Invitation> response = getApiInstance().postShare("Bearer " + token);
+        Call<Invitation> response = getApiInstance().postShare("Bearer " + token, new JSONObject().toString());
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
@@ -332,7 +333,7 @@ public class SharedMetadata {
             IOException,
             SharedMetadataException {
         authorize();
-        Call<Invitation> response = getApiInstance().postToShare("Bearer " + token, inviteId);
+        Call<Invitation> response = getApiInstance().postToShare("Bearer " + token, inviteId, new JSONObject().toString());
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {

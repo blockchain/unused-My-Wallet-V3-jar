@@ -73,11 +73,15 @@ public interface MetadataEndpoints {
     // SHARING
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Arbitrary JSON can be sent here, but for now we're not using it for anything so an empty
+     * JsonObject can be sent.
+     */
     @POST("metadata/share")
-    Call<Invitation> postShare(@Header("Authorization") String jwToken);
+    Call<Invitation> postShare(@Header("Authorization") String jwToken, @Body String jsonData);
 
     @POST("metadata/share" + "/{uuid}")
-    Call<Invitation> postToShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
+    Call<Invitation> postToShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid, @Body String jsonData);
 
     @GET("metadata/share" + "/{uuid}")
     Call<Invitation> getShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
