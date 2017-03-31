@@ -13,16 +13,24 @@ import org.junit.Test;
 public class PrivateKeyFactoryTest extends MockedResponseTest {
 
     private PrivateKeyFactory privateKeyFactory;
+
     //Mini key
-    private String uncompressedAddress = "16FFsrfKxeKt7JWhtpB4VrGBjQ1kKv5o3p";
-    private String compressedAddress = "1H2E6b2Ny6UeQ6bM5V2pSxAwZaVYAaaYUH";
+    private String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
+    private String miniUncompressedAddress = "16FFsrfKxeKt7JWhtpB4VrGBjQ1kKv5o3p";
+    private String miniCompressedAddress = "1H2E6b2Ny6UeQ6bM5V2pSxAwZaVYAaaYUH";
+
+    //Hex key
+    private String hexKey = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
+    private String hexUncompressedAddress = "1NZUGwdmQJ7AA6QrEuBz4jeT6z7yjty5dM";
+    private String hexCompressedAddress = "1NLLkARpefxpXaMb7ZhHmc2DYNoVUnzBAz";
+
     private String balanceApiResponse = "{\n" +
-            "    \""+uncompressedAddress+"\": {\n" +
+            "    \"%s\": {\n" +
             "        \"final_balance\": %d,\n" +
             "        \"n_tx\": 22,\n" +
             "        \"total_received\": 259526\n" +
             "    },\n" +
-            "    \""+compressedAddress+"\": {\n" +
+            "    \"%s\": {\n" +
             "        \"final_balance\": %d,\n" +
             "        \"n_tx\": 51,\n" +
             "        \"total_received\": 622078\n" +
@@ -63,11 +71,10 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     }
 
     @Test
-    public void test_HEX_COMPRESSED_KeyFormat() throws Exception {
+    public void test_HEX_KeyFormat() throws Exception {
 
-        String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
-        String format = privateKeyFactory.getFormat(key);
-        Assert.assertEquals(PrivateKeyFactory.HEX_COMPRESSED, format);
+        String format = privateKeyFactory.getFormat(hexKey);
+        Assert.assertEquals(PrivateKeyFactory.HEX, format);
     }
 
     @Test
@@ -108,17 +115,16 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_Mini_KeyFormat_shouldReturnCompressed_byDefault() throws Exception {
 
         //Arrange
-        String compressedByDefault = String.format(balanceApiResponse, 0 ,0);
+        String compressedByDefault = String.format(balanceApiResponse, miniUncompressedAddress, 0, miniCompressedAddress,0);
         mockInterceptor.setResponseString(compressedByDefault);
 
         //Act
-        String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
         String format = privateKeyFactory.getFormat(miniKey);
         ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
-        Assert.assertEquals(compressedAddress, address.toString());
+        Assert.assertEquals(miniCompressedAddress, address.toString());
         Assert.assertTrue(ecKey.isCompressed());
     }
 
@@ -126,18 +132,17 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_Mini_KeyFormat_shouldReturnUncompressed_ifHasBalance() throws Exception {
 
         //Arrange
-        String uncompressedWithBalance = String.format(balanceApiResponse, 1000 ,0);
+        String uncompressedWithBalance = String.format(balanceApiResponse, miniUncompressedAddress, 1000, miniCompressedAddress ,0);
         mockInterceptor.setResponseString(uncompressedWithBalance);
 
         //Act
-        String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
         String format = privateKeyFactory.getFormat(miniKey);
         ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
         if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams) {
-            Assert.assertEquals(uncompressedAddress, address.toString());
+            Assert.assertEquals(miniUncompressedAddress, address.toString());
             Assert.assertTrue(!ecKey.isCompressed());
         }
     }
@@ -146,29 +151,73 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
     public void test_Mini_KeyFormat_shouldReturnCompressed_ifBothHaveFunds() throws Exception {
 
         //Arrange
-        String compressedWithBalance = String.format(balanceApiResponse, 0 ,1000);
+        String compressedWithBalance = String.format(balanceApiResponse, miniUncompressedAddress, 0, miniCompressedAddress ,1000);
         mockInterceptor.setResponseString(compressedWithBalance);
 
         //Act
-        String miniKey = "SxuRMDrSNbwozww4twnedUPouUmGST";
         String format = privateKeyFactory.getFormat(miniKey);
         ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
         Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
-        Assert.assertEquals(compressedAddress, address.toString());
+        Assert.assertEquals(miniCompressedAddress, address.toString());
         Assert.assertTrue(ecKey.isCompressed());
     }
 
     @Test
-    public void test_HEX_KeyFormat_shouldReturnCompressed() throws Exception {
+    public void test_HEX_KeyFormat_shouldReturnCompressed_byDefault() throws Exception {
 
-        String key = "C7C4AEE098C6EF6C8A9363E4D760F515FA27D67C219E7238510F458235B9870D";
-        String format = privateKeyFactory.getFormat(key);
-        ECKey key1 = privateKeyFactory.getKey(PrivateKeyFactory.HEX_COMPRESSED, key);
+        //Arrange
+        String compressedByDefault = String.format(balanceApiResponse, hexUncompressedAddress, 0, hexCompressedAddress ,0);
+        mockInterceptor.setResponseString(compressedByDefault);
+
+        //Act
+        String format = privateKeyFactory.getFormat(hexKey);
+        ECKey ecKey = privateKeyFactory.getKey(format, hexKey);
+        Address address = ecKey.toAddress(MainNetParams.get());
 
         //Assert
-        Assert.assertEquals(PrivateKeyFactory.HEX_COMPRESSED, format);
-        Assert.assertEquals("1NLLkARpefxpXaMb7ZhHmc2DYNoVUnzBAz", key1.toAddress(MainNetParams.get()).toString());
+        Assert.assertEquals(hexCompressedAddress, address.toString());
+        Assert.assertTrue(ecKey.isCompressed());
+        Assert.assertEquals(PrivateKeyFactory.HEX, format);
     }
+
+    @Test
+    public void test_HEX_KeyFormat_shouldReturnCompressed_ifBothHaveFunds() throws Exception {
+
+        //Arrange
+        String compressedWithBalance = String.format(balanceApiResponse, hexUncompressedAddress, 0, hexCompressedAddress ,1000);
+        mockInterceptor.setResponseString(compressedWithBalance);
+
+        //Act
+        String format = privateKeyFactory.getFormat(hexKey);
+        ECKey ecKey = privateKeyFactory.getKey(format, hexKey);
+        Address address = ecKey.toAddress(MainNetParams.get());
+
+        //Assert
+        Assert.assertEquals(hexCompressedAddress, address.toString());
+        Assert.assertTrue(ecKey.isCompressed());
+        Assert.assertEquals(PrivateKeyFactory.HEX, format);
+    }
+
+    @Test
+    public void test_HEX_KeyFormat_shouldReturnUncompressed_ifHasBalance() throws Exception {
+
+        //Arrange
+        String uncompressedWithBalance = String.format(balanceApiResponse, hexUncompressedAddress, 1000 ,hexCompressedAddress, 0);
+        mockInterceptor.setResponseString(uncompressedWithBalance);
+
+        //Act
+        String format = privateKeyFactory.getFormat(hexKey);
+        ECKey ecKey = privateKeyFactory.getKey(format, hexKey);
+        Address address = ecKey.toAddress(MainNetParams.get());
+
+        //Assert
+        Assert.assertEquals(PrivateKeyFactory.HEX, format);
+        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams) {
+            Assert.assertEquals(hexUncompressedAddress, address.toString());
+            Assert.assertTrue(!ecKey.isCompressed());
+        }
+    }
+
 }

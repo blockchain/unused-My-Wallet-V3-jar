@@ -5,16 +5,29 @@ import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.bip44.HDAccount;
-import info.blockchain.wallet.exceptions.*;
+import info.blockchain.wallet.exceptions.AccountLockedException;
+import info.blockchain.wallet.exceptions.ApiException;
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.EncryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
+import info.blockchain.wallet.exceptions.InvalidCredentialsException;
+import info.blockchain.wallet.exceptions.MetadataException;
+import info.blockchain.wallet.exceptions.NoSuchAddressException;
+import info.blockchain.wallet.exceptions.ServerConnectionException;
+import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.pairing.Pairing;
-import info.blockchain.wallet.payload.data.*;
+import info.blockchain.wallet.payload.data.Account;
+import info.blockchain.wallet.payload.data.HDWallet;
+import info.blockchain.wallet.payload.data.LegacyAddress;
+import info.blockchain.wallet.payload.data.Wallet;
+import info.blockchain.wallet.payload.data.WalletBase;
+import info.blockchain.wallet.payload.data.WalletWrapper;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.Tools;
-import io.reactivex.Observable;
-import okhttp3.ResponseBody;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.ECKey;
@@ -25,16 +38,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
-import retrofit2.Call;
-import retrofit2.Response;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class PayloadManager {
@@ -605,7 +627,7 @@ public class PayloadManager {
      * @return
      * @throws Exception
      */
-    public Observable<ResponseBody> unregisterMdid(ECKey node) throws Exception {
+    public Observable<ResponseBody> unregisterMdid(ECKey node) {
         log.info("Unregister mdid - deactivate push notifications");
         String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
         return walletApi.unregisterMdid(walletBaseBody.getWalletBody().getGuid(),
@@ -619,7 +641,7 @@ public class PayloadManager {
      * @return
      * @throws Exception
      */
-    public Observable<ResponseBody> registerMdid(ECKey node) throws Exception {
+    public Observable<ResponseBody> registerMdid(ECKey node) {
         log.info("Register mdid - activate push notifications");
         String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
         return walletApi.registerMdid(walletBaseBody.getWalletBody().getGuid(),
@@ -775,7 +797,7 @@ public class PayloadManager {
      */
     public String getNextReceiveAddress(Account account) throws IOException, HDWalletException {
 
-        int nextIndex = multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+        int nextIndex = getNextReceiveAddressIndex(account);
 
         HDAccount hdAccount = getPayload().getHdWallets().get(0)
             .getHDAccountFromAccountBody(account);
@@ -797,13 +819,21 @@ public class PayloadManager {
     public String getReceiveAddressAtPosition(Account account, int position) {
         try {
             HDAccount hdAccount = getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
-            int nextIndex = multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+            int nextIndex = getNextReceiveAddressIndex(account);
             int receiveAddressIndex = multiAddressFactory.findNextUnreservedReceiveAddressIndex(account, nextIndex + position);
 
             return hdAccount.getReceive().getAddressAt(receiveAddressIndex).getAddressString();
         } catch (HDWalletException e) {
             return null;
         }
+    }
+
+    private int getNextReceiveAddressIndex(Account account)  {
+        return multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+    }
+
+    private int getNextChangeAddressIndex(Account account)  {
+        return multiAddressFactory.getNextChangeAddressIndex(account.getXpub());
     }
 
     /**
@@ -815,7 +845,7 @@ public class PayloadManager {
      */
     public String getNextChangeAddress(Account account) throws IOException, HDWalletException {
 
-        int nextIndex = multiAddressFactory.getNextChangeAddressIndex(account.getXpub());
+        int nextIndex = getNextChangeAddressIndex(account);
 
         HDAccount hdAccount = getPayload().getHdWallets().get(0)
             .getHDAccountFromAccountBody(account);
@@ -829,6 +859,29 @@ public class PayloadManager {
 
     public void incrementNextChangeAddress(Account account) {
         multiAddressFactory.incrementNextChangeAddress(account.getXpub());
+    }
+
+    @Nullable
+    public String getNextReceiveAddressAndReserve(Account account, String reserveLabel)
+        throws HDWalletException, EncryptionException, NoSuchAlgorithmException, IOException, ServerConnectionException {
+
+        int nextIndex = getNextReceiveAddressIndex(account);
+
+        reserveAddress(account, nextIndex, reserveLabel);
+
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+            .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
+    }
+
+    public void reserveAddress(Account account, int index, String label)
+        throws HDWalletException, EncryptionException, NoSuchAlgorithmException, IOException, ServerConnectionException {
+
+        account.addAddressLabel(index, label);
+        if(!save()) {
+            throw new ServerConnectionException("Unable to reserve address.");
+        }
     }
 
     //********************************************************************************************//

@@ -58,7 +58,7 @@ public class AccountTest {
             accounts.get(1).getXpub());
         Assert.assertNotNull(accounts.get(1).getCache());
 
-        //AddressLabels parsing tested in AddressLabelsTest
+        //AddressLabel parsing tested in AddressLabelTest
         Assert.assertNotNull(accounts.get(1).getAddressLabels());
     }
 
