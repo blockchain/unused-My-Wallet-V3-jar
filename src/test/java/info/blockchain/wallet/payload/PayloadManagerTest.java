@@ -8,7 +8,7 @@ import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.Account;
-import info.blockchain.wallet.payload.data.AddressLabels;
+import info.blockchain.wallet.payload.data.AddressLabel;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
 import java.net.URI;
@@ -445,8 +445,8 @@ public class PayloadManagerTest extends MockedResponseTest {
         Wallet wallet = PayloadManager.getInstance().getPayload();
 
         //Reserve an address to ensure it gets skipped
-        List<AddressLabels> labelList = new ArrayList<>();
-        labelList.add(AddressLabels.fromJson("{\n"
+        List<AddressLabel> labelList = new ArrayList<>();
+        labelList.add(AddressLabel.fromJson("{\n"
             + "              \"index\": 1,\n"
             + "              \"label\": \"Reserved\"\n"
             + "            }"));

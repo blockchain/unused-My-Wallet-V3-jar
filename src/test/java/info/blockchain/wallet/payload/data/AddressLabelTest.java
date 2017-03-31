@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AddressLabelsTest {
+public class AddressLabelTest {
 
     @Test
     public void fromJson_1() throws Exception {
@@ -21,7 +21,7 @@ public class AddressLabelsTest {
 
         List<Account> accounts = hdWallet.getAccounts();
 
-        List<AddressLabels> addressLabels = accounts.get(1).getAddressLabels();
+        List<AddressLabel> addressLabels = accounts.get(1).getAddressLabels();
         Assert.assertEquals(98, addressLabels.get(0).getIndex());
         Assert.assertEquals("New Address", addressLabels.get(0).getLabel());
 
@@ -44,7 +44,7 @@ public class AddressLabelsTest {
 
         List<Account> accounts = hdWallet.getAccounts();
 
-        List<AddressLabels> addressLabels = accounts.get(1).getAddressLabels();
+        List<AddressLabel> addressLabels = accounts.get(1).getAddressLabels();
         String jsonString = addressLabels.get(0).toJson();
 
         JSONObject jsonObject = new JSONObject(jsonString);

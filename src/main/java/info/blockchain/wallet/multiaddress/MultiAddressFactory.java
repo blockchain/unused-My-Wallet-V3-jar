@@ -6,7 +6,7 @@ import info.blockchain.wallet.bip44.HDChain;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.Account;
-import info.blockchain.wallet.payload.data.AddressLabels;
+import info.blockchain.wallet.payload.data.AddressLabel;
 import retrofit2.Response;
 
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class MultiAddressFactory {
         return nextChangeAddressMap.get(xpub);
     }
 
-    public int getNextReceiveAddressIndex(String xpub, List<AddressLabels> reservedAddresses) {
+    public int getNextReceiveAddressIndex(String xpub, List<AddressLabel> reservedAddresses) {
 
         if(!nextReceiveAddressMap.containsKey(xpub)) {
             return 0;
@@ -88,7 +88,7 @@ public class MultiAddressFactory {
         Integer receiveIndex = nextReceiveAddressMap.get(xpub);
 
         //Skip reserved addresses
-        for(AddressLabels reservedAddress : reservedAddresses) {
+        for(AddressLabel reservedAddress : reservedAddresses) {
             if(reservedAddress.getIndex() == receiveIndex) {
                 receiveIndex++;
             }
@@ -113,7 +113,7 @@ public class MultiAddressFactory {
     }
 
     private boolean isReserved(Account account, int position) {
-        for (AddressLabels reservedAddress : account.getAddressLabels()) {
+        for (AddressLabel reservedAddress : account.getAddressLabels()) {
             if (reservedAddress.getIndex() == position) {
                 return true;
             }
@@ -121,7 +121,7 @@ public class MultiAddressFactory {
         return false;
     }
 
-    public void incrementNextReceiveAddress(String xpub, List<AddressLabels> reservedAddresses) {
+    public void incrementNextReceiveAddress(String xpub, List<AddressLabel> reservedAddresses) {
 
         int receiveIndex = getNextReceiveAddressIndex(xpub, reservedAddresses);
         receiveIndex++;
