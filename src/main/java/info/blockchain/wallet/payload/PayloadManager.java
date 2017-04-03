@@ -34,6 +34,8 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
 
@@ -62,6 +64,8 @@ public class PayloadManager {
     public static final String MULTI_ADDRESS_ALL = "all";
     public static final String MULTI_ADDRESS_ALL_LEGACY = "all_legacy";
 
+    private static Logger log = LoggerFactory.getLogger(PayloadManager.class);
+
     //Assume we only support 1 hdWallet
     private static final int HD_WALLET_INDEX = 0;
 
@@ -85,6 +89,7 @@ public class PayloadManager {
     }
 
     private PayloadManager() {
+        log.info("Initializing PayloadManager");
         walletApi = new WalletApi();
         blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
         multiAddressFactory = new MultiAddressFactory(blockExplorer);
@@ -93,6 +98,7 @@ public class PayloadManager {
     }
 
     public void wipe() {
+        log.info("Wiping PayloadManager");
         walletBaseBody = null;
         password = null;
     }
@@ -130,6 +136,7 @@ public class PayloadManager {
      */
     public Wallet create(@Nonnull String defaultAccountName, @Nonnull String email, @Nonnull String password)
         throws Exception {
+        log.info("Creating wallet");
 
         this.password = password;
         walletBaseBody = new WalletBase();
@@ -151,6 +158,7 @@ public class PayloadManager {
      */
     public Wallet recoverFromMnemonic(@Nonnull String mnemonic, @Nonnull String defaultAccountName,
         @Nonnull String email, @Nonnull String password) throws Exception {
+        log.info("Recovering wallet");
 
         this.password = password;
         walletBaseBody = new WalletBase();
@@ -177,6 +185,7 @@ public class PayloadManager {
      * @throws Exception
      */
     public boolean upgradeV2PayloadToV3(String secondPassword, String defaultAccountName) throws Exception {
+        log.info("Upgrading to v3 wallet");
 
         walletBaseBody.getWalletBody().upgradeV2PayloadToV3(secondPassword, defaultAccountName);
 
@@ -213,6 +222,7 @@ public class PayloadManager {
         throws IOException, InvalidCredentialsException, AccountLockedException, ServerConnectionException,
         DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException,
         ApiException {
+        log.info("Initializing and decrypting wallet from credentials");
 
         this.password = password;
 
@@ -223,7 +233,9 @@ public class PayloadManager {
             walletBaseBody = WalletBase.fromJson(exe.body().string());
             walletBaseBody.decryptPayload(this.password);
         } else {
+            log.warn("Fetching wallet data failed with provided credentials");
             String errorMessage = exe.errorBody().string();
+            log.warn("", errorMessage);
             if (errorMessage != null && errorMessage.contains("Unknown Wallet Identifier")) {
                 throw new InvalidCredentialsException();
             } else if (errorMessage != null && errorMessage.contains("locked")) {
@@ -237,6 +249,7 @@ public class PayloadManager {
     }
 
     public void initializeAndDecryptFromQR(@Nonnull String qrData) throws Exception {
+        log.info("Initializing and decrypting wallet from scanned QR");
 
         Pair qrComponents = Pairing.getQRComponentsFromRawString(qrData);
         Call<ResponseBody> call = walletApi.fetchPairingEncryptionPasswordCall((String)qrComponents.getLeft());
@@ -256,7 +269,8 @@ public class PayloadManager {
             initializeAndDecrypt(sharedKey, guid, password);
 
         } else {
-            throw new ServerConnectionException(exe.errorBody().string());
+            log.error("", exe.code()+" - "+exe.errorBody().string());
+            throw new ServerConnectionException(exe.code()+" - "+exe.errorBody().string());
         }
 
         updateAllBalances();
@@ -272,6 +286,7 @@ public class PayloadManager {
      */
     public void initializeAndDecryptFromPayload(String payload,
                                                 String password) throws HDWalletException, DecryptionException {
+        log.info("Initializing and decrypting wallet from manual pairing");
 
         try {
             walletBaseBody = WalletBase.fromJson(payload);
@@ -280,13 +295,16 @@ public class PayloadManager {
 
             updateAllBalances();
         } catch (DecryptionException decryptionException) {
+            log.warn("", decryptionException);
             throw decryptionException;
         } catch (Exception e) {
+            log.error("", e);
             throw new HDWalletException(e);
         }
     }
 
     private void validateSave() throws HDWalletException {
+        log.info("Checking if wallet is safe to save");
         if (walletBaseBody == null) {
             throw new HDWalletException("Save aborted - HDWallet not initialized.");
         } else if (!walletBaseBody.getWalletBody().isEncryptionConsistent()) {
@@ -298,6 +316,7 @@ public class PayloadManager {
 
     private void saveNewWallet(String email) throws Exception {
         validateSave();
+        log.info("Saving wallet");
 
         //Encrypt and wrap payload
         Pair pair = walletBaseBody.encryptAndWrapPayload(password);
@@ -319,6 +338,7 @@ public class PayloadManager {
             //set new checksum
             walletBaseBody.setPayloadChecksum(newPayloadChecksum);
         } else{
+            log.error("", exe.code()+" - "+exe.errorBody().string());
             throw new ServerConnectionException(exe.code()+" - "+exe.errorBody().string());
         }
     }
@@ -336,6 +356,7 @@ public class PayloadManager {
         EncryptionException, IOException {
 
         validateSave();
+        log.info("Saving wallet");
 
         //Encrypt and wrap payload
         Pair pair = walletBaseBody.encryptAndWrapPayload(password);
@@ -366,6 +387,7 @@ public class PayloadManager {
 
             return true;
         } else{
+            log.error("Save unsuccessful");
             return false;
         }
     }
@@ -384,6 +406,7 @@ public class PayloadManager {
      */
     public Account addAccount(String label, @Nullable String secondPassword)
         throws Exception {
+        log.info("Adding account");
         Account accountBody = walletBaseBody.getWalletBody().addAccount(HD_WALLET_INDEX, label, secondPassword);
 
         boolean success = save();
@@ -409,6 +432,7 @@ public class PayloadManager {
      * @throws Exception
      */
     public boolean addLegacyAddress(String label, @Nullable String secondPassword) throws Exception {
+        log.info("Adding legacy address");
 
         LegacyAddress legacyAddressBody = walletBaseBody.getWalletBody()
             .addLegacyAddress(label, secondPassword);
@@ -433,7 +457,7 @@ public class PayloadManager {
      * @throws Exception Possible if saving the Wallet fails
      */
     public void addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
-
+        log.info("Adding legacy address");
         // TODO: 02/03/2017  second password
 
         List<LegacyAddress> currentAddresses = walletBaseBody.getWalletBody().getLegacyAddressList();
@@ -463,6 +487,7 @@ public class PayloadManager {
      */
     public LegacyAddress setKeyForLegacyAddress(ECKey key, @Nullable String secondPassword)
         throws Exception {
+        log.info("Setting key for legacy address");
 
         LegacyAddress matchingLegacyAddress = null;
         try {
@@ -487,6 +512,7 @@ public class PayloadManager {
 
     public LegacyAddress addLegacyAddressFromKey(ECKey key, @Nullable String secondPassword)
         throws Exception {
+        log.info("Adding legacy address from ECKey");
 
         LegacyAddress newlyAdded = walletBaseBody.getWalletBody()
             .addLegacyAddressFromKey(key, secondPassword);
@@ -520,15 +546,18 @@ public class PayloadManager {
         //Add all addresses, archived or not
         all.addAll(getPayload().getLegacyAddressStringList());
 
+        log.info("Getting account and address list: List size = {}", all.size());
         return all;
     }
 
     public boolean validateSecondPassword(String secondPassword) {
+        log.info("Validating second password");
 
         try{
             walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
             return true;
         } catch (Exception e){
+            log.warn("",e);
             e.printStackTrace();
             return false;
         }
@@ -544,12 +573,14 @@ public class PayloadManager {
 
     public ECKey getAddressECKey(@Nonnull LegacyAddress legacyAddress, @Nullable String secondPassword)
         throws DecryptionException, UnsupportedEncodingException, InvalidCipherTextException {
+        log.info("Get address ECKey");
 
         walletBaseBody.getWalletBody().validateSecondPassword(secondPassword);
 
         String decryptedPrivateKey = legacyAddress.getPrivateKey();
 
         if(secondPassword != null) {
+            log.info("Decrypting address private key");
             decryptedPrivateKey = DoubleEncryptionFactory
                 .decrypt(legacyAddress.getPrivateKey(),
                     walletBaseBody.getWalletBody().getSharedKey(),
@@ -579,6 +610,7 @@ public class PayloadManager {
                 map.put(address, balanceHashMap.get(address));
             }
 
+            log.info("Get map for address balances: Map size = {}", map.size());
             return map;
         } else {
             throw new ApiException(response.code() + ": " + response.errorBody().string());
@@ -596,6 +628,7 @@ public class PayloadManager {
      * @throws Exception
      */
     public Observable<ResponseBody> unregisterMdid(ECKey node) {
+        log.info("Unregister mdid - deactivate push notifications");
         String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
         return walletApi.unregisterMdid(walletBaseBody.getWalletBody().getGuid(),
             walletBaseBody.getWalletBody().getSharedKey(),
@@ -609,6 +642,7 @@ public class PayloadManager {
      * @throws Exception
      */
     public Observable<ResponseBody> registerMdid(ECKey node) {
+        log.info("Register mdid - activate push notifications");
         String signedGuid = node.signMessage(walletBaseBody.getWalletBody().getGuid());
         return walletApi.registerMdid(walletBaseBody.getWalletBody().getGuid(),
             walletBaseBody.getWalletBody().getSharedKey(),
@@ -625,6 +659,7 @@ public class PayloadManager {
      * @throws Exception Can throw an Exception if there's an issue with the credentials or network
      */
     public boolean loadNodes() throws Exception {
+        log.info("Loading metadata nodes");
         if (metadataNodeFactory == null) {
             metadataNodeFactory = new MetadataNodeFactory(walletBaseBody.getWalletBody().getGuid(),
                 walletBaseBody.getWalletBody().getSharedKey(), password);
@@ -642,7 +677,7 @@ public class PayloadManager {
      *                   a generic Exception if saving the nodes fails
      */
     public void generateNodes(@Nullable String secondPassword) throws Exception{
-
+        log.info("Generating metadata nodes");
         walletBaseBody.getWalletBody().decryptHDWallet(HD_WALLET_INDEX, secondPassword);
 
         boolean success = metadataNodeFactory.saveMetadataHdNodes(

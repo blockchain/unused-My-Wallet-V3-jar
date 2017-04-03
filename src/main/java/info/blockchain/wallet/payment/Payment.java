@@ -13,6 +13,8 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Call;
 
 import javax.annotation.Nonnull;
@@ -23,6 +25,8 @@ import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
 public class Payment {
+
+    private static final Logger log = LoggerFactory.getLogger(Payment.class);
 
     public static final BigInteger PUSHTX_MIN = BigInteger.valueOf(Coin.parseCoin("0.00001").longValue());
     public static final BigInteger DUST = BigInteger.valueOf(Coin.parseCoin("0.000005460").longValue());
@@ -47,11 +51,13 @@ public class Payment {
     }
 
     public Observable<FeeList> getDynamicFee() {
+        log.info("Fetching dynamic fee list");
         return new WalletApi().getDynamicFee();
     }
 
     public Fee getDefaultFee() {
 
+        log.info("Using hardcoded default fee");
         Fee fee = null;
         try {
             fee = Fee.fromJson(""
@@ -61,7 +67,7 @@ public class Payment {
                     + "     \"ok\": true\n"
                     + "}");
         } catch (IOException e) {
-            //This won't happen
+            log.error("This should never happen");
             e.printStackTrace();
         }
         return fee;

@@ -1,10 +1,15 @@
 package info.blockchain.wallet.api;
 
+import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.params.MainNetParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("WeakerAccess")
 public class PersistentUrls {
+
+    private static Logger log = LoggerFactory.getLogger(PersistentUrls.class);
 
     // Env enum keys
     public static final String KEY_ENV_PROD = "env_prod";
@@ -77,6 +82,7 @@ public class PersistentUrls {
      * Resets all URLs to their production base
      */
     public void setProductionEnvironment() {
+        log.info("Setting environment to PRODUCTION");
         currentNetworkParams = MainNetParams.get();
         setCurrentApiUrl(BASE_API_URL);
         setCurrentServerUrl(BASE_SERVER_URL);
@@ -141,26 +147,32 @@ public class PersistentUrls {
     ///////////////////////////////////////////////////////////////////////////
 
     public void setCurrentNetworkParams(AbstractBitcoinNetParams currentNetworkParams) {
+        log.info("Setting bitcoin network parameter {}", currentNetworkParams);
         this.currentNetworkParams = currentNetworkParams;
     }
 
     public void setCurrentApiUrl(String currentApiUrl) {
+        log.info("Setting API URL {}", currentApiUrl);
         this.currentApiUrl = currentApiUrl;
     }
 
     public void setCurrentServerUrl(String currentServerUrl) {
+        log.info("Setting server URL {}", currentServerUrl);
         this.currentServerUrl = currentServerUrl;
     }
 
     public void setCurrentWebsocketUrl(String currentWebsocketUrl) {
+        log.info("Setting websocket URL {}", currentWebsocketUrl);
         this.currentWebsocketUrl = currentWebsocketUrl;
     }
 
     public void setCurrentSFOXUrl(String currentSFOXUrl) {
+        log.info("Setting SFOX URL {}", currentWebsocketUrl);
         this.currentSFOXUrl = currentSFOXUrl;
     }
 
     public void setCurrentEnvironment(Environment currentEnvironment) {
+        log.info("Setting current environment {}", currentEnvironment);
         this.currentEnvironment = currentEnvironment;
     }
 }

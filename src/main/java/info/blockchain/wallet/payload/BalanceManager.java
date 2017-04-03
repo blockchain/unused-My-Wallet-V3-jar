@@ -3,6 +3,8 @@ package info.blockchain.wallet.payload;
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -18,17 +20,23 @@ import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL_LE
 
 public class BalanceManager {
 
+    private static Logger log = LoggerFactory.getLogger(BalanceManager.class);
+
     private BlockExplorer blockExplorer;
 
     private HashMap<String, BigInteger> balanceMap;
 
     public BalanceManager(BlockExplorer blockExplorer) {
+        log.info("Initializing BalanceManager");
         this.blockExplorer = blockExplorer;
         this.balanceMap = new HashMap<>();
     }
 
     public void subtractAmountFromAddressBalance(String address, BigInteger amount)
         throws Exception {
+
+        log.info("Updating internal balance of address "+address);
+
         //Update individual address
         BigInteger currentBalance = balanceMap.get(address);
         if(currentBalance == null) {
@@ -61,6 +69,9 @@ public class BalanceManager {
     public void updateAllBalances(List<String> legacyAddressList, List<String> allAccountsAndAddresses) throws ServerConnectionException, IOException {
         Call<HashMap<String, Balance>> call = blockExplorer.getBalance(allAccountsAndAddresses,
             BlockExplorer.TX_FILTER_ALL);
+
+
+        log.info("Fetching wallet balances");
 
         BigInteger walletFinalBalance = BigInteger.ZERO;
         BigInteger importedFinalBalance = BigInteger.ZERO;

@@ -28,16 +28,22 @@ import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 
 public class PaymentTx {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentTx.class);
 
     public static synchronized Transaction makeTransaction(List<UnspentOutput> unspentCoins,
         HashMap<String, BigInteger> receivingAddresses,
         @Nonnull BigInteger fee,
         @Nonnull String changeAddress)
         throws InsufficientMoneyException, AddressFormatException {
+
+        log.info("Making transaction");
 
         Transaction transaction = new Transaction(PersistentUrls.getInstance()
             .getCurrentNetworkParams());
@@ -163,6 +169,7 @@ public class PaymentTx {
 
     public static synchronized void signTransaction(Transaction transaction, List<ECKey> keys) {
 
+        log.info("Signing transaction");
         Wallet keyBag = Wallet.fromKeys(PersistentUrls.getInstance()
             .getCurrentNetworkParams(), keys);
 
@@ -172,6 +179,8 @@ public class PaymentTx {
 
     public static synchronized Call<ResponseBody> publishTransaction(Transaction transaction, String apiCode)
         throws IOException {
+
+        log.info("Publishing transaction");
         PushTx pushTx = new PushTx(BlockchainFramework.getRetrofitServerInstance(), apiCode);
         return pushTx.pushTx(new String(Hex.encode(transaction.bitcoinSerialize())));
     }

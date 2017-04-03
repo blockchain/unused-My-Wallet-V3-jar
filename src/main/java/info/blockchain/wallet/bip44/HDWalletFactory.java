@@ -25,7 +25,7 @@ public class HDWalletFactory {
 
     public static final String BIP39_ENGLISH_SHA256 = "ad90bf3beb7b0eb7e5acd74727dc0da96e0a280a258354e7293fb7e211ac03db";
 
-    private static final Logger mLogger = LoggerFactory.getLogger(HDWalletFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(HDWalletFactory.class);
 
     public enum Language{
         US, ES, FR, JP, CN, TW
@@ -41,7 +41,7 @@ public class HDWalletFactory {
      */
     public static HDWallet createWallet(AbstractBitcoinNetParams networkParameters, Language language, int nbWords, String passphrase,
         int nbAccounts) throws IOException, MnemonicException.MnemonicLengthException {
-
+        log.info("Generating HDWallet");
         Locale locale = getLocale(language);
 
         HDWallet hdw;
@@ -69,7 +69,7 @@ public class HDWalletFactory {
             hdw = new HDWallet(mc, networkParameters, seed, passphrase, nbAccounts);
             wis.close();
         } else {
-            mLogger.info("cannot read BIP39 word list");
+            log.warn("cannot read BIP39 word list");
             return null;
         }
 
@@ -88,6 +88,7 @@ public class HDWalletFactory {
         int nbAccounts)
         throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
 
+        log.info("Restoring HDWallet from seed");
         Locale locale = getLocale(language);
 
         HDWallet hdw;

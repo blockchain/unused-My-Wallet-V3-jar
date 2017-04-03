@@ -3,6 +3,7 @@ package info.blockchain.wallet.contacts;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
@@ -20,6 +21,8 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 
 import org.bitcoinj.crypto.DeterministicKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 
@@ -53,6 +56,8 @@ public class Contacts {
      */
     private static final int METADATA_TYPE_EXTERNAL = 4;
 
+    private static final Logger log = LoggerFactory.getLogger(Contacts.class);
+
     private Metadata metadata;
     private SharedMetadata sharedMetadata;
     private HashMap<String, Contact> contactList;
@@ -65,6 +70,7 @@ public class Contacts {
     public void init(DeterministicKey metaDataHDNode, DeterministicKey sharedMetaDataHDNode) throws
             IOException,
             MetadataException {
+        log.info("Initialising Contacts");
         metadata = new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
         sharedMetadata = new SharedMetadata.Builder(sharedMetaDataHDNode).build();
         contactList = new HashMap<>();
@@ -94,12 +100,15 @@ public class Contacts {
         } else {
             contactList = new HashMap<>();
         }
+
+        log.info("Fetching contact list. Size = {}", contactList.size());
     }
 
     /**
      * Saves contact list to metadata service
      */
     public void save() throws IOException, MetadataException, InvalidCipherTextException {
+        log.info("Saving contact list");
         if (contactList != null) {
             metadata.putMetadata(mapper.writeValueAsString(contactList.values().toArray()));
         }
@@ -109,6 +118,7 @@ public class Contacts {
      * Wipes contact list on metadata service as well as local contact list
      */
     public void wipe() throws IOException, MetadataException, InvalidCipherTextException {
+        log.info("Wiping contact list");
         metadata.putMetadata(mapper.writeValueAsString(new ArrayList<Contact>()));
         contactList = new HashMap<>();
     }
@@ -155,6 +165,7 @@ public class Contacts {
             MetadataException,
             IOException,
             InvalidCipherTextException {
+        log.info("Adding contact {}", contact.getId());
         contactList.put(contact.getId(), contact);
         save();
     }
@@ -167,6 +178,7 @@ public class Contacts {
             SharedMetadataException,
             MetadataException,
             InvalidCipherTextException {
+        log.info("Removing contact {}", contact.getId());
         contactList.remove(contact.getId());
         if (contact.getMdid() != null) {
             sharedMetadata.deleteTrusted(contact.getMdid());
@@ -184,6 +196,7 @@ public class Contacts {
             InvalidCipherTextException {
         Contact contact = getContactFromMdid(mdid);
 
+        log.info("Removing contact {}", contact.getId());
         contactList.remove(contact.getId());
         sharedMetadata.deleteTrusted(contact.getMdid());
         save();
@@ -219,6 +232,7 @@ public class Contacts {
             MetadataException,
             IOException,
             InvalidCipherTextException {
+        log.info("Deleting facilitated transaction {}", fctxId);
         Contact contact = getContactFromMdid(mdid);
         if (contact != null) {
             contact.deleteFacilitatedTransaction(fctxId);
@@ -232,6 +246,7 @@ public class Contacts {
      * Publishes your mdid-xpub pair unencrypted to metadata service
      */
     public void publishXpub() throws MetadataException, IOException, InvalidCipherTextException {
+        log.info("Publishing mdid-xpub pair");
         PublicContactDetails details = new PublicContactDetails(sharedMetadata.getXpub());
 
         Metadata publicMet = new Metadata();
@@ -248,6 +263,7 @@ public class Contacts {
      */
     public String fetchXpub(String mdid) throws MetadataException, IOException,
             InvalidCipherTextException {
+        log.info("Fetching mdid's xpub");
         String data = metadata.getMetadata(mdid, false);
 
         if (data != null) {
@@ -266,6 +282,7 @@ public class Contacts {
             SharedMetadataException,
             MetadataException,
             InvalidCipherTextException {
+        log.info("Creating inter-wallet-comms invitation");
         myDetails.setMdid(sharedMetadata.getAddress());
 
         Invitation i = sharedMetadata.createInvitation();
@@ -289,6 +306,7 @@ public class Contacts {
      * Parses invitation uri to {@link Contact}
      */
     public Contact readInvitationLink(String link) throws UnsupportedEncodingException {
+        log.info("Reading inter-wallet-comms invitation link");
         Map<String, String> queryParams = getQueryParams(link);
         //link will contain contact info, but not mdid
         return new Contact().fromQueryParameters(queryParams);
@@ -302,6 +320,7 @@ public class Contacts {
             SharedMetadataException,
             MetadataException,
             InvalidCipherTextException {
+        log.info("Accepting inter-wallet-comms invitation link");
         Map<String, String> queryParams = getQueryParams(link);
 
         Invitation accepted = sharedMetadata.acceptInvitation(queryParams.get("id"));
@@ -347,6 +366,7 @@ public class Contacts {
 
             save();
         }
+        log.info("Checking if invitation has been accepted - {}",accepted);
 
         return accepted;
     }
@@ -367,6 +387,7 @@ public class Contacts {
             SharedMetadataException,
             IOException,
             InvalidCipherTextException {
+        log.info("Sending inter-wallet-comms message");
         String b64Message;
 
         if (encrypted) {
@@ -391,6 +412,7 @@ public class Contacts {
             ValidationException,
             SignatureException,
             IOException {
+        log.info("Fetching inter-wallet-comms messages");
         List<Message> messages = sharedMetadata.getMessages(onlyNew);
 
         Iterator<Message> i = messages.iterator();
@@ -436,6 +458,7 @@ public class Contacts {
             IOException,
             InvalidCipherTextException,
             MetadataException {
+        log.info("Decrypting inter-wallet-comms message");
         String decryptedPayload = sharedMetadata.decryptFrom(xpub, message.getPayload());
         message.setPayload(decryptedPayload);
         return message;
@@ -475,6 +498,7 @@ public class Contacts {
             InvalidCipherTextException,
             SharedMetadataException {
 
+        log.info("Sending inter-wallet-comms request for payment request");
         FacilitatedTransaction tx = new FacilitatedTransaction();
         tx.setIntendedAmount(request.getIntendedAmount());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
@@ -499,6 +523,8 @@ public class Contacts {
             MetadataException,
             InvalidCipherTextException,
             SharedMetadataException {
+
+        log.info("Sending inter-wallet-comms payment request");
         FacilitatedTransaction facilitatedTransaction = new FacilitatedTransaction();
         request.setId(facilitatedTransaction.getId());
 
@@ -522,6 +548,8 @@ public class Contacts {
             SharedMetadataException,
             InvalidCipherTextException,
             MetadataException {
+
+        log.info("Sending inter-wallet-comms payment request response");
         sendMessage(mdid, request.toJson(), TYPE_PAYMENT_REQUEST_RESPONSE, true);
 
         Contact contact = getContactFromMdid(mdid);
@@ -542,6 +570,8 @@ public class Contacts {
             MetadataException,
             InvalidCipherTextException,
             SharedMetadataException {
+
+        log.info("Sending inter-wallet-comms notification that transaction has been processed.");
         Contact contact = getContactFromMdid(mdid);
         FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
 
@@ -565,6 +595,8 @@ public class Contacts {
             SharedMetadataException,
             InvalidCipherTextException,
             MetadataException {
+
+        log.info("Sending inter-wallet-comms notification that transaction has been declined.");
         Contact contact = getContactFromMdid(mdid);
         FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
 
@@ -587,6 +619,8 @@ public class Contacts {
             SharedMetadataException,
             InvalidCipherTextException,
             MetadataException {
+
+        log.info("Sending inter-wallet-comms notification that transaction has been cancelled.");
         Contact contact = getContactFromMdid(mdid);
         FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
 
@@ -622,6 +656,8 @@ public class Contacts {
             MetadataException,
             InvalidCipherTextException {
         List<Contact> unread = new ArrayList<>();
+
+        log.info("Digesting inter-wallet-comms payment requests.");
 
         for (Message message : messages) {
             switch (message.getType()) {

@@ -3,11 +3,16 @@ package info.blockchain.wallet.settings;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Settings;
 
+import info.blockchain.wallet.payment.Payment;
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("WeakerAccess")
 public class SettingsManager {
+
+    private static final Logger log = LoggerFactory.getLogger(SettingsManager.class);
 
     //API methods
     public static final String METHOD_GET_INFO = "get-info";
@@ -70,14 +75,17 @@ public class SettingsManager {
     }
 
     public Observable<Settings> getInfo()  {
+        log.info("Fetching settings details");
         return walletApi.fetchSettings(METHOD_GET_INFO, guid, sharedKey);
     }
 
     public Observable<ResponseBody> updateSetting(String method, String payload) {
+        log.info("Update settings");
         return walletApi.updateSettings(method, guid, sharedKey, payload);
     }
 
     public Observable<ResponseBody> updateSetting(String method, int payload) {
+        log.info("Update settings");
         return walletApi.updateSettings(method, guid, sharedKey, payload+"");
     }
 }
