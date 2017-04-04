@@ -5,18 +5,21 @@ import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
-import io.reactivex.Observable;
-import okhttp3.ResponseBody;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.spongycastle.util.encoders.Hex;
-import retrofit2.Call;
-import retrofit2.Response;
+import info.blockchain.wallet.api.data.WalletOptions;
 
-import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
+import org.spongycastle.util.encoders.Hex;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+
+import javax.annotation.Nullable;
+
+import io.reactivex.Observable;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
 
 @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
 public class WalletApi {
@@ -210,4 +213,9 @@ public class WalletApi {
             name,
             BlockchainFramework.getApiCode());
     }
+
+    public Observable<WalletOptions> getWalletOptions() {
+        return getServerApiInstance().getWalletOptions(BlockchainFramework.getApiCode());
+    }
+
 }
