@@ -90,6 +90,10 @@ public class PayloadManager {
 
     private PayloadManager() {
         log.info("Initializing PayloadManager");
+        init();
+    }
+
+    private void init() {
         walletApi = new WalletApi();
         blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
         multiAddressFactory = new MultiAddressFactory(blockExplorer);
@@ -99,8 +103,9 @@ public class PayloadManager {
 
     public void wipe() {
         log.info("Wiping PayloadManager");
-        walletBaseBody = null;
         password = null;
+        metadataNodeFactory = null;
+        init();
     }
 
     public Wallet getPayload() {
