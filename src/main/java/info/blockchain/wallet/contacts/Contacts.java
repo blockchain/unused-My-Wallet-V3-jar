@@ -3,7 +3,6 @@ package info.blockchain.wallet.contacts;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
@@ -121,6 +120,15 @@ public class Contacts {
         log.info("Wiping contact list");
         metadata.putMetadata(mapper.writeValueAsString(new ArrayList<Contact>()));
         contactList = new HashMap<>();
+    }
+
+    /**
+     * Nulls out all Metadata nodes to allow proper reset when logging in/out.
+     */
+    public void destroy() {
+        metadata = null;
+        sharedMetadata = null;
+        contactList = null;
     }
 
     /**
