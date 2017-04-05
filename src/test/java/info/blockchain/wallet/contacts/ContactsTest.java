@@ -70,6 +70,11 @@ public class ContactsTest {
             }
 
             @Override
+            public Retrofit getRetrofitCoinifyInstance() {
+                return null;
+            }
+
+            @Override
             public String getApiCode() {
                 return null;
             }

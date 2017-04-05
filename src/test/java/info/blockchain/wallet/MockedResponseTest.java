@@ -33,6 +33,7 @@ public abstract class MockedResponseTest {
         PersistentUrls.getInstance().setCurrentApiUrl("https://api.blockchain.info/");
         PersistentUrls.getInstance().setCurrentServerUrl("https://blockchain.info/");
         PersistentUrls.getInstance().setCurrentSFOXUrl("https://api.staging.sfox.com/");
+        PersistentUrls.getInstance().setCurrentCoinifyUrl("https://app-api.coinify.com/");
 
         //Initialize framework
         BlockchainFramework.init(new FrameworkInterface() {
@@ -49,6 +50,11 @@ public abstract class MockedResponseTest {
             @Override
             public Retrofit getRetrofitSFOXInstance() {
                 return getRetrofit(PersistentUrls.getInstance().getCurrentSFOXUrl(), getOkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitCoinifyInstance() {
+                return getRetrofit(PersistentUrls.getInstance().getCurrentCoinifyUrl(), getOkHttpClient());
             }
 
             @Override

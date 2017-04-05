@@ -45,7 +45,12 @@ public abstract class BaseIntegTest {
 
             @Override
             public Retrofit getRetrofitSFOXInstance() {
-                return null;
+                return getRetrofit(PersistentUrls.getInstance().getCurrentSFOXUrl(), getOkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitCoinifyInstance() {
+                return getRetrofit(PersistentUrls.getInstance().getCurrentCoinifyUrl(), getOkHttpClient());
             }
 
             @Override
