@@ -1,0 +1,32 @@
+{
+  "id": 113475347,
+  "traderId": 754035,
+  "state": "awaiting_transfer_in",
+  "inCurrency": "USD",
+  "outCurrency": "BTC",
+  "inAmount": 1000.00,
+  "outAmountExpected": 2.41526674,
+  "transferIn": {
+    "id": 4433662222,
+    "currency": "USD",
+    "sendAmount": 1000.00,
+    "receiveAmount": 1000.00,
+    "medium": "card",
+    "details": {
+      "redirectUrl": "https://provider.com/payment/d3aab081-7c5b-4ddb-b28b-c82cc8642a18",
+      "paymentId": "d3aab081-7c5b-4ddb-b28b-c82cc8642a18"
+    }
+  },
+  "transferOut": {
+    "id": 4433662233,
+    "currency": "BTC",
+    "medium": "blockchain",
+    "sendAmount": 2.41526674,
+    "receiveAmount": 2.41526674,
+    "details": {
+      "account": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
+    }
+  },
+  "updateTime": "2016-04-01T12:27:36Z",
+  "createTime": "2016-04-01T12:23:19Z"
+}
