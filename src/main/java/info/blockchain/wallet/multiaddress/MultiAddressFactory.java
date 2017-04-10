@@ -243,7 +243,13 @@ public class MultiAddressFactory {
                         }
 
                         //Keep track of inputs
-                        txSummary.inputsMap.put(inputAddr, inputValue);
+                        if(txSummary.inputsMap.containsKey(inputAddr)) {
+                            BigInteger prevValue = txSummary.inputsMap.get(inputAddr).add(inputValue);
+                            txSummary.inputsMap.put(inputAddr, prevValue);
+                        } else {
+                            txSummary.inputsMap.put(inputAddr, inputValue);
+                        }
+
                     } else {
                         //This will never happen unless server has issues
                     }

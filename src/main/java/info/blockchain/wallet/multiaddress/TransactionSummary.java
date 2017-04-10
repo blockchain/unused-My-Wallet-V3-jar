@@ -11,7 +11,7 @@ public class TransactionSummary {
     }
 
     private String hash;
-    private BigInteger total;//Total actually sent
+    private BigInteger total;//Total actually sent, including fee
     private BigInteger fee;//Total fee used
 
     private Direction direction;

@@ -98,11 +98,11 @@ public class PayloadManager {
         blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
         multiAddressFactory = new MultiAddressFactory(blockExplorer);
         balanceManager = new BalanceManager(blockExplorer);
-        walletBaseBody = new WalletBase();
     }
 
     public void wipe() {
         log.info("Wiping PayloadManager");
+        walletBaseBody = null;
         password = null;
         metadataNodeFactory = null;
         init();
@@ -309,7 +309,7 @@ public class PayloadManager {
     }
 
     private void validateSave() throws HDWalletException {
-        log.info("Checking if wallet is safe to save");
+        log.info("Checking if wallet is safe to save "+walletBaseBody);
         if (walletBaseBody == null) {
             throw new HDWalletException("Save aborted - HDWallet not initialized.");
         } else if (!walletBaseBody.getWalletBody().isEncryptionConsistent()) {
