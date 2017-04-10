@@ -309,7 +309,7 @@ public class PayloadManager {
     }
 
     private void validateSave() throws HDWalletException {
-        log.info("Checking if wallet is safe to save "+walletBaseBody);
+        log.info("Checking if wallet is safe to save");
         if (walletBaseBody == null) {
             throw new HDWalletException("Save aborted - HDWallet not initialized.");
         } else if (!walletBaseBody.getWalletBody().isEncryptionConsistent()) {
