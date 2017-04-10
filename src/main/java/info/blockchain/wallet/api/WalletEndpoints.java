@@ -4,13 +4,21 @@ import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
+import info.blockchain.wallet.api.data.WalletOptions;
+
+import java.util.List;
+
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.http.*;
-
-import java.util.List;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 @SuppressWarnings("SameParameterValue")
 public interface WalletEndpoints {
@@ -145,4 +153,8 @@ public interface WalletEndpoints {
     Observable<Status> logEvent(
         @Query("name") String name,
         @Query("api_code") String apiCode);
+
+    @GET("Resources/wallet-options.json")
+    Observable<WalletOptions> getWalletOptions(@Query("api_code") String apiCode);
+
 }

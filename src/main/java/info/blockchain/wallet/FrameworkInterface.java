@@ -23,6 +23,12 @@ public interface FrameworkInterface {
     Retrofit getRetrofitSFOXInstance();
 
     /**
+     * Provides an instance of Retrofit with it's base URL set to {@link
+     * info.blockchain.wallet.api.PersistentUrls#BASE_COINIFY_URL} or its debug/staging/testnet equivalent
+     */
+    Retrofit getRetrofitCoinifyInstance();
+
+    /**
      * Provides an ApiCode used for bci platform usage statistics.
      */
     String getApiCode();
