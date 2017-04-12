@@ -12,7 +12,9 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -154,6 +156,19 @@ public class WalletApi {
                 BlockchainFramework.getApiCode());
     }
 
+    public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("Authorization", "Bearer " + sessionId);
+        return getServerApiInstance().submitTwoFactorCode(
+                headerMap,
+                "get-wallet",
+                guid,
+                twoFactorCode,
+                twoFactorCode.length(),
+                "plain",
+                BlockchainFramework.getApiCode());
+    }
+
     public Observable<Response<ResponseBody>> getSessionId(String guid) {
         return getServerApiInstance().getSessionId(guid);
     }
@@ -210,8 +225,8 @@ public class WalletApi {
 
     public Observable<Status> logEvent(String name) {
         return getServerApiInstance().logEvent(
-            name,
-            BlockchainFramework.getApiCode());
+                name,
+                BlockchainFramework.getApiCode());
     }
 
     public Observable<WalletOptions> getWalletOptions() {
