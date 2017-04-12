@@ -109,7 +109,7 @@ public class PayloadManager {
     }
 
     public Wallet getPayload() {
-        return walletBaseBody.getWalletBody();
+        return walletBaseBody != null ? walletBaseBody.getWalletBody() : null;
     }
 
     public String getPayloadChecksum() {
