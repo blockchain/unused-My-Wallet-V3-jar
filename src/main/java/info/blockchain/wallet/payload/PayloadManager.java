@@ -478,6 +478,43 @@ public class PayloadManager {
     }
 
     /**
+     * Replaces an old {@link LegacyAddress} with a newer one if found and then syncs the wallet
+     * with the server. Will remove/revert the LegacyAddress if the sync was unsuccessful.
+     *
+     * @param legacyAddress The {@link LegacyAddress} to be added
+     * @throws Exception Possible if saving the Wallet fails
+     * @throws NullPointerException Thrown if the address to be updated is not found
+     */
+    public void updateLegacyAddress(LegacyAddress legacyAddress) throws Exception {
+        log.info("Updating legacy address");
+        // TODO: 02/03/2017  second password
+        boolean found = false;
+
+        final List<LegacyAddress> legacyAddressList = walletBaseBody.getWalletBody().getLegacyAddressList();
+        for (int i = 0; i < legacyAddressList.size(); i++) {
+            final LegacyAddress address = legacyAddressList.get(i);
+            if (address.getAddress().equals(legacyAddress.getAddress())) {
+                // Replace object with updated version
+                walletBaseBody.getWalletBody().getLegacyAddressList().set(i, legacyAddress);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            throw new NullPointerException("Legacy address not found");
+        }
+
+        if (!save()) {
+            // Revert on sync fail
+            walletBaseBody.getWalletBody().setLegacyAddressList(legacyAddressList);
+            throw new Exception("Failed to save added Legacy Address.");
+        }
+
+        updateAllBalances();
+    }
+
+    /**
      * Sets private key to existing matching legacy address. If no match is found the key will be added
      * to the wallet non the less.
      * @param key ECKey for existing legacy address
