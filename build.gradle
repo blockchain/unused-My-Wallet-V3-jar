@@ -19,37 +19,39 @@ tasks.withType(JavaCompile) {
 }
 
 repositories {
-    maven {
-        url nexusUrl + '/repository/maven-public/'
-        credentials(PasswordCredentials) {
-            username nexusUsername
-            password nexusPassword
-        }
-    }
+    mavenCentral()
+    // TODO: Switch this back once the client is published
+//    maven {
+//        url nexusUrl + '/repository/maven-public/'
+//        credentials(PasswordCredentials) {
+//            username nexusUsername
+//            password nexusPassword
+//        }
+//    }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-
-            artifact sourceJar {
-                classifier "sources"
-            }
-        }
-    }
-
-    repositories {
-        project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
-        maven {
-            url "${nexusUrl}/repository/maven-${project.repo}/"
-            credentials(PasswordCredentials) {
-                username nexusUsername
-                password nexusPassword
-            }
-        }
-    }
-}
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//
+//            artifact sourceJar {
+//                classifier "sources"
+//            }
+//        }
+//    }
+//
+//    repositories {
+//        project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
+//        maven {
+//            url "${nexusUrl}/repository/maven-${project.repo}/"
+//            credentials(PasswordCredentials) {
+//                username nexusUsername
+//                password nexusPassword
+//            }
+//        }
+//    }
+//}
 
 task sourceJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
@@ -62,7 +64,9 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 dependencies {
-    compile group: 'info.blockchain', name: 'api-client', version: '0.1.15-SNAPSHOT'
+    compile files('libs/api-client-0.1.13-SNAPSHOT.jar')
+    // TODO: Switch this back once the client is published
+//    compile group: 'info.blockchain', name: 'api-client', version: '0.1.15-SNAPSHOT'
     compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.5'
