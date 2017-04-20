@@ -3,10 +3,6 @@ language: java
 jdk:
 - oraclejdk8
 
-branches:
-  only:
-  - master
-
 env:
   global:
   - secure: oMOfwU+VhMWDogGVRZORA5jnJn2fwUUyTJNA6IYfIBdQJ11FnpiINNSq3+SXxu9+R+cJHogm4pypPpNKKbyKHJBqHIjJ3tZ5PZpIaqKykWihpX2AgJkp2z6IGR5UFkCdh/zgYUpVCHc133TyZ7vBj4z92mEiK3eNUu4yV03B1RuIuIgcyJqhChArU+1SbZ1j52l3kZviZtVnLFOZ9w8zOYJ8e/odvACIJuU353nBe/wOK4yHP3jad/q4lb0BZxad83gIRaRnL7WssoRW0iMu39mpkgo6wlsGWR8T29o6i9WPzUX2T3G/DFL7G4krKB/UJ1IO5ji2ywsf4Hk7fmsYjB6SqE9e74Frg7KnRQ/WERP1TUL34u2FA1Gzb4ahQlhR/Yrb8MEnD/AQsd7m/YoQYdTuYxI2D0EdlkqqAQEAjMgEbCGBomiG/7C/pB/VFPmXrpYnS+mTGowOsZhdyoIYArBgQCt+8l9wLGPfmMig5gRK0GcsCxkeMJulZaiZfb5O0r/CBkRaGuRfzF1jiHXVEBuYcU1mbM8y3thwF08iAtFX5t0zs6LGDDQZRrIOSa1efilHsoBmJ4Jjd8uYgpu+bov7Ngjgw6qzpA8pA/IFeZJr9P9NxpaRcWpneIkY9OE3XBT6cz3AtfxD60+Bd74LB2XG+co4ytT7AKhYgaV8qDc=
