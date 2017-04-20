@@ -509,7 +509,7 @@ public class PayloadManagerTest extends MockedResponseTest {
     }
 
     @Test
-    public void multiAddress() throws Exception {
+    public void getAccountTransactions() throws Exception {
         //guid 5350e5d5-bd65-456f-b150-e6cc089f0b26
         URI uri = getClass().getClassLoader().getResource("wallet_v3_6.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
