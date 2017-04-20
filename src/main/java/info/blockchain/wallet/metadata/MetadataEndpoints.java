@@ -28,10 +28,10 @@ public interface MetadataEndpoints {
     // AUTH
     ///////////////////////////////////////////////////////////////////////////
 
-    @GET("iwcs/auth")
+    @GET("metadata/auth")
     Call<Auth> getNonce();
 
-    @POST("iwcs/auth")
+    @POST("metadata/auth")
     Call<Auth> getToken(@Body HashMap<String, String> body);
 
 
@@ -39,16 +39,16 @@ public interface MetadataEndpoints {
     // TRUSTED
     ///////////////////////////////////////////////////////////////////////////
 
-    @GET("iwcs/trusted")
+    @GET("metadata/trusted")
     Call<Trusted> getTrustedList(@Header("Authorization") String jwToken);
 
-    @GET("iwcs/trusted")
+    @GET("metadata/trusted")
     Call<Trusted> getTrusted(@Header("Authorization") String jwToken, @Query("mdid") String mdid);
 
-    @PUT("iwcs/trusted/{mdid}")
+    @PUT("metadata/trusted/{mdid}")
     Call<Trusted> putTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
-    @DELETE("iwcs/trusted/{mdid}")
+    @DELETE("metadata/trusted/{mdid}")
     Call<ResponseBody> deleteTrusted(@Header("Authorization") String jwToken, @Path("mdid") String mdid);
 
 
@@ -56,16 +56,16 @@ public interface MetadataEndpoints {
     // MESSAGES
     ///////////////////////////////////////////////////////////////////////////
 
-    @POST("iwcs/messages")
+    @POST("metadata/messages")
     Call<Message> postMessage(@Header("Authorization") String jwToken, @Body Message body);
 
-    @GET("iwcs/messages")
+    @GET("metadata/messages")
     Call<List<Message>> getMessages(@Header("Authorization") String jwToken, @Query("new") Boolean onlyProcessed);
 
-    @GET("iwcs/message/{uuid}")
+    @GET("metadata/message/{uuid}")
     Call<Message> getMessage(@Header("Authorization") String jwToken, @Path("uuid") String messageId);
 
-    @PUT("iwcs/message/{uuid}/processed")
+    @PUT("metadata/message/{uuid}/processed")
     Call<Void> processMessage(@Header("Authorization") String jwToken, @Path("uuid") String id, @Body MessageProcessRequest body);
 
 
@@ -77,16 +77,16 @@ public interface MetadataEndpoints {
      * Arbitrary JSON can be sent here, but for now we're not using it for anything so an empty
      * JsonObject can be sent.
      */
-    @POST("iwcs/share")
+    @POST("metadata/share")
     Call<Invitation> postShare(@Header("Authorization") String jwToken, @Body String jsonData);
 
-    @POST("iwcs/share" + "/{uuid}")
+    @POST("metadata/share" + "/{uuid}")
     Call<Invitation> postToShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid, @Body String jsonData);
 
-    @GET("iwcs/share" + "/{uuid}")
+    @GET("metadata/share" + "/{uuid}")
     Call<Invitation> getShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
-    @DELETE("iwcs/share" + "/{uuid}")
+    @DELETE("metadata/share" + "/{uuid}")
     Call<Invitation> deleteShare(@Header("Authorization") String jwToken, @Path("uuid") String uuid);
 
 
@@ -94,12 +94,12 @@ public interface MetadataEndpoints {
     // CRUD OPERATIONS
     ///////////////////////////////////////////////////////////////////////////
 
-    @PUT("iwcs/{addr}")
+    @PUT("metadata/{addr}")
     Call<Void> putMetadata(@Path("addr") String address, @Body MetadataRequest body);
 
-    @GET("iwcs/{addr}")
+    @GET("metadata/{addr}")
     Call<MetadataResponse> getMetadata(@Path("addr") String address);
 
-    @DELETE("iwcs/{addr}")
+    @DELETE("metadata/{addr}")
     Call<Void> deleteMetadata(@Path("addr") String address, @Query("signature") String signature);
 }

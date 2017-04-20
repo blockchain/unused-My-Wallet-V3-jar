@@ -67,6 +67,18 @@ public class MultiAddressFactory {
         }
     }
 
+    /**
+     *
+     * @param all A list of all xpubs and legacy addresses
+     * @param watchOnly A list of watch-only legacy addresses
+     * @param activeLegacy A list of active legacy addresses. Used to flag transactions as 'watch only'
+     * @param onlyShow Xpub or legacy address. Used to fetch transaction only relating to this address.
+     * @param limit Maximum amount of transactions fetched
+     * @param offset Page offset
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     */
     public List<TransactionSummary> getAccountTransactions(ArrayList<String> all, List<String> watchOnly, List<String> activeLegacy, String onlyShow, int limit, int offset)
         throws IOException, ApiException {
 
@@ -194,7 +206,7 @@ public class MultiAddressFactory {
         }
 
         for(Transaction tx : txs) {
-
+            System.out.println("-------"+tx.getHash());
             boolean isLegacy = false;
 
             TransactionSummary txSummary = new TransactionSummary();
@@ -334,7 +346,7 @@ public class MultiAddressFactory {
             filterOwnedAddresses(ownAddressesAndXpubs,
                 txSummary.inputsMap, txSummary.outputsMap, txSummary.getDirection());
 
-            BigInteger total = calculateTotalOld(txSummary.inputsMap, txSummary.outputsMap, fee, txSummary.getDirection());
+            BigInteger total = calculateTotal(txSummary.inputsMap, txSummary.outputsMap, fee, txSummary.getDirection());
 
             txSummary.setHash(tx.getHash());
             txSummary.setTotal(total);
@@ -386,19 +398,32 @@ public class MultiAddressFactory {
         }
     }
 
-    private BigInteger calculateTotalOld(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> nonChangeOutputs, BigInteger fee, Direction direction) {
+    private BigInteger calculateTotal(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> nonChangeOutputs, BigInteger fee, Direction direction) {
 
         BigInteger total = BigInteger.ZERO;
 
         if(direction == Direction.SENT) {
-            for(BigInteger amount : inputs.values()) {
+            System.out.println("RECEIVED OR TRANSFERRED");
+            for (BigInteger amount : nonChangeOutputs.values()) {
+                System.out.println("input: "+amount);
                 total = total.add(amount);
             }
+            System.out.println("fee: "+fee);
+            total = total.add(fee);
         } else {
-            for(BigInteger amount : nonChangeOutputs.values()) {
+            System.out.println("SENT");
+            for (BigInteger amount : nonChangeOutputs.values()) {
+                System.out.println("output: "+amount);
                 total = total.add(amount);
             }
         }
+        System.out.println("Total: "+total);
+
+        System.out.println(":::");
+        for(BigInteger input : inputs.values()) {
+            System.out.println("input: "+input);
+        }
+        System.out.println(":::");
 
         return total;
     }
