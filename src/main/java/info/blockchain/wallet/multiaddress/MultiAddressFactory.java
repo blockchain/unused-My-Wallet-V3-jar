@@ -206,7 +206,7 @@ public class MultiAddressFactory {
         }
 
         for(Transaction tx : txs) {
-            System.out.println("-------"+tx.getHash());
+
             boolean isLegacy = false;
 
             TransactionSummary txSummary = new TransactionSummary();
@@ -274,6 +274,7 @@ public class MultiAddressFactory {
 
             //Outputs
             HashMap<String, BigInteger> allOutputs = new HashMap<>();
+            HashMap<String, BigInteger> changeMap = new HashMap<>();
             String outputAddr;
             BigInteger outputValue;
             for(Output output :tx.getOut()) {
@@ -296,7 +297,8 @@ public class MultiAddressFactory {
                             txSummary.outputsMap.put(outputAddr, outputValue);
                             txSummary.outputsXpubMap.put(outputAddr, xpubBody.getM());
                         } else {
-                            //Change - ignore
+                            //Change
+                            changeMap.put(outputAddr, outputValue);
                         }
 
                     } else {
@@ -310,6 +312,8 @@ public class MultiAddressFactory {
                             //Don't add change coming back
                             if (!txSummary.inputsMap.containsKey(outputAddr)) {
                                 txSummary.outputsMap.put(outputAddr, outputValue);
+                            } else {
+                                changeMap.put(outputAddr, outputValue);
                             }
 
                         } else {
@@ -346,16 +350,17 @@ public class MultiAddressFactory {
             filterOwnedAddresses(ownAddressesAndXpubs,
                 txSummary.inputsMap, txSummary.outputsMap, txSummary.getDirection());
 
-            BigInteger total = calculateTotal(txSummary.inputsMap, txSummary.outputsMap, fee, txSummary.getDirection());
-
             txSummary.setHash(tx.getHash());
-            txSummary.setTotal(total);
             txSummary.setTime(tx.getTime());
             txSummary.setDoubleSpend(tx.isDoubleSpend());
 
             if(txSummary.getDirection() == Direction.RECEIVED) {
+                BigInteger total = calculateTotalReceived(txSummary.outputsMap);
+                txSummary.setTotal(total);
                 txSummary.setFee(BigInteger.ZERO);
             } else {
+                BigInteger total = calculateTotalSent(txSummary.inputsMap, changeMap, fee, txSummary.getDirection());
+                txSummary.setTotal(total);
                 txSummary.setFee(fee);
             }
 
@@ -398,32 +403,33 @@ public class MultiAddressFactory {
         }
     }
 
-    private BigInteger calculateTotal(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> nonChangeOutputs, BigInteger fee, Direction direction) {
+    private BigInteger calculateTotalReceived(HashMap<String, BigInteger> outputsMap) {
 
         BigInteger total = BigInteger.ZERO;
 
-        if(direction == Direction.SENT) {
-            System.out.println("RECEIVED OR TRANSFERRED");
-            for (BigInteger amount : nonChangeOutputs.values()) {
-                System.out.println("input: "+amount);
-                total = total.add(amount);
-            }
-            System.out.println("fee: "+fee);
-            total = total.add(fee);
-        } else {
-            System.out.println("SENT");
-            for (BigInteger amount : nonChangeOutputs.values()) {
-                System.out.println("output: "+amount);
-                total = total.add(amount);
-            }
+        for(BigInteger output : outputsMap.values()) {
+            total = total.add(output);
         }
-        System.out.println("Total: "+total);
 
-        System.out.println(":::");
-        for(BigInteger input : inputs.values()) {
-            System.out.println("input: "+input);
+        return total;
+    }
+
+    private BigInteger calculateTotalSent(HashMap<String, BigInteger> inputsMap, HashMap<String, BigInteger> changeMap,
+        BigInteger fee, Direction direction) {
+
+        BigInteger total = BigInteger.ZERO;
+
+        for(BigInteger input : inputsMap.values()) {
+            total = total.add(input);
         }
-        System.out.println(":::");
+
+        for(BigInteger change : changeMap.values()) {
+            total = total.subtract(change);
+        }
+
+        if(direction == Direction.TRANSFERRED) {
+            total = total.subtract(fee);
+        }
 
         return total;
     }
