@@ -1,18 +1,17 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.util.RestClient;
-
+import info.blockchain.wallet.MockInterceptor;
+import info.blockchain.wallet.util.RestClient;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 public class MetadataNodeFactoryTest {
@@ -29,7 +28,7 @@ public class MetadataNodeFactoryTest {
     @Before
     public void setup() throws Exception {
 
-        mockInterceptor = new MockInterceptor();
+        mockInterceptor = MockInterceptor.getInstance();
 
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
@@ -42,11 +41,36 @@ public class MetadataNodeFactoryTest {
                         .addInterceptor(mockInterceptor)//Mock responses
                         .build();
 
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
+                return null;
+            }
+
+            @Override
+            public Retrofit getRetrofitSFOXInstance() {
+                return null;
+            }
+
+            @Override
+            public Retrofit getRetrofitCoinifyInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
+                return null;
+            }
+
+            @Override
+            public String getDevice() {
+                return null;
+            }
+
+            @Override
+            public String getAppVersion() {
                 return null;
             }
         });
@@ -61,6 +85,7 @@ public class MetadataNodeFactoryTest {
         String metadataB58 = "xprv9twfkEhG8UPRWCrX3HnowyQk7vMCVeGY5ZHWsLANZqxqBaiAHPN3MvuuFedVNBhixki7WBvYW8gcg2mCemfV6XNNpCZ31JusEHUhdmdhsvp";
         String sharedMetadataB58 = "xprv9twfkEhLiMZnQ5Gjf8w2f5wn5ASrQ9qMVwLo458shQmfMWhus8oo9aecvsAmSDXfgGbX2xQgeXi9Luj9ao5xGLKGjCj7gKiwvBGnjhdVEji";
 
+        mockInterceptor.setResponseString("{\"status\": \"success\"}");
         metadataNodeFactory.saveMetadataHdNodes(HDKeyDerivation.createMasterPrivateKey(Hex.decode(masterKeyHex)));
 
         Assert.assertTrue(metadataNodeFactory.getMetadataNode().serializePrivB58(MainNetParams.get()).equals(metadataB58));

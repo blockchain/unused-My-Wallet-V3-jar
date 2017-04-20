@@ -1,8 +1,10 @@
 package info.blockchain.wallet.crypto;
 
 import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.util.CharSequenceX;
-
+import info.blockchain.wallet.exceptions.EncryptionException;
+import java.io.UnsupportedEncodingException;
+import java.security.SecureRandom;
+import javax.annotation.Nullable;
 import org.apache.commons.codec.binary.Base64;
 import org.spongycastle.crypto.BlockCipher;
 import org.spongycastle.crypto.BufferedBlockCipher;
@@ -19,11 +21,6 @@ import org.spongycastle.crypto.paddings.ISO10126d2Padding;
 import org.spongycastle.crypto.paddings.PaddedBufferedBlockCipher;
 import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.crypto.params.ParametersWithIV;
-
-import java.io.UnsupportedEncodingException;
-import java.security.SecureRandom;
-
-import javax.annotation.Nullable;
 
 public class AESUtil {
 
@@ -46,12 +43,12 @@ public class AESUtil {
 
     // AES 256 PBKDF2 CBC iso10126 decryption
     // 16 byte IV must be prepended to ciphertext - Compatible with crypto-js
-    public static String decrypt(String ciphertext, CharSequenceX password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException, DecryptionException {
+    public static String decrypt(String ciphertext, String password, int iterations) throws UnsupportedEncodingException, InvalidCipherTextException, DecryptionException {
 
         return decryptWithSetMode(ciphertext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String decryptWithSetMode(String ciphertext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
+    public static String decryptWithSetMode(String ciphertext, String password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws InvalidCipherTextException, UnsupportedEncodingException, DecryptionException {
 
         byte[] cipherdata = Base64.decodeBase64(ciphertext.getBytes());
 
@@ -103,15 +100,17 @@ public class AESUtil {
     }
 
     // AES 256 PBKDF2 CBC iso10126 encryption
-    public static String encrypt(String cleartext, CharSequenceX password, int iterations) throws Exception {
+    public static String encrypt(String cleartext, String password, int iterations)
+        throws EncryptionException, UnsupportedEncodingException {
 
         return encryptWithSetMode(cleartext, password, iterations, MODE_CBC, new ISO10126d2Padding());
     }
 
-    public static String encryptWithSetMode(String cleartext, CharSequenceX password, int iterations, int mode, @Nullable BlockCipherPadding padding) throws Exception {
+    public static String encryptWithSetMode(String cleartext, String password, int iterations, int mode, @Nullable BlockCipherPadding padding)
+        throws EncryptionException, UnsupportedEncodingException {
 
         if (password == null) {
-            throw  new Exception("Password null");
+            throw  new EncryptionException("Password null");
         }
 
         // Use secure random to generate a 16 byte iv
@@ -122,7 +121,7 @@ public class AESUtil {
         byte[] clearbytes = cleartext.getBytes("UTF-8");
 
         PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
-        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(password.toString().toCharArray()), iv, iterations);
+        generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(password.toCharArray()), iv, iterations);
         KeyParameter keyParam = (KeyParameter) generator.generateDerivedParameters(256);
 
         CipherParameters params = new ParametersWithIV(keyParam, iv);

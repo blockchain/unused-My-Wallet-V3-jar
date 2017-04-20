@@ -1,0 +1,16 @@
+[
+  {
+      "action": "buy",
+      "transaction_id": "579afee4-5b5f-11e6-8e25-14109fd9ceb9",
+      "amount": "100",
+      "amount_currency": "usd",
+      "quote_id": "07c89dda-5b60-11e6-87d5-14109fd9ceb9",
+      "base_currency": "btc",
+      "quote_currency": "usd",
+      "base_amount": "0.16666667",
+      "quote_amount": "100",
+      "fee_amount": "1",
+      "fee_currency": "usd",
+      "status": "completed"
+  }
+]

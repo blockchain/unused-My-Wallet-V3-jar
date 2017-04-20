@@ -6,19 +6,21 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Message {
 
-    String payload;//base64 encoded
-    String signature;
-    String recipient;
-    String id;
-    String sender;
-    long sent;
-    boolean processed;
-    boolean notified;
-    int type;
+    private String payload;//base64 encoded
+    private String signature;
+    private String recipient;
+    private String id;
+    private String sender;
+    private long sent;
+    private boolean processed;
+    private boolean notified;
+    private int type;
 
     public String getPayload() {
         return payload;
@@ -90,6 +92,11 @@ public class Message {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    @JsonIgnore
+    public static Message fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, Message.class);
     }
 
     @JsonIgnore

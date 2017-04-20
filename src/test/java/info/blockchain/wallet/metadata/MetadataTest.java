@@ -1,22 +1,22 @@
 package info.blockchain.wallet.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import info.blockchain.BlockchainFramework;
-import info.blockchain.FrameworkInterface;
-import info.blockchain.bip44.Wallet;
-import info.blockchain.bip44.WalletFactory;
-import info.blockchain.util.RestClient;
+import info.blockchain.wallet.MockInterceptor;
+import info.blockchain.wallet.util.RestClient;
+import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.bip44.HDWallet;
+import info.blockchain.wallet.bip44.HDWalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.util.MetadataUtil;
-
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 public class MetadataTest {
@@ -30,7 +30,7 @@ public class MetadataTest {
     @Before
     public void setup() throws Exception {
 
-        mockInterceptor = new MockInterceptor();
+        mockInterceptor = MockInterceptor.getInstance();
 
         //Set environment
         BlockchainFramework.init(new FrameworkInterface() {
@@ -45,21 +45,46 @@ public class MetadataTest {
                         .addInterceptor(loggingInterceptor)//Extensive logging
                         .build();
 
-                return RestClient.getRetrofitInstance(okHttpClient);
+                return RestClient.getRetrofitApiInstance(okHttpClient);
             }
 
             @Override
             public Retrofit getRetrofitServerInstance() {
                 return null;
             }
+
+            @Override
+            public Retrofit getRetrofitSFOXInstance() {
+                return null;
+            }
+
+            @Override
+            public Retrofit getRetrofitCoinifyInstance() {
+                return null;
+            }
+
+            @Override
+            public String getApiCode() {
+                return null;
+            }
+
+            @Override
+            public String getDevice() {
+                return null;
+            }
+
+            @Override
+            public String getAppVersion() {
+                return null;
+            }
         });
     }
 
-    private Wallet getWallet() throws Exception {
+    private HDWallet getWallet() throws Exception {
 
-        return new WalletFactory().restoreWallet("15e23aa73d25994f1921a1256f93f72c",
-                "",
-                1);
+        return HDWalletFactory
+            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                "15e23aa73d25994f1921a1256f93f72c", "", 1);
     }
 
     @Test
@@ -112,7 +137,9 @@ public class MetadataTest {
         String result2 = metadata.getMetadata();
         Assert.assertTrue(msg.equals(result2));
 
+        mockInterceptor.setResponseString("{\"status\": \"success\"}");
         mockInterceptor.setResponseCode(200);
+        mockInterceptor.setResponseString("");
         metadata.deleteMetadata(msg);
 
         mockInterceptor.setResponseString("{\"message\":\"Not Found\"}");

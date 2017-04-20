@@ -1,0 +1,182 @@
+{
+    "recommend_include_fee": true,
+    "sharedcoin_endpoint": "https://api.sharedcoin.com",
+    "info": {
+        "nconnected": 197,
+        "conversion": 100000000.00000000,
+        "symbol_local": {
+            "code": "USD",
+            "symbol": "$",
+            "name": "U.S. dollar",
+            "conversion": 79990.40115186,
+            "symbolAppearsAfter": false,
+            "local": true
+        },
+        "symbol_btc": {
+            "code": "BTC",
+            "symbol": "BTC",
+            "name": "Bitcoin",
+            "conversion": 100000000.00000000,
+            "symbolAppearsAfter": true,
+            "local": false
+        },
+        "latest_block": {
+            "block_index": 1470275,
+            "hash": "00000000000000000127d1ddae4d9afe4cf497d9474356d4ee2f392aef711a29",
+            "height": 456177,
+            "time": 1488904851
+        }
+    },
+    "wallet": {
+        "n_tx": 2,
+        "n_tx_filtered": 2,
+        "total_received": 39217,
+        "total_sent": 0,
+        "final_balance": 39217
+    },
+    "addresses": [
+        {
+            "address": "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL",
+            "n_tx": 2,
+            "total_received": 39217,
+            "total_sent": 0,
+            "final_balance": 39217,
+            "gap_limit": 20,
+            "change_index": 0,
+            "account_index": 2
+        }
+    ],
+    "txs": [
+        {
+            "hash": "f66f66cf7cc259caa0563b6c947f14be9126f4e5be4885998e9d594d72443269",
+            "ver": 1,
+            "vin_sz": 1,
+            "vout_sz": 3,
+            "size": 259,
+            "relayed_by": "127.0.0.1",
+            "lock_time": 0,
+            "tx_index": 229738713,
+            "double_spend": false,
+            "result": -30327,
+            "balance": 39217,
+            "time": 1488905634,
+            "inputs": [
+                {
+                    "prev_out": {
+                        "value": 662032,
+                        "tx_index": 229735141,
+                        "n": 2,
+                        "spent": true,
+                        "script": "76a9140bcd2f8b7b8eb5cc9ec180b256b52801deec4f4d88ac",
+                        "type": 0,
+                        "addr": "125QEfWq3eKzAQQHeqcMcDMeZGm13hVRvU",
+                        "xpub": {
+                            "m": "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV",
+                            "path": "M/1/2"
+                        }
+                    },
+                    "sequence": 4294967295,
+                    "script": "47304402200ba7edc49badf622cba411772ff51952f3812cce17264921c62aa55913b30c340220264184d135c1ef4cfc336669e3dcb3329bee4bb041906b788d857cbe39b58ce801210296e159f8c2df5e533af580ea1361c95e3450fa36ef53eeb9dd45fd240a4789ba"
+                }
+            ],
+            "out": [
+                {
+                    "value": 29384,
+                    "tx_index": 229738713,
+                    "n": 0,
+                    "spent": false,
+                    "script": "76a914eeadc37698f3cfd59333e24b3b750b80ae0a938c88ac",
+                    "type": 0,
+                    "addr": "1Nm1yxXCTodAkQ9RAEquVdSneJGeubqeTw",
+                    "xpub": {
+                        "m": "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL",
+                        "path": "M/0/1"
+                    }
+                },
+                {
+                    "value": 39179,
+                    "tx_index": 229738713,
+                    "n": 1,
+                    "spent": false,
+                    "script": "76a9144e6eb255e9dbb487a03ec0cad0771dbc8d6f22e188ac",
+                    "type": 0,
+                    "addr": "189iKJLruPtUorasDuxmc6fMRVxz6zxpPS"
+                },
+                {
+                    "value": 563142,
+                    "tx_index": 229738713,
+                    "n": 2,
+                    "spent": false,
+                    "script": "76a914ddb2ac1df82c54c44d264977c385356b0141a05288ac",
+                    "type": 0,
+                    "addr": "1MDENmRBapEqrJrPYfJTj4kkoKqWfymFk5",
+                    "xpub": {
+                        "m": "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV",
+                        "path": "M/1/3"
+                    }
+                }
+            ]
+        },
+        {
+            "hash": "e249265c3fc7e5494e2e54ad16e3446ded475b7c98624e81fa9eb35cd565cbb9",
+            "ver": 1,
+            "vin_sz": 1,
+            "vout_sz": 2,
+            "size": 225,
+            "relayed_by": "127.0.0.1",
+            "lock_time": 0,
+            "tx_index": 229734613,
+            "double_spend": false,
+            "result": -27120,
+            "balance": 69544,
+            "time": 1488905364,
+            "inputs": [
+                {
+                    "prev_out": {
+                        "value": 40160,
+                        "tx_index": 229734557,
+                        "n": 0,
+                        "spent": true,
+                        "script": "76a91449b571a1cee2ee37d188381a4f532262ecbb495488ac",
+                        "type": 0,
+                        "addr": "17ijgwpGsVQRzMjsdAfdmeP53kpw9yvXur",
+                        "xpub": {
+                            "m": "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV",
+                            "path": "M/0/0"
+                        }
+                    },
+                    "sequence": 4294967295,
+                    "script": "47304402201726c64309ba99752e3b0b22bda67037472f960ecd971136bdffc6519d6e93b902200d0e1330491a73c047fffb1e4b3ca76ddb020f09d83e24bf9d4d8e49c85ddc3d01210282ccfdfac3305a0f1496b941251ddb9cfa4767231c0d946fc0080efa3d18e4a6"
+                }
+            ],
+            "out": [
+                {
+                    "value": 3207,
+                    "tx_index": 229734613,
+                    "n": 0,
+                    "spent": false,
+                    "script": "76a914fe42409c046de9a946653502ef1f9cab7b9e977788ac",
+                    "type": 0,
+                    "addr": "1QBQ12Dm3kpcA2xk1TkRKSUquqUMvwgGPi",
+                    "xpub": {
+                        "m": "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV",
+                        "path": "M/1/0"
+                    }
+                },
+                {
+                    "value": 9833,
+                    "tx_index": 229734613,
+                    "n": 1,
+                    "spent": false,
+                    "script": "76a9146c8a689266a216fcc98d392f2ad035de8212813788ac",
+                    "type": 0,
+                    "addr": "1AtunWT3F6WvQc3aaPuPbNGeBpVF3ZPM5r",
+                    "xpub": {
+                        "m": "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL",
+                        "path": "M/0/0"
+                    }
+                }
+            ]
+        }
+    ]
+}

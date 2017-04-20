@@ -1,0 +1,82 @@
+{
+    "guid": "a09910d9-1906-4ea1-a956-2508c3fe0661",
+    "sharedKey": "d14f3d2c-f883-40da-87e2-c8448521ee64",
+    "double_encryption": true,
+    "dpasswordhash": "1f7cb884545e89e4083c10522bf8b991e8e13551aa5816110cb9419277fb4652",
+    "tx_notes": {
+        "94a4934712fd40f2b91b7be256eacad49a50b850c949313b07046664d24c0e4c": "Bought Pizza"
+    },
+    "options": {
+        "pbkdf2_iterations": 5000,
+        "fee_per_kb": 10000,
+        "html5_notifications": false,
+        "logout_time": 3600000
+    },
+    "hd_wallets": [
+        {
+            "accounts": [
+                {
+                    "label": "My Wallet",
+                    "archived": false,
+                    "xpriv": "FhyK+vchEiRwTFmIFye+V182e38sNjStJGT/eFcy7TKyrfGh+XnfaJi90IRHatMJVCvIo7jZApX7x3zc87UzqR8tH2yIpqIcjR3IXWA7IGXfi9grNc6UU3tF5BaYV/jlrAOij/7mGsZSYam5G5Fz8gscVYf4+4ZC9eM+q80lN1Q=",
+                    "xpub": "xpub6DEe2bJAU7GbP12FBdsBckUkGPzQKMnZXaF2ajz2NCFfYJMEzb5G3oGwYrE6WQjnjhLeB6TgVudV3B9kKtpQmYeBJZLRNyXCobPht2jPUBm",
+                    "cache": {
+                        "receiveAccount": "xpub6F2ehb9khoF6MW8WzyT8WdVhvW3RnZxXYdHDvt43LabqGKdpqt39QFgpRCMAcktZckGZJBUrVVP4uwYbrb98MdR8KujG4tu1B4sRHA9QVwE",
+                        "changeAccount": "xpub6F2ehb9khoF6PZZxKS7vD8T2yDeDWuSR5RNH43b2wK5gY2ayWVApQezEzsFz7EpH2Jf6d6GYJzTrbfReT948CyxVgkhkkvmDBGkcY41MMnv"
+                    },
+                    "address_labels": []
+                },
+                {
+                    "label": "Savings 1",
+                    "archived": true,
+                    "xpriv": "nz3xhp6xFfBxOe4+l1xLePSdL5E4cBDCj/TC1nNNSokvHZTdXgbuTV5Ow+Gh7ZbOpth3Oh2iZrCibpwgiiler0A/TKDu++V1QnuJOmK/77WGYizm/e563eultBUuQCNktEfNGQUVveCYeF+TfsTU24tS3xbKzK4JeYiXaVlN4fk=",
+                    "xpub": "xpub6DEe2bJAU7GbQcGHvqgJ4T6pzZUU8j1WqLPyVtaWJFewfjChAKtUX5uRza9rabc6rAgFhXptveBmaoy7ptVGgbYT8KKaJ9E7wmyj5o4aqvr",
+                    "cache": {
+                        "receiveAccount": "xpub6EuwUwBeWacMrV9z2EwUAVokKA9BqjamdHGpKvngNENXAySJmBc6bLAX41y2Hbnrv9QNTDcRPnt6maaNCzPNt6QjMqVzvAadie6dPozsTN1",
+                        "changeAccount": "xpub6EuwUwBeWacMumpp5d2U63qRvLMUaXrNbGnuaSCirfNnXryTkN9cdwrz2oGrRxNdADMDSJY399oVyBaskiyvan6UbA9JsYL1KzRtDz1vrwQ"
+                    },
+                    "address_labels": [
+                        {
+                            "index": 98,
+                            "label": "New Address"
+                        }
+                    ]
+                }
+            ],
+            "seed_hex": "i3gtswW35zfbS/23fnh3IzKzcrpD04Tp+zeKbj++rODMOGRMO1aMQukwE3Q+63ds8pUMzBFnzomkjntprhisrQ==",
+            "passphrase": "",
+            "mnemonic_verified": true,
+            "default_account_idx": 0
+        }
+    ],
+    "keys": [
+        {
+            "addr": "19Axrcn8nsdZkSJtbnyM1rCs1PGwSzzzNn",
+            "priv": "g9rIjgOlfASQuJv38i1xdLmP1m2gMTPe96YzJJ9hjI2BBz5RErNOSeHPdeU2ZIOnsk+M1dfFw649MHXb7RAcZg==",
+            "label": "import 1",
+            "created_time": 1433495572,
+            "tag": 0,
+            "created_device_name": "android",
+            "created_device_version": null
+        },
+        {
+            "addr": "1rW486AbUx2LapYca7kddpULJVqMGMhTH",
+            "priv": "TIMsVAyWiVcTmcwc6Xv5r494sZcMBRQue6DamkXzDAzOn0cGQSf2XDN+1ZKM/cHgsL0oeJqxrBs9c5TzsNHIZg==",
+            "label": "1rW486AbUx2LapYca7kddpULJVqMGMhTH",
+            "created_time": 1434379366,
+            "tag": 2,
+            "created_device_name": "web",
+            "created_device_version": "6.1.16"
+        }
+    ],
+    "address_book": [
+        {
+          "addr": "17k7jQsewpru3uxMkaUMxahyvACVc7fjjb",
+          "label": "QA first one"
+        },
+        {
+          "addr": "1DiJVG3oD3yeqW26qcVaghwTjvMaVoeghX",
+          "label": "QA second one"
+        }
+    ]
+}

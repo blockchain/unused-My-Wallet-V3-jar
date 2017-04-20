@@ -1,0 +1,28 @@
+{
+    "extra_seed": "7ffafcba53d3d014d13f7e33717bac748506fb1a2095d09a137851c628a3d27c584b3eb0f48c53f5e3b3f3fdf1a84d6ab91006def452e77127a42135b5c854f8",
+    "auth_type": 0,
+    "initial_success": "Reminder: Verify your email.",
+    "real_auth_type": 0,
+    "payload": "4gen70mZdnKx0YRnjpPSHTqz2UOMiEUGev9ZaU0L5daWQpqCBqZUgCIqEEbyNzmBQk6DhaQsReAOkzJz4L8q8VMeKk+/h5JXIQTqxOwz0M470ZiyGnmKe7DFtEQGft3oAQAvc/SA89gdu/50SASEQk6fQPyRigkPunIrjmnxzWuO+Mak040Lea3qoScJXBY3xZG4C4ukJaFFhcZUTi+e45JYAg7AtmyONFFdcVLNpGjwRTkDvpAPobGJqMfOfFLHkdxNos+51khXYuyxEp3grU8jvwZbl2pCVgC1Z50IWFSUvSaZGvKkZaK5Ohw0Tn7RF4T4oUA4IrRYGpHY2F8yLUpcSJ47ctC90UPT7GITpDHA/eQNpzdhtIv7Inkkza/Okd5blx+59he+x/AQFTdyc5YZmsEgN+g/RUN06UNibe78iyqEEN4q88RiLDAwFMoHY4cYtzyd25CSza0NP+yBFFLf+NbKA64Ck2pItMgr4JXkCVU8shQmtKnVKfO8mC3MQSF+kZE0mClr7URa8LIbMhmGgQ3o2vGNbRiutzdO7/L52F7GWTHJzKEo5FdWK2K218Spd0L31TpBn3aKXg6BLgw6WiggztP4hP4pVf6LK21KvgPKf3NegF4Or7wfDz1/mP4uiz+xf18trCuFHoityhXduwrrtA9bhhf2SwLE4+Md9R+m1KOQ6q63ynujM0oeIGVj6NIH4uJS6pz/3iIKZTkr/4/5TdEw8uBlKHHxJHBHBuHPsYN3bpd4A+VMiNn3EPV02aD7xCq6anFPvoYbj8BHW0p6kUHP32fcuETciO7NF0NLGSIoE3iTNHRSpXt58BEHIU/p4Tx4KczwLfUiVvARzjnkF8KQMPrgzhZysiXhH8cwdw3LPU1hi0zDuyW3RR7UQxuCTOa/T8v0ZnGZhFNIFkocwSvcDStef807vg6bu2Fe4BewCLzHLQDEudTUHxiFsWWfzo4E4/3pCTNgAkI4N0swvUR7aBTQHminudxrdSxC2f/6pgBnd4TqBv+W16qcWLf31x/yV1wHFyG2rfTpbpTx07W4r3G4zoDq8XHecpfuDy2H+GKgctSyUSDO9BTb6Q93+JyrMDvuw2o4ennAmll8gQ8C5WjxsQ78oES2//yeCqTgKQiEx121Dwa2/MiposMiRg82pwMXZ7lERx74CQnII54z4YAHGA2EqtQwwNdzdCufJqGV8oHaEPAXRNnGuAK6fbDUlM10GiSQoCpvzmDtv5n3RYlXXgmXAjmDb1CodLEFqCps/lPyAvav",
+    "symbol_local": {
+        "symbol": "$",
+        "code": "USD",
+        "symbolAppearsAfter": false,
+        "name": "U.S. dollar",
+        "local": true,
+        "conversion": 164338.53738702
+    },
+    "guid": "2ca9b0e4-6b82-4dae-9fef-e8b300c72aa2",
+    "payload_checksum": "57f97ace89c105c19c43a15f2d6e3091d457dec804243b15772d2062a32f8b7d",
+    "war_checksum": "3642b083667c7f4d",
+    "language": "en",
+    "symbol_btc": {
+        "symbol": "BTC",
+        "code": "BTC",
+        "symbolAppearsAfter": true,
+        "name": "Bitcoin",
+        "local": false,
+        "conversion": 100000000
+    },
+    "sync_pubkeys": false
+}

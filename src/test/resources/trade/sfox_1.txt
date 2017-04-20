@@ -1,0 +1,9 @@
+[
+  {
+      "action": "buy",
+      "transaction_id": "579afee4-5b5f-11e6-8e25-14109fd9ceb9",
+      "amount": "100",
+      "amount_currency": "usd",
+      "status": "pending"
+  }
+]

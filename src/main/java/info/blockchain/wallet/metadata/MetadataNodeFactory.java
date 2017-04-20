@@ -1,13 +1,12 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.api.PersistentUrls;
+import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.RemoteMetadataNodes;
 import info.blockchain.wallet.util.MetadataUtil;
 
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.HDKeyDerivation;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -23,12 +22,11 @@ public class MetadataNodeFactory {
 
     private Metadata secondPwNode;
 
-    public MetadataNodeFactory(String guid, String sharedKey, String walletPassword) throws Exception{
+    public MetadataNodeFactory(String guid, String sharedKey, String walletPassword) throws Exception {
         this.secondPwNode = deriveSecondPasswordNode(guid, sharedKey, walletPassword);
     }
 
-    public boolean isMetadataUsable() throws Exception{
-
+    public boolean isMetadataUsable() throws Exception {
         try {
             String nodesJson = secondPwNode.getMetadata();
             if (nodesJson == null) {
@@ -37,10 +35,10 @@ public class MetadataNodeFactory {
                 return false;
             } else {
                 //Yes load nodes from stored metadata.
-                return loadNodes(new RemoteMetadataNodes().fromJson(nodesJson));
+                return loadNodes(RemoteMetadataNodes.fromJson(nodesJson));
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             //Metadata decryption will fail if user changes wallet password.
             e.printStackTrace();
             return false;
@@ -48,19 +46,22 @@ public class MetadataNodeFactory {
     }
 
     private boolean loadNodes(RemoteMetadataNodes remoteMetadataNodes) throws Exception {
-
         //If not all nodes available fail.
-        if(!remoteMetadataNodes.isAllNodesAvailable()){
+        if (!remoteMetadataNodes.isAllNodesAvailable()) {
             return false;
         }
 
-        sharedMetadataNode = DeterministicKey.deserializeB58(remoteMetadataNodes.getMdid(), PersistentUrls.getInstance().getCurrentNetworkParams());
-        metadataNode = DeterministicKey.deserializeB58(remoteMetadataNodes.getMetadata(), PersistentUrls.getInstance().getCurrentNetworkParams());
+        sharedMetadataNode = DeterministicKey.deserializeB58(
+                remoteMetadataNodes.getMdid(),
+                PersistentUrls.getInstance().getCurrentNetworkParams());
+        metadataNode = DeterministicKey.deserializeB58(
+                remoteMetadataNodes.getMetadata(),
+                PersistentUrls.getInstance().getCurrentNetworkParams());
+
         return true;
     }
 
     public boolean saveMetadataHdNodes(DeterministicKey masterKey) throws Exception {
-
         //Derive nodes
         DeterministicKey md = MetadataUtil.deriveMetadataNode(masterKey);
         DeterministicKey smd = MetadataUtil.deriveSharedMetadataNode(masterKey);
@@ -75,7 +76,6 @@ public class MetadataNodeFactory {
     }
 
     private Metadata deriveSecondPasswordNode(String guid, String sharedkey, String password) throws Exception {
-
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         String text = guid + sharedkey;
         md.update(text.getBytes("UTF-8"));

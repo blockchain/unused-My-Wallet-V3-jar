@@ -1,12 +1,15 @@
 plugins {
     id 'java'
     id 'maven'
+    id 'maven-publish'
     id 'jacoco'
     id "com.github.kt3k.coveralls" version "2.7.1"
 }
 
-group = 'info.blockchain.wallet'
-version = '6.2.2'
+group = 'info.blockchain'
+version = PROJECT_VERSION
+
+apply from: "integTest.gradle"
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -15,41 +18,70 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-task sourcesJar(type: Jar, dependsOn:classes) {
+repositories {
+    mavenCentral()
+    // TODO: Switch this back once the client is published
+//    maven {
+//        url nexusUrl + '/repository/maven-public/'
+//        credentials(PasswordCredentials) {
+//            username nexusUsername
+//            password nexusPassword
+//        }
+//    }
+}
+
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//
+//            artifact sourceJar {
+//                classifier "sources"
+//            }
+//        }
+//    }
+//
+//    repositories {
+//        project.ext.set('repo', project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases')
+//        maven {
+//            url "${nexusUrl}/repository/maven-${project.repo}/"
+//            credentials(PasswordCredentials) {
+//                username nexusUsername
+//                password nexusPassword
+//            }
+//        }
+//    }
+//}
+
+task sourceJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
 
-repositories {
-
-    if (hasProperty('nexusUrl')) {
-        maven {
-            url nexusUrl + '/repository/maven-public/'
-            credentials(PasswordCredentials) {
-                username nexusUsername
-                password nexusPassword
-            }
-        }
-    } else {
-        mavenCentral()
-    }
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 dependencies {
-    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.13.1'
+    compile files('libs/api-client-0.1.13-SNAPSHOT.jar')
+    // TODO: Switch this back once the client is published
+//    compile group: 'info.blockchain', name: 'api-client', version: '0.1.15-SNAPSHOT'
+    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.5'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.3'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.4'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     compile group: 'io.mikael', name: 'urlbuilder', version: '2.0.8'
     compile group: 'org.json', name: 'json', version: '20160810'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.5'
-    compile group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.1.0'
-    compile group: 'com.squareup.retrofit2', name: 'converter-jackson', version: '2.1.0'
-    compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '3.3.1'
-    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.6.0'
+    compile group: 'com.squareup.retrofit2', name: 'retrofit', version: '2.2.0'
+    compile group: 'com.squareup.retrofit2', name: 'converter-jackson', version: '2.2.0'
+    compile group: 'com.squareup.retrofit2', name: 'adapter-rxjava2', version: '2.2.0'
+    compile group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: '3.6.0'
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     compile group: 'com.squareup.okio', name: 'okio', version: '1.11.0'
     compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
     testCompile group: 'junit', name: 'junit', version: '4.12'

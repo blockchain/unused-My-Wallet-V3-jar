@@ -1,0 +1,95 @@
+{
+    "recommend_include_fee": true,
+    "sharedcoin_endpoint": "https://api.sharedcoin.com",
+    "info": {
+        "nconnected": 208,
+        "conversion": 100000000,
+        "symbol_local": {
+            "code": "USD",
+            "symbol": "$",
+            "name": "U.S. dollar",
+            "conversion": 77254.08094683,
+            "symbolAppearsAfter": false,
+            "local": true
+        },
+        "symbol_btc": {
+            "code": "BTC",
+            "symbol": "BTC",
+            "name": "Bitcoin",
+            "conversion": 100000000,
+            "symbolAppearsAfter": true,
+            "local": false
+        },
+        "latest_block": {
+            "block_index": 1468027,
+            "hash": "0000000000000000017b56c949632b0a089f95f85f150fd13be0f4a9e6e1d530",
+            "height": 455574,
+            "time": 1488546142
+        }
+    },
+    "wallet": {
+        "n_tx": 1,
+        "n_tx_filtered": 1,
+        "total_received": 77402,
+        "total_sent": 0,
+        "final_balance": 77402
+    },
+    "addresses": [
+        {
+            "address": "xpub6CeAwhuTvFTiL8oskqNsFrQ1SHdw8cPj6DkiHCVgKstCBEn7FAyPMUELmH4UUGhXJHLZV5oCrd7Cyi4R1yHw4VEQcW1kskR4Yb9RjsgwRPU",
+            "n_tx": 1,
+            "total_received": 77402,
+            "total_sent": 0,
+            "final_balance": 77402,
+            "gap_limit": 20,
+            "change_index": 0,
+            "account_index": 1
+        }
+    ],
+    "txs": [
+        {
+            "hash": "fda58212543f93cb1de9a2181e0fdf05cf1cbfd6704e7b7e2fcea3d2836ef809",
+            "ver": 1,
+            "vin_sz": 1,
+            "vout_sz": 2,
+            "size": 226,
+            "relayed_by": "127.0.0.1",
+            "lock_time": 0,
+            "tx_index": 228112611,
+            "double_spend": false,
+            "result": 77402,
+            "balance": 77402,
+            "time": 1488545845,
+            "inputs": [
+                {
+                    "prev_out": {
+                        "value": 5947491,
+                        "tx_index": 227763215,
+                        "n": 1,
+                        "spent": true,
+                        "script": "76a914e0ae36b480ae3ca6b69d2254d55c6f5473047fda88ac",
+                        "type": 0,
+                        "addr": "1MV14YsbpMr3E7vc5Pa9kFEtbtXAkNHzzE"
+                    },
+                    "sequence": 4294967295,
+                    "script": "483045022100c855f140454e7bd0e63aa75db2ec3148054583dd8cbdcae2f42be17a4840e2fa02201899cca3f00f6fab44575b80f03c34423ddea76e7d8e7bc9ae9dba45435a6d4801210218993301799918ab4c7e0f9360c079d7b3763eda555eeb897f30ca4f9407cfa7"
+                }
+            ],
+            "out": [
+                {
+                    "value": 77402,
+                    "tx_index": 228112611,
+                    "n": 0,
+                    "spent": false,
+                    "script": "76a9148a5f2b4b96bff329a8defe10e357aa5cd129527c88ac",
+                    "type": 0,
+                    "addr": "1DceFwUEJkxhD9cDmzWdU1K89785mLgdY5",
+                    "xpub": {
+                        "m": "xpub6CeAwhuTvFTiL8oskqNsFrQ1SHdw8cPj6DkiHCVgKstCBEn7FAyPMUELmH4UUGhXJHLZV5oCrd7Cyi4R1yHw4VEQcW1kskR4Yb9RjsgwRPU",
+                        "path": "M/0/0"
+                    }
+                }
+            ]
+        }
+    ]
+}

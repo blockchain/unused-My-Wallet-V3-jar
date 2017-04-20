@@ -1,0 +1,24 @@
+{
+    "initial_error": "Unknown Wallet Identifier. Please check you entered it correctly.",
+    "extra_seed": "724ee67266df75a459557c061b41811672211e666194273a8210f0734bda154fef45d5c285f110bb78f6d43609cff3bc58d3fbcc6c958a1da880c2db776e9671",
+    "symbol_local": {
+        "symbol": "$",
+        "code": "USD",
+        "symbolAppearsAfter": false,
+        "name": "U.S. dollar",
+        "local": true,
+        "conversion": 95562.09625014
+    },
+    "clientTimeDiff": -121253,
+    "serverTime": 1487328490459,
+    "war_checksum": "d3e3b31c57f823ed",
+    "language": "en",
+    "symbol_btc": {
+        "symbol": "BTC",
+        "code": "BTC",
+        "symbolAppearsAfter": true,
+        "name": "Bitcoin",
+        "local": false,
+        "conversion": 100000000
+    }
+}

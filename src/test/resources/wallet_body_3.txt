@@ -1,0 +1,58 @@
+{
+    "guid": "2ca9b0e4-6b82-4dae-9fef-e8b300c72aa2",
+    "sharedKey": "e8553981-b196-47cc-8858-5b0d16284f61",
+    "double_encryption": false,
+    "wallet_options": {
+        "pbkdf2_iterations": 10,
+        "fee_per_kb": 0,
+        "html5_notifications": false,
+        "logout_time": 600000
+    },
+    "keys": [
+        {
+            "addr": "18oiLmwwRmw25jK3Go72cieUaNsq5eZq2a",
+            "priv": "7nkCC1DvFBoWQd8EVUmSEMRawwnmMZVH6ZSmJM1Rog4r",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "1PFf4ruwpU8LoNPyzFLNX7aLFtT3AhbQxW",
+            "priv": "dnuY1XXVPSL78Ths3q5vQwZWrmbsqr3yiuknAUWYVaX",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "13JEiKew1Ee3H8K255RNuxd3yYMsqyXHtz",
+            "priv": "ExsEQwQpCsMunoBMReUzQ4kQFPKm4KTBnH9sym4wCCAT",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "15bhQZEbL3815K93ceHYBf5rekd2GEThEK",
+            "priv": "8rGeLoELr8xLpuNHTA8XtYawY7QJGHQrzvjF9PKN581r",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        },
+        {
+            "addr": "1JNwKdMZJAeonq2uUFcV5NuU8tSpHXb3bD",
+            "priv": "Gsc8jrwa11pCuEzvhuABWC9XePQa44jz78ZZJkKyVUDu",
+            "label": null,
+            "created_time": 0,
+            "tag": 0,
+            "created_device_name": null,
+            "created_device_version": null
+        }
+    ]
+}

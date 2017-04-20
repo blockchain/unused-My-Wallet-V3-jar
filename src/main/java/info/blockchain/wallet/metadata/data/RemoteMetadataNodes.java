@@ -12,9 +12,11 @@ import java.io.IOException;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RemoteMetadataNodes {
 
-    //private bytes as HEX
-    String metadata;
-    String mdid;
+    /**
+     * Private bytes as HEX
+     */
+    private String metadata;
+    private String mdid;
     //Add any future metadata node derivations here
 
     public String getMetadata() {
@@ -34,7 +36,7 @@ public class RemoteMetadataNodes {
     }
 
     @JsonIgnore
-    public RemoteMetadataNodes fromJson(String json) throws IOException {
+    public static RemoteMetadataNodes fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, RemoteMetadataNodes.class);
     }
 

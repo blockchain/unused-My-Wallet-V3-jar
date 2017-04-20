@@ -1,36 +1,36 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.crypto.AESUtil;
-
+import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.EncryptionException;
+import info.blockchain.wallet.settings.SettingsManager;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
 
-import java.security.MessageDigest;
-
+/**
+ * Double encryption uses concatenated sharedKey+second password to encrypt data
+ */
 public class DoubleEncryptionFactory {
 
-    private static DoubleEncryptionFactory instance = null;
+    private static final Logger log = LoggerFactory.getLogger(DoubleEncryptionFactory.class);
 
-    private DoubleEncryptionFactory() {
+    public static String encrypt(String encrypted, String sharedKey, String password2, int iterations)
+        throws UnsupportedEncodingException, EncryptionException {
+        log.info("Encrypting");
+        return AESUtil.encrypt(encrypted, sharedKey + password2, iterations);
     }
 
-    public static DoubleEncryptionFactory getInstance() {
-
-        if (instance == null) {
-            instance = new DoubleEncryptionFactory();
-        }
-
-        return instance;
+    public static String decrypt(String encrypted2, String sharedKey, String password2, int iterations)
+        throws UnsupportedEncodingException, DecryptionException, InvalidCipherTextException {
+        log.info("Decrypting");
+        return AESUtil.decrypt(encrypted2, sharedKey + password2, iterations);
     }
 
-    public String encrypt(String encrypted, String sharedKey, String password2, int iterations) throws Exception {
-        return AESUtil.encrypt(encrypted, new CharSequenceX(sharedKey + password2), iterations);
-    }
-
-    public String decrypt(String encrypted2, String sharedKey, String password2, int iterations) throws Exception {
-        return AESUtil.decrypt(encrypted2, new CharSequenceX(sharedKey + password2), iterations);
-    }
-
-    public String getHash(String sharedKey, String password2, int iterations) {
+    public static String getHash(String sharedKey, String password2, int iterations) {
 
         byte[] data = null;
 
@@ -46,6 +46,8 @@ public class DoubleEncryptionFactory {
 
             }
         } catch (Exception e) {
+            //Second pw or iterations incorrect
+            log.error("", e);
             e.printStackTrace();
         }
 
@@ -57,9 +59,12 @@ public class DoubleEncryptionFactory {
 
     }
 
-    public boolean validateSecondPassword(String dpasswordhash, String sharedKey, CharSequenceX password2, int iterations) {
-        String dhash = getHash(sharedKey, password2.toString(), iterations);
-        return dpasswordhash.equals(dhash);
+    public static void validateSecondPassword(String dpasswordhash, String sharedKey, String password2, int iterations)
+        throws DecryptionException {
+        log.info("Validating second password");
+        String dhash = getHash(sharedKey, password2, iterations);
+        if(!dpasswordhash.equals(dhash)) {
+            throw new DecryptionException("Double encryption password error!!");
+        }
     }
-
 }
