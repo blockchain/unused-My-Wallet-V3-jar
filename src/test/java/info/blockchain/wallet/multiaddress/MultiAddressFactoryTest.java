@@ -104,4 +104,86 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         Assert.assertEquals(5, multiAddressFactory.getNextChangeAddressIndex(dormantXpub));
         Assert.assertEquals(10, multiAddressFactory.getNextReceiveAddressIndex(dormantXpub, new ArrayList<AddressLabel>()));
     }
+
+    @Test
+    public void getMultiAddress_legacyAddress2() throws Exception {
+
+        String xpub1 = "xpub6Bx1J3neE11W2XpvKRFQVwWpZFsDfnRkLJ2V4JjPWNRDXbRvZrwnytbSbBng2F1fRejxkMWAi6fYJuAJrGg6TP8Key4jvs9YqpVo5LJ8jSk";
+        String xpub2 = "xpub6Bx1J3neE11W3XsMUTWVBKECFJee9TjJDSZJ53LKhr7AaAPJpNtz4KZTCe8nctTdu6kLYB4uZncjsy7EBi18mKb4HLg3WLfhPFW2KFGjScE";
+        String address = "1DtkXqBjvXWsboMpc72U1kfRrK8JTntBLQ";
+
+        URI uri = getClass().getClassLoader().getResource("multiaddress/multi_address_1Dtk.txt").toURI();
+        String response = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+
+        mockInterceptor.setResponseString(response);
+
+        List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
+            new ArrayList<>(Arrays.asList(xpub1, xpub2, address)), new ArrayList<String>(),
+            null, null, 100, 0);
+
+        Assert.assertEquals(7, summary.size());
+
+        TransactionSummary txSummary = summary.get(0);
+        Assert.assertEquals(1, txSummary.getInputsMap().size());
+        Assert.assertEquals(1, txSummary.getOutputsMap().size());
+        Assert.assertEquals(166486, txSummary.getTotal().longValue());
+        Assert.assertEquals(Direction.SENT, txSummary.getDirection());
+        Assert.assertEquals(27120, txSummary.getFee().longValue());
+        Assert.assertEquals(1492614742, txSummary.getTime());
+        Assert.assertEquals("de2db2e9b430f949f8c94ef4cd9093a020ef10c614b6802320920f7d84a8afab", txSummary.getHash());
+
+        txSummary = summary.get(1);
+        Assert.assertEquals(1, txSummary.getInputsMap().size());
+        Assert.assertEquals(1, txSummary.getOutputsMap().size());
+        Assert.assertEquals(446212, txSummary.getTotal().longValue());
+        Assert.assertEquals(Direction.SENT, txSummary.getDirection());
+        Assert.assertEquals(27120, txSummary.getFee().longValue());
+        Assert.assertEquals(1492614706, txSummary.getTime());
+        Assert.assertEquals("8a5327e09c1789f9ef9467298bfb8e46748effd79ff981226df14e5a468378b6", txSummary.getHash());
+
+        txSummary = summary.get(2);
+        Assert.assertEquals(1, txSummary.getInputsMap().size());
+        Assert.assertEquals(1, txSummary.getOutputsMap().size());
+        Assert.assertEquals(166486, txSummary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, txSummary.getDirection());
+        Assert.assertEquals(27120, txSummary.getFee().longValue());
+        Assert.assertEquals(1492614681, txSummary.getTime());
+        Assert.assertEquals("165b251a736e0e5d1e9aa287687b8d6fd5eb91c72b1138dd6047e34f8ed17217", txSummary.getHash());
+
+        txSummary = summary.get(3);
+        Assert.assertEquals(1, txSummary.getInputsMap().size());
+        Assert.assertEquals(1, txSummary.getOutputsMap().size());
+        Assert.assertEquals(83243, txSummary.getTotal().longValue());
+        Assert.assertEquals(Direction.TRANSFERRED, txSummary.getDirection());
+        Assert.assertEquals(27120, txSummary.getFee().longValue());
+        Assert.assertEquals(1492614642, txSummary.getTime());
+        Assert.assertEquals("0b2804884f0ae1d151a7260d2009168078259ef6428c861b001ce6a028a19977", txSummary.getHash());
+
+        txSummary = summary.get(4);
+        Assert.assertEquals(1, txSummary.getInputsMap().size());
+        Assert.assertEquals(1, txSummary.getOutputsMap().size());
+        Assert.assertEquals(750181, txSummary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, txSummary.getDirection());
+        Assert.assertEquals(0, txSummary.getFee().longValue());
+        Assert.assertEquals(1492614623, txSummary.getTime());
+        Assert.assertEquals("9fccf050f52ed23ee4fe20a89b03780a944d795ad897b38ff44a7369d6c7e665", txSummary.getHash());
+
+        txSummary = summary.get(5);
+        Assert.assertEquals(1, txSummary.getInputsMap().size());
+        Assert.assertEquals(2, txSummary.getOutputsMap().size());
+        Assert.assertEquals(909366, txSummary.getTotal().longValue());
+        Assert.assertEquals(Direction.SENT, txSummary.getDirection());
+        Assert.assertEquals(133680, txSummary.getFee().longValue());
+        Assert.assertEquals(1492497642, txSummary.getTime());
+        Assert.assertEquals("8765362f7fd1895bb35942197c9f74a6e25c85d0043f38858021442b20bfa112", txSummary.getHash());
+
+        txSummary = summary.get(6);
+        Assert.assertEquals(1, txSummary.getInputsMap().size());
+        Assert.assertEquals(1, txSummary.getOutputsMap().size());
+        Assert.assertEquals(909366, txSummary.getTotal().longValue());
+        Assert.assertEquals(Direction.RECEIVED, txSummary.getDirection());
+        Assert.assertEquals(0, txSummary.getFee().longValue());
+        Assert.assertEquals(1486028570, txSummary.getTime());
+        Assert.assertEquals("50115fce313d537b4a97ea24bb42d08b48f21d921b5710b765f07fc4fd23b101", txSummary.getHash());
+    }
 }

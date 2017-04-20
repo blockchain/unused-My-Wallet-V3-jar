@@ -7,6 +7,7 @@ import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressLabel;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Response;
@@ -41,11 +42,11 @@ public class MultiAddressFactory {
         return addressToXpubMap.get(address);
     }
 
-    private MultiAddress getMultiAddress(List<String> allActive, String context, int limit, int offset) throws IOException, ApiException{
+    private MultiAddress getMultiAddress(List<String> allActive, String onlyShow, int limit, int offset) throws IOException, ApiException{
 
         log.info("Fetching multiaddress for {} accounts/addresses", allActive.size());
 
-        if (context!=null && context.equals(MULTI_ADDRESS_ALL)) {
+        if (onlyShow!=null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
 
             Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
 
@@ -56,7 +57,7 @@ public class MultiAddressFactory {
             }
 
         } else {
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, context, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
 
             if(call.isSuccessful()) {
                 return call.body();
@@ -66,12 +67,12 @@ public class MultiAddressFactory {
         }
     }
 
-    public List<TransactionSummary> getAccountTransactions(ArrayList<String> all, List<String> watchOnly, List<String> activeLegacy, String xpub, int limit, int offset)
+    public List<TransactionSummary> getAccountTransactions(ArrayList<String> all, List<String> watchOnly, List<String> activeLegacy, String onlyShow, int limit, int offset)
         throws IOException, ApiException {
 
         log.info("Get transactions. limit {}, offset {}", limit, offset);
 
-        MultiAddress multiAddress = getMultiAddress(all, xpub, limit, offset);
+        MultiAddress multiAddress = getMultiAddress(all, onlyShow, limit, offset);
         if(multiAddress == null || multiAddress.getTxs() == null) {
             return new ArrayList<>();
         }
@@ -300,7 +301,7 @@ public class MultiAddressFactory {
                             }
 
                         } else {
-                            //Addres does not belong to us
+                            //Address does not belong to us
                             txSummary.outputsMap.put(outputAddr, outputValue);
                         }
                     }
@@ -328,12 +329,23 @@ public class MultiAddressFactory {
             }
 
             BigInteger fee = calculateFee(txSummary.inputsMap, allOutputs, txSummary.getDirection());
-            BigInteger total = calculateTotal(tx.getHash(), txSummary.outputsMap, fee, txSummary.getDirection());
+
+            //Remove input addresses not ours
+            filterOwnedAddresses(ownAddressesAndXpubs,
+                txSummary.inputsMap, txSummary.outputsMap, txSummary.getDirection());
+
+            BigInteger total = calculateTotalOld(txSummary.inputsMap, txSummary.outputsMap, fee, txSummary.getDirection());
+
             txSummary.setHash(tx.getHash());
             txSummary.setTotal(total);
-            txSummary.setFee(fee);
             txSummary.setTime(tx.getTime());
             txSummary.setDoubleSpend(tx.isDoubleSpend());
+
+            if(txSummary.getDirection() == Direction.RECEIVED) {
+                txSummary.setFee(BigInteger.ZERO);
+            } else {
+                txSummary.setFee(fee);
+            }
 
             //Set confirmations
             long latestBlock = multiAddress.getInfo().getLatestBlock().getHeight();
@@ -353,27 +365,45 @@ public class MultiAddressFactory {
         return summaryList;
     }
 
-    private BigInteger calculateTotal(String hash, HashMap<String, BigInteger> nonChange, BigInteger fee, Direction direction) {
+    private void filterOwnedAddresses(ArrayList<String> ownAddressesAndXpubs,
+        HashMap<String, BigInteger> inputsMap,
+        HashMap<String, BigInteger> outputsMap, Direction direction) {
+
+        Iterator<Entry<String, BigInteger>> iterator = inputsMap.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Entry<String, BigInteger> item = iterator.next();
+            if(!ownAddressesAndXpubs.contains(item.getKey()) && direction.equals(Direction.SENT)) {
+                iterator.remove();
+            }
+        }
+
+        iterator = outputsMap.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Entry<String, BigInteger> item = iterator.next();
+            if(!ownAddressesAndXpubs.contains(item.getKey()) && direction.equals(Direction.RECEIVED)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private BigInteger calculateTotalOld(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> nonChangeOutputs, BigInteger fee, Direction direction) {
 
         BigInteger total = BigInteger.ZERO;
 
-        for(BigInteger amount : nonChange.values()) {
-            total = total.add(amount);
-        }
-
         if(direction == Direction.SENT) {
-            total = total.add(fee);
+            for(BigInteger amount : inputs.values()) {
+                total = total.add(amount);
+            }
+        } else {
+            for(BigInteger amount : nonChangeOutputs.values()) {
+                total = total.add(amount);
+            }
         }
 
         return total;
     }
 
     private BigInteger calculateFee(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> outputs, Direction direction) {
-
-        if(direction == Direction.RECEIVED) {
-            //Receive doesn't have fee. We don't carry cost of tx
-            return BigInteger.ZERO;
-        }
 
         BigInteger inputTotal = BigInteger.ZERO;
         BigInteger outputTotal = BigInteger.ZERO;
