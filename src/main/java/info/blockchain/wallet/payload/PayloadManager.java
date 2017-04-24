@@ -44,7 +44,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -170,7 +170,7 @@ public class PayloadManager {
 
         Wallet walletBody = new Wallet();
         HDWallet hdWallet = HDWallet.recoverFromMnemonic(mnemonic, defaultAccountName);
-        walletBody.setHdWallets(Arrays.asList(hdWallet));
+        walletBody.setHdWallets(Collections.singletonList(hdWallet));
 
         walletBaseBody.setWalletBody(walletBody);
 
@@ -349,16 +349,35 @@ public class PayloadManager {
     }
 
     /**
-     * Saves wallet to server
+     * Saves wallet to server and forces the upload of the user's addresses to allow notifications
+     * to work correctly.
+     *
      * @return True if save successful
-     * @throws HDWalletException
-     * @throws NoSuchAlgorithmException
-     * @throws EncryptionException
-     * @throws IOException
      */
-    public boolean save()
-        throws HDWalletException, NoSuchAlgorithmException,
-        EncryptionException, IOException {
+    public boolean saveAndSyncPubKeys() throws
+            HDWalletException,
+            EncryptionException,
+            NoSuchAlgorithmException,
+            IOException {
+        return save(true);
+    }
+
+    /**
+     * Saves wallet to server.
+     *
+     * @return True if save successful
+     */
+    public boolean save() throws
+            HDWalletException,
+            EncryptionException,
+            NoSuchAlgorithmException,
+            IOException {
+        return save(false);
+    }
+
+    private boolean save(boolean forcePubKeySync)
+            throws HDWalletException, NoSuchAlgorithmException,
+            EncryptionException, IOException {
 
         validateSave();
         log.info("Saving wallet");
@@ -371,28 +390,48 @@ public class PayloadManager {
 
         //Save to server
         List<String> syncAddresses = null;
-        if(walletBaseBody.isSyncPubkeys()) {
-            syncAddresses = Tools.filterLegacyAddress(
-                LegacyAddress.NORMAL_ADDRESS,
-                walletBaseBody.getWalletBody().getLegacyAddressList());
+        if (walletBaseBody.isSyncPubkeys() || forcePubKeySync) {
+            syncAddresses = new ArrayList<>();
+
+            /*
+              This matches what iOS is doing, but it seems to be massive overkill for mobile
+              devices. I'm also filtering out archived accounts here because I don't see the point
+              in sending them.
+             */
+            for (Account account : getPayload().getHdWallets().get(0).getAccounts()) {
+                if (!account.isArchived()) {
+                    HDAccount hdAccount =
+                            getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
+                    int nextIndex = getNextReceiveAddressIndex(account);
+
+                    syncAddresses.addAll(
+                            Tools.getReceiveAddressList(hdAccount, nextIndex, nextIndex + 20));
+                }
+            }
+
+            syncAddresses.addAll(
+                    Tools.filterLegacyAddress(
+                            LegacyAddress.NORMAL_ADDRESS,
+                            walletBaseBody.getWalletBody().getLegacyAddressList()));
         }
+
         Call<ResponseBody> call = walletApi.updateWallet(
-            walletBaseBody.getWalletBody().getGuid(),
-            walletBaseBody.getWalletBody().getSharedKey(),
-            syncAddresses,
-            payloadWrapper.toJson(),
-            newPayloadChecksum,
-            oldPayloadChecksum,
-            BlockchainFramework.getDevice());
+                walletBaseBody.getWalletBody().getGuid(),
+                walletBaseBody.getWalletBody().getSharedKey(),
+                syncAddresses,
+                payloadWrapper.toJson(),
+                newPayloadChecksum,
+                oldPayloadChecksum,
+                BlockchainFramework.getDevice());
 
         Response<ResponseBody> exe = call.execute();
-        if(exe.isSuccessful()) {
+        if (exe.isSuccessful()) {
             //set new checksum
             walletBaseBody.setPayloadChecksum(newPayloadChecksum);
 
             return true;
-        } else{
-            log.error("Save unsuccessful");
+        } else {
+            log.error("Save unsuccessful: " + exe.errorBody().string());
             return false;
         }
     }

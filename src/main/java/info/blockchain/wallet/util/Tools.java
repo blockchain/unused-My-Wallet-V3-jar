@@ -1,15 +1,11 @@
 package info.blockchain.wallet.util;
 
 import com.google.common.primitives.UnsignedBytes;
+
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -18,6 +14,14 @@ import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.params.MainNetParams;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.annotation.Nonnull;
 
 public class Tools {
 
@@ -136,4 +140,23 @@ public class Tools {
 
         return list;
     }
+
+    /**
+     * Returns a list of receive addresses between two points on the chain.
+     *
+     * @param account    The {@link HDAccount} that you wish to derive addresses from
+     * @param startIndex The starting index, probably the next available index
+     * @param endIndex   The finishing index, an arbitrary number away from the starting point
+     * @return A non-null List of addresses as Strings
+     */
+    public static List<String> getReceiveAddressList(HDAccount account, int startIndex, int endIndex) {
+        List<String> list = new ArrayList<>();
+
+        for (int i = startIndex; i < endIndex; i++) {
+            list.add(account.getReceive().getAddressAt(i).getAddressString());
+        }
+
+        return list;
+    }
+
 }
