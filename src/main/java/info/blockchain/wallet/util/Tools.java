@@ -1,7 +1,5 @@
 package info.blockchain.wallet.util;
 
-import com.google.common.primitives.UnsignedBytes;
-
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.payload.data.LegacyAddress;
@@ -25,7 +23,7 @@ import javax.annotation.Nonnull;
 
 public class Tools {
 
-    public static Transaction applyBip69 (Transaction transaction) {
+    public static Transaction applyBip69(Transaction transaction) {
         //This will render an already signed transaction invalid, as the signature covers the ordering of the in/outputs.
 
         List<TransactionInput> inputList = new ArrayList<>(transaction.getInputs());
@@ -33,10 +31,10 @@ public class Tools {
 
         Collections.sort(inputList, new Comparator<TransactionInput>() {
             @Override
-            public int compare (TransactionInput o1, TransactionInput o2) {
+            public int compare(TransactionInput o1, TransactionInput o2) {
                 byte[] hash1 = o1.getOutpoint().getHash().getBytes();
                 byte[] hash2 = o2.getOutpoint().getHash().getBytes();
-                int hashCompare = UnsignedBytes.lexicographicalComparator().compare(hash1, hash2);
+                int hashCompare = LexicographicalComparator.getComparator().compare(hash1, hash2);
                 if (hashCompare != 0) {
                     return hashCompare;
                 } else {
@@ -47,14 +45,14 @@ public class Tools {
 
         Collections.sort(outputList, new Comparator<TransactionOutput>() {
             @Override
-            public int compare (TransactionOutput o1, TransactionOutput o2) {
+            public int compare(TransactionOutput o1, TransactionOutput o2) {
                 long amountDiff = o1.getValue().getValue() - o2.getValue().value;
                 if (amountDiff != 0) {
                     return (int) amountDiff;
                 } else {
                     byte[] hash1 = o1.getScriptBytes();
                     byte[] hash2 = o2.getScriptBytes();
-                    return UnsignedBytes.lexicographicalComparator().compare(hash1, hash2);
+                    return LexicographicalComparator.getComparator().compare(hash1, hash2);
                 }
             }
         });
@@ -69,7 +67,7 @@ public class Tools {
         return sortedTransaction;
     }
 
-    public static byte[] hexStringToByteArray (String s) {
+    public static byte[] hexStringToByteArray(String s) {
         s = s.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
         int len = s.length();
 
@@ -84,7 +82,8 @@ public class Tools {
         return data;
     }
 
-    public static ECKey getECKeyFromKeyAndAddress(@Nonnull String decryptedKey, @Nonnull String address) throws AddressFormatException {
+    public static ECKey getECKeyFromKeyAndAddress(@Nonnull String decryptedKey, @Nonnull String address) throws
+            AddressFormatException {
 
         byte[] privBytes = Base58.decode(decryptedKey);
         ECKey ecKey;
@@ -103,10 +102,10 @@ public class Tools {
         }
 
         if (keyCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams())
-            .toString().equals(address)) {
+                .toString().equals(address)) {
             ecKey = keyCompressed;
         } else if (keyUnCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams())
-            .toString().equals(address)) {
+                .toString().equals(address)) {
             ecKey = keyUnCompressed;
         } else {
             ecKey = null;
@@ -119,8 +118,8 @@ public class Tools {
 
         List<String> addressList = new ArrayList<>();
 
-        for(LegacyAddress key : keys) {
-            if(key.getTag() == filter) {
+        for (LegacyAddress key : keys) {
+            if (key.getTag() == filter) {
                 addressList.add(key.getAddress());
             }
         }
@@ -130,7 +129,7 @@ public class Tools {
 
     public static List<String> getAddressList(int chain, String xpub, int startIndex, int endIndex) {
         HDAccount hdAccount = new HDAccount(PersistentUrls.getInstance().getCurrentNetworkParams(),
-            xpub);
+                xpub);
 
         List<String> list = new ArrayList<>();
 
