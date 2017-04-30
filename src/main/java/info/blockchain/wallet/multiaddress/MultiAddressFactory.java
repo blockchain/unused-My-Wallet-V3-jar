@@ -1,20 +1,31 @@
 package info.blockchain.wallet.multiaddress;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.*;
+import info.blockchain.api.data.Address;
+import info.blockchain.api.data.Input;
+import info.blockchain.api.data.MultiAddress;
+import info.blockchain.api.data.Output;
+import info.blockchain.api.data.Transaction;
+import info.blockchain.api.data.Xpub;
 import info.blockchain.wallet.bip44.HDChain;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
-import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressLabel;
-import java.util.Map.Entry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import retrofit2.Response;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+
+import retrofit2.Response;
 
 import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
 
@@ -129,21 +140,6 @@ public class MultiAddressFactory {
 
     public boolean isOwnHDAddress(String address) {
         return addressToXpubMap.containsKey(address);
-    }
-
-    public int findNextUnreservedReceiveAddressIndex(Account account, int addressPosition) {
-        return isReserved(account, addressPosition)
-                ? findNextUnreservedReceiveAddressIndex(account, addressPosition + 1)
-                : addressPosition;
-    }
-
-    private boolean isReserved(Account account, int position) {
-        for (AddressLabel reservedAddress : account.getAddressLabels()) {
-            if (reservedAddress.getIndex() == position) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public void incrementNextReceiveAddress(String xpub, List<AddressLabel> reservedAddresses) {

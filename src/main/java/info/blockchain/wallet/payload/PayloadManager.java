@@ -901,9 +901,7 @@ public class PayloadManager {
         try {
             HDAccount hdAccount = getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
             int nextIndex = getNextReceiveAddressIndex(account);
-            int receiveAddressIndex = multiAddressFactory.findNextUnreservedReceiveAddressIndex(account, nextIndex + position);
-
-            return hdAccount.getReceive().getAddressAt(receiveAddressIndex).getAddressString();
+            return hdAccount.getReceive().getAddressAt(nextIndex + position).getAddressString();
         } catch (HDWalletException e) {
             return null;
         }
