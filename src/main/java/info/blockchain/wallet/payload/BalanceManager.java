@@ -68,7 +68,7 @@ public class BalanceManager {
 
     public void updateAllBalances(List<String> legacyAddressList, List<String> allAccountsAndAddresses) throws ServerConnectionException, IOException {
         Call<HashMap<String, Balance>> call = blockExplorer.getBalance(allAccountsAndAddresses,
-            BlockExplorer.TX_FILTER_ALL);
+            BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE);
 
 
         log.info("Fetching wallet balances");
@@ -104,6 +104,6 @@ public class BalanceManager {
     }
 
     public Call<HashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
-        return blockExplorer.getBalance(addresses, BlockExplorer.TX_FILTER_ALL);
+        return blockExplorer.getBalance(addresses, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE);
     }
 }

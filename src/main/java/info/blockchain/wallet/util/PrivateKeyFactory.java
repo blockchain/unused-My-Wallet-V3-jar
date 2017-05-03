@@ -121,7 +121,7 @@ public class PrivateKeyFactory {
             list.add(compressedAddress);
 
             BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
-            Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, BlockExplorer.TX_FILTER_ALL);
+            Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE);
 
             Response<HashMap<String, Balance>> exe = call.execute();
 
