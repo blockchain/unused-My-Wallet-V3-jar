@@ -235,8 +235,9 @@ public class PayloadManager {
         Response<ResponseBody> exe = call.execute();
 
         if(exe.isSuccessful()){
-            walletBaseBody = WalletBase.fromJson(exe.body().string());
-            walletBaseBody.decryptPayload(this.password);
+            final WalletBase walletBase = WalletBase.fromJson(exe.body().string());
+            walletBase.decryptPayload(this.password);
+            walletBaseBody = walletBase;
         } else {
             log.warn("Fetching wallet data failed with provided credentials");
             String errorMessage = exe.errorBody().string();
