@@ -374,7 +374,7 @@ public class HDWallet {
         }
 
         Response<HashMap<String, Balance>> exe = blockExplorer
-            .getBalance(xpubs, BlockExplorer.TX_FILTER_ALL).execute();
+            .getBalance(xpubs, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE).execute();
 
         if(!exe.isSuccessful()) {
             throw new Exception(exe.code() + " " + exe.errorBody().string());
@@ -405,7 +405,7 @@ public class HDWallet {
         throws Exception {
 
         Response<HashMap<String, Balance>> exe = blockExplorer
-            .getBalance(Arrays.asList(xpub), BlockExplorer.TX_FILTER_ALL).execute();
+            .getBalance(Arrays.asList(xpub), BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE).execute();
 
         if (!exe.isSuccessful()) {
             throw new Exception(exe.code() + " " + exe.errorBody().string());
