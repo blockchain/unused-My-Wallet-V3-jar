@@ -59,7 +59,7 @@ public class MultiAddressFactory {
 
         if (onlyShow!=null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
 
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE, limit, offset).execute();
 
             if(call.isSuccessful()) {
                 return call.body();
@@ -68,7 +68,7 @@ public class MultiAddressFactory {
             }
 
         } else {
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, BlockExplorer.TX_FILTER_ALL, limit, offset).execute();
+            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE, limit, offset).execute();
 
             if(call.isSuccessful()) {
                 return call.body();
