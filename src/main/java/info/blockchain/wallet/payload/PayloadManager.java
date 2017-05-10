@@ -908,6 +908,23 @@ public class PayloadManager {
         }
     }
 
+    /**
+     * Allows you to get an address from any given point on the receive chain.
+     *
+     * @param account  The {@link Account} you wish to generate an address from
+     * @param position What position on the chain the address you wish to create is
+     * @return A bitcoin address
+     */
+    @Nullable
+    public String getReceiveAddressAtArbitraryPosition(Account account, int position) {
+        try {
+            HDAccount hdAccount = getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
+            return hdAccount.getReceive().getAddressAt(position).getAddressString();
+        } catch (HDWalletException e) {
+            return null;
+        }
+    }
+
     private int getNextReceiveAddressIndex(Account account)  {
         return multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
     }

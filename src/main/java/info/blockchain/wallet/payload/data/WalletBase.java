@@ -95,10 +95,7 @@ public class WalletBase {
         throws IOException, DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
 
         WalletWrapper walletWrapperBody = WalletWrapper.fromJson(payload);
-        Wallet walletBody = walletWrapperBody.decryptPayload(password);
-        //In case iterations weren't set in wallet options
-        walletBody.getOptions().setPbkdf2Iterations(walletWrapperBody.getPbkdf2Iterations());
-        return walletBody;
+        return walletWrapperBody.decryptPayload(password);
     }
 
     /*
