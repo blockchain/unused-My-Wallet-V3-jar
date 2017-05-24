@@ -22,7 +22,7 @@ public class FeeApi {
      * option, both listed in Satoshis per byte.
      */
     public Observable<FeeOptions> getFeeOptions() {
-        return getBaseApiInstance().getFeeOptions("https://charts.dev.blockchain.info/fees");
+        return getBaseApiInstance().getFeeOptions();
     }
 
 }

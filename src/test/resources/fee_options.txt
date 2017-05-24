@@ -1,0 +1,8 @@
+{
+  "priority": 264,
+  "regular": 197,
+  "limits": {
+    "min": 98,
+    "max": 396
+  }
+}
