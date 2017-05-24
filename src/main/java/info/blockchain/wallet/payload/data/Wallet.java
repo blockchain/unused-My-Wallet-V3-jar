@@ -56,6 +56,9 @@ public class Wallet {
     @JsonProperty("dpasswordhash")
     private String dpasswordhash;
 
+    @JsonProperty("metadataHDNode")
+    private String metadataHDNode;
+
     @JsonProperty("tx_notes")
     private Map<String, String> txNotes;
 
@@ -118,6 +121,10 @@ public class Wallet {
         return dpasswordhash;
     }
 
+    public String getMetadataHDNode() {
+        return metadataHDNode;
+    }
+
     public Map<String, String> getTxNotes() {
         return txNotes;
     }
@@ -165,6 +172,10 @@ public class Wallet {
 
     public void setDpasswordhash(String dpasswordhash) {
         this.dpasswordhash = dpasswordhash;
+    }
+
+    public void setMetadataHDNode(String metadataHDNode) {
+        this.metadataHDNode = metadataHDNode;
     }
 
     public void setTxNotes(Map<String, String> txNotes) {
