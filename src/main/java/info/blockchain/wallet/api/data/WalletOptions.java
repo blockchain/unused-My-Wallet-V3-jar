@@ -15,6 +15,8 @@ public class WalletOptions {
     private List<String> buySellCountries = new ArrayList<>();
     @JsonProperty("partners")
     private Partners partners;
+    @JsonProperty("androidBuyPercent")
+    private double rolloutPercentage;
 
     public List<String> getBuySellCountries() {
         return buySellCountries;
@@ -24,4 +26,7 @@ public class WalletOptions {
         return partners;
     }
 
+    public double getRolloutPercentage() {
+        return rolloutPercentage;
+    }
 }
