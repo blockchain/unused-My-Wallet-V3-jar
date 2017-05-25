@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
@@ -87,7 +88,8 @@ public class WalletWrapper {
     }
 
     public Wallet decryptPayload(String password)
-        throws UnsupportedVersionException, IOException, DecryptionException, InvalidCipherTextException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
+        throws UnsupportedVersionException, IOException, DecryptionException, InvalidCipherTextException,
+        MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException, HDWalletException {
         validateVersion();
         validatePbkdf2Iterations();
 

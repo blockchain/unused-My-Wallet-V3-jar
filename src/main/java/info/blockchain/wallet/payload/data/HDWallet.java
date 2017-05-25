@@ -443,14 +443,6 @@ public class HDWallet {
     public HDAccount getHDAccountFromAccountBody(Account accountBody) throws HDWalletException {
 
         if(HD == null) {
-            try {
-                instantiateBip44Wallet();
-            } catch (Exception e) {
-                throw new HDWalletException(e);
-            }
-        }
-
-        if(HD == null) {
             throw new HDWalletException("HD wallet not instantiated");
         }
 
