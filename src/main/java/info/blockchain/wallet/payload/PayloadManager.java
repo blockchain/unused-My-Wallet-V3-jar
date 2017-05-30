@@ -226,7 +226,7 @@ public class PayloadManager {
     public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull String password)
         throws IOException, InvalidCredentialsException, AccountLockedException, ServerConnectionException,
         DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException,
-        ApiException {
+        ApiException, HDWalletException {
         log.info("Initializing and decrypting wallet from credentials");
 
         this.password = password;

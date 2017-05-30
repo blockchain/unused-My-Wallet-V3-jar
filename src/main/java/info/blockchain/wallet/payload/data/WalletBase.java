@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
+import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
@@ -82,7 +83,8 @@ public class WalletBase {
     }
 
     public void decryptPayload(@Nonnull String password)
-        throws DecryptionException, IOException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
+        throws DecryptionException, IOException, InvalidCipherTextException, UnsupportedVersionException,
+        MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException, HDWalletException {
 
         if (!isV1Wallet()) {
             walletBody = decryptV3Wallet(password);
@@ -92,7 +94,8 @@ public class WalletBase {
     }
 
     private Wallet decryptV3Wallet(String password)
-        throws IOException, DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException {
+        throws IOException, DecryptionException, InvalidCipherTextException, UnsupportedVersionException,
+        MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException, HDWalletException {
 
         WalletWrapper walletWrapperBody = WalletWrapper.fromJson(payload);
         return walletWrapperBody.decryptPayload(password);
@@ -102,7 +105,7 @@ public class WalletBase {
     No need to encrypt V1 wallet again. We will force user to upgrade to V3
      */
     private Wallet decryptV1Wallet(String password)
-        throws DecryptionException, IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException, InvalidCipherTextException {
+        throws DecryptionException, IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException, InvalidCipherTextException, HDWalletException {
 
         String decrypted = null;
         int succeededIterations = -1000;

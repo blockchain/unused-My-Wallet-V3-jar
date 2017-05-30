@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -216,7 +217,7 @@ public class Wallet {
 
     public static Wallet fromJson(String json)
         throws IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException,
-        DecoderException, InvalidCipherTextException, DecryptionException {
+        DecoderException, InvalidCipherTextException, DecryptionException, HDWalletException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
             .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
@@ -224,7 +225,22 @@ public class Wallet {
             .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
             .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-        return mapper.readValue(json, Wallet.class);
+        Wallet wallet = mapper.readValue(json, Wallet.class);
+
+        if(wallet.getHdWallets() != null) {
+            //V3 Wallets only
+            Iterator<HDWallet> iterator = wallet.getHdWallets().iterator();
+
+            ArrayList<HDWallet> hdWalletList = new ArrayList<>();
+            while (iterator.hasNext()) {
+                HDWallet nextHd = iterator.next();
+                hdWalletList.add(HDWallet.fromJson(nextHd.toJson()));
+
+            }
+            wallet.setHdWallets(hdWalletList);
+        }
+
+        return wallet;
     }
 
     public String toJson() throws JsonProcessingException {
