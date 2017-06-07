@@ -1,7 +1,8 @@
 package info.blockchain.wallet.multiaddress;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.Address;
+import info.blockchain.api.blockexplorer.FilterType;
+import info.blockchain.api.data.AddressSummary;
 import info.blockchain.api.data.Input;
 import info.blockchain.api.data.MultiAddress;
 import info.blockchain.api.data.Output;
@@ -59,7 +60,7 @@ public class MultiAddressFactory {
 
         if (onlyShow!=null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
 
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE, limit, offset).execute();
+            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
 
             if(call.isSuccessful()) {
                 return call.body();
@@ -68,7 +69,7 @@ public class MultiAddressFactory {
             }
 
         } else {
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE, limit, offset).execute();
+            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
 
             if(call.isSuccessful()) {
                 return call.body();
@@ -190,7 +191,7 @@ public class MultiAddressFactory {
         List<TransactionSummary> summaryList = new ArrayList<>();
 
         //Set next address indexes
-        for(Address address : multiAddress.getAddresses()) {
+        for(AddressSummary address : multiAddress.getAddresses()) {
             nextReceiveAddressMap.put(address.getAddress(),address.getAccountIndex());
             nextChangeAddressMap.put(address.getAddress(),address.getChangeIndex());
         }
