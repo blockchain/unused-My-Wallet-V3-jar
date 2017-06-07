@@ -299,8 +299,8 @@ public class MultiAddressFactory {
                         }
 
                     } else {
-                        //If we own this address, it's a transfer
-                        if (ownAddressesAndXpubs.contains(outputAddr)) {
+                        //If we own this address and it's not change coming back, it's a transfer
+                        if (ownAddressesAndXpubs.contains(outputAddr) && !txSummary.inputsMap.keySet().contains(outputAddr)) {
 
                             if(txSummary.getDirection() == Direction.SENT) {
                                 txSummary.setDirection(Direction.TRANSFERRED);
