@@ -376,7 +376,7 @@ public class PayloadManager {
         return save(false);
     }
 
-    private boolean save(boolean forcePubKeySync)
+    private synchronized boolean save(boolean forcePubKeySync)
             throws HDWalletException, NoSuchAlgorithmException,
             EncryptionException, IOException {
 
