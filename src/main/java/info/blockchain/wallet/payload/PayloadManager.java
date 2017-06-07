@@ -355,7 +355,7 @@ public class PayloadManager {
      *
      * @return True if save successful
      */
-    public synchronized boolean saveAndSyncPubKeys() throws
+    public boolean saveAndSyncPubKeys() throws
             HDWalletException,
             EncryptionException,
             NoSuchAlgorithmException,
@@ -368,7 +368,7 @@ public class PayloadManager {
      *
      * @return True if save successful
      */
-    public synchronized boolean save() throws
+    public boolean save() throws
             HDWalletException,
             EncryptionException,
             NoSuchAlgorithmException,
@@ -376,7 +376,7 @@ public class PayloadManager {
         return save(false);
     }
 
-    private boolean save(boolean forcePubKeySync)
+    private synchronized boolean save(boolean forcePubKeySync)
             throws HDWalletException, NoSuchAlgorithmException,
             EncryptionException, IOException {
 
