@@ -1,7 +1,10 @@
 package info.blockchain.wallet;
 
+import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.api.PersistentUrls.Environment;
+
+import org.bitcoinj.params.AbstractBitcoinNetParams;
+import org.bitcoinj.params.MainNetParams;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,33 +31,36 @@ public abstract class MockedResponseTest {
     @BeforeClass
     public static void init() {
 
-        //Set Environment
-        PersistentUrls.getInstance().setCurrentEnvironment(Environment.PRODUCTION);
-        PersistentUrls.getInstance().setCurrentApiUrl("https://api.blockchain.info/");
-        PersistentUrls.getInstance().setCurrentServerUrl("https://blockchain.info/");
-        PersistentUrls.getInstance().setCurrentSFOXUrl("https://api.staging.sfox.com/");
-        PersistentUrls.getInstance().setCurrentCoinifyUrl("https://app-api.coinify.com/");
-
         //Initialize framework
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
             public Retrofit getRetrofitApiInstance() {
-                return getRetrofit(PersistentUrls.getInstance().getCurrentBaseApiUrl(), getOkHttpClient());
+                return getRetrofit(PersistentUrls.API_URL, getOkHttpClient());
             }
 
             @Override
-            public Retrofit getRetrofitServerInstance() {
-                return getRetrofit(PersistentUrls.getInstance().getCurrentBaseServerUrl(), getOkHttpClient());
+            public Retrofit getRetrofitExplorerInstance() {
+                return getRetrofit(PersistentUrls.EXPLORER_URL, getOkHttpClient());
             }
 
             @Override
             public Retrofit getRetrofitSFOXInstance() {
-                return getRetrofit(PersistentUrls.getInstance().getCurrentSFOXUrl(), getOkHttpClient());
+                return getRetrofit("https://api.staging.sfox.com/", getOkHttpClient());
             }
 
             @Override
             public Retrofit getRetrofitCoinifyInstance() {
-                return getRetrofit(PersistentUrls.getInstance().getCurrentCoinifyUrl(), getOkHttpClient());
+                return getRetrofit("https://app-api.coinify.com/", getOkHttpClient());
+            }
+
+            @Override
+            public Environment getEnvironment() {
+                return Environment.PRODUCTION;
+            }
+
+            @Override
+            public AbstractBitcoinNetParams getNetworkParameters() {
+                return MainNetParams.get();
             }
 
             @Override

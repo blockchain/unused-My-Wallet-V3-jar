@@ -1,9 +1,9 @@
 package info.blockchain.wallet.contacts;
 
-import info.blockchain.wallet.MockInterceptor;
-import info.blockchain.wallet.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.MockInterceptor;
+import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.bip44.HDWalletFactory;
@@ -17,18 +17,24 @@ import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.exceptions.SharedMetadataException;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
+import info.blockchain.wallet.util.RestClient;
+
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.params.AbstractBitcoinNetParams;
+import org.bitcoinj.params.MainNetParams;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.spongycastle.crypto.InvalidCipherTextException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.spongycastle.crypto.InvalidCipherTextException;
 import retrofit2.Retrofit;
 
 public class ContactsTest {
@@ -60,7 +66,7 @@ public class ContactsTest {
             }
 
             @Override
-            public Retrofit getRetrofitServerInstance() {
+            public Retrofit getRetrofitExplorerInstance() {
                 return null;
             }
 
@@ -72,6 +78,16 @@ public class ContactsTest {
             @Override
             public Retrofit getRetrofitCoinifyInstance() {
                 return null;
+            }
+
+            @Override
+            public Environment getEnvironment() {
+                return Environment.PRODUCTION;
+            }
+
+            @Override
+            public AbstractBitcoinNetParams getNetworkParameters() {
+                return MainNetParams.get();
             }
 
             @Override
@@ -94,11 +110,11 @@ public class ContactsTest {
     private HDWallet getWallet() throws Exception {
 
         return HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
-                "15e23aa73d25994f1921a1256f93f72c", "", 1);
+                .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+                        "15e23aa73d25994f1921a1256f93f72c", "", 1);
     }
 
-    private Contacts init() throws Exception{
+    private Contacts init() throws Exception {
         HDWallet b_wallet = getWallet();
         DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
@@ -130,7 +146,7 @@ public class ContactsTest {
             return;
         } catch (InvalidCipherTextException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             mockInterceptor.setIOException(false);
         }
         Assert.assertTrue("IOException not caught", false);
@@ -172,7 +188,7 @@ public class ContactsTest {
             e.printStackTrace();
         } catch (InvalidCipherTextException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             mockInterceptor.setIOException(false);
         }
         Assert.assertTrue(false);
@@ -214,7 +230,7 @@ public class ContactsTest {
             e.printStackTrace();
         } catch (InvalidCipherTextException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             mockInterceptor.setIOException(false);
         }
         Assert.assertTrue(false);
@@ -227,7 +243,7 @@ public class ContactsTest {
     }
 
     @Test
-    public void setContactList() throws Exception{
+    public void setContactList() throws Exception {
 
         Contacts contacts = init();
 
@@ -248,7 +264,7 @@ public class ContactsTest {
     }
 
     @Test
-    public void setContactList_IOException() throws Exception{
+    public void setContactList_IOException() throws Exception {
 
         Contacts contacts = init();
 
@@ -272,7 +288,7 @@ public class ContactsTest {
             Assert.assertTrue(true);
         } catch (InvalidCipherTextException e) {
             Assert.assertTrue(false);
-        }finally {
+        } finally {
             mockInterceptor.setIOException(false);
         }
 
@@ -280,7 +296,7 @@ public class ContactsTest {
     }
 
     @Test
-    public void addContact() throws Exception{
+    public void addContact() throws Exception {
 
         Contacts contacts = init();
 
@@ -298,7 +314,7 @@ public class ContactsTest {
     }
 
     @Test
-    public void removeContact() throws Exception{
+    public void removeContact() throws Exception {
 
         Contact c1 = new Contact();
         Contact c2 = new Contact();
@@ -363,7 +379,7 @@ public class ContactsTest {
             return;
         } catch (InvalidCipherTextException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             mockInterceptor.setIOException(false);
         }
         Assert.fail();
@@ -391,7 +407,7 @@ public class ContactsTest {
             return;
         } catch (InvalidCipherTextException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             mockInterceptor.setIOException(false);
         }
         Assert.assertTrue(false);
@@ -419,7 +435,7 @@ public class ContactsTest {
             return;
         } catch (SharedMetadataException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             mockInterceptor.setIOException(false);
         }
 
@@ -443,7 +459,7 @@ public class ContactsTest {
     }
 
     @Test
-    public void digestUnreadPaymentRequests_RPR() throws Exception{
+    public void digestUnreadPaymentRequests_RPR() throws Exception {
 
         Contacts contacts = init();
 
@@ -474,7 +490,7 @@ public class ContactsTest {
 
         mockInterceptor.setResponseString(success);//save
         List<Contact> unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
-        for(Contact item : unreadPaymentRequests) {
+        for (Contact item : unreadPaymentRequests) {
 
             FacilitatedTransaction ftx = item.getFacilitatedTransactions().get(rpr.getId());
 
@@ -488,7 +504,7 @@ public class ContactsTest {
     }
 
     @Test
-    public void digestUnreadPaymentRequests_RP() throws Exception{
+    public void digestUnreadPaymentRequests_RP() throws Exception {
 
         Contacts contacts = init();
 
@@ -521,7 +537,7 @@ public class ContactsTest {
 
         mockInterceptor.setResponseString(success);//save
         List<Contact> unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
-        for(Contact item : unreadPaymentRequests) {
+        for (Contact item : unreadPaymentRequests) {
 
             FacilitatedTransaction ftx = item.getFacilitatedTransactions().get(pr.getId());
 
@@ -551,7 +567,7 @@ public class ContactsTest {
 
         mockInterceptor.setResponseString(success);//save
         unreadPaymentRequests = contacts.digestUnreadPaymentRequests(messages, false);
-        for(Contact item : unreadPaymentRequests) {
+        for (Contact item : unreadPaymentRequests) {
 
             FacilitatedTransaction ftx = item.getFacilitatedTransactions().get(b.getId());
 

@@ -1,17 +1,21 @@
 package info.blockchain.wallet.metadata;
 
-import info.blockchain.wallet.MockInterceptor;
-import info.blockchain.wallet.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
+import info.blockchain.wallet.MockInterceptor;
+import info.blockchain.wallet.api.Environment;
+import info.blockchain.wallet.util.RestClient;
+
 import org.bitcoinj.crypto.HDKeyDerivation;
+import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
+
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 public class MetadataNodeFactoryTest {
@@ -45,7 +49,7 @@ public class MetadataNodeFactoryTest {
             }
 
             @Override
-            public Retrofit getRetrofitServerInstance() {
+            public Retrofit getRetrofitExplorerInstance() {
                 return null;
             }
 
@@ -57,6 +61,16 @@ public class MetadataNodeFactoryTest {
             @Override
             public Retrofit getRetrofitCoinifyInstance() {
                 return null;
+            }
+
+            @Override
+            public Environment getEnvironment() {
+                return Environment.PRODUCTION;
+            }
+
+            @Override
+            public AbstractBitcoinNetParams getNetworkParameters() {
+                return MainNetParams.get();
             }
 
             @Override

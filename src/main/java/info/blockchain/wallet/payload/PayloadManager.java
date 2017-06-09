@@ -95,7 +95,7 @@ public class PayloadManager {
 
     private void init() {
         walletApi = new WalletApi();
-        blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
+        blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
         multiAddressFactory = new MultiAddressFactory(blockExplorer);
         balanceManager = new BalanceManager(blockExplorer);
     }

@@ -9,10 +9,8 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +26,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
     @Before
     public void setUp() throws Exception {
         multiAddressFactory = new MultiAddressFactory(
-            new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode()));
+            new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode()));
     }
 
     @Test

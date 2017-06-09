@@ -1,5 +1,9 @@
 package info.blockchain.wallet;
 
+import info.blockchain.wallet.api.Environment;
+
+import org.bitcoinj.params.AbstractBitcoinNetParams;
+
 import retrofit2.Retrofit;
 
 /**
@@ -17,8 +21,8 @@ public final class BlockchainFramework {
         return blockchainInterface.getRetrofitApiInstance();
     }
 
-    public static Retrofit getRetrofitServerInstance() {
-        return blockchainInterface.getRetrofitServerInstance();
+    public static Retrofit getRetrofitExplorerInstance() {
+        return blockchainInterface.getRetrofitExplorerInstance();
     }
 
     public static Retrofit getRetrofitSFOXInstance() {
@@ -27,6 +31,14 @@ public final class BlockchainFramework {
 
     public static Retrofit getRetrofitCoinifyInstance() {
         return blockchainInterface.getRetrofitCoinifyInstance();
+    }
+
+    public static Environment getEnvironment() {
+        return blockchainInterface.getEnvironment();
+    }
+
+    public static AbstractBitcoinNetParams getNetworkParameters() {
+        return blockchainInterface.getNetworkParameters();
     }
 
     public static String getApiCode() {
