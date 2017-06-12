@@ -89,7 +89,6 @@ public class ContactsIntegTest extends BaseIntegTest{
     }
 
     @Test
-    @Ignore("Contacts has been put on hold temporarily")
     public void testSharedMetadataIntegration() throws Exception {
 
         /*
