@@ -2,6 +2,10 @@ package info.blockchain.wallet.metadata;
 
 final class MetadataUrls {
 
+    private MetadataUrls() {
+        throw new UnsupportedOperationException("You can't implement this class");
+    }
+
     /* Base endpoint for Contacts/Shared Metadata/CryptoMatrix */
     private static final String IWCS = "iwcs";
 
