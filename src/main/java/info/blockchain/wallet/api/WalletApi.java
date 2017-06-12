@@ -39,7 +39,7 @@ public class WalletApi {
 
     private WalletEndpoints getServerApiInstance() {
         if (walletServer == null) {
-            walletServer = BlockchainFramework.getRetrofitServerInstance()
+            walletServer = BlockchainFramework.getRetrofitExplorerInstance()
                     .create(WalletEndpoints.class);
         }
         return walletServer;

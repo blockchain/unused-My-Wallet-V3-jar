@@ -329,7 +329,7 @@ public class HDWallet {
                 mnemonic, passphrase, DEFAULT_NEW_WALLET_SIZE);
 
         BlockExplorer blockExplorer = new BlockExplorer(
-            BlockchainFramework.getRetrofitServerInstance(),
+            BlockchainFramework.getRetrofitExplorerInstance(),
             BlockchainFramework.getApiCode());
 
         HDWallet hdWalletBody = new HDWallet();
