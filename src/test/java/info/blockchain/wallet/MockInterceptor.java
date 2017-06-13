@@ -1,15 +1,22 @@
 package info.blockchain.wallet;
 
+import info.blockchain.wallet.payload.PayloadManager;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.Protocol;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.apache.commons.cli.MissingArgumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockInterceptor implements Interceptor {
+
+    private static Logger log = LoggerFactory.getLogger(MockInterceptor.class);
 
     static MockInterceptor instance;
 
@@ -62,7 +69,14 @@ public class MockInterceptor implements Interceptor {
         final String query = uri.query();
         final String method = chain.request().method();
 
-        String responseString = responseStringList.getFirst();
+        String responseString = null;
+
+        try {
+            responseString = responseStringList.getFirst();
+        } catch (NoSuchElementException e) {
+            log.error("Missing mock response", e);
+        }
+
         if(responseCodeList == null || responseCodeList.size() == 0) {
             responseCodeList = new LinkedList<>();
             responseCodeList.add(200);

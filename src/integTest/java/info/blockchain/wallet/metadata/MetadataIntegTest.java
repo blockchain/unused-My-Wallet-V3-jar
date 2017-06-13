@@ -32,7 +32,10 @@ public class MetadataIntegTest extends BaseIntegTest {
 
         Metadata metadata = new Metadata.Builder(metaDataHDNode, 2)
             .build();
-        metadata.putMetadata(new PublicContactDetails("Yolo1").toJson());
+        metadata.putMetadata(new PublicContactDetails("hello").toJson());
+        metadata.setMagicHash(null);
+        metadata.putMetadata(new PublicContactDetails("hello").toJson());
+        metadata.deleteMetadata(new PublicContactDetails("hello").toJson());
 
         metadata = new Metadata.Builder(metaDataHDNode, 2)
             .build();
