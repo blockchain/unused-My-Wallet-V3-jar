@@ -1,5 +1,6 @@
 package info.blockchain.wallet.metadata;
 
+import com.google.common.annotations.VisibleForTesting;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
@@ -35,8 +36,11 @@ public class Metadata {
     private byte[] encryptionKey;
     private byte[] magicHash;
 
+    public static final short FETCH_MAGIC_HASH_ATTEMPT_LIMIT = 1;
+    private short attempt;
+
     public Metadata() {
-        // Empty constructor
+        attempt = FETCH_MAGIC_HASH_ATTEMPT_LIMIT;
     }
 
     public void setAddress(String address) {
@@ -69,6 +73,11 @@ public class Metadata {
 
     public byte[] getMagicHash() {
         return magicHash;
+    }
+
+    @VisibleForTesting
+    void setMagicHash(byte[] magicHash) {
+        this.magicHash = magicHash;
     }
 
     private MetadataEndpoints getApiInstance() {
@@ -145,8 +154,17 @@ public class Metadata {
         Response<Void> exe = response.execute();
 
         if (!exe.isSuccessful()) {
-            throw new MetadataException(exe.code() + " " + exe.message());
+            if (exe.code() == 401 && attempt > 0) {
+                // Unauthorized - Possible cross platform clash
+                // Fetch magic hash and retry
+                fetchMagic();
+                attempt--;
+                putMetadata(payload);
+            } else {
+                throw new MetadataException(exe.code() + " " + exe.message());
+            }
         } else {
+            attempt = FETCH_MAGIC_HASH_ATTEMPT_LIMIT;
             magicHash = nextMagicHash;
         }
     }
