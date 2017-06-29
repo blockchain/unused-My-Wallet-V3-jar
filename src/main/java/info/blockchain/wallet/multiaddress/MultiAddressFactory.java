@@ -214,11 +214,12 @@ public class MultiAddressFactory {
             txSummary.inputsXpubMap = new HashMap<>();
             txSummary.outputsXpubMap = new HashMap<>();
 
-            if(tx.getResult().signum() > 0) {
+            if (tx.getResult().add(tx.getFee()).signum() == 0) {
+                txSummary.setDirection(Direction.TRANSFERRED);
+            } else if (tx.getResult().signum() > 0) {
                 txSummary.setDirection(Direction.RECEIVED);
             } else {
                 txSummary.setDirection(Direction.SENT);
-                //Or potential Direction.TRANSFERRED
             }
 
             //Inputs
@@ -261,7 +262,7 @@ public class MultiAddressFactory {
                         }
 
                     } else {
-                        //This will never happen unless server has issues
+                        throw new IllegalStateException("inputAddr is null");
                     }
 
                 } else {
@@ -269,8 +270,6 @@ public class MultiAddressFactory {
                 }
             }
 
-            //Outputs
-            HashMap<String, BigInteger> allOutputs = new HashMap<>();
             HashMap<String, BigInteger> changeMap = new HashMap<>();
             String outputAddr;
             BigInteger outputValue;
@@ -285,12 +284,7 @@ public class MultiAddressFactory {
 
                         //inputAddr belongs to our own account - add it
                         ownAddressesAndXpubs.add(outputAddr);
-                        if(xpubBody.getPath().startsWith("M/"+HDChain.RECEIVE_CHAIN+"/")) {
-
-                            if(txSummary.getDirection() == Direction.SENT) {
-                                txSummary.setDirection(Direction.TRANSFERRED);
-                            }
-
+                        if (xpubBody.getPath().startsWith("M/" + HDChain.RECEIVE_CHAIN + "/")) {
                             txSummary.outputsMap.put(outputAddr, outputValue);
                             txSummary.outputsXpubMap.put(outputAddr, xpubBody.getM());
                         } else {
@@ -328,11 +322,8 @@ public class MultiAddressFactory {
                     if (legacy != null && legacy.contains(outputAddr)) {
                         isLegacy = true;
                     }
-
-                    //Keep track of outputs
-                    allOutputs.put(outputAddr, outputValue);
                 } else {
-                    //This will never happen unless server has issues
+                    throw new IllegalStateException("outputAddr is null");
                 }
             }
 
@@ -341,24 +332,28 @@ public class MultiAddressFactory {
                 continue;
             }
 
-            BigInteger fee = calculateFee(txSummary.inputsMap, allOutputs, txSummary.getDirection());
-
             //Remove input addresses not ours
-            filterOwnedAddresses(ownAddressesAndXpubs,
-                txSummary.inputsMap, txSummary.outputsMap, txSummary.getDirection());
+            filterOwnedAddresses(
+                    ownAddressesAndXpubs,
+                    txSummary.inputsMap,
+                    txSummary.outputsMap,
+                    txSummary.getDirection());
 
             txSummary.setHash(tx.getHash());
             txSummary.setTime(tx.getTime());
             txSummary.setDoubleSpend(tx.isDoubleSpend());
+            txSummary.setFee(tx.getFee());
 
-            if(txSummary.getDirection() == Direction.RECEIVED) {
+            if (txSummary.getDirection() == Direction.RECEIVED) {
                 BigInteger total = calculateTotalReceived(txSummary.outputsMap);
                 txSummary.setTotal(total);
-                txSummary.setFee(BigInteger.ZERO);
             } else {
-                BigInteger total = calculateTotalSent(txSummary.inputsMap, changeMap, fee, txSummary.getDirection());
+                BigInteger total = calculateTotalSent(
+                        txSummary.inputsMap,
+                        changeMap,
+                        tx.getFee(),
+                        txSummary.getDirection());
                 txSummary.setTotal(total);
-                txSummary.setFee(fee);
             }
 
             //Set confirmations
@@ -431,19 +426,4 @@ public class MultiAddressFactory {
         return total;
     }
 
-    private BigInteger calculateFee(HashMap<String, BigInteger> inputs, HashMap<String, BigInteger> outputs, Direction direction) {
-
-        BigInteger inputTotal = BigInteger.ZERO;
-        BigInteger outputTotal = BigInteger.ZERO;
-
-        for(BigInteger inputAmount : inputs.values()) {
-            inputTotal = inputTotal.add(inputAmount);
-        }
-
-        for(BigInteger outputAmount : outputs.values()) {
-            outputTotal = outputTotal.add(outputAmount);
-        }
-
-        return inputTotal.subtract(outputTotal);
-    }
 }
