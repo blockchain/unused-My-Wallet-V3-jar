@@ -72,6 +72,7 @@
 		"tx_index": 242601760,
 		"double_spend": false,
 		"result": -166486,
+		"fee": 27120,
 		"balance": 83243,
 		"time": 1492614742,
 		"inputs": [{
@@ -111,6 +112,7 @@
 		"tx_index": 242601707,
 		"double_spend": false,
 		"result": -446212,
+		"fee": 27120,
 		"balance": 249729,
 		"time": 1492614706,
 		"inputs": [{
@@ -150,6 +152,7 @@
 		"tx_index": 242601671,
 		"double_spend": false,
 		"result": -27120,
+		"fee": 27120,
 		"balance": 695941,
 		"time": 1492614681,
 		"inputs": [{
@@ -205,6 +208,7 @@
 		"tx_index": 242601615,
 		"double_spend": false,
 		"result": -27120,
+        "fee": 27120,
 		"balance": 723061,
 		"time": 1492614642,
 		"inputs": [{
@@ -256,6 +260,7 @@
 		"tx_index": 242599861,
 		"double_spend": false,
 		"result": 750181,
+		"fee": 0,
 		"balance": 750181,
 		"time": 1492614623,
 		"block_height": 462582,
@@ -296,6 +301,7 @@
 		"tx_index": 242180307,
 		"double_spend": false,
 		"result": -909366,
+		"fee": 133680,
 		"balance": 0,
 		"time": 1492497642,
 		"block_height": 462383,
@@ -412,6 +418,7 @@
 		"tx_index": 216791519,
 		"double_spend": false,
 		"result": 909366,
+		"fee": 0,
 		"balance": 909366,
 		"time": 1486028570,
 		"block_height": 451251,
