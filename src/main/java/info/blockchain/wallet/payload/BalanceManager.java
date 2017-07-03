@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payload;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class BalanceManager {
 
     public void updateAllBalances(List<String> legacyAddressList, List<String> allAccountsAndAddresses) throws ServerConnectionException, IOException {
         Call<HashMap<String, Balance>> call = blockExplorer.getBalance(allAccountsAndAddresses,
-            BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE);
+            FilterType.RemoveUnspendable);
 
 
         log.info("Fetching wallet balances");
@@ -104,6 +105,6 @@ public class BalanceManager {
     }
 
     public Call<HashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
-        return blockExplorer.getBalance(addresses, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE);
+        return blockExplorer.getBalance(addresses, FilterType.RemoveUnspendable);
     }
 }

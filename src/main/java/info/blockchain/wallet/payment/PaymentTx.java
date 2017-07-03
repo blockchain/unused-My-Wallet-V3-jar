@@ -181,7 +181,7 @@ public class PaymentTx {
         throws IOException {
 
         log.info("Publishing transaction");
-        PushTx pushTx = new PushTx(BlockchainFramework.getRetrofitServerInstance(), apiCode);
+        PushTx pushTx = new PushTx(BlockchainFramework.getRetrofitExplorerInstance(), apiCode);
         return pushTx.pushTx(new String(Hex.encode(transaction.bitcoinSerialize())));
     }
 }

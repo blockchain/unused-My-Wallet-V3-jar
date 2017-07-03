@@ -95,7 +95,7 @@ public class PayloadManager {
 
     private void init() {
         walletApi = new WalletApi();
-        blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
+        blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
         multiAddressFactory = new MultiAddressFactory(blockExplorer);
         balanceManager = new BalanceManager(blockExplorer);
     }
@@ -226,7 +226,7 @@ public class PayloadManager {
     public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull String password)
         throws IOException, InvalidCredentialsException, AccountLockedException, ServerConnectionException,
         DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException,
-        ApiException {
+        ApiException, HDWalletException {
         log.info("Initializing and decrypting wallet from credentials");
 
         this.password = password;
@@ -376,7 +376,7 @@ public class PayloadManager {
         return save(false);
     }
 
-    private boolean save(boolean forcePubKeySync)
+    private synchronized boolean save(boolean forcePubKeySync)
             throws HDWalletException, NoSuchAlgorithmException,
             EncryptionException, IOException {
 

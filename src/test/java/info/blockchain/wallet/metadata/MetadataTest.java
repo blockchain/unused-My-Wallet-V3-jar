@@ -1,22 +1,26 @@
 package info.blockchain.wallet.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import info.blockchain.wallet.MockInterceptor;
-import info.blockchain.wallet.util.RestClient;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
+import info.blockchain.wallet.MockInterceptor;
+import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.util.MetadataUtil;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
+import info.blockchain.wallet.util.RestClient;
+
 import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.params.AbstractBitcoinNetParams;
+import org.bitcoinj.params.MainNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 
 public class MetadataTest {
@@ -24,8 +28,6 @@ public class MetadataTest {
     boolean isEncrypted = false;
 
     MockInterceptor mockInterceptor;
-
-    private ObjectMapper mapper = new ObjectMapper();
 
     @Before
     public void setup() throws Exception {
@@ -49,7 +51,7 @@ public class MetadataTest {
             }
 
             @Override
-            public Retrofit getRetrofitServerInstance() {
+            public Retrofit getRetrofitExplorerInstance() {
                 return null;
             }
 
@@ -61,6 +63,16 @@ public class MetadataTest {
             @Override
             public Retrofit getRetrofitCoinifyInstance() {
                 return null;
+            }
+
+            @Override
+            public Environment getEnvironment() {
+                return Environment.PRODUCTION;
+            }
+
+            @Override
+            public AbstractBitcoinNetParams getNetworkParameters() {
+                return MainNetParams.get();
             }
 
             @Override

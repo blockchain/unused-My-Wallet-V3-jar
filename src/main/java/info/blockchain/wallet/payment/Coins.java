@@ -4,7 +4,7 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.contacts.Contacts;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ class Coins {
 
     public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
         log.info("Fetching unspent coins");
-        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
+        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
         return blockExplorer.getUnspentOutputs(addresses);
     }
 

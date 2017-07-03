@@ -58,6 +58,7 @@
             "tx_index": 229738713,
             "double_spend": false,
             "result": -30327,
+            "fee": 30327,
             "balance": 39217,
             "time": 1488905634,
             "inputs": [
@@ -128,6 +129,7 @@
             "tx_index": 229734613,
             "double_spend": false,
             "result": -27120,
+            "fee": 27120,
             "balance": 69544,
             "time": 1488905364,
             "inputs": [

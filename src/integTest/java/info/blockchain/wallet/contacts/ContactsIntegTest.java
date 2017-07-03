@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ContactsIntegTest extends BaseIntegTest{

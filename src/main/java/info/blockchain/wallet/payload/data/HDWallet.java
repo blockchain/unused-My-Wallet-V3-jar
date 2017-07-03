@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.Balance;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.wallet.BlockchainFramework;
@@ -328,7 +329,7 @@ public class HDWallet {
                 mnemonic, passphrase, DEFAULT_NEW_WALLET_SIZE);
 
         BlockExplorer blockExplorer = new BlockExplorer(
-            BlockchainFramework.getRetrofitServerInstance(),
+            BlockchainFramework.getRetrofitExplorerInstance(),
             BlockchainFramework.getApiCode());
 
         HDWallet hdWalletBody = new HDWallet();
@@ -374,7 +375,7 @@ public class HDWallet {
         }
 
         Response<HashMap<String, Balance>> exe = blockExplorer
-            .getBalance(xpubs, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE).execute();
+            .getBalance(xpubs, FilterType.RemoveUnspendable).execute();
 
         if(!exe.isSuccessful()) {
             throw new Exception(exe.code() + " " + exe.errorBody().string());
@@ -405,7 +406,7 @@ public class HDWallet {
         throws Exception {
 
         Response<HashMap<String, Balance>> exe = blockExplorer
-            .getBalance(Arrays.asList(xpub), BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE).execute();
+            .getBalance(Arrays.asList(xpub), FilterType.RemoveUnspendable).execute();
 
         if (!exe.isSuccessful()) {
             throw new Exception(exe.code() + " " + exe.errorBody().string());
@@ -441,14 +442,6 @@ public class HDWallet {
     }
 
     public HDAccount getHDAccountFromAccountBody(Account accountBody) throws HDWalletException {
-
-        if(HD == null) {
-            try {
-                instantiateBip44Wallet();
-            } catch (Exception e) {
-                throw new HDWalletException(e);
-            }
-        }
 
         if(HD == null) {
             throw new HDWalletException("HD wallet not instantiated");

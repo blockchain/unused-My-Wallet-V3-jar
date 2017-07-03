@@ -1,6 +1,7 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.api.blockexplorer.BlockExplorer;
+import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
@@ -120,8 +121,8 @@ public class PrivateKeyFactory {
             list.add(uncompressedAddress);
             list.add(compressedAddress);
 
-            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitServerInstance(), BlockchainFramework.getApiCode());
-            Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, BlockExplorer.TX_FILTER_REMOVE_UNSPENDABLE);
+            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
+            Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, FilterType.RemoveUnspendable);
 
             Response<HashMap<String, Balance>> exe = call.execute();
 

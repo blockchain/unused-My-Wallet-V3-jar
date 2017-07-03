@@ -64,7 +64,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 dependencies {
-    compile files('libs/api-client-0.1.13-SNAPSHOT.jar')
+    compile files('libs/api-client-0.1.14-SNAPSHOT.jar')
     // TODO: Switch this back once the client is published
 //    compile group: 'info.blockchain', name: 'api-client', version: '0.1.15-SNAPSHOT'
     compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
