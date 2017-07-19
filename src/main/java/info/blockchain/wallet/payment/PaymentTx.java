@@ -154,7 +154,8 @@ public class PaymentTx {
 
         BigInteger change = inputValueSum.subtract(outputValueSum).subtract(fee);
 
-        if (change.compareTo(BigInteger.ZERO) > 0) {
+        //Consume dust if needed
+        if (change.compareTo(BigInteger.ZERO) > 0 && (change.compareTo(Payment.DUST) == 1)) {
 
             Script changeScript = ScriptBuilder
                 .createOutputScript(Address.fromBase58(networkParams, changeAddress));
