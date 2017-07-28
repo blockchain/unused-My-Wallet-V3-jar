@@ -19,6 +19,7 @@ import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 
+import java.util.NoSuchElementException;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -324,14 +325,22 @@ public class Contacts {
      * Accepts invitation link and returns {@link Contact}.
      */
     public Contact acceptInvitationLink(String link) throws
-            IOException,
-            SharedMetadataException,
-            MetadataException,
-            InvalidCipherTextException {
+        IOException,
+        SharedMetadataException,
+        MetadataException,
+        InvalidCipherTextException,
+        NoSuchElementException {
         log.info("Accepting inter-wallet-comms invitation link");
         Map<String, String> queryParams = getQueryParams(link);
 
-        Invitation accepted = sharedMetadata.acceptInvitation(queryParams.get("id"));
+        String id = queryParams.get("id");
+
+        String senderMdid = sharedMetadata.readInvitation(id);
+        if(senderMdid != null) {
+            throw new NoSuchElementException("Invitation already accepted.");
+        }
+
+        Invitation accepted = sharedMetadata.acceptInvitation(id);
 
         Contact contact = new Contact().fromQueryParameters(queryParams);
         contact.setMdid(accepted.getMdid());
@@ -341,6 +350,7 @@ public class Contacts {
         addContact(contact);
         contact.setXpub(fetchXpub(accepted.getMdid()));
         save();
+
 
         return contact;
     }
