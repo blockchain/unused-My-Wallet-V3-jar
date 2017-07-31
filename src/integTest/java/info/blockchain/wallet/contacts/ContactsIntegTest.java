@@ -11,14 +11,15 @@ import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.util.MetadataUtil;
+
+import org.bitcoinj.crypto.DeterministicKey;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class ContactsIntegTest extends BaseIntegTest{
 

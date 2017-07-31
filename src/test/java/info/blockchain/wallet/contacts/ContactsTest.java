@@ -545,7 +545,7 @@ public class ContactsTest {
             Assert.assertEquals(pr.getId(), ftx.getId());
             Assert.assertEquals("waiting_payment", ftx.getState());
             Assert.assertEquals(28940000L, ftx.getIntendedAmount());
-            Assert.assertEquals("rpr_receiver", ftx.getRole());
+            Assert.assertEquals("pr_receiver", ftx.getRole());
             Assert.assertEquals(pr.getNote(), ftx.getNote());
             Assert.assertEquals(pr.getAddress(), ftx.getAddress());
         }
@@ -575,7 +575,7 @@ public class ContactsTest {
             Assert.assertEquals(b.getId(), ftx.getId());
             Assert.assertEquals("payment_broadcasted", ftx.getState());
             Assert.assertEquals(28940000L, ftx.getIntendedAmount());
-            Assert.assertEquals("rpr_receiver", ftx.getRole());
+            Assert.assertEquals("pr_receiver", ftx.getRole());
             Assert.assertEquals(pr.getNote(), ftx.getNote());
             Assert.assertEquals(pr.getAddress(), ftx.getAddress());
         }
