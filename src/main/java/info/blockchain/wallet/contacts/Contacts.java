@@ -704,11 +704,7 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntendedAmount(pr.getIntendedAmount());
-                        if (pr.getAddress() == null || pr.getAddress().isEmpty()) {
-                            tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
-                        } else {
-                            tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
-                        }
+                        tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                         tx.setNote(pr.getNote());
                         newlyCreated = true;
                     }
