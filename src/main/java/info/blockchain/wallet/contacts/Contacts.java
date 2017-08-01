@@ -19,7 +19,6 @@ import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 
-import java.util.NoSuchElementException;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.annotation.Nonnull;
 
@@ -574,7 +574,6 @@ public class Contacts {
 
         FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-        ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
         ftx.updateCompleted();
 
         save();
@@ -686,7 +685,7 @@ public class Contacts {
                     tx.setId(rpr.getId());
                     tx.setIntendedAmount(rpr.getIntendedAmount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
-                    tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
+                    tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setNote(rpr.getNote());
                     tx.updateCompleted();
 
@@ -705,12 +704,12 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntendedAmount(pr.getIntendedAmount());
+                        tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                         tx.setNote(pr.getNote());
                         newlyCreated = true;
                     }
 
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-                    tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setAddress(pr.getAddress());
                     tx.updateCompleted();
 
