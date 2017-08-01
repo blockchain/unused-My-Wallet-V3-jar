@@ -498,7 +498,7 @@ public class ContactsTest {
             Assert.assertEquals(rpr.getId(), ftx.getId());
             Assert.assertEquals("waiting_address", ftx.getState());
             Assert.assertEquals(17940000L, ftx.getIntendedAmount());
-            Assert.assertEquals("pr_receiver", ftx.getRole());
+            Assert.assertEquals("rpr_receiver", ftx.getRole());
             Assert.assertEquals(rpr.getNote(), ftx.getNote());
         }
     }
