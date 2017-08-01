@@ -574,7 +574,6 @@ public class Contacts {
 
         FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-        ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
         ftx.updateCompleted();
 
         save();
@@ -686,7 +685,7 @@ public class Contacts {
                     tx.setId(rpr.getId());
                     tx.setIntendedAmount(rpr.getIntendedAmount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
-                    tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
+                    tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setNote(rpr.getNote());
                     tx.updateCompleted();
 
@@ -705,7 +704,11 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntendedAmount(pr.getIntendedAmount());
-                        tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
+                        if (pr.getAddress() == null || pr.getAddress().isEmpty()) {
+                            tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
+                        } else {
+                            tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
+                        }
                         tx.setNote(pr.getNote());
                         newlyCreated = true;
                     }
