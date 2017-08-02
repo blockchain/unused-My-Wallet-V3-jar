@@ -127,10 +127,8 @@ public class MetadataNodeFactory {
 
     public boolean isLegacySecondPwNodeAvailable() throws Exception {
         try {
-            String neh = secondPwNodeLegacy.getMetadata();
-            return  neh != null;
+            return  secondPwNodeLegacy.getMetadata() != null;
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }

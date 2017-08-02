@@ -35,7 +35,6 @@ public class MetadataNodeFactoryIntegTest extends BaseIntegTest {
 
         Assert.assertTrue(subject.isMetadataUsable());
         Assert.assertFalse(subject.isLegacySecondPwNodeAvailable());
-        subject.isMetadataUsable();
     }
 
     @Test
