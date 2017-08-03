@@ -437,13 +437,15 @@ public class Contacts {
         while (i.hasNext()) {
             Message message = i.next();
             final Contact contactFromMdid = getContactFromMdid(message.getSender());
-            if (contactFromMdid != null) {
+            if (contactFromMdid != null && contactFromMdid.getXpub() != null) {
                 try {
                     decryptMessageFrom(message, contactFromMdid.getXpub());
                 } catch (IOException | InvalidCipherTextException | MetadataException e) {
-                    e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
+                    e.printStackTrace();
                 }
             } else {
+                //Edge case since Android will not allow contact invitation without a published xpub
+                log.warn("Unable to decrypt message - Sender's xpub might not be published");
                 markMessageAsRead(message.getId(), true);
                 i.remove();
             }
