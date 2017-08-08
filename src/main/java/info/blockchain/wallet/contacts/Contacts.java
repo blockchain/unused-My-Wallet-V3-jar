@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.annotation.Nonnull;
 
@@ -324,14 +325,22 @@ public class Contacts {
      * Accepts invitation link and returns {@link Contact}.
      */
     public Contact acceptInvitationLink(String link) throws
-            IOException,
-            SharedMetadataException,
-            MetadataException,
-            InvalidCipherTextException {
+        IOException,
+        SharedMetadataException,
+        MetadataException,
+        InvalidCipherTextException,
+        NoSuchElementException {
         log.info("Accepting inter-wallet-comms invitation link");
         Map<String, String> queryParams = getQueryParams(link);
 
-        Invitation accepted = sharedMetadata.acceptInvitation(queryParams.get("id"));
+        String id = queryParams.get("id");
+
+        String senderMdid = sharedMetadata.readInvitation(id);
+        if(senderMdid != null) {
+            throw new NoSuchElementException("Invitation already accepted.");
+        }
+
+        Invitation accepted = sharedMetadata.acceptInvitation(id);
 
         Contact contact = new Contact().fromQueryParameters(queryParams);
         contact.setMdid(accepted.getMdid());
@@ -341,6 +350,7 @@ public class Contacts {
         addContact(contact);
         contact.setXpub(fetchXpub(accepted.getMdid()));
         save();
+
 
         return contact;
     }
@@ -427,13 +437,15 @@ public class Contacts {
         while (i.hasNext()) {
             Message message = i.next();
             final Contact contactFromMdid = getContactFromMdid(message.getSender());
-            if (contactFromMdid != null) {
+            if (contactFromMdid != null && contactFromMdid.getXpub() != null) {
                 try {
                     decryptMessageFrom(message, contactFromMdid.getXpub());
                 } catch (IOException | InvalidCipherTextException | MetadataException e) {
-                    e.printStackTrace();//Unable to decrypt message - Sender's xpub might not be published
+                    e.printStackTrace();
                 }
             } else {
+                //Edge case since Android will not allow contact invitation without a published xpub
+                log.warn("Unable to decrypt message - Sender's xpub might not be published");
                 markMessageAsRead(message.getId(), true);
                 i.remove();
             }
@@ -564,7 +576,6 @@ public class Contacts {
 
         FacilitatedTransaction ftx = contact.getFacilitatedTransactions().get(fTxId);
         ftx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-        ftx.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
         ftx.updateCompleted();
 
         save();
@@ -676,7 +687,7 @@ public class Contacts {
                     tx.setId(rpr.getId());
                     tx.setIntendedAmount(rpr.getIntendedAmount());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
-                    tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
+                    tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setNote(rpr.getNote());
                     tx.updateCompleted();
 
@@ -695,12 +706,12 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntendedAmount(pr.getIntendedAmount());
+                        tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                         tx.setNote(pr.getNote());
                         newlyCreated = true;
                     }
 
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
-                    tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setAddress(pr.getAddress());
                     tx.updateCompleted();
 

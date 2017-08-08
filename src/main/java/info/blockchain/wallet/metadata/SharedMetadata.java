@@ -15,6 +15,7 @@ import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.MessageProcessRequest;
 import info.blockchain.wallet.metadata.data.Trusted;
 
+import java.util.NoSuchElementException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -346,13 +347,17 @@ public class SharedMetadata {
     /**
      * Gets MDID of sender from one-time UUID
      */
-    public String readInvitation(String uuid) throws SharedMetadataException, IOException {
+    public String readInvitation(String uuid) throws SharedMetadataException, IOException, NoSuchElementException {
         authorize();
         Call<Invitation> response = getApiInstance().getShare("Bearer " + token, uuid);
         Response<Invitation> exe = response.execute();
 
         if (exe.isSuccessful()) {
-            return exe.body().getContact();
+            if(exe.body() == null){
+                throw new NoSuchElementException("One-time invitation UUID not found.");
+            } else {
+                return exe.body().getContact();
+            }
         } else {
             throw new SharedMetadataException(exe.code() + " " + exe.message());
         }

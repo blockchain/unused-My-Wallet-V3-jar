@@ -106,11 +106,8 @@ public abstract class BaseIntegTest {
     }
 
     private static OkHttpClient getOkHttpClient() {
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
         return new OkHttpClient.Builder()
-//            .addInterceptor(loggingInterceptor)//Extensive logging
+//            .addInterceptor(new ApiInterceptor())//Extensive logging
                 .build();
     }
 

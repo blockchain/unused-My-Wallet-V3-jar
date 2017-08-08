@@ -2,14 +2,17 @@ package info.blockchain.wallet.metadata;
 
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
+import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.data.RemoteMetadataNodes;
 import info.blockchain.wallet.util.MetadataUtil;
 
+import java.io.IOException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import org.spongycastle.crypto.InvalidCipherTextException;
 
 /**
  * Restores derived metadata nodes from a metadata node derived from user credentials.
@@ -21,9 +24,13 @@ public class MetadataNodeFactory {
     private DeterministicKey metadataNode;
 
     private Metadata secondPwNode;
+    private Metadata secondPwNodeLegacy;
 
     public MetadataNodeFactory(String guid, String sharedKey, String walletPassword) throws Exception {
         this.secondPwNode = deriveSecondPasswordNode(guid, sharedKey, walletPassword);
+
+        this.secondPwNodeLegacy = deriveSecondPasswordNodeLegacy(guid, sharedKey, walletPassword);
+        deleteMetadataFromNode(secondPwNodeLegacy);
     }
 
     public boolean isMetadataUsable() throws Exception {
@@ -75,7 +82,7 @@ public class MetadataNodeFactory {
         return loadNodes(remoteMetadataNodes);
     }
 
-    private Metadata deriveSecondPasswordNode(String guid, String sharedkey, String password) throws Exception {
+    private Metadata deriveSecondPasswordNodeLegacy(String guid, String sharedkey, String password) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         String text = guid + sharedkey;
         md.update(text.getBytes("UTF-8"));
@@ -95,6 +102,50 @@ public class MetadataNodeFactory {
         metadata.fetchMagic();
 
         return metadata;
+    }
+
+    private Metadata deriveSecondPasswordNode(String guid, String sharedkey, String password) throws Exception {
+
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        String input = guid + sharedkey + password;
+        md.update(input.getBytes("UTF-8"));
+        byte[] entropy = md.digest();
+        BigInteger bi = new BigInteger(1, entropy);
+
+        ECKey key = ECKey.fromPrivate(bi);
+
+        Metadata metadata = new Metadata();
+        metadata.setEncrypted(true);
+        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+        metadata.setNode(key);
+        metadata.setEncryptionKey(key.getPrivKeyBytes());
+        metadata.setType(-1);
+        metadata.fetchMagic();
+
+        return metadata;
+    }
+
+    public boolean isLegacySecondPwNodeAvailable() throws Exception {
+        try {
+            return  secondPwNodeLegacy.getMetadata() != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void deleteMetadataFromNode(Metadata node) throws Exception {
+        try {
+            String nodesJson = node.getMetadata();
+            if (nodesJson == null) {
+                //no record
+            } else {
+                RemoteMetadataNodes remoteMetadataNodes = RemoteMetadataNodes.fromJson(nodesJson);
+                node.deleteMetadata(remoteMetadataNodes.toJson());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public DeterministicKey getSharedMetadataNode() {
