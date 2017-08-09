@@ -41,7 +41,7 @@ public class ContactsTest {
 
     MockInterceptor mockInterceptor;
 
-    private final String magic = "{\"version\":1,\"payload\":\"9SnGfbzzKWljjsI6KBpnWt2vnVFqdj5j60qdsBjI1MaQZgzLghgjYEKkoEw+wqN6rdkZARgX9/d9aLPEEKgFdrWAN6OzAVlQnYIePbdmpDBuretq4iol66veV9xAOtqegA/FVYSVeMVFLvdb455L5QWoNNDUQq6Yo11stbHc5eSfPIMp5x/ekG9tFIK4yvKGsluVkL8y3+fR9riY+NXBg0kVqyY4KLEfYPVUXmZG4f2+BXFZoSBx57HwVq0Ay8AWc1rNtghmWf05xJU1h368Xw==\",\"signature\":\"H0tvbP8JYD6bj5y6f/eRXxSE40wyZoziRRImC+U3EzeQElGsUSRKaHEGC/L5cp/BbuJWM7o+a9MNVStQGHG87jg=\",\"type_id\":4,\"created_at\":1482153702000,\"updated_at\":1482153702000,\"address\":\"1LF1QvtK6gnxJ3f8tZx9hamWS9jytKZJ6C\"}";
+    private final String magic = "{\"payload\":\"VSSU6yr2Y63SD/q9uzEK5YrXo8n+i/Li6RreS53oFupMuyuNIQB2tJ0Ek1tGMWbB+zzZDR6E4NjXWHoZ6tXfxYdlNvs/SSg4y83Xm2P5UQi3zQ+UlwCC75d46UpoBQh9QHh56j9VvBXKfkkm9m1fHBGeevG8dM3FxOziHXwalaShv01F1w8Q7BHN8m9KLkg3ELajhpbAqX6V6OeHfH2/OqqW9BMVURCWn1a0IF8O32se08kU9y3saOOXx/QBEHKGxP7GwpftnUgT28BkwEjB6Q6A+AYuwnJxoa36GqVSNMw2gv10Gxjic59L2FfJvjg40oXjhhnnGfyQtCWFqj15GX15Kv0Krn/oLLZM0gERe0fpelRVYG2iK2+ytYh76s0L\",\"version\":1,\"type_id\":4,\"signature\":\"IIhKFiFFlQRsNcJsk3Pa45CtwnmBCxRCq7ncxScXK/U6XawV3zza7RvGyAp3M41cdXYOvmFFErQAp0TZytJQ+qo=\",\"prev_magic_hash\":\"e00c9cfe5756507508a07fddd5139491f1a52a0e087593627ae0490297a48842\",\"address\":\"1LF1QvtK6gnxJ3f8tZx9hamWS9jytKZJ6C\",\"created_at\":1482153702000,\"updated_at\":1502285812000}";
     private final String success = "{\"status\":\"success\"}";
     private final String fail = "{\"status\":\"fail\"}";
 
