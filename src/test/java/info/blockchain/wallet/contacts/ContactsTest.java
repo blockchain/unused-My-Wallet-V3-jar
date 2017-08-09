@@ -71,16 +71,6 @@ public class ContactsTest {
             }
 
             @Override
-            public Retrofit getRetrofitSFOXInstance() {
-                return null;
-            }
-
-            @Override
-            public Retrofit getRetrofitCoinifyInstance() {
-                return null;
-            }
-
-            @Override
             public Environment getEnvironment() {
                 return Environment.PRODUCTION;
             }

@@ -17,8 +17,6 @@ public class PersistentUrls {
     public static final String API_URL = "https://api.blockchain.info/";
     public static final String EXPLORER_URL = "https://blockchain.info/";
     public static final String WEBSOCKET_URL = "wss://ws.blockchain.info/inv";
-    public static final String SFOX_URL = "https://api.staging.sfox.com/";
-    public static final String COINIFY_URL = "https://app-api.coinify.com/";
 
     // Instance
     private static PersistentUrls instance;

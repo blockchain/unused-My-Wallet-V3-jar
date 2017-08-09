@@ -43,16 +43,6 @@ public abstract class MockedResponseTest {
             }
 
             @Override
-            public Retrofit getRetrofitSFOXInstance() {
-                return getRetrofit("https://api.staging.sfox.com/", getOkHttpClient());
-            }
-
-            @Override
-            public Retrofit getRetrofitCoinifyInstance() {
-                return getRetrofit("https://app-api.coinify.com/", getOkHttpClient());
-            }
-
-            @Override
             public Environment getEnvironment() {
                 return Environment.PRODUCTION;
             }
