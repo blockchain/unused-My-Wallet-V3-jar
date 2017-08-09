@@ -40,16 +40,6 @@ public abstract class BaseIntegTest {
             }
 
             @Override
-            public Retrofit getRetrofitSFOXInstance() {
-                return getRetrofit(PersistentUrls.SFOX_URL, getOkHttpClient());
-            }
-
-            @Override
-            public Retrofit getRetrofitCoinifyInstance() {
-                return getRetrofit(PersistentUrls.COINIFY_URL, getOkHttpClient());
-            }
-
-            @Override
             public Environment getEnvironment() {
                 return Environment.PRODUCTION;
             }
