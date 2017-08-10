@@ -683,7 +683,7 @@ public class Contacts {
                     FacilitatedTransaction tx = new FacilitatedTransaction();
                     tx.setId(rpr.getId());
                     tx.setIntendedAmount(rpr.getIntendedAmount());
-                    tx.setCurrency(PaymentCurrency.BITCOIN);
+                    tx.setCurrency(rpr.getCurrency());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setNote(rpr.getNote());
@@ -704,7 +704,7 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntendedAmount(pr.getIntendedAmount());
-                        tx.setCurrency(PaymentCurrency.BITCOIN);
+                        tx.setCurrency(pr.getCurrency());
                         tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                         tx.setNote(pr.getNote());
                         newlyCreated = true;
