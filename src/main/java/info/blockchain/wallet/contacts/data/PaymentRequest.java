@@ -17,6 +17,7 @@ public class PaymentRequest {
     private long intendedAmount;
     private String note;
     private String address;
+    private String currency;
 
     public PaymentRequest() {
         // Empty constructor
@@ -59,6 +60,14 @@ public class PaymentRequest {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     @JsonIgnore

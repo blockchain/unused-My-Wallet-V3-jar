@@ -7,6 +7,7 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
 import info.blockchain.wallet.contacts.data.PaymentCancelledResponse;
+import info.blockchain.wallet.contacts.data.PaymentCurrency;
 import info.blockchain.wallet.contacts.data.PaymentDeclinedResponse;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.PublicContactDetails;
@@ -86,8 +87,8 @@ public class Contacts {
      * Retrieves contact list from metadata service
      */
     public void fetch() throws MetadataException, IOException, InvalidCipherTextException {
+        log.info("Fetching contact list");
         String data = metadata.getMetadata();
-        System.out.println(data);
         if (data != null) {
             contactList = mapper.readValue(data, new TypeReference<Map<String, Contact>>() {
             });
@@ -515,6 +516,7 @@ public class Contacts {
         log.info("Sending inter-wallet-comms request for payment request");
         FacilitatedTransaction tx = new FacilitatedTransaction();
         tx.setIntendedAmount(request.getIntendedAmount());
+        tx.setCurrency(request.getCurrency());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
         tx.setNote(request.getNote());
@@ -547,6 +549,7 @@ public class Contacts {
         Contact contact = getContactFromMdid(mdid);
         facilitatedTransaction.setNote(request.getNote());
         facilitatedTransaction.setIntendedAmount(request.getIntendedAmount());
+        facilitatedTransaction.setCurrency(request.getCurrency());
         facilitatedTransaction.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
         facilitatedTransaction.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
         facilitatedTransaction.updateCompleted();
@@ -680,6 +683,7 @@ public class Contacts {
                     FacilitatedTransaction tx = new FacilitatedTransaction();
                     tx.setId(rpr.getId());
                     tx.setIntendedAmount(rpr.getIntendedAmount());
+                    tx.setCurrency(PaymentCurrency.BITCOIN);
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setNote(rpr.getNote());
@@ -700,6 +704,7 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntendedAmount(pr.getIntendedAmount());
+                        tx.setCurrency(PaymentCurrency.BITCOIN);
                         tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                         tx.setNote(pr.getNote());
                         newlyCreated = true;

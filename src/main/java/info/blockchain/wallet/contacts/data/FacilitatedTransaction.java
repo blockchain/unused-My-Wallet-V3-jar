@@ -39,6 +39,7 @@ public class FacilitatedTransaction {
     private long created;
     private long lastUpdated;
     private String note;
+    private String currency;
 
     public FacilitatedTransaction() {
         this.id = UUID.randomUUID().toString();
@@ -131,6 +132,14 @@ public class FacilitatedTransaction {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     @JsonIgnore
