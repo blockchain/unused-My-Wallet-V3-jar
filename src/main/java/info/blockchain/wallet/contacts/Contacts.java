@@ -293,11 +293,11 @@ public class Contacts {
 
         Invitation sent = new Invitation();
         sent.setId(i.getId());
+        sent.setMdid(myDetails.getMdid());
         myDetails.setInvitationSent(sent);
 
         Invitation received = new Invitation();
         received.setId(i.getId());
-        myDetails.setInvitationReceived(received);
 
         recipientDetails.setInvitationSent(sent);
 
@@ -330,12 +330,13 @@ public class Contacts {
 
         String id = queryParams.get("id");
 
-        String senderMdid = sharedMetadata.readInvitation(id);
-        if(senderMdid != null) {
-            throw new NoSuchElementException("Invitation already accepted.");
+        Invitation accepted = null;
+        try {
+            accepted = sharedMetadata.acceptInvitation(queryParams.get("id"));
+        } catch (SharedMetadataException e) {
+            //Invitation doesn't exist
+            throw new NoSuchElementException("Invitation already accepted");
         }
-
-        Invitation accepted = sharedMetadata.acceptInvitation(id);
 
         Contact contact = new Contact().fromQueryParameters(queryParams);
         contact.setMdid(accepted.getMdid());
@@ -361,16 +362,16 @@ public class Contacts {
             InvalidCipherTextException {
         boolean accepted = false;
 
-        String contactMdid = sharedMetadata.readInvitation(invite.getInvitationSent().getId());
+        String recipientMdid = sharedMetadata.readInvitation(invite.getInvitationSent().getId());
 
-        if (contactMdid != null) {
+        if (recipientMdid != null) {
 
             Contact contact = getContactFromSentInviteId(invite.getInvitationSent().getId());
-            contact.setMdid(contactMdid);
+            contact.setMdid(recipientMdid);
 
-            sharedMetadata.addTrusted(contactMdid);
+            sharedMetadata.addTrusted(recipientMdid);
             addContact(contact);
-            contact.setXpub(fetchXpub(contactMdid));
+            contact.setXpub(fetchXpub(recipientMdid));
 
             //Contact accepted invite, we can update and delete invite now
             sharedMetadata.deleteInvitation(invite.getInvitationSent().getId());

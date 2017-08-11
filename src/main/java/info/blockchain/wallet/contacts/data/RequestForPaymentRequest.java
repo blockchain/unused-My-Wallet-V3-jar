@@ -21,9 +21,10 @@ public class RequestForPaymentRequest {
     public RequestForPaymentRequest() {
     }
 
-    public RequestForPaymentRequest(long amount, String note) {
+    public RequestForPaymentRequest(long amount, String note, String currency) {
         this.intendedAmount = amount;
         this.note = note;
+        this.currency = currency;
     }
 
     public String getId() {

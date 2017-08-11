@@ -23,9 +23,10 @@ public class PaymentRequest {
         // Empty constructor
     }
 
-    public PaymentRequest(long amount, String note) {
+    public PaymentRequest(long amount, String note, String currency) {
         this.intendedAmount = amount;
         this.note = note;
+        this.currency = currency;
     }
 
     public String getId() {
