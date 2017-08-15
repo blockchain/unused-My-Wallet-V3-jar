@@ -93,10 +93,15 @@ public class WalletWrapper {
         validateVersion();
         validatePbkdf2Iterations();
 
-        String decryptedPayload = AESUtil.decrypt(getPayload(), password,
-            getPbkdf2Iterations());
+        String decryptedPayload = null;
+        try {
+            decryptedPayload = AESUtil.decrypt(getPayload(), password,
+                getPbkdf2Iterations());
+        } catch (Exception e) {
+            throw new DecryptionException(e);
+        }
 
-        if(!FormatsUtil.isValidJson(decryptedPayload)) {
+        if(decryptedPayload == null || !FormatsUtil.isValidJson(decryptedPayload)) {
             throw new DecryptionException("Decryption failed.");
         }
 
