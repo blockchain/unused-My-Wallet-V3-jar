@@ -7,6 +7,7 @@ import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
 import info.blockchain.wallet.contacts.data.PaymentCancelledResponse;
+import info.blockchain.wallet.contacts.data.PaymentCurrency;
 import info.blockchain.wallet.contacts.data.PaymentDeclinedResponse;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.PublicContactDetails;
@@ -86,8 +87,8 @@ public class Contacts {
      * Retrieves contact list from metadata service
      */
     public void fetch() throws MetadataException, IOException, InvalidCipherTextException {
+        log.info("Fetching contact list");
         String data = metadata.getMetadata();
-        System.out.println(data);
         if (data != null) {
             contactList = mapper.readValue(data, new TypeReference<Map<String, Contact>>() {
             });
@@ -292,11 +293,11 @@ public class Contacts {
 
         Invitation sent = new Invitation();
         sent.setId(i.getId());
+        sent.setMdid(myDetails.getMdid());
         myDetails.setInvitationSent(sent);
 
         Invitation received = new Invitation();
         received.setId(i.getId());
-        myDetails.setInvitationReceived(received);
 
         recipientDetails.setInvitationSent(sent);
 
@@ -329,12 +330,13 @@ public class Contacts {
 
         String id = queryParams.get("id");
 
-        String senderMdid = sharedMetadata.readInvitation(id);
-        if(senderMdid != null) {
-            throw new NoSuchElementException("Invitation already accepted.");
+        Invitation accepted = null;
+        try {
+            accepted = sharedMetadata.acceptInvitation(queryParams.get("id"));
+        } catch (SharedMetadataException e) {
+            //Invitation doesn't exist
+            throw new NoSuchElementException("Invitation already accepted");
         }
-
-        Invitation accepted = sharedMetadata.acceptInvitation(id);
 
         Contact contact = new Contact().fromQueryParameters(queryParams);
         contact.setMdid(accepted.getMdid());
@@ -360,16 +362,16 @@ public class Contacts {
             InvalidCipherTextException {
         boolean accepted = false;
 
-        String contactMdid = sharedMetadata.readInvitation(invite.getInvitationSent().getId());
+        String recipientMdid = sharedMetadata.readInvitation(invite.getInvitationSent().getId());
 
-        if (contactMdid != null) {
+        if (recipientMdid != null) {
 
             Contact contact = getContactFromSentInviteId(invite.getInvitationSent().getId());
-            contact.setMdid(contactMdid);
+            contact.setMdid(recipientMdid);
 
-            sharedMetadata.addTrusted(contactMdid);
+            sharedMetadata.addTrusted(recipientMdid);
             addContact(contact);
-            contact.setXpub(fetchXpub(contactMdid));
+            contact.setXpub(fetchXpub(recipientMdid));
 
             //Contact accepted invite, we can update and delete invite now
             sharedMetadata.deleteInvitation(invite.getInvitationSent().getId());
@@ -515,6 +517,7 @@ public class Contacts {
         log.info("Sending inter-wallet-comms request for payment request");
         FacilitatedTransaction tx = new FacilitatedTransaction();
         tx.setIntendedAmount(request.getIntendedAmount());
+        tx.setCurrency(request.getCurrency());
         tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
         tx.setRole(FacilitatedTransaction.ROLE_RPR_INITIATOR);
         tx.setNote(request.getNote());
@@ -547,6 +550,7 @@ public class Contacts {
         Contact contact = getContactFromMdid(mdid);
         facilitatedTransaction.setNote(request.getNote());
         facilitatedTransaction.setIntendedAmount(request.getIntendedAmount());
+        facilitatedTransaction.setCurrency(request.getCurrency());
         facilitatedTransaction.setState(FacilitatedTransaction.STATE_WAITING_FOR_PAYMENT);
         facilitatedTransaction.setRole(FacilitatedTransaction.ROLE_PR_INITIATOR);
         facilitatedTransaction.updateCompleted();
@@ -680,6 +684,7 @@ public class Contacts {
                     FacilitatedTransaction tx = new FacilitatedTransaction();
                     tx.setId(rpr.getId());
                     tx.setIntendedAmount(rpr.getIntendedAmount());
+                    tx.setCurrency(rpr.getCurrency());
                     tx.setState(FacilitatedTransaction.STATE_WAITING_FOR_ADDRESS);
                     tx.setRole(FacilitatedTransaction.ROLE_RPR_RECEIVER);
                     tx.setNote(rpr.getNote());
@@ -700,6 +705,7 @@ public class Contacts {
                         tx = new FacilitatedTransaction();
                         tx.setId(pr.getId());
                         tx.setIntendedAmount(pr.getIntendedAmount());
+                        tx.setCurrency(pr.getCurrency());
                         tx.setRole(FacilitatedTransaction.ROLE_PR_RECEIVER);
                         tx.setNote(pr.getNote());
                         newlyCreated = true;

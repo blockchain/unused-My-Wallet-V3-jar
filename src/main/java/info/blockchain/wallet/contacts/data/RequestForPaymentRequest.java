@@ -16,13 +16,15 @@ public class RequestForPaymentRequest {
     private String id;
     private long intendedAmount;
     private String note;
+    private String currency;
 
     public RequestForPaymentRequest() {
     }
 
-    public RequestForPaymentRequest(long amount, String note) {
+    public RequestForPaymentRequest(long amount, String note, String currency) {
         this.intendedAmount = amount;
         this.note = note;
+        this.currency = currency;
     }
 
     public String getId() {
@@ -49,6 +51,14 @@ public class RequestForPaymentRequest {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     @JsonIgnore
