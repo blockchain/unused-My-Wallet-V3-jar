@@ -1,6 +1,9 @@
 package info.blockchain.wallet.contacts.data;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,19 +23,48 @@ import io.mikael.urlbuilder.UrlBuilder;
 import io.mikael.urlbuilder.util.UrlParameterMultimap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = Visibility.NONE,
+    getterVisibility = Visibility.NONE,
+    setterVisibility = Visibility.NONE,
+    creatorVisibility = Visibility.NONE,
+    isGetterVisibility = Visibility.NONE)
 public class Contact {
 
+    @JsonProperty("id")
     private String id;
+
+    @JsonProperty("name")
     private String name;
+
+    @JsonProperty("surname")
     private String surname;
+
+    @JsonProperty("company")
     private String company;
+
+    @JsonProperty("email")
     private String email;
+
+    @JsonProperty("xpub")
     private String xpub;
+
+    @JsonProperty("note")
     private String note;
+
+    @JsonProperty("mdid")
     private String mdid;
+
+    @JsonProperty("created")
     private long created;
+
+    @JsonProperty("invitationSent")
     private Invitation invitationSent; // I invited somebody
+
+    @JsonProperty("invitationReceived")
     private Invitation invitationReceived;// Somebody invited me
+
+    @JsonProperty("facilitatedTxList")
     private HashMap<String, FacilitatedTransaction> facilitatedTransaction;
 
     public Contact() {
@@ -122,13 +154,11 @@ public class Contact {
     }
 
     @Nonnull
-    @JsonProperty("facilitatedTransaction")
     public HashMap<String, FacilitatedTransaction> getFacilitatedTransactions() {
         return facilitatedTransaction != null
                 ? facilitatedTransaction : new HashMap<String, FacilitatedTransaction>();
     }
 
-    @JsonIgnore
     public void addFacilitatedTransaction(FacilitatedTransaction facilitatedTransaction) {
         this.facilitatedTransaction.put(facilitatedTransaction.getId(), facilitatedTransaction);
     }
@@ -137,7 +167,6 @@ public class Contact {
         facilitatedTransaction.remove(fctxId);
     }
 
-    @JsonProperty("facilitatedTransaction")
     public void setFacilitatedTransactions(HashMap<String, FacilitatedTransaction> facilitatedTransaction) {
         this.facilitatedTransaction = facilitatedTransaction;
     }
@@ -150,7 +179,6 @@ public class Contact {
         this.created = created;
     }
 
-    @JsonIgnore
     public Contact fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, Contact.class);
     }
