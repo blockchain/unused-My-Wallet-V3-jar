@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -124,6 +125,9 @@ public class Settings {
     @JsonProperty("guid")
     private String guid;
 
+    @JsonProperty("invited")
+    private HashMap<String, Boolean> invited;
+
     public String getBtcCurrency() {
         return btcCurrency;
     }
@@ -224,5 +228,9 @@ public class Settings {
 
     private boolean intToBoolean(int value) {
         return value != 0;
+    }
+
+    public HashMap<String, Boolean> getInvited() {
+        return invited;
     }
 }

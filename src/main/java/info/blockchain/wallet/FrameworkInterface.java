@@ -21,18 +21,6 @@ public interface FrameworkInterface {
     Retrofit getRetrofitExplorerInstance();
 
     /**
-     * Provides an instance of Retrofit with it's base URL set to {@link
-     * info.blockchain.wallet.api.PersistentUrls#SFOX_URL} or its debug/staging/testnet equivalent
-     */
-    Retrofit getRetrofitSFOXInstance();
-
-    /**
-     * Provides an instance of Retrofit with it's base URL set to {@link
-     * info.blockchain.wallet.api.PersistentUrls#COINIFY_URL} or its debug/staging/testnet equivalent
-     */
-    Retrofit getRetrofitCoinifyInstance();
-
-    /**
      * Provides the currently chosen environment, as dictated by the top-level app
      */
     Environment getEnvironment();

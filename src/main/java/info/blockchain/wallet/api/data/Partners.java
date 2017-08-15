@@ -13,6 +13,8 @@ public class Partners {
     private Coinify coinify;
     @JsonProperty("sfox")
     private Sfox sfox;
+    @JsonProperty("unocoin")
+    private Unocoin unocoin;
 
     public Coinify getCoinify() {
         return coinify;
@@ -22,5 +24,8 @@ public class Partners {
         return sfox;
     }
 
+    public Unocoin getUnocoin() {
+        return unocoin;
+    }
 }
 

@@ -87,16 +87,10 @@ public class Contacts {
      */
     public void fetch() throws MetadataException, IOException, InvalidCipherTextException {
         String data = metadata.getMetadata();
+        System.out.println(data);
         if (data != null) {
-            ArrayList<Contact> list = mapper.readValue(data, new TypeReference<List<Contact>>() {
+            contactList = mapper.readValue(data, new TypeReference<Map<String, Contact>>() {
             });
-
-            contactList.clear();
-
-            for (Contact contact : list) {
-                contactList.put(contact.getId(), contact);
-            }
-
         } else {
             contactList = new HashMap<>();
         }
@@ -110,7 +104,7 @@ public class Contacts {
     public void save() throws IOException, MetadataException, InvalidCipherTextException {
         log.info("Saving contact list");
         if (contactList != null) {
-            metadata.putMetadata(mapper.writeValueAsString(contactList.values().toArray()));
+            metadata.putMetadata(mapper.writeValueAsString(contactList));
         }
     }
 
@@ -119,7 +113,7 @@ public class Contacts {
      */
     public void wipe() throws IOException, MetadataException, InvalidCipherTextException {
         log.info("Wiping contact list");
-        metadata.putMetadata(mapper.writeValueAsString(new ArrayList<Contact>()));
+        metadata.putMetadata(mapper.writeValueAsString(new HashMap<>()));
         contactList = new HashMap<>();
     }
 
