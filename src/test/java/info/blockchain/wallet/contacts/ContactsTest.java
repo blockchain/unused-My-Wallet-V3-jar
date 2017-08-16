@@ -441,7 +441,7 @@ public class ContactsTest {
         Contact receivedInvite = contacts.readInvitationLink("http://blockchain.info/invite?id=852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37&name=Me");
 
         Assert.assertTrue(receivedInvite.getName().equals("Me"));
-        Assert.assertTrue(receivedInvite.getInvitationReceived().getId().equals("852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37"));
+        Assert.assertTrue(receivedInvite.getInvitationReceived().equals("852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37"));
     }
 
     @Test

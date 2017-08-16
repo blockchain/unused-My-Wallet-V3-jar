@@ -291,15 +291,12 @@ public class Contacts {
 
         Invitation i = sharedMetadata.createInvitation();
 
-        Invitation sent = new Invitation();
-        sent.setId(i.getId());
-        sent.setMdid(myDetails.getMdid());
-        myDetails.setInvitationSent(sent);
+        myDetails.setInvitationSent(i.getId());
 
         Invitation received = new Invitation();
         received.setId(i.getId());
 
-        recipientDetails.setInvitationSent(sent);
+        recipientDetails.setInvitationSent(i.getId());
 
         addContact(recipientDetails);
 
@@ -340,8 +337,9 @@ public class Contacts {
 
         Contact contact = new Contact().fromQueryParameters(queryParams);
         contact.setMdid(accepted.getMdid());
-        contact.setInvitationReceived(accepted);
+        contact.setInvitationReceived(accepted.getId());
 
+        publishXpub();
         sharedMetadata.addTrusted(accepted.getMdid());
         addContact(contact);
         contact.setXpub(fetchXpub(accepted.getMdid()));
@@ -362,11 +360,11 @@ public class Contacts {
             InvalidCipherTextException {
         boolean accepted = false;
 
-        String recipientMdid = sharedMetadata.readInvitation(invite.getInvitationSent().getId());
+        String recipientMdid = sharedMetadata.readInvitation(invite.getInvitationSent());
 
         if (recipientMdid != null) {
 
-            Contact contact = getContactFromSentInviteId(invite.getInvitationSent().getId());
+            Contact contact = getContactFromSentInviteId(invite.getInvitationSent());
             contact.setMdid(recipientMdid);
 
             sharedMetadata.addTrusted(recipientMdid);
@@ -374,7 +372,7 @@ public class Contacts {
             contact.setXpub(fetchXpub(recipientMdid));
 
             //Contact accepted invite, we can update and delete invite now
-            sharedMetadata.deleteInvitation(invite.getInvitationSent().getId());
+            sharedMetadata.deleteInvitation(invite.getInvitationSent());
 
             accepted = true;
 
@@ -387,7 +385,7 @@ public class Contacts {
 
     private Contact getContactFromSentInviteId(String id) {
         for (Contact contact : contactList.values()) {
-            if (contact.getInvitationSent() != null && contact.getInvitationSent().getId().equals(id)) {
+            if (contact.getInvitationSent() != null && contact.getInvitationSent().equals(id)) {
                 return contact;
             }
         }

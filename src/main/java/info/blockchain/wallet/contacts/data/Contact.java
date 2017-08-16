@@ -59,10 +59,10 @@ public class Contact {
     private long created;
 
     @JsonProperty("invitationSent")
-    private Invitation invitationSent; // I invited somebody
+    private String invitationSent; // I invited somebody
 
     @JsonProperty("invitationReceived")
-    private Invitation invitationReceived;// Somebody invited me
+    private String invitationReceived;// Somebody invited me
 
     @JsonProperty("facilitatedTxList")
     private HashMap<String, FacilitatedTransaction> facilitatedTransaction;
@@ -137,19 +137,19 @@ public class Contact {
         this.mdid = mdid;
     }
 
-    public Invitation getInvitationSent() {
+    public String getInvitationSent() {
         return invitationSent;
     }
 
-    public void setInvitationSent(Invitation invitationSent) {
+    public void setInvitationSent(String invitationSent) {
         this.invitationSent = invitationSent;
     }
 
-    public Invitation getInvitationReceived() {
+    public String getInvitationReceived() {
         return invitationReceived;
     }
 
-    public void setInvitationReceived(Invitation invitationReceived) {
+    public void setInvitationReceived(String invitationReceived) {
         this.invitationReceived = invitationReceived;
     }
 
@@ -189,7 +189,7 @@ public class Contact {
 
     private UrlParameterMultimap toQueryParameters() {
         UrlParameterMultimap queryParams = UrlParameterMultimap.newMultimap();
-        if (id != null) queryParams.add("id", invitationSent.getId());
+        if (id != null) queryParams.add("id", invitationSent);
         if (name != null) queryParams.add("name", name);
         if (surname != null) queryParams.add("surname", surname);
 //        if (company != null) queryParams.add("company", company);
@@ -203,8 +203,7 @@ public class Contact {
 
     public Contact fromQueryParameters(Map<String, String> queryParams) {
         Contact contact = new Contact();
-        contact.invitationReceived = new Invitation();
-        contact.invitationReceived.setId(queryParams.get("id"));
+        contact.invitationReceived = queryParams.get("id");
         contact.name = queryParams.get("name");
         contact.surname = queryParams.get("surname");
 
