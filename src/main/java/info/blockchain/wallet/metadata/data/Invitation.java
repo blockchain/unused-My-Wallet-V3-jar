@@ -21,7 +21,7 @@ public class Invitation {
     private String mdid;
 
     /**
-     * The recipient
+     * The recipient's MDID
      */
     private String contact;
 

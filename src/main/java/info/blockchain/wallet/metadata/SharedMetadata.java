@@ -316,7 +316,7 @@ public class SharedMetadata {
     }
 
     /**
-     * Obtains a one-time UUID for key sharing Gets MDID of sender from one-time UUID
+     * Creates a one-time UUID for key sharing. Recipient can retreive MDID of sender from one-time UUID
      */
     public Invitation createInvitation() throws IOException, SharedMetadataException {
         authorize();
