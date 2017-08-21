@@ -20,6 +20,9 @@ tasks.withType(JavaCompile) {
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://dl.bintray.com/ethereum/maven/"
+    }
     // TODO: Switch this back once the client is published
 //    maven {
 //        url nexusUrl + '/repository/maven-public/'
@@ -68,7 +71,7 @@ dependencies {
     // TODO: Switch this back once the client is published
 //    compile group: 'info.blockchain', name: 'api-client', version: '0.1.15-SNAPSHOT'
     compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
-    compile group: 'org.ethereum', name: 'ethereumj-core', version: '1.5.0'
+    compile group: 'org.ethereum', name: 'ethereumj-core', version: '1.5.0-RELEASE'
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.5'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
