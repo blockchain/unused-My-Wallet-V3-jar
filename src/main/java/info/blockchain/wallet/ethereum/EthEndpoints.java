@@ -10,10 +10,10 @@ import retrofit2.http.Query;
 
 interface EthEndpoints {
 
-    @GET("eth/account/{address}")
+    @GET(EthUrls.ACCOUNT + "/{address}")
     Single<EthAccount> getEthAccount(@Query("address") String address);
 
-    @GET("eth/account/{address}/isContract")
+    @GET(EthUrls.ACCOUNT + "/{address}" + EthUrls.IS_CONTRACT)
     Single<HashMap<String, Boolean>> getIfContract(@Query("address") String address);
 
 }
