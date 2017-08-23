@@ -5,6 +5,7 @@ import info.blockchain.wallet.api.data.EthAccount;
 
 import io.reactivex.Single;
 
+@SuppressWarnings("WeakerAccess")
 public class EthAccountApi {
 
     private EthEndpoints endpoints;
