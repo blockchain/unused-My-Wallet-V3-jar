@@ -1,14 +1,16 @@
-package info.blockchain.wallet.api;
+package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.MockedResponseTest;
-import info.blockchain.wallet.api.data.EthAccount;
-import info.blockchain.wallet.api.data.EthTransaction;
+import info.blockchain.wallet.ethereum.data.EthAccount;
+import info.blockchain.wallet.ethereum.data.EthTransaction;
 
 import org.junit.Test;
 
 import io.reactivex.observers.TestObserver;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class EthAccountApiTest extends MockedResponseTest {
 
@@ -17,7 +19,7 @@ public class EthAccountApiTest extends MockedResponseTest {
     @Test
     public void getEthAccount() throws Exception {
         // Arrange
-        mockInterceptor.setResponseString(EXAMPLE_RESPONSE);
+        mockInterceptor.setResponseString(ACCOUNT_RESPONSE);
         // Act
         final TestObserver<EthAccount> response = subject.getEthAccount("address").test();
         // Assert
@@ -33,7 +35,33 @@ public class EthAccountApiTest extends MockedResponseTest {
         assertEquals("0x879dbfde84b0239feb355f55f81fb29f898c778c", transaction.getTo());
     }
 
-    private static final String EXAMPLE_RESPONSE = "{\n" +
+    @Test
+    public void getIfContract_returns_false() throws Exception {
+        // Arrange
+        mockInterceptor.setResponseString(NO_CONTRACT_RESPONSE);
+        // Act
+        final TestObserver<Boolean> response = subject.getIfContract("address").test();
+        // Assert
+        response.assertComplete();
+        response.assertNoErrors();
+        final Boolean contract = response.values().get(0);
+        assertFalse(contract);
+    }
+
+    @Test
+    public void getIfContract_returns_true() throws Exception {
+        // Arrange
+        mockInterceptor.setResponseString(CONTRACT_RESPONSE);
+        // Act
+        final TestObserver<Boolean> response = subject.getIfContract("address").test();
+        // Assert
+        response.assertComplete();
+        response.assertNoErrors();
+        final Boolean contract = response.values().get(0);
+        assertTrue(contract);
+    }
+
+    private static final String ACCOUNT_RESPONSE = "{\n" +
             "  \"id\": 8878260,\n" +
             "  \"txn_count\": 2,\n" +
             "  \"account\": \"0x879dbfde84b0239feb355f55f81fb29f898c778c\",\n" +
@@ -89,6 +117,14 @@ public class EthAccountApiTest extends MockedResponseTest {
             "    }\n" +
             "  ],\n" +
             "  \"txnOffset\": 0\n" +
+            "}";
+
+    private static final String NO_CONTRACT_RESPONSE = "{\n" +
+            "\t\"contract\": false\n" +
+            "}";
+
+    private static final String CONTRACT_RESPONSE = "{\n" +
+            "\t\"contract\": true\n" +
             "}";
 
 }

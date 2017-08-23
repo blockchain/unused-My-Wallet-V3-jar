@@ -1,5 +1,5 @@
 
-package info.blockchain.wallet.api.data;
+package info.blockchain.wallet.ethereum.data;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
