@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigInteger;
+
 @SuppressWarnings("unused")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -37,13 +39,13 @@ public class EthTransaction {
     @JsonProperty("to")
     private String to;
     @JsonProperty("value")
-    private String value;
+    private BigInteger value;
     @JsonProperty("gas")
-    private Long gas;
+    private BigInteger gas;
     @JsonProperty("gasPrice")
-    private Long gasPrice;
+    private BigInteger gasPrice;
     @JsonProperty("gasUsed")
-    private Long gasUsed;
+    private BigInteger gasUsed;
     @JsonProperty("input")
     private String input;
     @JsonProperty("internalFlag")
@@ -89,19 +91,19 @@ public class EthTransaction {
         return to;
     }
 
-    public String getValue() {
+    public BigInteger getValue() {
         return value;
     }
 
-    public Long getGas() {
+    public BigInteger getGas() {
         return gas;
     }
 
-    public Long getGasPrice() {
+    public BigInteger getGasPrice() {
         return gasPrice;
     }
 
-    public Long getGasUsed() {
+    public BigInteger getGasUsed() {
         return gasUsed;
     }
 

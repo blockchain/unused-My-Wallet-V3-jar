@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class EthAccount {
     @JsonProperty("accountType")
     private Integer accountType;
     @JsonProperty("balance")
-    private String balance;
+    private BigInteger balance;
     @JsonProperty("nonce")
     private Integer nonce;
     @JsonProperty("firstTime")
@@ -40,11 +41,11 @@ public class EthAccount {
     @JsonProperty("numInternalTxns")
     private Integer numInternalTxns;
     @JsonProperty("totalReceived")
-    private String totalReceived;
+    private BigInteger totalReceived;
     @JsonProperty("totalSent")
-    private String totalSent;
+    private BigInteger totalSent;
     @JsonProperty("totalFee")
-    private String totalFee;
+    private BigInteger totalFee;
     @JsonProperty("txns")
     private List<EthTransaction> txns = new ArrayList<>();
     @JsonProperty("txnOffset")
@@ -66,7 +67,7 @@ public class EthAccount {
         return accountType;
     }
 
-    public String getBalance() {
+    public BigInteger getBalance() {
         return balance;
     }
 
@@ -86,15 +87,15 @@ public class EthAccount {
         return numInternalTxns;
     }
 
-    public String getTotalReceived() {
+    public BigInteger getTotalReceived() {
         return totalReceived;
     }
 
-    public String getTotalSent() {
+    public BigInteger getTotalSent() {
         return totalSent;
     }
 
-    public String getTotalFee() {
+    public BigInteger getTotalFee() {
         return totalFee;
     }
 
