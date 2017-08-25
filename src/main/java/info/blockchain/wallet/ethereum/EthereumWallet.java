@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
@@ -90,7 +91,7 @@ public class EthereumWallet {
         return new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
     }
 
-    public void save(DeterministicKey metaDataHDNode)
+    public void save()
         throws IOException, MetadataException, InvalidCipherTextException {
         metadata.putMetadata(toJson());
     }

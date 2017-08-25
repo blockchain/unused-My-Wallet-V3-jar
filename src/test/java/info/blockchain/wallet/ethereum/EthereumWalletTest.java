@@ -7,6 +7,7 @@ import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.util.MetadataUtil;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
@@ -163,7 +164,7 @@ public class EthereumWalletTest extends MockedResponseTest {
         //Act
         subject = new EthereumWallet(wallet.getMasterKey(),"My Ether Wallet");
         subject.setHasSeen(true);
-        subject.save(MetadataUtil.deriveMetadataNode(wallet.getMasterKey()));
+        subject.save();
 
         //Assert
         Assert.assertTrue(subject.hasSeen());

@@ -5,11 +5,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import info.blockchain.wallet.util.HashUtil;
+import java.util.Arrays;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.ethereum.crypto.ECKey;
-import org.ethereum.util.Utils;
 import org.spongycastle.util.encoders.Hex;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -43,9 +44,10 @@ public class EthereumAccount {
     }
 
     public EthereumAccount(ECKey addressKey, String label) {
+
         this.accountKey = addressKey;
-        assert Utils.isValidAddress(accountKey.getAddress()) : "Invalid Ethereum address";
-        this.address = "0x" + Hex.toHexString(accountKey.getAddress());
+        this.address = HashUtil.toHexString(computeAddress(accountKey.getPubKeyPoint().getEncoded(false)));
+        System.out.println(this.address);
         this.label = label;
     }
 
@@ -68,5 +70,15 @@ public class EthereumAccount {
     //TODO: 24/08/2017 https://forum.ethereum.org/discussion/9220/eth-address-upper-and-lower-characters-does-not-matter
     public String getAddress() {
         return address;
+    }
+
+    /**
+     * Compute an address from an encoded public key.
+     *
+     * @param pubBytes an encoded (uncompressed) public key
+     * @return 20-byte address
+     */
+    private byte[] computeAddress(byte[] pubBytes) {
+        return HashUtil.sha3omit12(Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
     }
 }
