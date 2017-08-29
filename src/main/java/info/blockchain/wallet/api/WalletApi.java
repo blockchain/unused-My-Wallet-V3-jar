@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -215,9 +216,17 @@ public class WalletApi {
                 BlockchainFramework.getApiCode());
     }
 
-    public Observable<ResponseBody> getHistoricPrice(long satoshis, String currency, long timeInMillis) {
-        return getServerApiInstance().getHistoricPrice(
+    public Observable<ResponseBody> getBtcHistoricPrice(long satoshis, String currency, long timeInMillis) {
+        return getServerApiInstance().getBtcHistoricPrice(
                 satoshis,
+                currency,
+                timeInMillis,
+                BlockchainFramework.getApiCode());
+    }
+
+    public Observable<ResponseBody> getEthHistoricPrice(BigInteger wei, String currency, long timeInMillis) {
+        return getServerApiInstance().getEthHistoricPrice(
+                wei.toString(),
                 currency,
                 timeInMillis,
                 BlockchainFramework.getApiCode());
