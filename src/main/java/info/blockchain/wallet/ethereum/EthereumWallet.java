@@ -14,9 +14,11 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.NoSuchElementException;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.TransactionEncoder;
+import org.web3j.protocol.core.methods.request.RawTransaction;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -144,5 +146,14 @@ public class EthereumWallet {
     public void removeTxNotes(String txHash) {
         HashMap<String, String> notes = walletData.getTxNotes();
         notes.remove(txHash);
+    }
+
+    /**
+     * @param transaction
+     * @return Signed transaction bytes
+     */
+    public byte[] signTransaction(RawTransaction transaction) {
+        Credentials credentials = Credentials.create(getAccount().accountKey.getPrivateKeyAsHex());
+        return TransactionEncoder.signMessage(transaction, credentials);
     }
 }
