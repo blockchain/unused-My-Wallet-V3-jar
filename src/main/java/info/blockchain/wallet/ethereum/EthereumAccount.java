@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import info.blockchain.wallet.util.HashUtil;
+import info.blockchain.wallet.ethereum.util.HashUtil;
 import java.util.Arrays;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.ChildNumber;
@@ -62,7 +62,7 @@ public class EthereumAccount {
         return new EthereumAccount(ECKey.fromPrivate(addressKey.getPrivKeyBytes()), label);
     }
 
-    public String getPrivateKey() {
+    public String getPrivateKeyHex() {
         return Hex.toHexString(accountKey.getPrivKeyBytes());
     }
 

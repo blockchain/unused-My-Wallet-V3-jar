@@ -1,4 +1,4 @@
-package info.blockchain.wallet.util;
+package info.blockchain.wallet.ethereum.util;
 
 import static java.util.Arrays.copyOfRange;
 
@@ -8,10 +8,9 @@ public class HashUtil {
 
     /**
      * Calculates RIGTMOST160(SHA3(input)). This is used in address
-     * calculations. *
+     * calculations.
      *
-     * @param input
-     *            - data
+     * @param input - data
      * @return - 20 right bytes of the hash keccak of the data
      */
     public static byte[] sha3omit12(byte[] input) {
