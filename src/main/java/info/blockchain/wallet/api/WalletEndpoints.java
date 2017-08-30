@@ -156,8 +156,15 @@ public interface WalletEndpoints {
     Observable<List<Merchant>> getAllMerchants();
 
     @GET("frombtc")
-    Observable<ResponseBody> getHistoricPrice(
+    Observable<ResponseBody> getBtcHistoricPrice(
             @Query("value") long value,
+            @Query("currency") String currency,
+            @Query("time") long time,
+            @Query("api_code") String apiCode);
+
+    @GET("fromEth")
+    Observable<ResponseBody> getEthHistoricPrice(
+            @Query("value") String value,
             @Query("currency") String currency,
             @Query("time") long time,
             @Query("api_code") String apiCode);

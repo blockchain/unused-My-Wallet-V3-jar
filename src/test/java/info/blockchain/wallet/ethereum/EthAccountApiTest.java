@@ -1,7 +1,7 @@
 package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.MockedResponseTest;
-import info.blockchain.wallet.ethereum.data.EthAccount;
+import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthTransaction;
 
 import org.junit.Test;
@@ -21,11 +21,11 @@ public class EthAccountApiTest extends MockedResponseTest {
         // Arrange
         mockInterceptor.setResponseString(ACCOUNT_RESPONSE);
         // Act
-        final TestObserver<EthAccount> response = subject.getEthAccount("address").test();
+        final TestObserver<EthAddressResponse> response = subject.getEthAddress("address").test();
         // Assert
         response.assertComplete();
         response.assertNoErrors();
-        final EthAccount ethAccount = response.values().get(0);
+        final EthAddressResponse ethAccount = response.values().get(0);
         assertEquals(8878260, (int) ethAccount.getId());
         assertEquals("0x879dbfde84b0239feb355f55f81fb29f898c778c", ethAccount.getAccount());
         assertEquals(2, ethAccount.getTransactions().size());

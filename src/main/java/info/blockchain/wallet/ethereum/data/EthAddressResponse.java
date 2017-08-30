@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         creatorVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class EthAccount {
+public class EthAddressResponse {
 
     @JsonProperty("id")
     private Integer id;

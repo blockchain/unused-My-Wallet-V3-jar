@@ -1,7 +1,7 @@
 package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.ethereum.data.EthAccount;
+import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 
 import java.util.HashMap;
 
@@ -14,14 +14,14 @@ public class EthAccountApi {
     private EthEndpoints endpoints;
 
     /**
-     * Returns an {@link EthAccount} object for a given ETH address as an {@link Observable}. An
-     * {@link EthAccount} contains a list of transactions associated with the account, as well as a
-     * final balance.
+     * Returns an {@link EthAddressResponse} object for a given ETH address as an {@link
+     * Observable}. An {@link EthAddressResponse} contains a list of transactions associated with
+     * the account, as well as a final balance.
      *
      * @param address The ETH address to be queried
-     * @return An {@link Observable} wrapping an {@link EthAccount}
+     * @return An {@link Observable} wrapping an {@link EthAddressResponse}
      */
-    public Observable<EthAccount> getEthAccount(String address) {
+    public Observable<EthAddressResponse> getEthAddress(String address) {
         return getApiInstance().getEthAccount(address);
     }
 
