@@ -162,7 +162,7 @@ public interface WalletEndpoints {
             @Query("time") long time,
             @Query("api_code") String apiCode);
 
-    @GET("fromEth")
+    @GET("frometh")
     Observable<ResponseBody> getEthHistoricPrice(
             @Query("value") String value,
             @Query("currency") String currency,

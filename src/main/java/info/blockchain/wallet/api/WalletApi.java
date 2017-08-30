@@ -30,7 +30,7 @@ public class WalletApi {
     private static WalletEndpoints walletApi;
     private static WalletEndpoints walletServer;
 
-    private WalletEndpoints getBaseApiInstance() {
+    private WalletEndpoints getApiInstance() {
         if (walletApi == null) {
             walletApi = BlockchainFramework.getRetrofitApiInstance().
                     create(WalletEndpoints.class);
@@ -38,7 +38,7 @@ public class WalletApi {
         return walletApi;
     }
 
-    private WalletEndpoints getServerApiInstance() {
+    private WalletEndpoints getExplorerInstance() {
         if (walletServer == null) {
             walletServer = BlockchainFramework.getRetrofitExplorerInstance()
                     .create(WalletEndpoints.class);
@@ -47,22 +47,22 @@ public class WalletApi {
     }
 
     public Observable<FeeList> getDynamicFee() {
-        return getBaseApiInstance().getFees();
+        return getApiInstance().getFees();
     }
 
     public Call<ResponseBody> getRandomBytesCall() {
-        return getBaseApiInstance().getRandomBytesCall(32, "hex");
+        return getApiInstance().getRandomBytesCall(32, "hex");
     }
 
     public Observable<ResponseBody> getRandomBytes() {
-        return getBaseApiInstance().getRandomBytes(32, "hex");
+        return getApiInstance().getRandomBytes(32, "hex");
     }
 
     public Observable<ResponseBody> updateFirebaseNotificationToken(String token,
                                                                     String guid,
                                                                     String sharedKey) {
 
-        return getServerApiInstance().postToWallet("update-firebase",
+        return getExplorerInstance().postToWallet("update-firebase",
                 guid,
                 sharedKey,
                 token,
@@ -74,7 +74,7 @@ public class WalletApi {
                                                  String sharedKey,
                                                  String signedGuid) {
 
-        return getServerApiInstance().postToWallet("register-mdid",
+        return getExplorerInstance().postToWallet("register-mdid",
                 guid, sharedKey, signedGuid, signedGuid.length(),
                 BlockchainFramework.getApiCode());
     }
@@ -83,18 +83,18 @@ public class WalletApi {
                                                    String sharedKey,
                                                    String signedGuid) {
 
-        return getServerApiInstance().postToWallet("unregister-mdid",
+        return getExplorerInstance().postToWallet("unregister-mdid",
                 guid, sharedKey, signedGuid, signedGuid.length(),
                 BlockchainFramework.getApiCode());
     }
 
     public Observable<Response<Status>> setAccess(String key, String value, String pin) {
         String hex = Hex.toHexString(value.getBytes());
-        return getServerApiInstance().pinStore(key, pin, hex, "put", BlockchainFramework.getApiCode());
+        return getExplorerInstance().pinStore(key, pin, hex, "put", BlockchainFramework.getApiCode());
     }
 
     public Observable<Response<Status>> validateAccess(String key, String pin) {
-        return getServerApiInstance().pinStore(key, pin, null, "get", BlockchainFramework.getApiCode());
+        return getExplorerInstance().pinStore(key, pin, null, "get", BlockchainFramework.getApiCode());
     }
 
     public Call<ResponseBody> insertWallet(String guid,
@@ -110,7 +110,7 @@ public class WalletApi {
             pipedAddresses = StringUtils.join(activeAddressList, "|");
         }
 
-        return getServerApiInstance().syncWalletCall("insert",
+        return getExplorerInstance().syncWalletCall("insert",
                 guid,
                 sharedKey,
                 encryptedPayload,
@@ -136,7 +136,7 @@ public class WalletApi {
             pipedAddresses = StringUtils.join(activeAddressList, "|");
         }
 
-        return getServerApiInstance().syncWalletCall("update",
+        return getExplorerInstance().syncWalletCall("update",
                 guid,
                 sharedKey,
                 encryptedPayload,
@@ -150,7 +150,7 @@ public class WalletApi {
     }
 
     public Call<ResponseBody> fetchWalletData(String guid, String sharedKey) {
-        return getServerApiInstance().fetchWalletData("wallet.aes.json",
+        return getExplorerInstance().fetchWalletData("wallet.aes.json",
                 guid,
                 sharedKey,
                 "json",
@@ -160,7 +160,7 @@ public class WalletApi {
     public Observable<ResponseBody> submitTwoFactorCode(String sessionId, String guid, String twoFactorCode) {
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("Authorization", "Bearer " + sessionId);
-        return getServerApiInstance().submitTwoFactorCode(
+        return getExplorerInstance().submitTwoFactorCode(
                 headerMap,
                 "get-wallet",
                 guid,
@@ -171,11 +171,11 @@ public class WalletApi {
     }
 
     public Observable<Response<ResponseBody>> getSessionId(String guid) {
-        return getServerApiInstance().getSessionId(guid);
+        return getExplorerInstance().getSessionId(guid);
     }
 
     public Observable<Response<ResponseBody>> fetchEncryptedPayload(String guid, String sessionId) {
-        return getServerApiInstance().fetchEncryptedPayload(guid,
+        return getExplorerInstance().fetchEncryptedPayload(guid,
                 "SID=" + sessionId,
                 "json",
                 false,
@@ -183,23 +183,23 @@ public class WalletApi {
     }
 
     public Call<ResponseBody> fetchPairingEncryptionPasswordCall(final String guid) {
-        return getServerApiInstance().fetchPairingEncryptionPasswordCall("pairing-encryption-password",
+        return getExplorerInstance().fetchPairingEncryptionPasswordCall("pairing-encryption-password",
                 guid,
                 BlockchainFramework.getApiCode());
     }
 
     public Observable<ResponseBody> fetchPairingEncryptionPassword(final String guid) {
-        return getServerApiInstance().fetchPairingEncryptionPassword("pairing-encryption-password",
+        return getExplorerInstance().fetchPairingEncryptionPassword("pairing-encryption-password",
                 guid,
                 BlockchainFramework.getApiCode());
     }
 
     public Observable<List<Merchant>> getAllMerchants() {
-        return getBaseApiInstance().getAllMerchants();
+        return getApiInstance().getAllMerchants();
     }
 
     public Observable<Settings> fetchSettings(String method, String guid, String sharedKey) {
-        return getServerApiInstance().fetchSettings(method,
+        return getExplorerInstance().fetchSettings(method,
                 guid,
                 sharedKey,
                 "plain",
@@ -207,7 +207,7 @@ public class WalletApi {
     }
 
     public Observable<ResponseBody> updateSettings(String method, String guid, String sharedKey, String payload) {
-        return getServerApiInstance().updateSettings(method,
+        return getExplorerInstance().updateSettings(method,
                 guid,
                 sharedKey,
                 payload,
@@ -217,7 +217,7 @@ public class WalletApi {
     }
 
     public Observable<ResponseBody> getBtcHistoricPrice(long satoshis, String currency, long timeInMillis) {
-        return getServerApiInstance().getBtcHistoricPrice(
+        return getApiInstance().getBtcHistoricPrice(
                 satoshis,
                 currency,
                 timeInMillis,
@@ -225,7 +225,7 @@ public class WalletApi {
     }
 
     public Observable<ResponseBody> getEthHistoricPrice(BigInteger wei, String currency, long timeInMillis) {
-        return getServerApiInstance().getEthHistoricPrice(
+        return getApiInstance().getEthHistoricPrice(
                 wei.toString(),
                 currency,
                 timeInMillis,
@@ -233,13 +233,13 @@ public class WalletApi {
     }
 
     public Observable<Status> logEvent(String name) {
-        return getServerApiInstance().logEvent(
+        return getExplorerInstance().logEvent(
                 name,
                 BlockchainFramework.getApiCode());
     }
 
     public Observable<WalletOptions> getWalletOptions() {
-        return getServerApiInstance().getWalletOptions(BlockchainFramework.getApiCode());
+        return getExplorerInstance().getWalletOptions(BlockchainFramework.getApiCode());
     }
 
 }
