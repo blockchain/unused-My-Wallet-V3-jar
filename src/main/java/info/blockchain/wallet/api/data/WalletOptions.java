@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,6 +19,8 @@ public class WalletOptions {
     private Partners partners;
     @JsonProperty("androidBuyPercent")
     private double rolloutPercentage;
+    @JsonProperty("android")
+    private Map<String, Boolean> androidFlags = new HashMap<>();
 
     public List<String> getBuySellCountries() {
         return buySellCountries;
@@ -29,4 +33,9 @@ public class WalletOptions {
     public double getRolloutPercentage() {
         return rolloutPercentage;
     }
+
+    public Map<String, Boolean> getAndroidFlags() {
+        return androidFlags;
+    }
+
 }
