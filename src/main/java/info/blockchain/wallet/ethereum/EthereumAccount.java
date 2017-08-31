@@ -81,4 +81,8 @@ public class EthereumAccount {
     private byte[] computeAddress(byte[] pubBytes) {
         return HashUtil.sha3omit12(Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
     }
+
+    public String getLabel() {
+        return label;
+    }
 }
