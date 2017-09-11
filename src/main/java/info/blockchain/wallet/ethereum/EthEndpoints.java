@@ -1,8 +1,7 @@
 package info.blockchain.wallet.ethereum;
 
-import info.blockchain.wallet.ethereum.data.EthAddressResponse;
-
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
+
 import java.util.HashMap;
 
 import io.reactivex.Observable;

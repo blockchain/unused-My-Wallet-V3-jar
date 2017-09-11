@@ -2,9 +2,12 @@ package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
-
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
@@ -15,15 +18,15 @@ public class EthAccountApi {
     private EthEndpoints endpoints;
 
     /**
-     * Returns an {@link EthAddressResponse} object for a given ETH address as an {@link
+     * Returns an {@link EthAddressResponse} object for a list of given ETH addresses as an {@link
      * Observable}. An {@link EthAddressResponse} contains a list of transactions associated with
-     * the account, as well as a final balance.
+     * the accounts, as well as a final balance for each.
      *
-     * @param address The ETH address to be queried
+     * @param addresses The ETH addresses to be queried
      * @return An {@link Observable} wrapping an {@link EthAddressResponse}
      */
-    public Observable<EthAddressResponseMap> getEthAddress(String address) {
-        return getApiInstance().getEthAccount(address);
+    public Observable<EthAddressResponseMap> getEthAddress(List<String> addresses) {
+        return getApiInstance().getEthAccount(StringUtils.join(addresses, ","));
     }
 
     /**
