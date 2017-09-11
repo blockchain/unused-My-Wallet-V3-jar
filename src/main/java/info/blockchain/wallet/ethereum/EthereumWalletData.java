@@ -35,6 +35,9 @@ public class EthereumWalletData {
     @JsonProperty("accounts")
     private ArrayList<EthereumAccount> accounts;
 
+    @JsonProperty("legacy_account")
+    private EthereumAccount legacyAccount;
+
     @JsonProperty("tx_notes")
     private HashMap<String, String> txNotes;
 
@@ -68,5 +71,13 @@ public class EthereumWalletData {
 
     public void setTxNotes(HashMap<String, String> txNotes) {
         this.txNotes = txNotes;
+    }
+
+    public EthereumAccount getLegacyAccount() {
+        return legacyAccount;
+    }
+
+    public void setLegacyAccount(EthereumAccount legacyAccount) {
+        this.legacyAccount = legacyAccount;
     }
 }
