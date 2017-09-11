@@ -3,6 +3,7 @@ package info.blockchain.wallet.ethereum;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 
+import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import java.util.HashMap;
 
 import io.reactivex.Observable;
@@ -21,7 +22,7 @@ public class EthAccountApi {
      * @param address The ETH address to be queried
      * @return An {@link Observable} wrapping an {@link EthAddressResponse}
      */
-    public Observable<EthAddressResponse> getEthAddress(String address) {
+    public Observable<EthAddressResponseMap> getEthAddress(String address) {
         return getApiInstance().getEthAccount(address);
     }
 

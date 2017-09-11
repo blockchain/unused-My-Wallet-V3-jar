@@ -2,8 +2,10 @@ package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
+import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import info.blockchain.wallet.ethereum.data.EthTransaction;
 
+import java.util.Map;
 import org.junit.Test;
 
 import io.reactivex.observers.TestObserver;
@@ -21,11 +23,15 @@ public class EthAccountApiTest extends MockedResponseTest {
         // Arrange
         mockInterceptor.setResponseString(ACCOUNT_RESPONSE);
         // Act
-        final TestObserver<EthAddressResponse> response = subject.getEthAddress("address").test();
+        final TestObserver<EthAddressResponseMap> response = subject.getEthAddress("address").test();
         // Assert
         response.assertComplete();
         response.assertNoErrors();
-        final EthAddressResponse ethAccount = response.values().get(0);
+        final Map<String, EthAddressResponse> ethAccountMap = response.values().get(0).getEthAddressResponseMap();
+
+        EthAddressResponse ethAccount = ethAccountMap
+            .get("0x879dbfde84b0239feb355f55f81fb29f898c778c");
+
         assertEquals(8878260, (int) ethAccount.getId());
         assertEquals("0x879dbfde84b0239feb355f55f81fb29f898c778c", ethAccount.getAccount());
         assertEquals(2, ethAccount.getTransactions().size());
@@ -61,7 +67,8 @@ public class EthAccountApiTest extends MockedResponseTest {
         assertTrue(contract);
     }
 
-    private static final String ACCOUNT_RESPONSE = "{\n" +
+    private static final String ACCOUNT_RESPONSE = "{"
+        + "\"0x879dbfde84b0239feb355f55f81fb29f898c778c\":{\n" +
             "  \"id\": 8878260,\n" +
             "  \"txn_count\": 2,\n" +
             "  \"account\": \"0x879dbfde84b0239feb355f55f81fb29f898c778c\",\n" +
@@ -117,7 +124,7 @@ public class EthAccountApiTest extends MockedResponseTest {
             "    }\n" +
             "  ],\n" +
             "  \"txnOffset\": 0\n" +
-            "}";
+            "}}";
 
     private static final String NO_CONTRACT_RESPONSE = "{\n" +
             "\t\"contract\": false\n" +
