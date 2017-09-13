@@ -255,7 +255,7 @@ public class FormatsUtil {
          * check basic address requirements, i.e. is not empty and contains
          * the valid number and type of characters
          */
-        if (address.isEmpty() || !ignoreCaseEthAddrPattern.matcher(address).find()) {
+        if (address == null || address.isEmpty() || !ignoreCaseEthAddrPattern.matcher(address).find()) {
             return false;
         } else if (lowerCaseEthAddrPattern.matcher(address).find()
             || upperCaseEthAddrPattern.matcher(address).find()) {
