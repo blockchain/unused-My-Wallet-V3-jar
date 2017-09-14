@@ -3,11 +3,14 @@ package info.blockchain.wallet.ethereum;
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
+import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 import info.blockchain.wallet.ethereum.data.EthTransaction;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Map;
 
 import io.reactivex.observers.TestObserver;
@@ -23,7 +26,9 @@ public class EthAccountApiTest extends MockedResponseTest {
     @Test
     public void getEthAccount() throws Exception {
         // Arrange
-        mockInterceptor.setResponseString(ACCOUNT_RESPONSE);
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(200, ACCOUNT_RESPONSE));
+        mockInterceptor.setResponseList(responses);
         // Act
         final TestObserver<EthAddressResponseMap> response =
                 subject.getEthAddress(Arrays.asList("address", "address")).test();
@@ -47,7 +52,9 @@ public class EthAccountApiTest extends MockedResponseTest {
     @Test
     public void getIfContract_returns_false() throws Exception {
         // Arrange
-        mockInterceptor.setResponseString(NO_CONTRACT_RESPONSE);
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(200, NO_CONTRACT_RESPONSE));
+        mockInterceptor.setResponseList(responses);
         // Act
         final TestObserver<Boolean> response = subject.getIfContract("address").test();
         // Assert
@@ -60,7 +67,9 @@ public class EthAccountApiTest extends MockedResponseTest {
     @Test
     public void getIfContract_returns_true() throws Exception {
         // Arrange
-        mockInterceptor.setResponseString(CONTRACT_RESPONSE);
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(200, CONTRACT_RESPONSE));
+        mockInterceptor.setResponseList(responses);
         // Act
         final TestObserver<Boolean> response = subject.getIfContract("address").test();
         // Assert
@@ -68,6 +77,21 @@ public class EthAccountApiTest extends MockedResponseTest {
         response.assertNoErrors();
         final Boolean contract = response.values().get(0);
         assertTrue(contract);
+    }
+
+    @Test
+    public void getLatestBlock() throws Exception {
+        // Arrange
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(200, LATEST_BLOCK_RESPONSE));
+        mockInterceptor.setResponseList(responses);
+        // Act
+        final TestObserver<EthLatestBlock> response = subject.getLatestBlock().test();
+        // Assert
+        response.assertComplete();
+        response.assertNoErrors();
+        final EthLatestBlock latestBlock = response.values().get(0);
+        assertEquals(4272693L, ((long) latestBlock.getBlockHeight()));
     }
 
     private static final String ACCOUNT_RESPONSE = "{\n" +
@@ -170,6 +194,29 @@ public class EthAccountApiTest extends MockedResponseTest {
 
     private static final String CONTRACT_RESPONSE = "{\n" +
             "\t\"contract\": true\n" +
+            "}";
+
+    private static final String LATEST_BLOCK_RESPONSE = "{\n" +
+            "  \"number\": 4272693,\n" +
+            "  \"hash\": \"0x6d77039178b68664d48c3946b5525ea62d1380c9fd988a3999662d431f20b62f\",\n" +
+            "  \"parentHash\": \"0x08bbf2f3e03f89b3cdba9720cbc7fcab14d9024d0331789a02b392524c5ced1e\",\n" +
+            "  \"nonce\": 17644216103464599520,\n" +
+            "  \"sha3Uncles\": \"0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347\",\n" +
+            "  \"logsBloom\": \"0x5090400024c801b8040708044004c14210005000a802121003b1050041a0018a000229141061030328c0260000c0242b202780100044108904000822aa218206000800402c5184009100300e2048040062040001012c4001084912008266434420024020724461840040a160820808860061002458048840800401102a90200c2020020100000020a00004000500001045240881018000a082120400000423060200020804001000b20060806300802080050581201180210800000002102089c80105c301062040002c44a00240002080121084802c4004a415300424082145049440801011012000080066800002a4401c014008020058010000820820129a\",\n" +
+            "  \"transactionsRoot\": \"0xaae344a412c96dd27600e347584b0f1cb5992fad659be2af02d33fff1d1f0796\",\n" +
+            "  \"stateRoot\": \"0x666e20c6b20b77e143312537633dc8fc0aef3ed49834f8e1250d9e3a0410c0ab\",\n" +
+            "  \"receiptsRoot\": \"0x7d62d603a32ceb113dd012f4c015627001dc15199f41a3d3d0f9be6de8bcb8e0\",\n" +
+            "  \"author\": null,\n" +
+            "  \"miner\": \"0xea674fdde714fd979de3edf0f56aa9716b898ec8\",\n" +
+            "  \"mixHash\": \"0xe990143c0bdf54274c8e2830121dc90e7ef2e11ffb144595601f0f593a9f267c\",\n" +
+            "  \"difficulty\": 2264942935176218,\n" +
+            "  \"totalDifficulty\": 928317937389649709684,\n" +
+            "  \"extraData\": \"0x65746865726d696e652d6173696135\",\n" +
+            "  \"size\": 23935,\n" +
+            "  \"gasLimit\": 6712392,\n" +
+            "  \"gasUsed\": 6695785,\n" +
+            "  \"timestamp\": 1505383570,\n" +
+            "  \"transactions\": []\n" +
             "}";
 
 }

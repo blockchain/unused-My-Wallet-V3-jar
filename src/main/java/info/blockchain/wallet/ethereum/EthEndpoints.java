@@ -1,6 +1,7 @@
 package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
+import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 
 import java.util.HashMap;
 
@@ -15,5 +16,8 @@ interface EthEndpoints {
 
     @GET(EthUrls.ACCOUNT + "/{address}" + EthUrls.IS_CONTRACT)
     Observable<HashMap<String, Boolean>> getIfContract(@Path("address") String address);
+
+    @GET(EthUrls.LATEST_BLOCK)
+    Observable<EthLatestBlock> getLatestBlock();
 
 }
