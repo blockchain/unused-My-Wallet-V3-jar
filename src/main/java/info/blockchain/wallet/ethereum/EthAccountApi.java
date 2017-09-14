@@ -3,6 +3,7 @@ package info.blockchain.wallet.ethereum;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
+import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,6 +46,15 @@ public class EthAccountApi {
                         return map.get("contract");
                     }
                 });
+    }
+
+    /**
+     * Returns information about the latest block via a {@link EthLatestBlock} object.
+     *
+     * @return An {@link Observable} wrapping an {@link EthLatestBlock}
+     */
+    public Observable<EthLatestBlock> getLatestBlock() {
+        return getApiInstance().getLatestBlock();
     }
 
     /**
