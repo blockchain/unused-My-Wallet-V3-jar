@@ -3,6 +3,7 @@ package info.blockchain.wallet.ethereum;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
+import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 
 import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,6 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
-import retrofit2.Call;
 
 @SuppressWarnings("WeakerAccess")
 public class EthAccountApi {
@@ -63,6 +63,14 @@ public class EthAccountApi {
                     return map.get("txHash");
                 }
             });
+    }
+
+     /**
+     * Returns information about the latest block via a {@link EthLatestBlock} object.
+     * @return An {@link Observable} wrapping an {@link EthLatestBlock}
+     */
+    public Observable<EthLatestBlock> getLatestBlock() {
+        return getApiInstance().getLatestBlock();
     }
 
     /**

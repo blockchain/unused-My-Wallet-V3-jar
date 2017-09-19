@@ -2,8 +2,11 @@ package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
-import io.reactivex.Observable;
+import info.blockchain.wallet.ethereum.data.EthLatestBlock;
+
 import java.util.HashMap;
+
+import io.reactivex.Observable;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -19,4 +22,8 @@ interface EthEndpoints {
 
     @POST(EthUrls.PUSH_TX)
     Observable<HashMap<String, String>> pushTx(@Body EthPushTxRequest ethPushTxRequest);
+
+    @GET(EthUrls.LATEST_BLOCK)
+    Observable<EthLatestBlock> getLatestBlock();
+
 }
