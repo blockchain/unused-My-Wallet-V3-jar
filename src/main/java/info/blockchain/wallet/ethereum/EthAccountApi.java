@@ -5,6 +5,7 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 
+import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -49,8 +50,23 @@ public class EthAccountApi {
     }
 
     /**
-     * Returns information about the latest block via a {@link EthLatestBlock} object.
+     * Executes signed eth transaction and returns transaction hash.
      *
+     * @param rawTx The ETH address to be queried
+     * @return An {@link Observable} returning true or false based on the address's contract status
+     */
+    public Observable<String> pushTx(String rawTx) {
+        return getApiInstance().pushTx(new EthPushTxRequest(rawTx))
+            .map(new Function<HashMap<String, String>, String>() {
+                @Override
+                public String apply(HashMap<String, String> map) throws Exception {
+                    return map.get("txHash");
+                }
+            });
+    }
+
+     /**
+     * Returns information about the latest block via a {@link EthLatestBlock} object.
      * @return An {@link Observable} wrapping an {@link EthLatestBlock}
      */
     public Observable<EthLatestBlock> getLatestBlock() {
