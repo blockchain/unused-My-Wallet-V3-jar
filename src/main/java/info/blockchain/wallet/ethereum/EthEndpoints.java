@@ -1,11 +1,12 @@
 package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
-
-import java.util.HashMap;
-
+import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
 import io.reactivex.Observable;
+import java.util.HashMap;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 interface EthEndpoints {
@@ -16,4 +17,6 @@ interface EthEndpoints {
     @GET(EthUrls.ACCOUNT + "/{address}" + EthUrls.IS_CONTRACT)
     Observable<HashMap<String, Boolean>> getIfContract(@Path("address") String address);
 
+    @POST(EthUrls.PUSH_TX)
+    Observable<HashMap<String, String>> pushTx(@Body EthPushTxRequest ethPushTxRequest);
 }

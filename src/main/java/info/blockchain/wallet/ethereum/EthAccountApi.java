@@ -4,6 +4,7 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 
+import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import retrofit2.Call;
 
 @SuppressWarnings("WeakerAccess")
 public class EthAccountApi {
@@ -45,6 +47,22 @@ public class EthAccountApi {
                         return map.get("contract");
                     }
                 });
+    }
+
+    /**
+     * Executes signed eth transaction and returns transaction hash.
+     *
+     * @param rawTx The ETH address to be queried
+     * @return An {@link Observable} returning true or false based on the address's contract status
+     */
+    public Observable<String> pushTx(String rawTx) {
+        return getApiInstance().pushTx(new EthPushTxRequest(rawTx))
+            .map(new Function<HashMap<String, String>, String>() {
+                @Override
+                public String apply(HashMap<String, String> map) throws Exception {
+                    return map.get("txHash");
+                }
+            });
     }
 
     /**

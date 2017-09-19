@@ -30,4 +30,16 @@ public class EthAccountApiIntegTest extends BaseIntegTest {
         assertEquals(2, testObserver.values().get(0).getEthAddressResponseMap().values().size());
     }
 
+    /**
+     * We just ensure that the endpoint is reachable and that form data is in correct format not to cause a 500 error.
+     */
+    @Test
+    public void pushTx() throws Exception {
+
+        final TestObserver<String> testObserver =
+            accountApi.pushTx("0xf86b808504e3b2920082520894ccc1dd86df371ecc3ea28a6877fd2301a09effd08701ad3aca3b0dee801ba039415ed7f464bee5cd36ee46410f8803fc941e7b2a453e62653f6e52fece179fa004c647a056aafe86ecfd50c345a7bb74da12ba716caf8e5043883f38596ed70a").test();
+
+        //Tx already submitted = "message" : "Transaction with the same hash was already imported."
+        testObserver.assertErrorMessage("HTTP 400 Bad Request");
+    }
 }
