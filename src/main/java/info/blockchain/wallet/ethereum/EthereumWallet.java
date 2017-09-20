@@ -96,7 +96,6 @@ public class EthereumWallet {
 
     public void save()
         throws IOException, MetadataException, InvalidCipherTextException {
-        System.out.println("vos saving :"+toJson());
         metadata.putMetadata(toJson());
     }
 
