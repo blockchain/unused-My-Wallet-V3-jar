@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.web3j.crypto.Credentials;
@@ -54,7 +55,7 @@ public class EthereumWallet {
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(walletMasterKey);
 
         ArrayList<EthereumAccount> accounts = new ArrayList<>();
-        accounts.add(EthereumAccount.derive(walletMasterKey, ACCOUNT_INDEX, defaultAccountName));
+        accounts.add(EthereumAccount.deriveAccount(walletMasterKey, ACCOUNT_INDEX, defaultAccountName));
 
         this.walletData = new EthereumWalletData();
         this.walletData.setHasSeen(false);
@@ -95,6 +96,7 @@ public class EthereumWallet {
 
     public void save()
         throws IOException, MetadataException, InvalidCipherTextException {
+        System.out.println("vos saving :"+toJson());
         metadata.putMetadata(toJson());
     }
 
@@ -131,6 +133,11 @@ public class EthereumWallet {
      * @return Single Ethereum account
      */
     public EthereumAccount getAccount() {
+
+        if(walletData.getAccounts().isEmpty()){
+            return null;
+        }
+
         return walletData.getAccounts().get(ACCOUNT_INDEX);
     }
 
@@ -146,14 +153,5 @@ public class EthereumWallet {
     public void removeTxNotes(String txHash) {
         HashMap<String, String> notes = walletData.getTxNotes();
         notes.remove(txHash);
-    }
-
-    /**
-     * @param transaction
-     * @return Signed transaction bytes
-     */
-    public byte[] signTransaction(RawTransaction transaction) {
-        Credentials credentials = Credentials.create(getAccount().accountKey.getPrivateKeyAsHex());
-        return TransactionEncoder.signMessage(transaction, credentials);
     }
 }

@@ -143,7 +143,7 @@ public class Tools {
     /**
      * Returns a list of receive addresses between two points on the chain.
      *
-     * @param account    The {@link HDAccount} that you wish to derive addresses from
+     * @param account    The {@link HDAccount} that you wish to deriveAccount addresses from
      * @param startIndex The starting index, probably the next available index
      * @param endIndex   The finishing index, an arbitrary number away from the starting point
      * @return A non-null List of addresses as Strings

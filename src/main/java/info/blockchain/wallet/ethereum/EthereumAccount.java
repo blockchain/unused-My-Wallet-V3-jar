@@ -12,6 +12,9 @@ import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.spongycastle.util.encoders.Hex;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.TransactionEncoder;
+import org.web3j.protocol.core.methods.request.RawTransaction;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -37,21 +40,25 @@ public class EthereumAccount {
     @JsonProperty("addr")
     private String address;
 
-    ECKey accountKey;
+    @JsonProperty("correct")
+    private boolean correct;
 
     public EthereumAccount() {
         //default constructor for Jackson
     }
 
-    public EthereumAccount(ECKey addressKey, String label) {
-
-        this.accountKey = addressKey;
-        this.address = HashUtil.toHexString(computeAddress(accountKey.getPubKeyPoint().getEncoded(false)));
-        System.out.println(this.address);
-        this.label = label;
+    public EthereumAccount(ECKey addressKey) {
+        this.address = HashUtil.toHexString(computeAddress(addressKey.getPubKeyPoint().getEncoded(false)));
     }
 
-    public static EthereumAccount derive(DeterministicKey masterKey, int accountIndex, String label) {
+    public static EthereumAccount deriveAccount(DeterministicKey masterKey, int accountIndex, String label) {
+        EthereumAccount ethereumAccount = new EthereumAccount(deriveECKey(masterKey, accountIndex));
+        ethereumAccount.setLabel(label);
+        ethereumAccount.setCorrect(true);
+        return ethereumAccount;
+    }
+
+    public static ECKey deriveECKey(DeterministicKey masterKey, int accountIndex) {
 
         DeterministicKey purposeKey = HDKeyDerivation.deriveChildKey(masterKey, DERIVATION_PATH_PURPOSE | ChildNumber.HARDENED_BIT);
         DeterministicKey rootKey = HDKeyDerivation.deriveChildKey(purposeKey, DERIVATION_PATH_COIN | ChildNumber.HARDENED_BIT);
@@ -59,11 +66,7 @@ public class EthereumAccount {
         DeterministicKey changeKey = HDKeyDerivation.deriveChildKey(accountKey, CHANGE_INDEX);
         DeterministicKey addressKey = HDKeyDerivation.deriveChildKey(changeKey, ADDRESS_INDEX);
 
-        return new EthereumAccount(ECKey.fromPrivate(addressKey.getPrivKeyBytes()), label);
-    }
-
-    public String getPrivateKeyHex() {
-        return Hex.toHexString(accountKey.getPrivKeyBytes());
+        return ECKey.fromPrivate(addressKey.getPrivKeyBytes());
     }
 
     //TODO: 24/08/2017 Case sensitivity is used for optional checksum
@@ -84,5 +87,26 @@ public class EthereumAccount {
 
     public String getLabel() {
         return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public boolean isCorrect() {
+        return correct;
+    }
+
+    public void setCorrect(boolean correct) {
+        this.correct = correct;
+    }
+
+    /**
+     * @param transaction
+     * @return Signed transaction bytes
+     */
+    public byte[] signTransaction(RawTransaction transaction, ECKey accountKey) {
+        Credentials credentials = Credentials.create(accountKey.getPrivateKeyAsHex());
+        return TransactionEncoder.signMessage(transaction, credentials);
     }
 }
