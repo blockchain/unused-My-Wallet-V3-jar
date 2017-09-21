@@ -153,4 +153,12 @@ public class EthereumWallet {
         HashMap<String, String> notes = walletData.getTxNotes();
         notes.remove(txHash);
     }
+
+    public String getLastTransactionHash() {
+        return walletData.getLastTx();
+    }
+
+    public void setLastTransactionHash(String txHash) {
+        walletData.setLastTx(txHash);
+    }
 }
