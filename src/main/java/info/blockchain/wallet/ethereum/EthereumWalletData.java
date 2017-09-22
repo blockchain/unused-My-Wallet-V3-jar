@@ -41,6 +41,9 @@ public class EthereumWalletData {
     @JsonProperty("tx_notes")
     private HashMap<String, String> txNotes;
 
+    @JsonProperty("last_tx")
+    private String lastTx;
+
     public boolean hasSeen() {
         return hasSeen;
     }
@@ -79,5 +82,17 @@ public class EthereumWalletData {
 
     public void setLegacyAccount(EthereumAccount legacyAccount) {
         this.legacyAccount = legacyAccount;
+    }
+
+    public boolean isHasSeen() {
+        return hasSeen;
+    }
+
+    public String getLastTx() {
+        return lastTx;
+    }
+
+    public void setLastTx(String lastTx) {
+        this.lastTx = lastTx;
     }
 }
