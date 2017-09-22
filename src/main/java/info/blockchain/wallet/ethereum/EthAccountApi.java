@@ -4,8 +4,9 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import info.blockchain.wallet.ethereum.data.EthLatestBlock;
-
 import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
+import info.blockchain.wallet.ethereum.data.EthTxDetails;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -57,20 +58,33 @@ public class EthAccountApi {
      */
     public Observable<String> pushTx(String rawTx) {
         return getApiInstance().pushTx(new EthPushTxRequest(rawTx))
-            .map(new Function<HashMap<String, String>, String>() {
-                @Override
-                public String apply(HashMap<String, String> map) throws Exception {
-                    return map.get("txHash");
-                }
-            });
+                .map(new Function<HashMap<String, String>, String>() {
+                    @Override
+                    public String apply(HashMap<String, String> map) throws Exception {
+                        return map.get("txHash");
+                    }
+                });
     }
 
-     /**
+    /**
      * Returns information about the latest block via a {@link EthLatestBlock} object.
+     *
      * @return An {@link Observable} wrapping an {@link EthLatestBlock}
      */
     public Observable<EthLatestBlock> getLatestBlock() {
         return getApiInstance().getLatestBlock();
+    }
+
+    /**
+     * Returns an {@link EthTxDetails} containing information about a specific ETH transaction. This
+     * call will return a error 400 with the payload "message": "Transaction not found" if the hash
+     * is incorrect or the transaction is still in the mempool.
+     *
+     * @param txHash The hash of the transaction you wish to check
+     * @return An {@link Observable} wrapping an {@link EthTxDetails}
+     */
+    public Observable<EthTxDetails> getTransaction(String txHash) {
+        return getApiInstance().getTransaction(txHash);
     }
 
     /**

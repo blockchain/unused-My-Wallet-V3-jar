@@ -1,8 +1,9 @@
 package info.blockchain.wallet.ethereum;
 
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
-import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
 import info.blockchain.wallet.ethereum.data.EthLatestBlock;
+import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
+import info.blockchain.wallet.ethereum.data.EthTxDetails;
 
 import java.util.HashMap;
 
@@ -25,5 +26,8 @@ interface EthEndpoints {
 
     @GET(EthUrls.LATEST_BLOCK)
     Observable<EthLatestBlock> getLatestBlock();
+
+    @GET(EthUrls.TX + "/{hash}")
+    Observable<EthTxDetails> getTransaction(@Path("hash") String txHash);
 
 }
