@@ -5,6 +5,7 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponse;
 import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 import info.blockchain.wallet.ethereum.data.EthTransaction;
+import info.blockchain.wallet.ethereum.data.EthTxDetails;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class EthAccountApiTest extends MockedResponseTest {
         final Map<String, EthAddressResponse> ethAccountMap = response.values().get(0).getEthAddressResponseMap();
 
         EthAddressResponse ethAccount = ethAccountMap
-            .get("0x879dBFdE84B0239feB355f55F81fb29f898C778C");
+                .get("0x879dBFdE84B0239feB355f55F81fb29f898C778C");
 
         assertEquals(8878260, (int) ethAccount.getId());
         assertEquals("0x879dbfde84b0239feb355f55f81fb29f898c778c", ethAccount.getAccount());
@@ -92,6 +93,21 @@ public class EthAccountApiTest extends MockedResponseTest {
         response.assertNoErrors();
         final EthLatestBlock latestBlock = response.values().get(0);
         assertEquals(4272693L, ((long) latestBlock.getBlockHeight()));
+    }
+
+    @Test
+    public void getTransactionFromHash() throws Exception {
+        // Arrange
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(200, TX_DETAILS_RESPONSE));
+        mockInterceptor.setResponseList(responses);
+        // Act
+        final TestObserver<EthTxDetails> response = subject.getTransaction("hash").test();
+        // Assert
+        response.assertComplete();
+        response.assertNoErrors();
+        final EthTxDetails txDetails = response.values().get(0);
+        assertEquals("0xcc6952c8f5c6e90d1addcaf3717b6df251982637f0cafc32c7f6348018dd2a7b", txDetails.getHash());
     }
 
     private static final String ACCOUNT_RESPONSE = "{\n" +
@@ -217,6 +233,32 @@ public class EthAccountApiTest extends MockedResponseTest {
             "  \"gasUsed\": 6695785,\n" +
             "  \"timestamp\": 1505383570,\n" +
             "  \"transactions\": []\n" +
+            "}";
+
+    public static final String TX_DETAILS_RESPONSE = "{\n" +
+            "\t\"hash\": \"0xcc6952c8f5c6e90d1addcaf3717b6df251982637f0cafc32c7f6348018dd2a7b\",\n" +
+            "\t\"nonce\": 0,\n" +
+            "\t\"blockHash\": \"0x33a980e70dd3951f85db42cfdddac4d320284d259c6e684ffb179d21586b666f\",\n" +
+            "\t\"blockNumber\": 4176736,\n" +
+            "\t\"transactionIndex\": 66,\n" +
+            "\t\"from\": \"0x879dbfde84b0239feb355f55f81fb29f898c778c\",\n" +
+            "\t\"to\": \"0x0297a2a4cf8117a27b4ad684e43c34e21e600753\",\n" +
+            "\t\"value\": 663402982550680064,\n" +
+            "\t\"gasPrice\": 21000000000,\n" +
+            "\t\"gas\": 21000,\n" +
+            "\t\"input\": \"0x\",\n" +
+            "\t\"creates\": null,\n" +
+            "\t\"publicKey\": null,\n" +
+            "\t\"raw\": null,\n" +
+            "\t\"r\": \"0x6fca196fe116a2f64e646f482294c5ae058a1cb0aa0165ddcf05b2c4b85fcd82\",\n" +
+            "\t\"s\": \"0x9b9aa060d93ccea3681bc370599ad7c55c759e9bf65ffba65344a50f9e560a4\",\n" +
+            "\t\"v\": 27,\n" +
+            "\t\"nonceRaw\": \"0x0\",\n" +
+            "\t\"blockNumberRaw\": \"0x3fbb60\",\n" +
+            "\t\"transactionIndexRaw\": \"0x42\",\n" +
+            "\t\"valueRaw\": \"0x934e17f6dde3200\",\n" +
+            "\t\"gasPriceRaw\": \"0x4e3b29200\",\n" +
+            "\t\"gasRaw\": \"0x5208\"\n" +
             "}";
 
 }
