@@ -97,7 +97,7 @@ public abstract class BaseIntegTest {
 
     private static OkHttpClient getOkHttpClient() {
         return new OkHttpClient.Builder()
-//            .addInterceptor(new ApiInterceptor())//Extensive logging
+            .addInterceptor(new ApiInterceptor())//Extensive logging
                 .build();
     }
 

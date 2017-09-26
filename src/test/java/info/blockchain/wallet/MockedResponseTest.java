@@ -99,12 +99,10 @@ public abstract class MockedResponseTest {
     }
 
     private static OkHttpClient getOkHttpClient() {
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(Level.BASIC);
 
         return new OkHttpClient.Builder()
                 .addInterceptor(mockInterceptor)//Mock responses
-                .addInterceptor(loggingInterceptor)//Extensive logging
+                .addInterceptor(new ApiInterceptor())//Extensive logging
                 .build();
     }
 
