@@ -1,6 +1,5 @@
 package info.blockchain.wallet;
 
-import info.blockchain.wallet.payload.PayloadManager;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -11,6 +10,7 @@ import okhttp3.Protocol;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.commons.cli.MissingArgumentException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,20 +35,24 @@ public class MockInterceptor implements Interceptor {
         return instance;
     }
 
+    @Deprecated
     public void setResponseStringList(LinkedList<String> responseStringList){
         this.responseStringList = responseStringList;
     }
 
+    @Deprecated
     public void setResponseString(String response) {
 
         this.responseStringList = new LinkedList<>();
         this.responseStringList.add(response);
     }
 
+    @Deprecated
     public void setResponseCodeList(LinkedList<Integer> responseCodeList){
         this.responseCodeList = responseCodeList;
     }
 
+    @Deprecated
     public void setResponseCode(int responseCode) {
 
         this.responseCodeList = new LinkedList<>();
@@ -99,5 +103,17 @@ public class MockInterceptor implements Interceptor {
         ioException = false;
 
         return response;
+    }
+
+    // TODO: 22/08/2017 Remove silly LinkedLists and fix A LOT of tests, then we can continue fixing the below method
+    public void setResponseList(LinkedList<Pair> responseList) {
+
+        responseCodeList = new LinkedList<>();
+        responseStringList = new LinkedList<>();
+
+        for(Pair meh : responseList) {
+            responseCodeList.add((Integer) meh.getLeft());
+            responseStringList.add((String) meh.getRight());
+        }
     }
 }

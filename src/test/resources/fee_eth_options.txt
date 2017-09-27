@@ -1,0 +1,9 @@
+{
+  "gasLimit" : 21000,
+  "priority" : 21,
+  "regular" : 21,
+  "limits" : {
+    "min" : 21,
+    "max" : 21
+  }
+}

@@ -7,6 +7,7 @@ import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
+import info.blockchain.wallet.contacts.data.PaymentCurrency;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.metadata.data.Message;
@@ -170,7 +171,9 @@ public class ContactsIntegTest extends BaseIntegTest{
         System.out.println("////////////////////////");
         System.out.println("\n--Sender--");
         //Step 1
-        RequestForPaymentRequest rpr = new RequestForPaymentRequest(17940000, "For the pizza");
+        RequestForPaymentRequest rpr = new RequestForPaymentRequest(17940000, "For the pizza",
+            PaymentCurrency.BITCOIN);
+        System.out.println(rpr.toJson());
         a_contacts.sendRequestForPaymentRequest(JaumeMdid, rpr);
         System.out.println("Send RPR: " + rpr.toJson());
 

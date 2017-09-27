@@ -10,4 +10,6 @@ public interface FeeEndpoints {
     @GET("mempool/fees")
     Observable<FeeOptions> getFeeOptions();
 
+    @GET("eth/fees")
+    Observable<FeeOptions> getEthFeeOptions();
 }

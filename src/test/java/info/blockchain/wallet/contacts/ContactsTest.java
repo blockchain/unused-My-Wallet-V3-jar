@@ -11,6 +11,7 @@ import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
+import info.blockchain.wallet.contacts.data.PaymentCurrency;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.RequestForPaymentRequest;
 import info.blockchain.wallet.exceptions.MetadataException;
@@ -440,7 +441,7 @@ public class ContactsTest {
         Contact receivedInvite = contacts.readInvitationLink("http://blockchain.info/invite?id=852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37&name=Me");
 
         Assert.assertTrue(receivedInvite.getName().equals("Me"));
-        Assert.assertTrue(receivedInvite.getInvitationReceived().getId().equals("852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37"));
+        Assert.assertTrue(receivedInvite.getInvitationReceived().equals("852bb6796c2aefb7ea96131b785da397dca9cb3bee5df4ea7c937493613e9c37"));
     }
 
     @Test
@@ -464,6 +465,7 @@ public class ContactsTest {
         RequestForPaymentRequest rpr = new RequestForPaymentRequest();
         rpr.setId("a9feb110-1ae2-4242-9246-f1d6ec3e3be8");
         rpr.setIntendedAmount(17940000);
+        rpr.setCurrency(PaymentCurrency.BITCOIN);
         rpr.setNote("For the pizza");
 
         List<Message> messages = new ArrayList<>();
@@ -488,6 +490,7 @@ public class ContactsTest {
             Assert.assertEquals(rpr.getId(), ftx.getId());
             Assert.assertEquals("waiting_address", ftx.getState());
             Assert.assertEquals(17940000L, ftx.getIntendedAmount());
+            Assert.assertEquals(rpr.getCurrency(), PaymentCurrency.BITCOIN);
             Assert.assertEquals("rpr_receiver", ftx.getRole());
             Assert.assertEquals(rpr.getNote(), ftx.getNote());
         }
@@ -510,6 +513,7 @@ public class ContactsTest {
         PaymentRequest pr = new PaymentRequest();
         pr.setId("a9feb110-1ae2-4242-9246-f1d6ec3e3be8");
         pr.setIntendedAmount(28940000);
+        pr.setCurrency(PaymentCurrency.BITCOIN);
         pr.setNote("For the pizza");
         pr.setAddress("15sAyHb9zBsZbVnaSXz2UivTZYxnjjrEkX");
 

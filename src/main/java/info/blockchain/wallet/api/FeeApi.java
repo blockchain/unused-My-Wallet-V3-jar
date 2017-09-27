@@ -18,11 +18,18 @@ public class FeeApi {
     }
 
     /**
-     * Returns a {@link FeeOptions} object which contains both a "regular" and a "priority" fee
+     * Returns a {@link FeeOptions} object for BTC which contains both a "regular" and a "priority" fee
      * option, both listed in Satoshis per byte.
      */
     public Observable<FeeOptions> getFeeOptions() {
         return getBaseApiInstance().getFeeOptions();
     }
 
+    /**
+     * Returns a {@link FeeOptions} object for ETH which contains both a "regular" and a "priority" fee
+     * option.
+     */
+    public Observable<FeeOptions> getEthFeeOptions() {
+        return getBaseApiInstance().getEthFeeOptions();
+    }
 }

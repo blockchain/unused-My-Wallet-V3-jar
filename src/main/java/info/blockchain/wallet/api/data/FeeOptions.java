@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeeOptions {
 
+    @JsonProperty("gasLimit")
+    private long gasLimit;
+
     @JsonProperty("regular")
     private long regularFee;
 
@@ -14,6 +17,13 @@ public class FeeOptions {
 
     @JsonProperty("limits")
     private FeeLimits limits;
+
+    /**
+     * Returns a "gasLimit" for Ethereum
+     */
+    public long getGasLimit() {
+        return gasLimit;
+    }
 
     /**
      * Returns a "regular" fee, which should result in a transaction being included in a block
