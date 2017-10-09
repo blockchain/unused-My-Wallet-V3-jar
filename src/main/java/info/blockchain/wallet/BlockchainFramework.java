@@ -25,6 +25,10 @@ public final class BlockchainFramework {
         return blockchainInterface.getRetrofitExplorerInstance();
     }
 
+    public static Retrofit getRetrofitShapeShiftInstance() {
+        return blockchainInterface.getRetrofitShapeShiftInstance();
+    }
+
     public static Environment getEnvironment() {
         return blockchainInterface.getEnvironment();
     }
