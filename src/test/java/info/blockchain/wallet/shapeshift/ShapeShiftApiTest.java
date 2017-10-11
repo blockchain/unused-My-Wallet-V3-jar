@@ -5,10 +5,10 @@ import static org.junit.Assert.assertNull;
 
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.shapeshift.data.MarketInfo;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftQuoteRequest;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftQuoteResponse;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftQuoteResponseWrapper;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftTradeStatusResponse;
+import info.blockchain.wallet.shapeshift.data.Quote;
+import info.blockchain.wallet.shapeshift.data.QuoteRequest;
+import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 import io.reactivex.observers.TestObserver;
 import org.junit.Test;
 
@@ -20,7 +20,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
     public void getMarketInfo() throws Exception {
         mockInterceptor
             .setResponseString("{\"pair\":\"btc_eth\",\"rate\":15.06742777,\"minerFee\":0.001,\"limit\":2.17562517,\"minimum\":0.0001324,\"maxLimit\":1.08781258}");
-        final TestObserver<MarketInfo> testObserver = subject.getMarketInfo(ShapeShiftPairs.BTC_ETH).test();
+        final TestObserver<MarketInfo> testObserver = subject.getRate(ShapeShiftPairs.BTC_ETH).test();
 
         testObserver.assertComplete();
         testObserver.assertNoErrors();
@@ -45,14 +45,14 @@ public class ShapeShiftApiTest extends MockedResponseTest {
                 + "\"maxLimit\":16.65419494,"
                 + "\"minerFee\":\"0.001\"}}");
 
-        ShapeShiftQuoteRequest request = new ShapeShiftQuoteRequest();
+        QuoteRequest request = new QuoteRequest();
         request.setAmount(0.1102969);
         request.setPair("eth_btc");
-        final TestObserver<ShapeShiftQuoteResponseWrapper> testObserver = subject.getQuote(request).test();
+        final TestObserver<QuoteResponseWrapper> testObserver = subject.getApproximateQuote(request).test();
 
         testObserver.assertComplete();
         testObserver.assertNoErrors();
-        ShapeShiftQuoteResponse wrapper = testObserver.values().get(0).getWrapper();
+        Quote wrapper = testObserver.values().get(0).getWrapper();
         assertEquals("eth_btc", wrapper.getPair());
         assertEquals(0.11029696, wrapper.getWithdrawalAmount(), 0);
         assertEquals(1.7278182, wrapper.getDepositAmount(), 0);
@@ -75,11 +75,11 @@ public class ShapeShiftApiTest extends MockedResponseTest {
                 + "\t\"transaction\": \"0xc1361e8ec096dfe48f524bd67fe811e5fd86a41c868ff5843f04619906882123\"\n"
                 + "}");
 
-        final TestObserver<ShapeShiftTradeStatusResponse> testObserver = subject.getTradeStatus("someAddress").test();
+        final TestObserver<TradeStatusResponse> testObserver = subject.getTradeStatus("someAddress").test();
 
         testObserver.assertComplete();
         testObserver.assertNoErrors();
-        ShapeShiftTradeStatusResponse response = testObserver.values().get(0);
+        TradeStatusResponse response = testObserver.values().get(0);
         assertEquals("complete", response.getStatus());
         assertEquals("3PpfQbaETF1PCUh2iZKfMoyMhCmZWmVz9Z", response.getAddress());
         assertEquals("0x9240d92140a48164ef71d9b0fade096583354e5a", response.getWithdraw());

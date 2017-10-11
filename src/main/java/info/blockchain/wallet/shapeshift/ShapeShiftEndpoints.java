@@ -1,11 +1,10 @@
 package info.blockchain.wallet.shapeshift;
 
 import info.blockchain.wallet.shapeshift.data.MarketInfo;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftQuoteRequest;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftQuoteResponseWrapper;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftSendAmountRequest;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftSendAmountResponseWrapper;
-import info.blockchain.wallet.shapeshift.data.ShapeShiftTradeStatusResponse;
+import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.QuoteRequest;
+import info.blockchain.wallet.shapeshift.data.SendAmountResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 import io.reactivex.Observable;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -18,11 +17,11 @@ public interface ShapeShiftEndpoints {
     Observable<MarketInfo> getMarketInfo(@Path("pair") String pair);
 
     @POST(ShapeShiftUrls.SENDAMOUNT)
-    Observable<ShapeShiftSendAmountResponseWrapper> getSendAmount(@Body ShapeShiftSendAmountRequest request);
+    Observable<SendAmountResponseWrapper> getQuote(@Body QuoteRequest request);
 
     @POST(ShapeShiftUrls.SENDAMOUNT)
-    Observable<ShapeShiftQuoteResponseWrapper> getQuote(@Body ShapeShiftQuoteRequest request);
+    Observable<QuoteResponseWrapper> getApproximateQuote(@Body QuoteRequest request);
 
     @GET(ShapeShiftUrls.TX_STATS + "/{address}")
-    Observable<ShapeShiftTradeStatusResponse> getTradeStatus(@Path("address") String address);
+    Observable<TradeStatusResponse> getTradeStatus(@Path("address") String address);
 }

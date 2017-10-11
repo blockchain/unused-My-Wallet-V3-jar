@@ -16,7 +16,7 @@ import java.io.IOException;
     setterVisibility = JsonAutoDetect.Visibility.NONE,
     creatorVisibility = JsonAutoDetect.Visibility.NONE,
     isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ShapeShiftTradeStatusResponse {
+public class TradeStatusResponse {
 
     @JsonProperty("status")
     private String status;
@@ -117,8 +117,8 @@ public class ShapeShiftTradeStatusResponse {
         this.error = error;
     }
 
-    public static ShapeShiftTradeStatusResponse fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, ShapeShiftTradeStatusResponse.class);
+    public static TradeStatusResponse fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, TradeStatusResponse.class);
     }
 
     @JsonIgnore

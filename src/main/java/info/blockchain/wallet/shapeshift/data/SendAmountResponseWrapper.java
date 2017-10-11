@@ -12,12 +12,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
     setterVisibility = JsonAutoDetect.Visibility.NONE,
     creatorVisibility = JsonAutoDetect.Visibility.NONE,
     isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ShapeShiftSendAmountResponseWrapper {
+public class SendAmountResponseWrapper {
 
     @JsonProperty("success")
-    private ShapeShiftSendAmountResponse wrapper;
+    private Quote wrapper;
 
-    public ShapeShiftSendAmountResponse getWrapper() {
+    public Quote getWrapper() {
         return wrapper;
     }
 }

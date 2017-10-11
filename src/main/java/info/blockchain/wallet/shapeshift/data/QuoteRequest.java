@@ -16,14 +16,27 @@ import java.io.IOException;
     setterVisibility = JsonAutoDetect.Visibility.NONE,
     creatorVisibility = JsonAutoDetect.Visibility.NONE,
     isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ShapeShiftQuoteRequest {
+public class QuoteRequest {
 
+    //the amount to be sent to the withdrawal address
     @JsonProperty("amount")
     private double amount;
+
+    //the address for coin to be sent to
+    @JsonProperty("withdrawal")
+    private String withdrawal;
 
     //what coins are being exchanged in the form [input coin]_[output coin]  ie eth_btc
     @JsonProperty("pair")
     private String pair;
+
+    //(Optional) address to return deposit to if anything goes wrong with exchange
+    @JsonProperty("returnAddress")
+    private String returnAddress;
+
+    //(Optional) Your affiliate PUBLIC KEY, for volume tracking, affiliate payments, split-shifts, etc...
+    @JsonProperty("apiKey")
+    private String apiKey;
 
     public double getAmount() {
         return amount;
@@ -31,6 +44,14 @@ public class ShapeShiftQuoteRequest {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public String getWithdrawal() {
+        return withdrawal;
+    }
+
+    public void setWithdrawal(String withdrawal) {
+        this.withdrawal = withdrawal;
     }
 
     public String getPair() {
@@ -41,8 +62,24 @@ public class ShapeShiftQuoteRequest {
         this.pair = pair;
     }
 
-    public static ShapeShiftQuoteRequest fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, ShapeShiftQuoteRequest.class);
+    public String getReturnAddress() {
+        return returnAddress;
+    }
+
+    public void setReturnAddress(String returnAddress) {
+        this.returnAddress = returnAddress;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public static QuoteRequest fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, QuoteRequest.class);
     }
 
     @JsonIgnore
