@@ -31,7 +31,7 @@ public class Quote {
 
     //Amount of the output coin you will receive
     @JsonProperty("withdrawalAmount")
-    private Double withdrawalAmount;
+    private String withdrawalAmount;//Implemented as string on web
 
     //Deposit Address
     @JsonProperty("deposit")
@@ -39,21 +39,21 @@ public class Quote {
 
     //Exact amount of input coin to send in
     @JsonProperty("depositAmount")
-    private Double depositAmount;
+    private String depositAmount;//Implemented as string on web
 
     //Timestamp of when trade will expire
     @JsonProperty("expiration")
     private long expiration;
 
-    //Excahnge rate to be honored
+    //Exchange rate to be honored
     @JsonProperty("quotedRate")
-    private double quotedRate;
+    private String quotedRate;//Implemented as string on web
 
     @JsonProperty("returnAddress")
     private String returnAddress;
 
     @JsonProperty("minerFee")
-    private Double minerFee;
+    private String minerFee;//Implemented as string on web
 
     //Public API attached to this shift
     @JsonProperty("apiPubKey")
@@ -84,11 +84,11 @@ public class Quote {
     }
 
     public Double getWithdrawalAmount() {
-        return withdrawalAmount;
+        return Double.parseDouble(withdrawalAmount);
     }
 
     public void setWithdrawalAmount(Double withdrawalAmount) {
-        this.withdrawalAmount = withdrawalAmount;
+        this.withdrawalAmount = Double.toString(withdrawalAmount);
     }
 
     public String getDeposit() {
@@ -100,11 +100,11 @@ public class Quote {
     }
 
     public Double getDepositAmount() {
-        return depositAmount;
+        return Double.parseDouble(depositAmount);
     }
 
     public void setDepositAmount(Double depositAmount) {
-        this.depositAmount = depositAmount;
+        this.depositAmount = Double.toString(depositAmount);
     }
 
     public long getExpiration() {
@@ -116,11 +116,11 @@ public class Quote {
     }
 
     public double getQuotedRate() {
-        return quotedRate;
+        return Double.parseDouble(quotedRate);
     }
 
     public void setQuotedRate(double quotedRate) {
-        this.quotedRate = quotedRate;
+        this.quotedRate = Double.toString(quotedRate);
     }
 
     public String getReturnAddress() {
@@ -132,11 +132,11 @@ public class Quote {
     }
 
     public Double getMinerFee() {
-        return minerFee;
+        return Double.parseDouble(minerFee);
     }
 
     public void setMinerFee(Double minerFee) {
-        this.minerFee = minerFee;
+        this.minerFee = Double.toString(minerFee);
     }
 
     public String getApiPubKey() {

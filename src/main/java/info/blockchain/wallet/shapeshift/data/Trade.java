@@ -28,6 +28,10 @@ public class Trade {
     @JsonProperty("hashOut")
     private String hashOut;
 
+    //Ignored - web-wallet js time string
+//    @JsonProperty("time")
+//    private String time;
+
     @JsonProperty("timestamp")
     private long timestamp;
 
