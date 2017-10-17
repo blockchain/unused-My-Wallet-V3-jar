@@ -1,8 +1,10 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.MockedResponseTest;
+import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.payload.data.WalletBase;
 
+import io.reactivex.Observable;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class WalletApiTest extends MockedResponseTest {
@@ -70,5 +73,43 @@ public class WalletApiTest extends MockedResponseTest {
 
         Response<ResponseBody> exe = call.execute();
         assertEquals("5001071ac0ea0b6993444716729429c1d7637def2bcc73a6ad6360c9cec06d47", exe.body().string());
+    }
+
+    @Test
+    public void getMobileNotice() throws IOException, URISyntaxException {
+        mockInterceptor.setResponseString("{\n"
+            + "  \"androidBuyPercent\": 1.00,\n"
+            + "  \"android\": {\n"
+            + "    \"showUnocoin\": false\n"
+            + "  },\n"
+            + "  \"mobile_notice\": {\n"
+            + "   \"en-EN\": \"Text warning 1 EN.\",\n"
+            + "   \"en-CA\": \"Text warning 2 CA.\"\n"
+            + "\t}\n"
+            + "}");
+        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
+
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        assertEquals("Text warning 1 EN.",
+            testObserver.values().get(0).getMobileNotice().get("en-EN"));
+        assertEquals("Text warning 2 CA.",
+            testObserver.values().get(0).getMobileNotice().get("en-CA"));
+    }
+
+    @Test
+    public void getMobileNotice_null() throws IOException, URISyntaxException {
+        mockInterceptor.setResponseString("{\n"
+            + "\t\"androidBuyPercent\": 1.00,\n"
+            + "\t\"android\": {\n"
+            + "\t\t\"showUnocoin\": false\n"
+            + "\t},\n"
+            + "\t\"mobile_notice\": null\n"
+            + "}");
+        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
+
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        assertNull(testObserver.values().get(0).getMobileNotice());
     }
 }

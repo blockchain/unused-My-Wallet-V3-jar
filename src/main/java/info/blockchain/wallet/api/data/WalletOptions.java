@@ -15,12 +15,18 @@ public class WalletOptions {
 
     @JsonProperty("showBuySellTab")
     private List<String> buySellCountries = new ArrayList<>();
+
     @JsonProperty("partners")
     private Partners partners;
+
     @JsonProperty("androidBuyPercent")
     private double rolloutPercentage;
+
     @JsonProperty("android")
     private Map<String, Boolean> androidFlags = new HashMap<>();
+
+    @JsonProperty("mobile_notice")
+    private Map<String, String> mobileNotice = new HashMap<>();
 
     public List<String> getBuySellCountries() {
         return buySellCountries;
@@ -38,4 +44,7 @@ public class WalletOptions {
         return androidFlags;
     }
 
+    public Map<String, String> getMobileNotice() {
+        return mobileNotice;
+    }
 }
