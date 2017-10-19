@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nullable;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE,
@@ -25,11 +27,14 @@ public class PriceDatum {
         return timestamp;
     }
 
+    @Nullable
     public Double getPrice() {
         return price;
     }
 
+    @Nullable
     public Double getVolume24h() {
         return volume24h;
     }
+
 }
