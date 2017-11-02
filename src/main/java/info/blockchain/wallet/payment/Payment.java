@@ -7,6 +7,7 @@ import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import io.reactivex.Observable;
+import javax.annotation.Nullable;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.core.AddressFormatException;
@@ -81,38 +82,66 @@ public class Payment {
     }
 
     /**
+     *
      * @param unspentCoins
      * @param feePerKb
+     * @param addReplayProtection
      * @return Pair left = sweepable amount, right = absolute fee needed for sweep
      */
-    public Pair<BigInteger, BigInteger> getSweepableCoins(@Nonnull UnspentOutputs unspentCoins,
-                                                          @Nonnull BigInteger feePerKb) {
-        return Coins.getSweepableCoins(unspentCoins, feePerKb);
+    public Pair<BigInteger, BigInteger> getMaximumAvailable(@Nonnull UnspentOutputs unspentCoins,
+        @Nonnull BigInteger feePerKb,
+        @Nonnull boolean addReplayProtection) {
+        return Coins.getMaximumAvailable(unspentCoins, feePerKb, addReplayProtection);
     }
 
     public SpendableUnspentOutputs getSpendableCoins(@Nonnull UnspentOutputs unspentCoins,
-                                                            @Nonnull BigInteger paymentAmount,
-                                                            @Nonnull BigInteger feePerKb)  {
-        return Coins.getMinimumCoinsForPayment(unspentCoins, paymentAmount, feePerKb);
+        @Nonnull BigInteger paymentAmount,
+        @Nonnull BigInteger feePerKb,
+        @Nonnull boolean addReplayProtection) {
+        return Coins.getMinimumCoinsForPayment(unspentCoins, paymentAmount, feePerKb,
+            addReplayProtection);
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Transaction
+    // Simple Transaction
     ///////////////////////////////////////////////////////////////////////////
-    public Transaction makeTransaction(@Nonnull List<UnspentOutput> unspentCoins,
+    public Transaction makeSimpleTransaction(@Nonnull List<UnspentOutput> unspentCoins,
                                               @Nonnull HashMap<String, BigInteger> receivingAddresses,
                                               @Nonnull BigInteger fee,
                                               @Nonnull String changeAddress)
             throws InsufficientMoneyException, AddressFormatException {
-        return PaymentTx.makeTransaction(unspentCoins, receivingAddresses, fee, changeAddress);
+        return PaymentTx.makeSimpleTransaction(unspentCoins, receivingAddresses, fee, changeAddress);
     }
 
-    public void signTransaction(@Nonnull Transaction transaction, @Nonnull List<ECKey> keys) {
-        PaymentTx.signTransaction(transaction, keys);
+    public void signSimpleTransaction(@Nonnull Transaction transaction, @Nonnull List<ECKey> keys) {
+        PaymentTx.signSimpleTransaction(transaction, keys);
     }
 
-    public Call<ResponseBody> publishTransaction(@Nonnull Transaction transaction)
+    public Call<ResponseBody> publishSimpleTransaction(@Nonnull Transaction transaction)
             throws IOException {
-        return PaymentTx.publishTransaction(transaction, BlockchainFramework.getApiCode());
+        return PaymentTx.publishSimpleTransaction(transaction, BlockchainFramework.getApiCode());
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Transaction with non-replayable dust
+    ///////////////////////////////////////////////////////////////////////////
+    public Transaction makeNonReplayableTransaction(@Nonnull List<UnspentOutput> unspentCoins,
+        @Nonnull HashMap<String, BigInteger> receivingAddresses,
+        @Nonnull BigInteger fee,
+        @Nullable String changeAddress,
+        @Nonnull DustServiceInput dustServiceInput)
+        throws InsufficientMoneyException, AddressFormatException {
+        return PaymentTx.makeNonReplayableTransaction(unspentCoins, receivingAddresses, fee, changeAddress,
+            dustServiceInput);
+    }
+
+    public void signNonReplayableTransaction(@Nonnull Transaction transaction, @Nonnull List<ECKey> keys)
+        throws Exception {
+        PaymentTx.signNonReplayableTransaction(transaction, keys);
+    }
+
+    public Call<ResponseBody> publishTransactionWithSecret(@Nonnull Transaction transaction, @Nonnull String lockSecret)
+        throws IOException {
+        return PaymentTx.publishTransactionWithSecret(transaction, lockSecret, BlockchainFramework.getApiCode());
     }
 }

@@ -1,6 +1,7 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BaseIntegTest;
+import info.blockchain.wallet.api.data.DustResponse;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Status;
@@ -183,4 +184,12 @@ public class WalletApiIntegTest extends BaseIntegTest {
 //        Assert.assertNotNull(call.body());
 //        Assert.assertNotNull(call.body().string());
 //    }
+
+    @Test
+    public void getDustTest() throws Exception {
+        final TestObserver<DustResponse> testObserver =
+            walletApi.getDust().test();
+
+        System.out.println(testObserver.values().get(0).toJson());
+    }
 }

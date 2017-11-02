@@ -1,6 +1,7 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
+import info.blockchain.wallet.api.data.DustResponse;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
@@ -225,4 +226,7 @@ public class WalletApi {
         return getExplorerInstance().getWalletOptions(BlockchainFramework.getApiCode());
     }
 
+    public Observable<DustResponse> getDust() {
+        return getApiInstance().getDust(BlockchainFramework.getApiCode());
+    }
 }

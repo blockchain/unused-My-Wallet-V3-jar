@@ -16,7 +16,6 @@ import io.reactivex.functions.Function;
 import io.reactivex.internal.schedulers.TrampolineScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -51,7 +50,7 @@ public abstract class BaseIntegTest {
 
             @Override
             public String getApiCode() {
-                return null;
+                return "Android-Integration-test";
             }
 
             @Override
@@ -95,13 +94,13 @@ public abstract class BaseIntegTest {
         RxJavaPlugins.reset();
     }
 
-    private static OkHttpClient getOkHttpClient() {
+    public static OkHttpClient getOkHttpClient() {
         return new OkHttpClient.Builder()
             .addInterceptor(new ApiInterceptor())//Extensive logging
                 .build();
     }
 
-    private static Retrofit getRetrofit(String url, OkHttpClient client) {
+    public static Retrofit getRetrofit(String url, OkHttpClient client) {
         return new Retrofit.Builder()
                 .baseUrl(url)
                 .client(client)

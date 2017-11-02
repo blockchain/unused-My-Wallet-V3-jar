@@ -1,5 +1,6 @@
 package info.blockchain.wallet.api;
 
+import info.blockchain.wallet.api.data.DustResponse;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
@@ -163,4 +164,6 @@ public interface WalletEndpoints {
     @GET("Resources/wallet-options.json")
     Observable<WalletOptions> getWalletOptions(@Query("api_code") String apiCode);
 
+    @GET("dust")
+    Observable<DustResponse> getDust(@Query("api_code") String apiCode);
 }
