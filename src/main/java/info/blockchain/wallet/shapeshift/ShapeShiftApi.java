@@ -14,7 +14,7 @@ public class ShapeShiftApi {
 
     private ShapeShiftEndpoints getApiInstance() {
         if (shift == null) {
-            shift = BlockchainFramework.getRetrofitApiInstance().
+            shift = BlockchainFramework.getRetrofitShapeShiftInstance().
                 create(ShapeShiftEndpoints.class);
         }
         return shift;

@@ -2,6 +2,7 @@ package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.params.MainNetParams;
@@ -16,7 +17,6 @@ import io.reactivex.functions.Function;
 import io.reactivex.internal.schedulers.TrampolineScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -41,7 +41,7 @@ public abstract class BaseIntegTest {
 
             @Override
             public Retrofit getRetrofitShapeShiftInstance() {
-                return null;
+                return getRetrofit(ShapeShiftUrls.SHAPESHIFT_URL, getOkHttpClient());
             }
 
             @Override
