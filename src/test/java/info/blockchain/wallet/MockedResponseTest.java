@@ -3,6 +3,7 @@ package info.blockchain.wallet;
 import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
 
+import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.After;
@@ -40,6 +41,11 @@ public abstract class MockedResponseTest {
             @Override
             public Retrofit getRetrofitExplorerInstance() {
                 return getRetrofit("https://explorer.staging.blockchain.info/", getOkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitShapeShiftInstance() {
+                return getRetrofit(ShapeShiftUrls.SHAPESHIFT_URL, getOkHttpClient());
             }
 
             @Override

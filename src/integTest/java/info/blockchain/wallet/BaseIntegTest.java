@@ -2,6 +2,7 @@ package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.params.MainNetParams;
@@ -36,6 +37,11 @@ public abstract class BaseIntegTest {
             @Override
             public Retrofit getRetrofitExplorerInstance() {
                 return getRetrofit(PersistentUrls.EXPLORER_URL, getOkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitShapeShiftInstance() {
+                return getRetrofit(ShapeShiftUrls.SHAPESHIFT_URL, getOkHttpClient());
             }
 
             @Override
