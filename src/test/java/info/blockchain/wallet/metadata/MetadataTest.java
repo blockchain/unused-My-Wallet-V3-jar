@@ -56,6 +56,11 @@ public class MetadataTest {
             }
 
             @Override
+            public Retrofit getRetrofitShapeShiftInstance() {
+                return null;
+            }
+
+            @Override
             public Environment getEnvironment() {
                 return Environment.PRODUCTION;
             }

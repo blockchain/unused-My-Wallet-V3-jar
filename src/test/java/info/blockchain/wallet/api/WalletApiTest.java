@@ -1,6 +1,7 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.MockedResponseTest;
+import info.blockchain.wallet.api.data.ShapeShiftOptions;
 import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.payload.data.WalletBase;
 
@@ -111,5 +112,40 @@ public class WalletApiTest extends MockedResponseTest {
         testObserver.assertComplete();
         testObserver.assertNoErrors();
         assertNull(testObserver.values().get(0).getMobileNotice());
+    }
+
+
+    @Test
+    public void getShapeshift() throws IOException, URISyntaxException {
+        mockInterceptor.setResponseString("{\n"
+            + "\t\"androidBuyPercent\": 1.00,\n"
+            + "\t\"android\": {\n"
+            + "\t\t\"showUnocoin\": false\n"
+            + "\t},\n"
+            + "\"shapeshift\": {\n"
+            + "    \"apiKey\": \"b7a7c320c19ea3a8e276c8921bc3ff79ec064d\",\n"
+            + "    \"statesWhitelist\": [\"AR\", \"AZ\"],\n"
+            + "    \"countriesBlacklist\": [\"RSA\", \"IT\"],\n"
+            + "    \"rolloutFraction\": 1,\n"
+            + "    \"upperLimit\": 20,\n"
+            + "    \"surveyLinks\": [\"https://blockchain.co1.qualtrics.com/jfe/form/asdasd\",\n"
+            + "                    \"https://blockchain.co1.qualtrics.com/jfe/form/asdasdasd\"]\n"
+            + "  }"
+            + "}");
+        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
+
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+
+        ShapeShiftOptions result = testObserver.values().get(0)
+            .getShapeshift();
+
+        assertEquals("b7a7c320c19ea3a8e276c8921bc3ff79ec064d", result.getApiKey());
+        assertEquals("RSA", result.getCountriesBlacklist().get(0));
+        assertEquals("IT", result.getCountriesBlacklist().get(1));
+        assertEquals("AR", result.getStatesWhitelist().get(0));
+        assertEquals("AZ", result.getStatesWhitelist().get(1));
+        assertEquals(1.0, result.getRolloutFraction(), 0);
+        assertEquals(20, result.getUpperLimit());
     }
 }

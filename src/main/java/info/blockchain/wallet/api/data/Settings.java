@@ -119,6 +119,9 @@ public class Settings {
     @JsonProperty("country_code")
     private String countryCode;
 
+    @JsonProperty("state")
+    private String state;
+
     @JsonProperty("logging_level")
     private int loggingLevel;
 
@@ -206,6 +209,10 @@ public class Settings {
 
     public String getCountryCode() {
         return countryCode;
+    }
+
+    public String getState() {
+        return state;
     }
 
     public int getLoggingLevel() {

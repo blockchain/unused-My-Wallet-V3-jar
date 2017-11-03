@@ -28,6 +28,9 @@ public class WalletOptions {
     @JsonProperty("mobile_notice")
     private Map<String, String> mobileNotice = new HashMap<>();
 
+    @JsonProperty("shapeshift")
+    private ShapeShiftOptions shapeshift;
+
     public List<String> getBuySellCountries() {
         return buySellCountries;
     }
@@ -46,5 +49,9 @@ public class WalletOptions {
 
     public Map<String, String> getMobileNotice() {
         return mobileNotice;
+    }
+
+    public ShapeShiftOptions getShapeshift() {
+        return shapeshift;
     }
 }
