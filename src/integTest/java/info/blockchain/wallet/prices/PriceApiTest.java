@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.observers.TestObserver;
 
@@ -52,6 +53,18 @@ public class PriceApiTest extends BaseIntegTest {
         // Act
         final TestObserver<Double> testObserver =
                 subject.getHistoricPrice("btc", "usd", oneYearAgo).test();
+        // Assert
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+    }
+
+    @Test
+    public void getPriceIndexes()throws Exception {
+        // Arrange
+
+        // Act
+        final TestObserver<Map<String, PriceDatum>> testObserver =
+                subject.getPriceIndexes("ETH").test();
         // Assert
         testObserver.assertComplete();
         testObserver.assertNoErrors();
