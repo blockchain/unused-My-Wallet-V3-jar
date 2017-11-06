@@ -35,53 +35,6 @@ public class PaymentReplayProtectionIntegTest extends BaseIntegTest {
 
     boolean addReplayProtection = true;
 
-    @BeforeClass
-    public static void init() {
-
-        //Initialize framework
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-                return getRetrofit("https://api.staging.blockchain.info/", getOkHttpClient());
-            }
-
-            @Override
-            public Retrofit getRetrofitExplorerInstance() {
-                return getRetrofit("https://explorer.staging.blockchain.info/", getOkHttpClient());
-            }
-
-            @Override
-            public Retrofit getRetrofitShapeShiftInstance() {
-                return null;
-            }
-
-            @Override
-            public Environment getEnvironment() {
-                return Environment.STAGING;
-            }
-
-            @Override
-            public AbstractBitcoinNetParams getNetworkParameters() {
-                return MainNetParams.get();
-            }
-
-            @Override
-            public String getApiCode() {
-                return "123123123-android-test";
-            }
-
-            @Override
-            public String getDevice() {
-                return "Android Integration test";
-            }
-
-            @Override
-            public String getAppVersion() {
-                return "1.0";
-            }
-        });
-    }
-
     private String getTestData(String file) throws Exception {
         URI uri = getClass().getClassLoader().getResource(file).toURI();
         return new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
@@ -149,7 +102,7 @@ public class PaymentReplayProtectionIntegTest extends BaseIntegTest {
         System.out.println("\n\nTransaction built! \n " + tx + "\n" + Hex.toHexString(tx.bitcoinSerialize()));
 
         Assert.assertEquals("ca4e3c636bc9879d7284d1dc99e958dc436a31b3cca859a63427d1d7c292daa5", tx.getHashAsString());
-        Call<ResponseBody> call = subject.publishTransactionWithSecret(tx, dustServiceInput.getLockSecret());
-        call.execute();
+//        Call<ResponseBody> call = subject.publishTransactionWithSecret(tx, dustServiceInput.getLockSecret());
+//        call.execute();
     }
 }
