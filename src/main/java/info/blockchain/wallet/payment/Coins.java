@@ -23,6 +23,8 @@ class Coins {
 
     private static final Logger log = LoggerFactory.getLogger(Coins.class);
 
+    private static final int SEGWIT_TX_SIZE_ADAPT = 130; //Size added to combined tx using dust-service to approximate fee
+
     public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
         log.info("Fetching unspent coins");
         BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
@@ -86,9 +88,11 @@ class Coins {
             //No non-replayable outputs in wallet - a dust input and output will be added to tx later
             outputCount = outputCount++;
             inputCount = inputCount++;
+            int size = Fees.estimatedSize(inputCount, outputCount) + SEGWIT_TX_SIZE_ADAPT;
+            sweepFee = Fees.calculateFee(size, feePerKb);
+        } else {
+            sweepFee = Fees.estimatedFee(inputCount, outputCount, feePerKb);
         }
-
-        sweepFee = Fees.estimatedFee(inputCount, outputCount, feePerKb);
 
         sweepBalance = sweepBalance.subtract(sweepFee);
 
@@ -219,9 +223,21 @@ class Coins {
             }
         }
 
+        BigInteger absoluteFee;
+        int inputCount = spendWorthyList.size();
+        if(addReplayProtection && !hasReplayProtection) {
+            //No non-replayable outputs in wallet - a dust input and output will be added to tx later
+            outputCount = outputCount++;
+            inputCount = inputCount++;
+            int size = Fees.estimatedSize(inputCount, outputCount) + SEGWIT_TX_SIZE_ADAPT;
+            absoluteFee = Fees.calculateFee(size, feePerKb);
+        } else {
+            absoluteFee = Fees.estimatedFee(inputCount, outputCount, feePerKb);
+        }
+
         SpendableUnspentOutputs paymentBundle = new SpendableUnspentOutputs();
         paymentBundle.setSpendableOutputs(spendWorthyList);
-        paymentBundle.setAbsoluteFee(Fees.estimatedFee(spendWorthyList.size(), outputCount, feePerKb));
+        paymentBundle.setAbsoluteFee(absoluteFee);
         paymentBundle.setConsumedAmount(consumedAmount);
         paymentBundle.setReplayProtected(hasReplayProtection);
         return paymentBundle;

@@ -6,6 +6,8 @@ import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.FrameworkInterface;
 import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.DustServiceInput;
 import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -46,6 +48,11 @@ public class PaymentReplayProtectionIntegTest extends BaseIntegTest {
             @Override
             public Retrofit getRetrofitExplorerInstance() {
                 return getRetrofit("https://explorer.staging.blockchain.info/", getOkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitShapeShiftInstance() {
+                return null;
             }
 
             @Override
@@ -101,6 +108,7 @@ public class PaymentReplayProtectionIntegTest extends BaseIntegTest {
         int size = 376;
         long fee = size * feePerByte;
         long receiveValue = value.longValue() - fee;
+
         SpendableUnspentOutputs paymentBundle = subject.getSpendableCoins(
             unspentOutputs,
             BigInteger.valueOf(receiveValue),

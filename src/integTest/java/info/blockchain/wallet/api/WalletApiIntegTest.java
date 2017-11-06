@@ -1,17 +1,14 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BaseIntegTest;
-import info.blockchain.wallet.api.data.DustResponse;
 import info.blockchain.wallet.api.data.FeeList;
-import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Status;
 
-import org.json.JSONObject;
+import info.blockchain.wallet.api.data.DustServiceInput;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
 import java.security.SecureRandom;
-import java.util.List;
 
 import io.reactivex.observers.TestObserver;
 import okhttp3.ResponseBody;
@@ -187,7 +184,7 @@ public class WalletApiIntegTest extends BaseIntegTest {
 
     @Test
     public void getDustTest() throws Exception {
-        final TestObserver<DustResponse> testObserver =
+        final TestObserver<DustServiceInput> testObserver =
             walletApi.getDust().test();
 
         System.out.println(testObserver.values().get(0).toJson());

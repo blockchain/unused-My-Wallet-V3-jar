@@ -4,6 +4,7 @@ import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.pushtx.PushTx;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.data.DustServiceInput;
 import info.blockchain.wallet.util.Hash;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Tools;

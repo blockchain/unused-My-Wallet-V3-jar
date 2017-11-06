@@ -4,6 +4,7 @@ import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.WalletApi;
+import info.blockchain.wallet.api.data.DustServiceInput;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import io.reactivex.Observable;

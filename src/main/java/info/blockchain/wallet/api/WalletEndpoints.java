@@ -1,12 +1,12 @@
 package info.blockchain.wallet.api;
 
-import info.blockchain.wallet.api.data.DustResponse;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.api.data.WalletOptions;
 
+import info.blockchain.wallet.api.data.DustServiceInput;
 import java.util.List;
 import java.util.Map;
 
@@ -165,5 +165,5 @@ public interface WalletEndpoints {
     Observable<WalletOptions> getWalletOptions(@Query("api_code") String apiCode);
 
     @GET("dust")
-    Observable<DustResponse> getDust(@Query("api_code") String apiCode);
+    Observable<DustServiceInput> getDust(@Query("api_code") String apiCode);
 }
