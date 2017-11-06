@@ -181,12 +181,12 @@ public class WalletApiIntegTest extends BaseIntegTest {
 //        Assert.assertNotNull(call.body());
 //        Assert.assertNotNull(call.body().string());
 //    }
-
-    @Test
-    public void getDustTest() throws Exception {
-        final TestObserver<DustServiceInput> testObserver =
-            walletApi.getDust().test();
-
-        System.out.println(testObserver.values().get(0).toJson());
-    }
+//
+//    @Test
+//    public void getDustTest() throws Exception {
+//        final TestObserver<DustServiceInput> testObserver =
+//            walletApi.getDust().test();
+//
+//        System.out.println(testObserver.values().get(0).toJson());
+//    }
 }

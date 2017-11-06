@@ -117,7 +117,7 @@ class Coins {
         }
 
         //Descending value. Add all replayable coins.
-        Collections.sort(unspentOutputs, new UnspentOutputAmountComparatorDesc());
+        Collections.reverse(unspentOutputs);
         for(UnspentOutput coin : unspentOutputs) {
             if (!sortedCoins.contains(coin) && coin.isReplayable()) {
                 sortedCoins.add(coin);
