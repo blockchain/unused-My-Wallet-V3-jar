@@ -23,26 +23,51 @@ class Coins {
 
     private static final Logger log = LoggerFactory.getLogger(Coins.class);
 
+    private static final int SEGWIT_TX_SIZE_ADAPT = 130; //Size added to combined tx using dust-service to approximate fee
+
     public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
         log.info("Fetching unspent coins");
         BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
         return blockExplorer.getUnspentOutputs(addresses);
     }
 
-    public static Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs coins, BigInteger feePerKb){
+    /**
+     *
+     * @param coins
+     * @param feePerKb
+     * @param addReplayProtection If true. Include at least one non-replayable output or add a dust output from dust-service api.
+     * @return
+     */
+    public static Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs coins,
+        BigInteger feePerKb, boolean addReplayProtection) {
 
         BigInteger sweepBalance = BigInteger.ZERO;
         BigInteger sweepFee;
 
-        ArrayList<UnspentOutput> unspentOutputs = coins.getUnspentOutputs();
+        ArrayList<UnspentOutput> unspentOutputs;
 
-        Collections.sort(unspentOutputs, new UnspentOutputAmountComparator());
+        //Sort inputs
+        if (addReplayProtection) {
+            unspentOutputs = getSortedCoins(coins.getUnspentOutputs());
+        } else {
+            unspentOutputs = coins.getUnspentOutputs();
+            Collections.sort(unspentOutputs, new UnspentOutputAmountComparatorDesc());
+        }
 
-        ArrayList<UnspentOutput> usableCoins = new ArrayList<UnspentOutput>();
+        ArrayList<UnspentOutput> usableCoins = new ArrayList<>();
 
         double inputCost = inputCost(feePerKb);
 
-        for (UnspentOutput output : unspentOutputs) {
+        boolean hasReplayProtection = false;
+
+        for (int i = 0; i < coins.getUnspentOutputs().size(); i++) {
+
+            UnspentOutput output = coins.getUnspentOutputs().get(i);
+
+            if (addReplayProtection && i == 0 && !output.isReplayable()) {
+                //1st input will be non-replayable if possible
+                hasReplayProtection = true;
+            }
 
             //Filter usable coins
             if (output.getValue().doubleValue() >= inputCost) {
@@ -56,7 +81,18 @@ class Coins {
 
         //Assume 2 outputs to line up with web. Not 100% correct but acceptable to
         //keep values across platforms constant.
-        sweepFee = Fees.estimatedFee(usableCoins.size(), 2, feePerKb);
+        int outputCount = 2;
+        int inputCount = usableCoins.size();
+
+        if(addReplayProtection && !hasReplayProtection) {
+            //No non-replayable outputs in wallet - a dust input and output will be added to tx later
+            outputCount = outputCount++;
+            inputCount = inputCount++;
+            int size = Fees.estimatedSize(inputCount, outputCount) + SEGWIT_TX_SIZE_ADAPT;
+            sweepFee = Fees.calculateFee(size, feePerKb);
+        } else {
+            sweepFee = Fees.estimatedFee(inputCount, outputCount, feePerKb);
+        }
 
         sweepBalance = sweepBalance.subtract(sweepFee);
 
@@ -66,14 +102,63 @@ class Coins {
         return Pair.of(sweepBalance, sweepFee);
     }
 
-    public static SpendableUnspentOutputs getMinimumCoinsForPayment(UnspentOutputs coins, BigInteger paymentAmount, BigInteger feePerKb) {
+    private static ArrayList<UnspentOutput> getSortedCoins(
+        ArrayList<UnspentOutput> unspentOutputs) {
+
+        ArrayList<UnspentOutput> sortedCoins = new ArrayList<>();
+
+        //Select 1 smallest non-replayable coin
+        Collections.sort(unspentOutputs, new UnspentOutputAmountComparatorAsc());
+        for(UnspentOutput coin : unspentOutputs) {
+            if (!coin.isReplayable()) {
+                sortedCoins.add(coin);
+                break;
+            }
+        }
+
+        //Descending value. Add all replayable coins.
+        Collections.reverse(unspentOutputs);
+        for(UnspentOutput coin : unspentOutputs) {
+            if (!sortedCoins.contains(coin) && coin.isReplayable()) {
+                sortedCoins.add(coin);
+                break;
+            }
+        }
+
+        //Still descending. Add all non-replayable coins.
+        for(UnspentOutput coin : unspentOutputs) {
+            if (!sortedCoins.contains(coin) && !coin.isReplayable()) {
+                sortedCoins.add(coin);
+                break;
+            }
+        }
+
+        return sortedCoins;
+    }
+
+    /**
+     *
+     * @param coins
+     * @param paymentAmount
+     * @param feePerKb
+     * @param addReplayProtection If true: Add at least one non-replayable output or add a dust output from dust-service api.
+     * @return
+     */
+    public static SpendableUnspentOutputs getMinimumCoinsForPayment(UnspentOutputs coins,
+        BigInteger paymentAmount, BigInteger feePerKb, boolean addReplayProtection) {
 
         log.info("Select the minimum number of outputs necessary for payment");
-        List<UnspentOutput> unspentOutputs = coins.getUnspentOutputs();
         List<UnspentOutput> spendWorthyList = new ArrayList<>();
 
-        // Descending order - Select the minimum number of outputs necessary
-        Collections.sort(unspentOutputs, new UnspentOutputAmountComparator());
+        ArrayList<UnspentOutput> unspentOutputs;
+
+        //Sort inputs
+        if (addReplayProtection) {
+            unspentOutputs = getSortedCoins(coins.getUnspentOutputs());
+        } else {
+            unspentOutputs = coins.getUnspentOutputs();
+            Collections.sort(unspentOutputs, new UnspentOutputAmountComparatorDesc());
+        }
 
         BigInteger collectedAmount = BigInteger.ZERO;
         BigInteger consumedAmount = BigInteger.ZERO;
@@ -82,10 +167,21 @@ class Coins {
 
         int outputCount = 2;//initially assume change
 
-        for (UnspentOutput output : coins.getUnspentOutputs()) {
+        boolean hasReplayProtection = false;
 
-            // Skip coins not worth spending
-            if (output.getValue().doubleValue() < inputCost) {
+        for (int i = 0; i < coins.getUnspentOutputs().size(); i++) {
+
+            UnspentOutput output = coins.getUnspentOutputs().get(i);
+
+            boolean nonReplayableFirst = (i == 0 && !output.isReplayable());
+
+            if (addReplayProtection && i == 0 && !output.isReplayable()) {
+                //1st input will be non-replayable if possible
+                hasReplayProtection = true;
+            }
+
+            // 1st potential non-replayable. Skip coins not worth spending.
+            if (nonReplayableFirst || output.getValue().doubleValue() < inputCost) {
                 continue;
             }
 
@@ -125,10 +221,23 @@ class Coins {
             }
         }
 
+        BigInteger absoluteFee;
+        int inputCount = spendWorthyList.size();
+        if(addReplayProtection && !hasReplayProtection) {
+            //No non-replayable outputs in wallet - a dust input and output will be added to tx later
+            outputCount = outputCount++;
+            inputCount = inputCount++;
+            int size = Fees.estimatedSize(inputCount, outputCount) + SEGWIT_TX_SIZE_ADAPT;
+            absoluteFee = Fees.calculateFee(size, feePerKb);
+        } else {
+            absoluteFee = Fees.estimatedFee(inputCount, outputCount, feePerKb);
+        }
+
         SpendableUnspentOutputs paymentBundle = new SpendableUnspentOutputs();
         paymentBundle.setSpendableOutputs(spendWorthyList);
-        paymentBundle.setAbsoluteFee(Fees.estimatedFee(spendWorthyList.size(), outputCount, feePerKb));
+        paymentBundle.setAbsoluteFee(absoluteFee);
         paymentBundle.setConsumedAmount(consumedAmount);
+        paymentBundle.setReplayProtected(hasReplayProtection);
         return paymentBundle;
     }
 
@@ -145,7 +254,7 @@ class Coins {
     /**
      * Sort unspent outputs by amount in descending order.
      */
-    private static class UnspentOutputAmountComparator implements Comparator<UnspentOutput> {
+    private static class UnspentOutputAmountComparatorDesc implements Comparator<UnspentOutput> {
 
         public int compare(UnspentOutput o1, UnspentOutput o2) {
 
@@ -159,6 +268,32 @@ class Coins {
                 ret = BEFORE;
             } else if (o1.getValue().compareTo(o2.getValue()) < 0) {
                 ret = AFTER;
+            } else {
+                ret = EQUAL;
+            }
+
+            return ret;
+        }
+
+    }
+
+    /**
+     * Sort unspent outputs by amount in ascending order.
+     */
+    private static class UnspentOutputAmountComparatorAsc implements Comparator<UnspentOutput> {
+
+        public int compare(UnspentOutput o1, UnspentOutput o2) {
+
+            final int BEFORE = -1;
+            final int EQUAL = 0;
+            final int AFTER = 1;
+
+            int ret;
+
+            if (o1.getValue().compareTo(o2.getValue()) > 0) {
+                ret = AFTER;
+            } else if (o1.getValue().compareTo(o2.getValue()) < 0) {
+                ret = BEFORE;
             } else {
                 ret = EQUAL;
             }

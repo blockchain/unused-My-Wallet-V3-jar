@@ -17,7 +17,7 @@ class Fees {
         return (outputs * ESTIMATED_OUTPUT_LEN) + (inputs * ESTIMATED_INPUT_LEN) + 10;
     }
 
-    private static BigInteger calculateFee(int size, BigInteger feePerKb) {
+    public static BigInteger calculateFee(int size, BigInteger feePerKb) {
 
         double txBytes = ((double) size / 1000.0);
         long absoluteFee = (long) Math.ceil(feePerKb.doubleValue() * txBytes);

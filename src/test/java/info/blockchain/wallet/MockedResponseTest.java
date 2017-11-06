@@ -35,12 +35,12 @@ public abstract class MockedResponseTest {
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
             public Retrofit getRetrofitApiInstance() {
-                return getRetrofit(PersistentUrls.API_URL, getOkHttpClient());
+                return getRetrofit("https://api.staging.blockchain.info/", getOkHttpClient());
             }
 
             @Override
             public Retrofit getRetrofitExplorerInstance() {
-                return getRetrofit(PersistentUrls.EXPLORER_URL, getOkHttpClient());
+                return getRetrofit("https://explorer.staging.blockchain.info/", getOkHttpClient());
             }
 
             @Override
@@ -50,7 +50,7 @@ public abstract class MockedResponseTest {
 
             @Override
             public Environment getEnvironment() {
-                return Environment.PRODUCTION;
+                return Environment.STAGING;
             }
 
             @Override

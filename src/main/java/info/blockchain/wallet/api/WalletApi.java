@@ -7,6 +7,7 @@ import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.api.data.WalletOptions;
 
+import info.blockchain.wallet.api.data.DustServiceInput;
 import org.apache.commons.lang3.StringUtils;
 import org.spongycastle.util.encoders.Hex;
 
@@ -225,4 +226,7 @@ public class WalletApi {
         return getExplorerInstance().getWalletOptions(BlockchainFramework.getApiCode());
     }
 
+    public Observable<DustServiceInput> getDust() {
+        return getApiInstance().getDust(BlockchainFramework.getApiCode());
+    }
 }

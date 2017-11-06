@@ -389,7 +389,7 @@ public class HDWalletTest extends MockedResponseTest {
         long feeManual = Payment.DUST.longValue();
 
         SpendableUnspentOutputs paymentBundle = payment
-            .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L));
+            .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L), false);
 
         List<ECKey> keyList = hdWallet
             .getHDKeysForSigning(hdWallet.getAccount(0), paymentBundle);

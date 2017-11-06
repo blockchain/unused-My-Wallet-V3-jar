@@ -4,7 +4,9 @@ import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.pushtx.PushTx;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.api.data.DustServiceInput;
 import info.blockchain.wallet.util.Hash;
+import info.blockchain.wallet.util.PrivateKeyFactory;
 import info.blockchain.wallet.util.Tools;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import okhttp3.ResponseBody;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
@@ -22,7 +25,9 @@ import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
+import org.bitcoinj.core.TransactionOutPoint;
 import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -37,7 +42,7 @@ public class PaymentTx {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentTx.class);
 
-    public static synchronized Transaction makeTransaction(List<UnspentOutput> unspentCoins,
+    public static synchronized Transaction makeSimpleTransaction(List<UnspentOutput> unspentCoins,
         HashMap<String, BigInteger> receivingAddresses,
         @Nonnull BigInteger fee,
         @Nonnull String changeAddress)
@@ -168,7 +173,7 @@ public class PaymentTx {
         }
     }
 
-    public static synchronized void signTransaction(Transaction transaction, List<ECKey> keys) {
+    public static synchronized void signSimpleTransaction(Transaction transaction, List<ECKey> keys) {
 
         log.info("Signing transaction");
         Wallet keyBag = Wallet.fromKeys(PersistentUrls.getInstance()
@@ -178,11 +183,119 @@ public class PaymentTx {
         keyBag.signTransaction(sendRequest);
     }
 
-    public static synchronized Call<ResponseBody> publishTransaction(Transaction transaction, String apiCode)
+    public static synchronized Call<ResponseBody> publishSimpleTransaction(Transaction transaction, String apiCode)
         throws IOException {
 
         log.info("Publishing transaction");
         PushTx pushTx = new PushTx(BlockchainFramework.getRetrofitExplorerInstance(), apiCode);
         return pushTx.pushTx(new String(Hex.encode(transaction.bitcoinSerialize())));
+    }
+
+    public static synchronized Transaction makeNonReplayableTransaction(List<UnspentOutput> unspentCoins,
+        HashMap<String, BigInteger> receivingAddresses,
+        @Nonnull BigInteger fee,
+        @Nullable String changeAddress,
+        @Nonnull DustServiceInput dustServiceInput)
+        throws InsufficientMoneyException, AddressFormatException {
+
+        log.info("Making transaction");
+        AbstractBitcoinNetParams params = PersistentUrls.getInstance()
+            .getCurrentNetworkParams();
+
+        Transaction transaction = new Transaction(params);
+
+        //Outputs
+        BigInteger outputValueSum = addTransactionOutputs(transaction, receivingAddresses);
+        BigInteger valueNeeded = outputValueSum.add(fee);
+
+        //Inputs
+        BigInteger inputValueSum = addTransactionInputList(transaction, unspentCoins, valueNeeded);
+
+        //Add Change
+        if (changeAddress != null) {
+            addChange(transaction, fee, changeAddress, outputValueSum, inputValueSum);
+        }
+
+        //Add dust input/output
+        Script dustOutput = new Script(Hex.decode(dustServiceInput.getOutputScript()));
+        Coin dustCoin = Coin.valueOf(dustServiceInput.getValue().longValue());
+
+        TransactionOutPoint dustOutpoint = dustServiceInput.getTransactionOutPoint(params);
+        transaction.addInput(dustOutpoint.getHash(), dustOutpoint.getIndex(), new Script(new byte[0]));
+        transaction.addOutput(dustCoin, dustOutput);
+
+        //Bip69
+        Transaction sortedTx = Tools.applyBip69(transaction);
+
+        return sortedTx;
+    }
+
+    public static synchronized void signNonReplayableTransaction(Transaction transaction, List<ECKey> keys)
+        throws Exception {
+
+        log.info("Signing transaction");
+        AbstractBitcoinNetParams networkParams = PersistentUrls.getInstance()
+            .getCurrentNetworkParams();
+
+        int numInputs = transaction.getInputs().size();
+        for (int i = 0; i < numInputs; i++) {
+
+            TransactionInput txIn = transaction.getInput(i);
+            System.out.println("txIn: "+txIn);
+
+            if (txIn.getConnectedOutput() == null) {
+                // Missing connected output, assuming already signed.
+                continue;
+            }
+
+            Script script = txIn.getConnectedOutput().getScriptPubKey();
+            Address address = script.getToAddress(networkParams);
+
+            ECKey key = getECKey(keys, address, networkParams);
+            if(key == null) {
+                continue;
+            }
+
+            // Create signature for our key
+            Sha256Hash hash = transaction.hashForSignature(
+                i,
+                ScriptBuilder.createOutputScript(key.toAddress(PersistentUrls.getInstance()
+                    .getCurrentNetworkParams())),
+                Transaction.SigHash.ALL,
+                false);
+
+            TransactionSignature signature = new TransactionSignature(
+                key.sign(hash),
+                Transaction.SigHash.ALL,
+                false
+            );
+
+            txIn.setScriptSig(
+                ScriptBuilder.createInputScript(signature, key)
+            );
+        }
+    }
+
+    private static ECKey getECKey(List<ECKey> keys, Address address, AbstractBitcoinNetParams networkParams) throws Exception {
+        ECKey key = null;
+        for(ECKey k : keys) {
+
+            String format = new PrivateKeyFactory().getFormat(k.getPrivateKeyAsHex());
+            key = new PrivateKeyFactory().getKey(format, k.getPrivateKeyAsHex());
+
+            if(key != null && !key.toAddress(networkParams).toBase58().equals(address.toBase58())) {
+                key = null;
+            }
+        }
+
+        return key;
+    }
+
+    public static synchronized Call<ResponseBody> publishTransactionWithSecret(Transaction transaction, String lockSecret, String apiCode)
+        throws IOException {
+
+        log.info("Publishing transaction");
+        PushTx pushTx = new PushTx(BlockchainFramework.getRetrofitExplorerInstance(), apiCode);
+        return pushTx.pushTxWithSecret(new String(Hex.encode(transaction.bitcoinSerialize())), lockSecret);
     }
 }
