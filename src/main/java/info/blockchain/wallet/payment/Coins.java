@@ -169,8 +169,6 @@ class Coins {
 
         boolean hasReplayProtection = false;
 
-        log.info("\n\n");
-
         for (int i = 0; i < coins.getUnspentOutputs().size(); i++) {
 
             UnspentOutput output = coins.getUnspentOutputs().get(i);
