@@ -13,6 +13,7 @@ import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabel;
 
+import info.blockchain.wallet.payment.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -262,7 +263,12 @@ public class MultiAddressFactory {
                         }
 
                     } else {
-                        throw new IllegalStateException("inputAddr is null");
+                        if(inputValue.compareTo(Payment.DUST) == 0) {
+                            //Input from dust-service - Ignore
+                        } else {
+                            //Purposeful fail. Segwit transaction - Not supported yet.
+                            throw new IllegalStateException("inputAddr is null");
+                        }
                     }
 
                 } else {
@@ -323,7 +329,12 @@ public class MultiAddressFactory {
                         isLegacy = true;
                     }
                 } else {
-                    throw new IllegalStateException("outputAddr is null");
+                    if(outputValue.compareTo(Payment.DUST) == 0) {
+                        //Output to dust-service - Ignore
+                    } else {
+                        //Purposeful fail. Segwit transaction - Not supported yet.
+                        throw new IllegalStateException("outputAddr is null");
+                    }
                 }
             }
 

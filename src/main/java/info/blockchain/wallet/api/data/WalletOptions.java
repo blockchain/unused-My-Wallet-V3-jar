@@ -25,11 +25,18 @@ public class WalletOptions {
     @JsonProperty("android")
     private Map<String, Boolean> androidFlags = new HashMap<>();
 
+    //Temp for hard fork
     @JsonProperty("mobile_notice")
     private Map<String, String> mobileNotice = new HashMap<>();
 
     @JsonProperty("shapeshift")
     private ShapeShiftOptions shapeshift;
+
+    @JsonProperty("androidUpgrade")
+    private Map<String, Integer> androidUpgrade = new HashMap<>();
+
+    @JsonProperty("mobileInfo")
+    private Map<String, String> mobileInfo = new HashMap<>();
 
     public List<String> getBuySellCountries() {
         return buySellCountries;
@@ -53,5 +60,13 @@ public class WalletOptions {
 
     public ShapeShiftOptions getShapeshift() {
         return shapeshift;
+    }
+
+    public Map<String, Integer> getAndroidUpgrade() {
+        return androidUpgrade;
+    }
+
+    public Map<String, String> getMobileInfo() {
+        return mobileInfo;
     }
 }
