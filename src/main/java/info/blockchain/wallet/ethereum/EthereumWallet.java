@@ -7,19 +7,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.util.MetadataUtil;
+
+import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.spongycastle.crypto.InvalidCipherTextException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.TransactionEncoder;
-import org.web3j.protocol.core.methods.request.RawTransaction;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -75,15 +74,23 @@ public class EthereumWallet {
      * @throws IOException
      * @throws InvalidCipherTextException MetadataHdNode encryption/decryption error
      */
-    public static EthereumWallet load(DeterministicKey metaDataHDNode) throws MetadataException, IOException, InvalidCipherTextException {
+    public static EthereumWallet load(DeterministicKey metaDataHDNode) throws
+            MetadataException,
+            IOException,
+            InvalidCipherTextException {
 
         Metadata metadata = getEthereumMetadataNode(metaDataHDNode);
         String walletJson = metadata.getMetadata();
 
-        if(walletJson != null) {
+        if (walletJson != null) {
             EthereumWallet ethereumWallet = fromJson(walletJson);
             ethereumWallet.metadata = metadata;
-            return ethereumWallet;
+            // Web can store an empty EthereumWalletData object
+            if (ethereumWallet.walletData == null || ethereumWallet.walletData.getAccounts().isEmpty()) {
+                return null;
+            } else {
+                return ethereumWallet;
+            }
         } else {
             return null;
         }
