@@ -39,40 +39,6 @@
         },
 
         {
-            "tx_hash":"ceceafa4f3130110248d7575b51f12aebcaa64255135e71c4430fc8fb27110e6",
-            "tx_hash_big_endian":"e61071b28ffc30441ce735512564aabcae121fb575758d24100113f3a4afcece",
-            "tx_index":168874581,
-            "tx_output_n": 0,
-            "script":"76a914a3a7c7be8e2b0b209c6347c73a175cfb381ffeb788ac",
-            "value": 8140,
-            "value_hex": "1fcc",
-            "confirmations":67011
-        },
-
-        {
-            "tx_hash":"b540bb52b46b4bc2cd292dbe16999cc6885ff314715d3ded9ceaec1b57b22f79",
-            "tx_hash_big_endian":"792fb2571becea9ced3d5d7114f35f88c69c9916be2d29cdc24b6bb452bb40b5",
-            "tx_index":168875310,
-            "tx_output_n": 0,
-            "script":"76a914a3a7c7be8e2b0b209c6347c73a175cfb381ffeb788ac",
-            "value": 8140,
-            "value_hex": "1fcc",
-            "replayable": false,
-            "confirmations":67010
-        },
-
-        {
-            "tx_hash":"9344d28a272c6c3fcaf115cdba978ca0392c0225ad208f458db30efe8a76361a",
-            "tx_hash_big_endian":"1a36768afe0eb38d458f20ad25022c39a08c97bacd15f1ca3f6c2c278ad24493",
-            "tx_index":169053709,
-            "tx_output_n": 0,
-            "script":"76a914a3a7c7be8e2b0b209c6347c73a175cfb381ffeb788ac",
-            "value": 8140,
-            "value_hex": "1fcc",
-            "confirmations":66918
-        },
-
-        {
             "tx_hash":"8306cbf7f02c865bc5640b2cc967933fb58a526affa989d773ac6e7879dec732",
             "tx_hash_big_endian":"32c7de79786eac73d789a9ff6a528ab53f9367c92c0b64c55b862cf0f7cb0683",
             "tx_index":184721195,
@@ -92,6 +58,7 @@
             "script":"76a914a3a7c7be8e2b0b209c6347c73a175cfb381ffeb788ac",
             "value": 6600,
             "value_hex": "19c8",
+            "replayable": false,
             "confirmations":43689
         },
 

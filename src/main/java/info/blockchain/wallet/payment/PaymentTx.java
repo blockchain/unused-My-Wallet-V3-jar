@@ -202,6 +202,12 @@ public class PaymentTx {
         AbstractBitcoinNetParams params = PersistentUrls.getInstance()
             .getCurrentNetworkParams();
 
+        if(unspentCoins.get(0).getValue().compareTo(Payment.DUST) == 0
+            && unspentCoins.get(0).isForceInclude()) {
+            log.info("Removing forced dust input");
+            unspentCoins.remove(0);
+        }
+
         Transaction transaction = new Transaction(params);
 
         //Outputs
