@@ -7,6 +7,7 @@ import info.blockchain.wallet.BlockchainFramework;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.script.Script;
+import org.bitcoinj.script.Script.ScriptType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
@@ -23,7 +24,7 @@ class Coins {
 
     private static final Logger log = LoggerFactory.getLogger(Coins.class);
 
-    private static final int SEGWIT_TX_SIZE_ADAPT = 130; //Size added to combined tx using dust-service to approximate fee
+    public static final int SEGWIT_TX_SIZE_ADAPT = 150; //Size added to combined tx using dust-service to approximate fee
 
     public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
         log.info("Fetching unspent coins");
@@ -58,19 +59,20 @@ class Coins {
 
         double inputCost = inputCost(feePerKb);
 
-        boolean hasReplayProtection = false;
+        //1st input will be non-replayable if possible
+        boolean hasReplayProtection = !unspentOutputs.get(0).isReplayable();
 
-        for (int i = 0; i < coins.getUnspentOutputs().size(); i++) {
+        if(addReplayProtection && !hasReplayProtection) {
+            log.info("Calculating maximum available with non-replayable dust included.");
+            unspentOutputs.add(0, getMockDustCoin());
+        }
 
-            UnspentOutput output = coins.getUnspentOutputs().get(i);
+        for (int i = 0; i < unspentOutputs.size(); i++) {
 
-            if (addReplayProtection && i == 0 && !output.isReplayable()) {
-                //1st input will be non-replayable if possible
-                hasReplayProtection = true;
-            }
+            UnspentOutput output = unspentOutputs.get(i);
 
             //Filter usable coins
-            if (output.getValue().doubleValue() >= inputCost) {
+            if (output.isForceInclude() || output.getValue().doubleValue() >= inputCost) {
                 usableCoins.add(output);
                 sweepBalance = sweepBalance.add(output.getValue());
             }
@@ -85,9 +87,7 @@ class Coins {
         int inputCount = usableCoins.size();
 
         if(addReplayProtection && !hasReplayProtection) {
-            //No non-replayable outputs in wallet - a dust input and output will be added to tx later
-            outputCount = outputCount++;
-            inputCount = inputCount++;
+            log.info("Modifying tx size for segwit fee calculation.");
             int size = Fees.estimatedSize(inputCount, outputCount) + SEGWIT_TX_SIZE_ADAPT;
             sweepFee = Fees.calculateFee(size, feePerKb);
         } else {
@@ -102,6 +102,11 @@ class Coins {
         return Pair.of(sweepBalance, sweepFee);
     }
 
+    /**
+     * Sort in order - 1 smallest non-replayable coin, descending replayable, descending non-relayable
+     * @param unspentOutputs
+     * @return
+     */
     private static ArrayList<UnspentOutput> getSortedCoins(
         ArrayList<UnspentOutput> unspentOutputs) {
 
@@ -111,6 +116,7 @@ class Coins {
         Collections.sort(unspentOutputs, new UnspentOutputAmountComparatorAsc());
         for(UnspentOutput coin : unspentOutputs) {
             if (!coin.isReplayable()) {
+                coin.setForceInclude(true);
                 sortedCoins.add(coin);
                 break;
             }
@@ -121,7 +127,6 @@ class Coins {
         for(UnspentOutput coin : unspentOutputs) {
             if (!sortedCoins.contains(coin) && coin.isReplayable()) {
                 sortedCoins.add(coin);
-                break;
             }
         }
 
@@ -129,7 +134,6 @@ class Coins {
         for(UnspentOutput coin : unspentOutputs) {
             if (!sortedCoins.contains(coin) && !coin.isReplayable()) {
                 sortedCoins.add(coin);
-                break;
             }
         }
 
@@ -167,27 +171,26 @@ class Coins {
 
         int outputCount = 2;//initially assume change
 
-        boolean hasReplayProtection = false;
+        //1st input will be non-replayable if possible
+        boolean hasReplayProtection = !unspentOutputs.get(0).isReplayable();
 
-        for (int i = 0; i < coins.getUnspentOutputs().size(); i++) {
+        if(addReplayProtection && !hasReplayProtection) {
+            log.info("Adding non-replayable dust to selected coins.");
+            unspentOutputs.add(0, getMockDustCoin());
+        }
 
-            UnspentOutput output = coins.getUnspentOutputs().get(i);
+        for (int i = 0; i < unspentOutputs.size(); i++) {
 
-            boolean nonReplayableFirst = (i == 0 && !output.isReplayable());
+            UnspentOutput output = unspentOutputs.get(i);
 
-            if (addReplayProtection && i == 0 && !output.isReplayable()) {
-                //1st input will be non-replayable if possible
-                hasReplayProtection = true;
-            }
-
-            // 1st potential non-replayable. Skip coins not worth spending.
-            if (nonReplayableFirst || output.getValue().doubleValue() < inputCost) {
+            //Filter coins not worth spending
+            if (output.getValue().doubleValue() < inputCost && !output.isForceInclude()) {
                 continue;
             }
 
             //Skip script with no type
-            Script script = new Script(Hex.decode(output.getScript().getBytes()));
-            if (script.getScriptType() == Script.ScriptType.NO_TYPE) {
+            if (!output.isForceInclude() &&
+                new Script(Hex.decode(output.getScript().getBytes())).getScriptType() == Script.ScriptType.NO_TYPE) {
                 continue;
             }
 
@@ -225,8 +228,7 @@ class Coins {
         int inputCount = spendWorthyList.size();
         if(addReplayProtection && !hasReplayProtection) {
             //No non-replayable outputs in wallet - a dust input and output will be added to tx later
-            outputCount = outputCount++;
-            inputCount = inputCount++;
+            log.info("Modifying tx size for segwit fee calculation.");
             int size = Fees.estimatedSize(inputCount, outputCount) + SEGWIT_TX_SIZE_ADAPT;
             absoluteFee = Fees.calculateFee(size, feePerKb);
         } else {
@@ -301,5 +303,13 @@ class Coins {
             return ret;
         }
 
+    }
+
+    private static UnspentOutput getMockDustCoin() {
+
+        UnspentOutput dust = new UnspentOutput();
+        dust.setValue(Payment.DUST);
+        dust.setForceInclude(true);
+        return dust;
     }
 }
