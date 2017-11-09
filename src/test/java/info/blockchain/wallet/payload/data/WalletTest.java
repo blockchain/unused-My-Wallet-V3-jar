@@ -435,7 +435,7 @@ public class WalletTest extends MockedResponseTest{
 
         SpendableUnspentOutputs paymentBundle = payment
             .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual),
-                BigInteger.valueOf(30000L), false);
+                BigInteger.valueOf(30000L));
 
         wallet.decryptHDWallet(0, "hello");
         List<ECKey> keyList = wallet.getHdWallets().get(0)

@@ -4,7 +4,6 @@ import info.blockchain.wallet.BaseIntegTest;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.api.data.Status;
 
-import info.blockchain.wallet.api.data.DustServiceInput;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
@@ -180,13 +179,5 @@ public class WalletApiIntegTest extends BaseIntegTest {
 //            SettingsManager.METHOD_UPDATE_EMAIL, guid, sharedKey, "a@a.com").execute();
 //        Assert.assertNotNull(call.body());
 //        Assert.assertNotNull(call.body().string());
-//    }
-//
-//    @Test
-//    public void getDustTest() throws Exception {
-//        final TestObserver<DustServiceInput> testObserver =
-//            walletApi.getDust().test();
-//
-//        System.out.println(testObserver.values().get(0).toJson());
 //    }
 }
