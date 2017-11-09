@@ -427,14 +427,16 @@ public class HDWallet {
         HDAccount hdAccount = getHDAccountFromAccountBody(account);
         if (hdAccount != null) {
             for (UnspentOutput unspent : unspentOutputBundle.getSpendableOutputs()) {
-                String[] split = unspent.getXpub().getPath().split("/");
-                int chain = Integer.parseInt(split[1]);
-                int addressIndex = Integer.parseInt(split[2]);
+                if(unspent.getXpub() != null) {
+                    String[] split = unspent.getXpub().getPath().split("/");
+                    int chain = Integer.parseInt(split[1]);
+                    int addressIndex = Integer.parseInt(split[2]);
 
-                HDAddress hdAddress = hdAccount.getChain(chain).getAddressAt(addressIndex);
-                ECKey walletKey = new PrivateKeyFactory()
-                    .getKey(PrivateKeyFactory.WIF_COMPRESSED, hdAddress.getPrivateKeyString());
-                keys.add(walletKey);
+                    HDAddress hdAddress = hdAccount.getChain(chain).getAddressAt(addressIndex);
+                    ECKey walletKey = new PrivateKeyFactory()
+                        .getKey(PrivateKeyFactory.WIF_COMPRESSED, hdAddress.getPrivateKeyString());
+                    keys.add(walletKey);
+                }
             }
         }
 
