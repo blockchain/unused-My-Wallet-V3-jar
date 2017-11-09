@@ -263,12 +263,8 @@ public class MultiAddressFactory {
                         }
 
                     } else {
-                        if(inputValue.compareTo(Payment.DUST) == 0) {
-                            //Input from dust-service - Ignore
-                        } else {
-                            //Purposeful fail. Segwit transaction - Not supported yet.
-                            throw new IllegalStateException("inputAddr is null");
-                        }
+                        //Possible Segwit transaction - Not supported yet.
+                        //throw new IllegalStateException("inputAddr is null");
                     }
 
                 } else {
@@ -332,8 +328,8 @@ public class MultiAddressFactory {
                     if(outputValue.compareTo(Payment.DUST) == 0) {
                         //Output to dust-service - Ignore
                     } else {
-                        //Purposeful fail. Segwit transaction - Not supported yet.
-                        throw new IllegalStateException("outputAddr is null");
+                        //Possible Segwit transaction - Not supported yet.
+                        //throw new IllegalStateException("outputAddr is null");
                     }
                 }
             }

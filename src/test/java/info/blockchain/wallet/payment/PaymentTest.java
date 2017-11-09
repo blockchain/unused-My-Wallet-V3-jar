@@ -28,8 +28,6 @@ public class PaymentTest extends MockedResponseTest {
 
     private Payment subject = new Payment();
 
-    boolean addReplayProtection = false;
-
     @Test
     public void estimatedFee() throws Exception {
 
@@ -150,7 +148,7 @@ public class PaymentTest extends MockedResponseTest {
 
         UnspentOutputs unspentOutputs = new UnspentOutputs().fromJson(UnspentTestData.apiResponseString);
         Pair<BigInteger, BigInteger> sweepBundle = subject
-            .getMaximumAvailable(unspentOutputs, BigInteger.valueOf(30000L), addReplayProtection);
+            .getMaximumAvailable(unspentOutputs, BigInteger.valueOf(30000L));
 
 //        long feeManual = calculateFee(1, UnspentTestData.UNSPENT_OUTPUTS_COUNT, BigInteger.valueOf(30000L));
 
@@ -176,8 +174,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         BigInteger spendAmountMinusFee = BigInteger.valueOf(spendAmount - feeManual);
         SpendableUnspentOutputs paymentBundle = subject
-            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L),
-                addReplayProtection);
+            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -199,8 +196,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         BigInteger spendAmountMinusFee = BigInteger.valueOf(spendAmount - feeManual);
         SpendableUnspentOutputs paymentBundle = subject
-            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L),
-                addReplayProtection);
+            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -222,8 +218,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         BigInteger spendAmountMinusFee = BigInteger.valueOf(spendAmount - feeManual);
         SpendableUnspentOutputs paymentBundle = subject
-            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L),
-                addReplayProtection);
+            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -244,8 +239,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         BigInteger spendAmountMinusFee = BigInteger.valueOf(spendAmount - feeManual);
         SpendableUnspentOutputs paymentBundle = subject
-            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L),
-                addReplayProtection);
+            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -267,8 +261,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         BigInteger spendAmountMinusFee = BigInteger.valueOf(spendAmount - feeManual);
         SpendableUnspentOutputs paymentBundle = subject
-            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L),
-                addReplayProtection);
+            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -290,8 +283,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         BigInteger spendAmountMinusFee = BigInteger.valueOf(spendAmount - feeManual);
         SpendableUnspentOutputs paymentBundle = subject
-            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L),
-                addReplayProtection);
+            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -312,8 +304,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         BigInteger spendAmountMinusFee = BigInteger.valueOf(spendAmount - feeManual);
         SpendableUnspentOutputs paymentBundle = subject
-            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L),
-                addReplayProtection);
+            .getSpendableCoins(unspentOutputs, spendAmountMinusFee, BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -333,7 +324,7 @@ public class PaymentTest extends MockedResponseTest {
         int outputs = 2;//change
         SpendableUnspentOutputs paymentBundle = subject
             .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount),
-                BigInteger.valueOf(30000L), addReplayProtection);
+                BigInteger.valueOf(30000L));
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -355,7 +346,7 @@ public class PaymentTest extends MockedResponseTest {
 
         SpendableUnspentOutputs paymentBundle = subject
             .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual),
-                BigInteger.valueOf(30000L), addReplayProtection);
+                BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -377,7 +368,7 @@ public class PaymentTest extends MockedResponseTest {
 
         SpendableUnspentOutputs paymentBundle = subject
             .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual),
-                BigInteger.valueOf(30000L), addReplayProtection);
+                BigInteger.valueOf(30000L));
 
         assertEquals(inputs, paymentBundle.getSpendableOutputs().size());
         assertEquals(feeManual, paymentBundle.getAbsoluteFee().longValue());
@@ -400,7 +391,7 @@ public class PaymentTest extends MockedResponseTest {
 
         SpendableUnspentOutputs paymentBundle = payment
             .getSpendableCoins(unspentOutputs, BigInteger.valueOf(spendAmount - feeManual),
-                BigInteger.valueOf(30000L), addReplayProtection);
+                BigInteger.valueOf(30000L));
 
         List<ECKey> keys = new ArrayList<>();
         String toAddress = "1GYkgRtJmEp355xUtVFfHSFjFdbqjiwKmb";
@@ -434,8 +425,7 @@ public class PaymentTest extends MockedResponseTest {
         SpendableUnspentOutputs paymentBundle = payment.getSpendableCoins(
             unspentOutputs,
             BigInteger.valueOf(spendAmount),
-            BigInteger.valueOf(30000L),
-            addReplayProtection);
+            BigInteger.valueOf(30000L));
 
         String toAddress = "1NNDb5uQU32CtQnBxnrfvJSjkWcREoFWe7";
         String changeAddress = "1JjHeuviHUxCRGcVXYjt3XTbX8H1qifUt2";
@@ -482,7 +472,7 @@ public class PaymentTest extends MockedResponseTest {
         long feeManual = calculateFee(outputs, inputs, BigInteger.valueOf(30000L));
 
         SpendableUnspentOutputs paymentBundle = payment.getSpendableCoins(unspentOutputs, BigInteger
-            .valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L), addReplayProtection);
+            .valueOf(spendAmount - feeManual), BigInteger.valueOf(30000L));
 
         String toAddress = "1GYkgRtJmEp355xUtVFfHSFjFdbqjiwKmb";
         String changeAddress = "1GiEQZt9aX2XfDcj14tCC4xAWEJtq9EXW7";
