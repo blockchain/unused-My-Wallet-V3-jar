@@ -1,16 +1,18 @@
 package info.blockchain.wallet.shapeshift;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.shapeshift.data.MarketInfo;
 import info.blockchain.wallet.shapeshift.data.Quote;
 import info.blockchain.wallet.shapeshift.data.QuoteRequest;
 import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
-import io.reactivex.observers.TestObserver;
+
 import org.junit.Test;
+
+import io.reactivex.observers.TestObserver;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ShapeShiftApiTest extends MockedResponseTest {
 
@@ -46,7 +48,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
                 + "\"minerFee\":\"0.001\"}}");
 
         QuoteRequest request = new QuoteRequest();
-        request.setAmount(0.1102969);
+        request.setDepositAmount(0.1102969);
         request.setPair("eth_btc");
         final TestObserver<QuoteResponseWrapper> testObserver = subject.getApproximateQuote(request).test();
 
