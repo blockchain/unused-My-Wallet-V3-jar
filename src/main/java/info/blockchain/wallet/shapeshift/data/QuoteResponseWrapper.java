@@ -17,7 +17,14 @@ public class QuoteResponseWrapper {
     @JsonProperty("success")
     private Quote wrapper;
 
+    @JsonProperty("error")
+    private String error;
+
     public Quote getWrapper() {
         return wrapper;
+    }
+
+    public String getError() {
+        return error;
     }
 }

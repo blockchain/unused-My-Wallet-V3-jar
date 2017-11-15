@@ -22,6 +22,10 @@ public class QuoteRequest {
     @JsonProperty("amount")
     private double amount;
 
+    //the amount to be withdrawn
+    @JsonProperty("withdrawalAmount")
+    private String withdrawalAmount;
+
     //the address for coin to be sent to
     @JsonProperty("withdrawal")
     private String withdrawal;
@@ -44,6 +48,14 @@ public class QuoteRequest {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public String getWithdrawalAmount() {
+        return withdrawalAmount;
+    }
+
+    public void setWithdrawalAmount(String withdrawalAmount) {
+        this.withdrawalAmount = withdrawalAmount;
     }
 
     public String getWithdrawal() {
