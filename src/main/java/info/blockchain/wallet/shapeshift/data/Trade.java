@@ -39,7 +39,7 @@ public class Trade {
     private Quote quote;
 
     public STATUS getStatus() {
-        return STATUS.valueOf(status);
+        return STATUS.fromString(status);
     }
 
     public void setStatus(STATUS status) {
@@ -98,6 +98,15 @@ public class Trade {
 
         STATUS(final String text) {
             this.text = text;
+        }
+
+        static STATUS fromString(String text) {
+            for (STATUS status : STATUS.values()) {
+                if (status.text.equalsIgnoreCase(text)) {
+                    return status;
+                }
+            }
+            return null;
         }
 
         @Override
