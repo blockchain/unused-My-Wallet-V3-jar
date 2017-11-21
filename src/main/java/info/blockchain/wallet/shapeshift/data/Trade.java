@@ -39,19 +39,7 @@ public class Trade {
     private Quote quote;
 
     public STATUS getStatus() {
-
-        // TODO: 11/10/2017 There must be an easier way to do this.
-        if (status.equals(STATUS.NO_DEPOSITS.toString())) {
-            return STATUS.NO_DEPOSITS;
-        } else if (status.equals(STATUS.RECEIVED.toString())) {
-            return STATUS.RECEIVED;
-        } else if (status.equals(STATUS.COMPLETE.toString())) {
-            return STATUS.COMPLETE;
-        } else if (status.equals(STATUS.RESOLVED.toString())) {
-            return STATUS.RESOLVED;
-        } else {
-            return STATUS.FAILED;
-        }
+        return STATUS.valueOf(status);
     }
 
     public void setStatus(STATUS status) {
@@ -108,7 +96,7 @@ public class Trade {
 
         private final String text;
 
-        private STATUS(final String text) {
+        STATUS(final String text) {
             this.text = text;
         }
 
