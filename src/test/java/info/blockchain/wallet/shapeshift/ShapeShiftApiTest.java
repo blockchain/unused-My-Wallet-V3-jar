@@ -5,6 +5,7 @@ import info.blockchain.wallet.shapeshift.data.MarketInfo;
 import info.blockchain.wallet.shapeshift.data.Quote;
 import info.blockchain.wallet.shapeshift.data.QuoteRequest;
 import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.Trade;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 
 import org.junit.Test;
@@ -82,7 +83,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         testObserver.assertComplete();
         testObserver.assertNoErrors();
         TradeStatusResponse response = testObserver.values().get(0);
-        assertEquals("complete", response.getStatus());
+        assertEquals(Trade.STATUS.COMPLETE, response.getStatus());
         assertEquals("3PpfQbaETF1PCUh2iZKfMoyMhCmZWmVz9Z", response.getAddress());
         assertEquals("0x9240d92140a48164ef71d9b0fade096583354e5a", response.getWithdraw());
         assertEquals(0.0001332, response.getIncomingCoin(), 0);
