@@ -82,7 +82,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         testObserver.assertComplete();
         testObserver.assertNoErrors();
         TradeStatusResponse response = testObserver.values().get(0);
-        assertEquals("complete", response.getStatus());
+        assertEquals("complete", response.getStatus().name());
         assertEquals("3PpfQbaETF1PCUh2iZKfMoyMhCmZWmVz9Z", response.getAddress());
         assertEquals("0x9240d92140a48164ef71d9b0fade096583354e5a", response.getWithdraw());
         assertEquals(0.0001332, response.getIncomingCoin(), 0);

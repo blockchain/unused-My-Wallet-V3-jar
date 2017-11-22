@@ -76,7 +76,10 @@ public class ShapeShiftTrades {
         return new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
     }
 
-    public void save() throws IOException, MetadataException, InvalidCipherTextException {
+    public synchronized void save() throws
+            IOException,
+            MetadataException,
+            InvalidCipherTextException {
         metadata.putMetadata(toJson());
     }
 
@@ -101,7 +104,7 @@ public class ShapeShiftTrades {
         return trades;
     }
 
-    public void setTrades(List<Trade> trades) {
+    public synchronized void setTrades(List<Trade> trades) {
         this.trades = trades;
     }
 }

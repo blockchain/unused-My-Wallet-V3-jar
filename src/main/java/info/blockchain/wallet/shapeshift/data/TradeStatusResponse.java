@@ -45,8 +45,8 @@ public class TradeStatusResponse {
     @JsonProperty("error")
     private String error;
 
-    public String getStatus() {
-        return status;
+    public Trade.STATUS getStatus() {
+        return Trade.STATUS.fromString(status);
     }
 
     public void setStatus(String status) {
