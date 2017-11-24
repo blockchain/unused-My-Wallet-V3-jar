@@ -87,6 +87,20 @@ public class Trade {
         this.quote = quote;
     }
 
+    /**
+     * @return Coin type a acquired from trade
+     */
+    public String getAcquiredCoinType() {
+
+        if(quote.getPair() != null &&
+            quote.getPair().contains("_") &&
+            quote.getPair().split("_").length > 1) {
+            return quote.getPair().split("_")[1];
+        } else {
+            return "";
+        }
+    }
+
     public static Trade fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, Trade.class);
     }
