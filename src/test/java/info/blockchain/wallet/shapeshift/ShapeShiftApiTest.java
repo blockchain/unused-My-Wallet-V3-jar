@@ -91,6 +91,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         assertEquals(0.00099547, response.getOutgoingCoin(), 0);
         assertEquals("ETH", response.getOutgoingType());
         assertEquals("0xc1361e8ec096dfe48f524bd67fe811e5fd86a41c868ff5843f04619906882123", response.getTransaction());
+        assertEquals("BTC_ETH", response.getPair());
         assertNull(response.getError());
     }
 }

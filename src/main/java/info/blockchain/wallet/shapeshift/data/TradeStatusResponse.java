@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,13 +29,13 @@ public class TradeStatusResponse {
     private String withdraw;
 
     @JsonProperty("incomingCoin")
-    private double incomingCoin;
+    private BigDecimal incomingCoin;
 
     @JsonProperty("incomingType")
     private String incomingType;
 
     @JsonProperty("outgoingCoin")
-    private double outgoingCoin;
+    private BigDecimal outgoingCoin;
 
     @JsonProperty("outgoingType")
     private String outgoingType;
@@ -70,11 +71,11 @@ public class TradeStatusResponse {
     }
 
     public double getIncomingCoin() {
-        return incomingCoin;
+        return incomingCoin.doubleValue();
     }
 
     public void setIncomingCoin(double incomingCoin) {
-        this.incomingCoin = incomingCoin;
+        this.incomingCoin = BigDecimal.valueOf(incomingCoin);
     }
 
     public String getIncomingType() {
@@ -86,11 +87,11 @@ public class TradeStatusResponse {
     }
 
     public double getOutgoingCoin() {
-        return outgoingCoin;
+        return outgoingCoin.doubleValue();
     }
 
     public void setOutgoingCoin(double outgoingCoin) {
-        this.outgoingCoin = outgoingCoin;
+        this.outgoingCoin = BigDecimal.valueOf(outgoingCoin);
     }
 
     public String getOutgoingType() {
@@ -119,6 +120,10 @@ public class TradeStatusResponse {
 
     public static TradeStatusResponse fromJson(String json) throws IOException {
         return new ObjectMapper().readValue(json, TradeStatusResponse.class);
+    }
+
+    public String getPair() {
+        return incomingType + "_" + outgoingType;
     }
 
     @JsonIgnore
