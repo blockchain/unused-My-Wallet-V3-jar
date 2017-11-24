@@ -11,6 +11,8 @@ import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 import java.math.BigDecimal;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+
 import io.reactivex.observers.TestObserver;
 
 import static org.junit.Assert.assertEquals;
@@ -58,11 +60,11 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         testObserver.assertNoErrors();
         Quote wrapper = testObserver.values().get(0).getWrapper();
         assertEquals("eth_btc", wrapper.getPair());
-        assertEquals(0.11029696, wrapper.getWithdrawalAmount(), 0);
-        assertEquals(1.7278182, wrapper.getDepositAmount(), 0);
-        assertEquals(1000, wrapper.getExpiration());
-        assertEquals(0.06441474, wrapper.getQuotedRate(), 0);
-        assertEquals(0.001, wrapper.getMinerFee(), 0);
+        assertEquals(BigDecimal.valueOf(0.11029696), wrapper.getWithdrawalAmount());
+        assertEquals(BigDecimal.valueOf(1.7278182), wrapper.getDepositAmount());
+        assertEquals(1000L, wrapper.getExpiration());
+        assertEquals(BigDecimal.valueOf(0.06441474), wrapper.getQuotedRate());
+        assertEquals(BigDecimal.valueOf(0.001), wrapper.getMinerFee());
     }
 
     @Test
