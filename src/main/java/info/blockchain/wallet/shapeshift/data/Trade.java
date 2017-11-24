@@ -19,12 +19,21 @@ import java.text.ParseException;
     isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Trade {
 
+    /*
+    @STATUS
+     */
     @JsonProperty("status")
     private String status;
 
+    /*
+    Tx hash (user tx hash to shapeshift)
+     */
     @JsonProperty("hashIn")
     private String hashIn;
 
+    /*
+    Tx hash (shapeshift tx hash to user)
+     */
     @JsonProperty("hashOut")
     private String hashOut;
 
