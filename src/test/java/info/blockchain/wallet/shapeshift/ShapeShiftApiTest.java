@@ -8,6 +8,7 @@ import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
 import info.blockchain.wallet.shapeshift.data.Trade;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 
+import java.math.BigDecimal;
 import org.junit.Test;
 
 import io.reactivex.observers.TestObserver;
@@ -86,9 +87,9 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         assertEquals(Trade.STATUS.COMPLETE, response.getStatus());
         assertEquals("3PpfQbaETF1PCUh2iZKfMoyMhCmZWmVz9Z", response.getAddress());
         assertEquals("0x9240d92140a48164ef71d9b0fade096583354e5a", response.getWithdraw());
-        assertEquals(0.0001332, response.getIncomingCoin(), 0);
+        assertEquals(BigDecimal.valueOf(0.0001332), response.getIncomingCoin());
         assertEquals("BTC", response.getIncomingType());
-        assertEquals(0.00099547, response.getOutgoingCoin(), 0);
+        assertEquals(BigDecimal.valueOf(0.00099547), response.getOutgoingCoin());
         assertEquals("ETH", response.getOutgoingType());
         assertEquals("0xc1361e8ec096dfe48f524bd67fe811e5fd86a41c868ff5843f04619906882123", response.getTransaction());
         assertEquals("BTC_ETH", response.getPair());

@@ -70,12 +70,12 @@ public class TradeStatusResponse {
         this.withdraw = withdraw;
     }
 
-    public double getIncomingCoin() {
-        return incomingCoin.doubleValue();
+    public BigDecimal getIncomingCoin() {
+        return incomingCoin;
     }
 
-    public void setIncomingCoin(double incomingCoin) {
-        this.incomingCoin = BigDecimal.valueOf(incomingCoin);
+    public void setIncomingCoin(BigDecimal incomingCoin) {
+        this.incomingCoin = incomingCoin;
     }
 
     public String getIncomingType() {
@@ -86,12 +86,12 @@ public class TradeStatusResponse {
         this.incomingType = incomingType;
     }
 
-    public double getOutgoingCoin() {
-        return outgoingCoin.doubleValue();
+    public BigDecimal getOutgoingCoin() {
+        return outgoingCoin;
     }
 
-    public void setOutgoingCoin(double outgoingCoin) {
-        this.outgoingCoin = BigDecimal.valueOf(outgoingCoin);
+    public void setOutgoingCoin(BigDecimal outgoingCoin) {
+        this.outgoingCoin = outgoingCoin;
     }
 
     public String getOutgoingType() {
