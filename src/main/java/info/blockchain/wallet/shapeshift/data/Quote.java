@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -31,7 +32,7 @@ public class Quote {
 
     //Amount of the output coin you will receive
     @JsonProperty("withdrawalAmount")
-    private String withdrawalAmount;//Implemented as string on web
+    private BigDecimal withdrawalAmount;//Implemented as string on web
 
     //Deposit Address
     @JsonProperty("deposit")
@@ -39,7 +40,7 @@ public class Quote {
 
     //Exact amount of input coin to send in
     @JsonProperty("depositAmount")
-    private String depositAmount;//Implemented as string on web
+    private BigDecimal depositAmount;//Implemented as string on web
 
     //Timestamp of when trade will expire
     @JsonProperty("expiration")
@@ -47,13 +48,13 @@ public class Quote {
 
     //Exchange rate to be honored
     @JsonProperty("quotedRate")
-    private String quotedRate;//Implemented as string on web
+    private BigDecimal quotedRate;//Implemented as string on web
 
     @JsonProperty("returnAddress")
     private String returnAddress;
 
     @JsonProperty("minerFee")
-    private String minerFee;//Implemented as string on web
+    private BigDecimal minerFee;//Implemented as string on web
 
     //Public API attached to this shift
     @JsonProperty("apiPubKey")
@@ -83,12 +84,12 @@ public class Quote {
         this.withdrawal = withdrawal;
     }
 
-    public Double getWithdrawalAmount() {
-        return Double.parseDouble(withdrawalAmount);
+    public BigDecimal getWithdrawalAmount() {
+        return withdrawalAmount;
     }
 
-    public void setWithdrawalAmount(Double withdrawalAmount) {
-        this.withdrawalAmount = Double.toString(withdrawalAmount);
+    public void setWithdrawalAmount(BigDecimal withdrawalAmount) {
+        this.withdrawalAmount = withdrawalAmount;
     }
 
     public String getDeposit() {
@@ -99,12 +100,12 @@ public class Quote {
         this.deposit = deposit;
     }
 
-    public Double getDepositAmount() {
-        return Double.parseDouble(depositAmount);
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
     }
 
-    public void setDepositAmount(Double depositAmount) {
-        this.depositAmount = Double.toString(depositAmount);
+    public void setDepositAmount(BigDecimal depositAmount) {
+        this.depositAmount = depositAmount;
     }
 
     public long getExpiration() {
@@ -115,12 +116,12 @@ public class Quote {
         this.expiration = expiration;
     }
 
-    public double getQuotedRate() {
-        return Double.parseDouble(quotedRate);
+    public BigDecimal getQuotedRate() {
+        return quotedRate;
     }
 
-    public void setQuotedRate(double quotedRate) {
-        this.quotedRate = Double.toString(quotedRate);
+    public void setQuotedRate(BigDecimal quotedRate) {
+        this.quotedRate = quotedRate;
     }
 
     public String getReturnAddress() {
@@ -131,12 +132,12 @@ public class Quote {
         this.returnAddress = returnAddress;
     }
 
-    public Double getMinerFee() {
-        return Double.parseDouble(minerFee);
+    public BigDecimal getMinerFee() {
+        return minerFee;
     }
 
-    public void setMinerFee(Double minerFee) {
-        this.minerFee = Double.toString(minerFee);
+    public void setMinerFee(BigDecimal minerFee) {
+        this.minerFee = minerFee;
     }
 
     public String getApiPubKey() {
