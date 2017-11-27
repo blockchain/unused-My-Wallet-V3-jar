@@ -123,7 +123,11 @@ public class TradeStatusResponse {
     }
 
     public String getPair() {
-        return incomingType + "_" + outgoingType;
+        if (incomingType == null || outgoingType == null) {
+            return null;
+        } else {
+            return incomingType + "_" + outgoingType;
+        }
     }
 
     @JsonIgnore
