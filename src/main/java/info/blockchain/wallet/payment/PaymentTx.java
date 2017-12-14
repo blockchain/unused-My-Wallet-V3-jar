@@ -1,5 +1,7 @@
 package info.blockchain.wallet.payment;
 
+import static com.google.common.base.Preconditions.*;
+
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.pushtx.PushTx;
 import info.blockchain.wallet.BlockchainFramework;
@@ -26,8 +28,13 @@ import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
-import org.bitcoinj.wallet.SendRequest;
-import org.bitcoinj.wallet.Wallet;
+import org.bitcoinj.script.ScriptException;
+import org.bitcoinj.signers.LocalTransactionSigner;
+import org.bitcoinj.signers.TransactionSigner;
+import org.bitcoinj.wallet.DecryptingKeyBag;
+import org.bitcoinj.wallet.KeyBag;
+import org.bitcoinj.wallet.KeyChainGroup;
+import org.bitcoinj.wallet.RedeemData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
@@ -40,7 +47,7 @@ public class PaymentTx {
     public static synchronized Transaction makeSimpleTransaction(List<UnspentOutput> unspentCoins,
         HashMap<String, BigInteger> receivingAddresses,
         @Nonnull BigInteger fee,
-        @Nonnull String changeAddress)
+        String changeAddress)
         throws InsufficientMoneyException, AddressFormatException {
 
         log.info("Making transaction");
@@ -56,7 +63,8 @@ public class PaymentTx {
         BigInteger inputValueSum = addTransactionInputList(transaction, unspentCoins, valueNeeded);
 
         //Add Change
-        addChange(transaction, fee, changeAddress, outputValueSum, inputValueSum);
+        if (changeAddress != null)
+            addChange(transaction, fee, changeAddress, outputValueSum, inputValueSum);
 
         //Bip69
         Transaction sortedTx = Tools.applyBip69(transaction);
@@ -168,14 +176,54 @@ public class PaymentTx {
         }
     }
 
-    public static synchronized void signSimpleTransaction(Transaction transaction, List<ECKey> keys) {
+    public static synchronized void signSimpleTransaction(Transaction tx, List<ECKey> keys, boolean useForkId) {
 
         log.info("Signing transaction");
-        Wallet keyBag = Wallet.fromKeys(PersistentUrls.getInstance()
-            .getCurrentNetworkParams(), keys);
+        KeyChainGroup keybag = new KeyChainGroup(PersistentUrls.getInstance().getCurrentNetworkParams());
+        keybag.importKeys(keys);
 
-        SendRequest sendRequest = SendRequest.forTx(transaction);
-        keyBag.signTransaction(sendRequest);
+        KeyBag maybeDecryptingKeyBag = new DecryptingKeyBag(keybag, null);
+
+        List<TransactionInput> inputs = tx.getInputs();
+        List<TransactionOutput> outputs = tx.getOutputs();
+        checkState(inputs.size() > 0);
+        checkState(outputs.size() > 0);
+
+        int numInputs = tx.getInputs().size();
+        for (int i = 0; i < numInputs; i++) {
+            TransactionInput txIn = tx.getInput(i);
+            if (txIn.getConnectedOutput() == null) {
+                // Missing connected output, assuming already signed.
+                continue;
+            }
+
+            try {
+                // We assume if its already signed, its hopefully got a SIGHASH type that will not invalidate when
+                // we sign missing pieces (to check this would require either assuming any signatures are signing
+                // standard output types or a way to get processed signatures out of script execution)
+                if(useForkId) {
+                    txIn.getScriptSig().correctlySpends(tx, i, txIn.getConnectedOutput().getScriptPubKey(), txIn.getConnectedOutput().getValue(), Script.ALL_VERIFY_FLAGS);
+                } else {
+                    txIn.getScriptSig().correctlySpends(tx, i, txIn.getConnectedOutput().getScriptPubKey(), Script.ALL_VERIFY_FLAGS);
+                }
+
+                log.warn("Input {} already correctly spends output, assuming SIGHASH type used will be safe and skipping signing.", i);
+                continue;
+            } catch (ScriptException e) {
+                log.debug("Input contained an incorrect signature", e);
+                // Expected.
+            }
+
+            Script scriptPubKey = txIn.getConnectedOutput().getScriptPubKey();
+            RedeemData redeemData = txIn.getConnectedRedeemData(maybeDecryptingKeyBag);
+            checkNotNull(redeemData, "Transaction exists in wallet that we cannot redeem: %s", txIn.getOutpoint().getHash());
+            txIn.setScriptSig(scriptPubKey.createEmptyInputScript(redeemData.keys.get(0), redeemData.redeemScript));
+        }
+
+        TransactionSigner.ProposedTransaction proposal = new TransactionSigner.ProposedTransaction(tx, useForkId);
+        LocalTransactionSigner signer = new LocalTransactionSigner();
+        if (!signer.signInputs(proposal, maybeDecryptingKeyBag))
+            log.info("{} returned false for the tx", signer.getClass().getName());
     }
 
     public static synchronized Call<ResponseBody> publishSimpleTransaction(Transaction transaction, String apiCode)
