@@ -4,10 +4,9 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import retrofit2.Call;
-import retrofit2.Response;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -15,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
 import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL_LEGACY;
@@ -27,20 +29,20 @@ public class BalanceManager {
 
     private HashMap<String, BigInteger> balanceMap;
 
-    public BalanceManager(BlockExplorer blockExplorer) {
+    BalanceManager(BlockExplorer blockExplorer) {
         log.info("Initializing BalanceManager");
         this.blockExplorer = blockExplorer;
         this.balanceMap = new HashMap<>();
     }
 
     public void subtractAmountFromAddressBalance(String address, BigInteger amount)
-        throws Exception {
+            throws Exception {
 
-        log.info("Updating internal balance of address "+address);
+        log.info("Updating internal balance of address " + address);
 
         //Update individual address
         BigInteger currentBalance = balanceMap.get(address);
-        if(currentBalance == null) {
+        if (currentBalance == null) {
             throw new Exception("No info for this address. updateAllBalances should be called first.");
         }
         BigInteger newBalance = currentBalance.subtract(amount);
@@ -48,7 +50,7 @@ public class BalanceManager {
 
         //Update wallet balance
         currentBalance = balanceMap.get(MULTI_ADDRESS_ALL);
-        if(currentBalance == null) {
+        if (currentBalance == null) {
             throw new Exception("No info for this address. updateAllBalances should be called first.");
         }
         newBalance = currentBalance.subtract(amount);
@@ -67,10 +69,10 @@ public class BalanceManager {
         return balanceMap.get(PayloadManager.MULTI_ADDRESS_ALL_LEGACY);
     }
 
-    public void updateAllBalances(List<String> legacyAddressList, List<String> allAccountsAndAddresses) throws ServerConnectionException, IOException {
-        Call<HashMap<String, Balance>> call = blockExplorer.getBalance(allAccountsAndAddresses,
-            FilterType.RemoveUnspendable);
-
+    public void updateAllBalances(List<String> legacyAddressList, List<String> allAccountsAndAddresses) throws
+            ServerConnectionException,
+            IOException {
+        Call<HashMap<String, Balance>> call = getBalanceOfAddresses(allAccountsAndAddresses);
 
         log.info("Fetching wallet balances");
 
@@ -78,10 +80,10 @@ public class BalanceManager {
         BigInteger importedFinalBalance = BigInteger.ZERO;
 
         Response<HashMap<String, Balance>> exe = call.execute();
-        if(exe.isSuccessful()) {
+        if (exe.isSuccessful()) {
 
             Set<Entry<String, Balance>> set = exe.body().entrySet();
-            for(Entry<String, Balance> item : set) {
+            for (Entry<String, Balance> item : set) {
                 String address = item.getKey();
                 Balance balance = item.getValue();
 
@@ -91,7 +93,7 @@ public class BalanceManager {
                 walletFinalBalance = walletFinalBalance.add(balance.getFinalBalance());
 
                 //Consolidate 'Imported'
-                if(legacyAddressList.contains(address)) {
+                if (legacyAddressList.contains(address)) {
                     importedFinalBalance = importedFinalBalance.add(balance.getFinalBalance());
                 }
             }
@@ -105,6 +107,10 @@ public class BalanceManager {
     }
 
     public Call<HashMap<String, Balance>> getBalanceOfAddresses(List<String> addresses) {
-        return blockExplorer.getBalance(addresses, FilterType.RemoveUnspendable);
+        return getBlockExplorer().getBalance("btc", addresses, FilterType.RemoveUnspendable);
+    }
+
+    BlockExplorer getBlockExplorer() {
+        return blockExplorer;
     }
 }

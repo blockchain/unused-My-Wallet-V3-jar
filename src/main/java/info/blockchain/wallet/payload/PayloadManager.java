@@ -17,6 +17,7 @@ import info.blockchain.wallet.exceptions.ServerConnectionException;
 import info.blockchain.wallet.exceptions.UnsupportedVersionException;
 import info.blockchain.wallet.metadata.MetadataNodeFactory;
 import info.blockchain.wallet.multiaddress.MultiAddressFactory;
+import info.blockchain.wallet.multiaddress.MultiAddressFactoryBch;
 import info.blockchain.wallet.multiaddress.TransactionSummary;
 import info.blockchain.wallet.pairing.Pairing;
 import info.blockchain.wallet.payload.data.Account;
@@ -76,8 +77,12 @@ public class PayloadManager {
     private WalletApi walletApi;
     private BlockExplorer blockExplorer;
 
+    // Bitcoin
     private MultiAddressFactory multiAddressFactory;
     private BalanceManager balanceManager;
+    // Bitcoin Cash
+    private MultiAddressFactoryBch multiAddressFactoryBch;
+    private BalanceManagerBch balanceManagerBch;
 
     private static PayloadManager instance;
 
@@ -95,9 +100,15 @@ public class PayloadManager {
 
     private void init() {
         walletApi = new WalletApi();
-        blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
+        blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                BlockchainFramework.getRetrofitApiInstance(),
+                BlockchainFramework.getApiCode());
+        // Bitcoin
         multiAddressFactory = new MultiAddressFactory(blockExplorer);
         balanceManager = new BalanceManager(blockExplorer);
+        // Bitcoin Cash
+        multiAddressFactoryBch = new MultiAddressFactoryBch(blockExplorer);
+        balanceManagerBch = new BalanceManagerBch(blockExplorer);
     }
 
     public void wipe() {
@@ -225,8 +236,8 @@ public class PayloadManager {
      */
     public void initializeAndDecrypt(@Nonnull String sharedKey, @Nonnull String guid, @Nonnull String password)
         throws IOException, InvalidCredentialsException, AccountLockedException, ServerConnectionException,
-        DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException, DecoderException,
-        ApiException, HDWalletException {
+        DecryptionException, InvalidCipherTextException, UnsupportedVersionException, MnemonicLengthException,
+            MnemonicWordException, MnemonicChecksumException, DecoderException, HDWalletException {
         log.info("Initializing and decrypting wallet from credentials");
 
         this.password = password;
@@ -571,7 +582,7 @@ public class PayloadManager {
         throws Exception {
         log.info("Setting key for legacy address");
 
-        LegacyAddress matchingLegacyAddress = null;
+        LegacyAddress matchingLegacyAddress;
         try {
             matchingLegacyAddress = walletBaseBody.getWalletBody()
                 .setKeyForLegacyAddress(key, secondPassword);
@@ -834,7 +845,7 @@ public class PayloadManager {
      * @return
      */
     public boolean isOwnHDAddress(String address) {
-        return multiAddressFactory.isOwnHDAddress(address);
+        return multiAddressFactory.isOwnHDAddress(address) || multiAddressFactoryBch.isOwnHDAddress(address);
     }
 
     /**
@@ -871,13 +882,23 @@ public class PayloadManager {
     }
 
     /**
+     * Returns an xPub from a Bitcoin Cash address if the address belongs to this wallet.
+     * @param address The Bitcoin Cash address you want to query
+     * @return  An xPub as a String
+     */
+    @Nullable
+    public String getXpubFromBchAddress(String address) {
+        return multiAddressFactoryBch.getXpubFromAddress(address);
+    }
+
+    /**
      * Gets next receive address. Excludes reserved addresses.
      * @param account
      * @return
      * @throws IOException
      * @throws HDWalletException
      */
-    public String getNextReceiveAddress(Account account) throws IOException, HDWalletException {
+    public String getNextReceiveAddress(Account account) throws HDWalletException {
 
         int nextIndex = getNextReceiveAddressIndex(account);
 
@@ -940,7 +961,7 @@ public class PayloadManager {
      * @throws IOException
      * @throws HDWalletException
      */
-    public String getNextChangeAddress(Account account) throws IOException, HDWalletException {
+    public String getNextChangeAddress(Account account) throws HDWalletException {
 
         int nextIndex = getNextChangeAddressIndex(account);
 
@@ -1043,4 +1064,67 @@ public class PayloadManager {
     public void subtractAmountFromAddressBalance(String address, BigInteger amount) throws Exception {
         balanceManager.subtractAmountFromAddressBalance(address, amount);
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // BALANCE BCH
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Returns the final balance for an address in BCH.
+     *
+     * @param address A valid Bitcoin or Bitcoin cash address
+     * @return The addresses's balance as a {@link BigInteger}
+     */
+    public BigInteger getAddressBalanceBch(String address) {
+        BigInteger result = balanceManagerBch.getAddressBalance(address);
+        return result == null ? BigInteger.ZERO : result;
+    }
+
+    /**
+     * Returns the final balance for all accounts + addresses in BCH.
+     *
+     * @return The wallet's BCH balance as a {@link BigInteger}
+     */
+    public BigInteger getWalletBalanceBch() {
+        BigInteger result = balanceManagerBch.getWalletBalance();
+        return result == null ? BigInteger.ZERO : result;
+    }
+
+    /**
+     * Returns the final balance of all imported addresses in BCH
+     *
+     * @return The BCH balance as a {@link BigInteger}
+     */
+    public BigInteger getImportedAddressesBalanceBch() {
+        BigInteger result = balanceManagerBch.getImportedAddressesBalance();
+        return result == null ? BigInteger.ZERO : result;
+    }
+
+    /**
+     * Updates all account and address balances and transaction counts for Bitcoin Cash. API call
+     * uses the Balance endpoint and is much quicker than multiaddress. This will allow the wallet
+     * to display wallet/account totals while transactions are still being fetched. This also stores
+     * the amount of transactions per address which we can use to limit the calls to multiaddress
+     * when the limit is reached.
+     */
+    public void updateAllBalancesBch() throws ServerConnectionException, IOException {
+        List<String> legacyAddressList = getPayload().getLegacyAddressStringList();
+        ArrayList<String> all = new ArrayList<>(getAllAccountsAndAddresses());
+
+        balanceManagerBch.updateAllBalances(legacyAddressList, all);
+    }
+
+    /**
+     * Updates address balance as well as wallet balance in BCH. This is used to immediately update
+     * balances after a successful transaction which speeds up the balance the UI reflects without
+     * the need to wait for incoming websocket notification.
+     *
+     * @param amount  The amount to be subtracted from the address's BCH balance
+     * @param address A valid Bitcoin or Bitcoin cash address
+     */
+    public void subtractAmountFromAddressBalanceBch(String address, BigInteger amount) throws
+            Exception {
+        balanceManagerBch.subtractAmountFromAddressBalance(address, amount);
+    }
+
 }

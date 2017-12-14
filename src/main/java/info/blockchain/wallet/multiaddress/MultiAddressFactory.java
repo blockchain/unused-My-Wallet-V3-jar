@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import retrofit2.Call;
 import retrofit2.Response;
 
 import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
@@ -56,29 +57,37 @@ public class MultiAddressFactory {
         return addressToXpubMap.get(address);
     }
 
-    private MultiAddress getMultiAddress(List<String> allActive, String onlyShow, int limit, int offset) throws IOException, ApiException{
+    private MultiAddress getMultiAddress(List<String> allActive, String onlyShow, int limit, int offset) throws IOException, ApiException {
 
         log.info("Fetching multiaddress for {} accounts/addresses", allActive.size());
 
-        if (onlyShow!=null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
+        if (onlyShow != null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
 
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
+            Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, null).execute();
 
-            if(call.isSuccessful()) {
+            if (call.isSuccessful()) {
                 return call.body();
             } else {
                 throw new ApiException(call.errorBody().string());
             }
 
         } else {
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
+            Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, onlyShow).execute();
 
-            if(call.isSuccessful()) {
+            if (call.isSuccessful()) {
                 return call.body();
             } else {
                 throw new ApiException(call.errorBody().string());
             }
         }
+    }
+
+    protected Call<MultiAddress> getMultiAddress(List<String> allActive, int limit, int offset, String context) {
+        return getBlockExplorer().getMultiAddress("btc", allActive, context, FilterType.RemoveUnspendable, limit, offset);
+    }
+
+    BlockExplorer getBlockExplorer() {
+        return blockExplorer;
     }
 
     /**
