@@ -107,6 +107,7 @@ public class ShapeShiftTrades {
         return trades;
     }
 
+    @JsonProperty("USAState")
     public State getUsState() {
         return state;
     }
@@ -115,6 +116,7 @@ public class ShapeShiftTrades {
         this.trades = trades;
     }
 
+    @JsonProperty("USAState")
     public void setUsState(State state) {
         this.state = state;
     }
