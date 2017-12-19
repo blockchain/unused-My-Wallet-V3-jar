@@ -10,22 +10,23 @@ import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
-import retrofit2.Call;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import retrofit2.Call;
+
 class Coins {
 
     private static final Logger log = LoggerFactory.getLogger(Coins.class);
 
-    public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
+    public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) {
         log.info("Fetching unspent coins");
-        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
+        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
         return blockExplorer.getUnspentOutputs(addresses);
     }
 

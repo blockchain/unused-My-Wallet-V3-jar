@@ -59,7 +59,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings("ALL")
 public class PayloadManager {
 
     public static final String MULTI_ADDRESS_ALL = "all";
@@ -75,7 +75,6 @@ public class PayloadManager {
     private MetadataNodeFactory metadataNodeFactory;
     // This is an explicit dependency and should be injected for easier testing
     private WalletApi walletApi;
-    private BlockExplorer blockExplorer;
 
     // Bitcoin
     private MultiAddressFactory multiAddressFactory;
@@ -100,7 +99,7 @@ public class PayloadManager {
 
     private void init() {
         walletApi = new WalletApi();
-        blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+        final BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
                 BlockchainFramework.getRetrofitApiInstance(),
                 BlockchainFramework.getApiCode());
         // Bitcoin
@@ -139,9 +138,9 @@ public class PayloadManager {
         return metadataNodeFactory;
     }
 
-    //********************************************************************************************//
-    //*                  Wallet initialization, creation, recovery, syncing                      *//
-    //********************************************************************************************//
+    ///////////////////////////////////////////////////////////////////////////
+    // WALLET INITIALIZATION, CREATION, RECOVERY, SYNCING
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * NB! When called from Android - First apply PRNGFixes
@@ -161,6 +160,7 @@ public class PayloadManager {
         saveNewWallet(email);
 
         updateAllBalances();
+        updateAllBalancesBch();
 
         return walletBaseBody.getWalletBody();
     }
@@ -188,6 +188,7 @@ public class PayloadManager {
         saveNewWallet(email);
 
         updateAllBalances();
+        updateAllBalancesBch();
 
         return walletBaseBody.getWalletBody();
     }
@@ -213,6 +214,7 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
 
         return success;
     }
@@ -263,6 +265,7 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
     }
 
     public void initializeAndDecryptFromQR(@Nonnull String qrData) throws Exception {
@@ -291,6 +294,7 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
     }
 
     /**
@@ -311,6 +315,7 @@ public class PayloadManager {
             setTempPassword(password);
 
             updateAllBalances();
+            updateAllBalancesBch();
         } catch (DecryptionException decryptionException) {
             log.warn("", decryptionException);
             throw decryptionException;
@@ -414,7 +419,7 @@ public class PayloadManager {
                 if (!account.isArchived()) {
                     HDAccount hdAccount =
                             getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
-                    int nextIndex = getNextReceiveAddressIndex(account);
+                    int nextIndex = getNextReceiveAddressIndexBtc(account);
 
                     syncAddresses.addAll(
                             Tools.getReceiveAddressList(hdAccount, nextIndex, nextIndex + 20));
@@ -448,9 +453,9 @@ public class PayloadManager {
         }
     }
 
-    //********************************************************************************************//
-    //*                         Account and Legacy HDAddress creation                              *//
-    //********************************************************************************************//
+    ///////////////////////////////////////////////////////////////////////////
+    // ACCOUNT AND LEGACY HDADDRESS CREATION
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Adds a new account to hd wallet and saves to server.
@@ -474,6 +479,7 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
 
         return accountBody;
     }
@@ -501,6 +507,7 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
 
         return success;
     }
@@ -514,7 +521,6 @@ public class PayloadManager {
      */
     public void addLegacyAddress(LegacyAddress legacyAddress) throws Exception {
         log.info("Adding legacy address");
-        // TODO: 02/03/2017  second password
 
         List<LegacyAddress> currentAddresses = walletBaseBody.getWalletBody().getLegacyAddressList();
         walletBaseBody.getWalletBody().getLegacyAddressList().add(legacyAddress);
@@ -526,6 +532,7 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
     }
 
     /**
@@ -538,7 +545,6 @@ public class PayloadManager {
      */
     public void updateLegacyAddress(LegacyAddress legacyAddress) throws Exception {
         log.info("Updating legacy address");
-        // TODO: 02/03/2017  second password
         boolean found = false;
 
         final List<LegacyAddress> legacyAddressList = walletBaseBody.getWalletBody().getLegacyAddressList();
@@ -563,6 +569,7 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
     }
 
     /**
@@ -618,20 +625,21 @@ public class PayloadManager {
         }
 
         updateAllBalances();
+        updateAllBalancesBch();
 
         return newlyAdded;
 
     }
 
-    //********************************************************************************************//
-    //*                                 Shortcut methods                                         *//
-    //********************************************************************************************//
+    ///////////////////////////////////////////////////////////////////////////
+    // SHORTCUT METHODS
+    ///////////////////////////////////////////////////////////////////////////
 
     private LinkedHashSet<String> getAllAccountsAndAddresses() {
         LinkedHashSet<String> all = new LinkedHashSet<>();
 
         //Add all accounts
-        if(getPayload().getHdWallets() != null) {
+        if (getPayload().getHdWallets() != null) {
             List<String> xpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
             all.addAll(xpubs);
         }
@@ -639,7 +647,7 @@ public class PayloadManager {
         //Add all addresses, archived or not
         all.addAll(getPayload().getLegacyAddressStringList());
 
-        log.info("Getting account and address list: List size = {}", all.size());
+        log.info("Getting BTC account and address list: List size = {}", all.size());
         return all;
     }
 
@@ -685,14 +693,18 @@ public class PayloadManager {
     }
 
     /**
-     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their respective addresses.
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their respective Bitcoin
+     * addresses.
      *
-     * @param addresses A List of addresses as Strings
-     * @return A {@link LinkedHashMap} where they key is the address String, and the value is a {@link Balance} object
+     * @param addresses A List of Bitcoin addresses as Strings
+     * @return A {@link LinkedHashMap} where they key is the address String, and the value is a
+     * {@link Balance} object
      * @throws IOException  Thrown if there are network issues
      * @throws ApiException Thrown if the call isn't successful
      */
-    public LinkedHashMap<String, Balance> getBalanceOfAddresses(List<String> addresses) throws IOException, ApiException {
+    public LinkedHashMap<String, Balance> getBalanceOfAddresses(List<String> addresses) throws
+            IOException,
+            ApiException {
         LinkedHashMap<String, Balance> map = new LinkedHashMap<>();
 
         final Response<HashMap<String, Balance>> response = balanceManager.getBalanceOfAddresses(addresses).execute();
@@ -703,16 +715,46 @@ public class PayloadManager {
                 map.put(address, balanceHashMap.get(address));
             }
 
-            log.info("Get map for address balances: Map size = {}", map.size());
+            log.info("Get map for BTC address balances: Map size = {}", map.size());
             return map;
         } else {
             throw new ApiException(response.code() + ": " + response.errorBody().string());
         }
     }
 
-    //********************************************************************************************//
-    //*                                        Metadata                                          *//
-    //********************************************************************************************//
+    /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their respective Bitcoin
+     * Cash addresses.
+     *
+     * @param addresses A List of Bitcoin Cash addresses as Strings
+     * @return A {@link LinkedHashMap} where they key is the address String, and the value is a
+     * {@link Balance} object
+     * @throws IOException  Thrown if there are network issues
+     * @throws ApiException Thrown if the call isn't successful
+     */
+    public LinkedHashMap<String, Balance> getBalanceOfBchAddresses(List<String> addresses) throws
+            IOException,
+            ApiException {
+        LinkedHashMap<String, Balance> map = new LinkedHashMap<>();
+
+        final Response<HashMap<String, Balance>> response = balanceManagerBch.getBalanceOfAddresses(addresses).execute();
+        if (response.isSuccessful()) {
+            final HashMap<String, Balance> balanceHashMap = response.body();
+            // Place into map to maintain order, as API may return them in a random order
+            for (String address : addresses) {
+                map.put(address, balanceHashMap.get(address));
+            }
+
+            log.info("Get map for BCH address balances: Map size = {}", map.size());
+            return map;
+        } else {
+            throw new ApiException(response.code() + ": " + response.errorBody().string());
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // METADATA
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * This will deactivate push notifications.
@@ -780,32 +822,45 @@ public class PayloadManager {
         }
     }
 
-    //********************************************************************************************//
-    //*                                     Multi_address                                        *//
-    //********************************************************************************************//
+    ///////////////////////////////////////////////////////////////////////////
+    // MULTIADDRESS
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Gets transaction list for all wallet accounts/addresses
-     * @param limit Amount of transactions per page
+     * Gets BTC transaction list for all wallet accounts/addresses
+     *
+     * @param limit  Amount of transactions per page
      * @param offset Page offset
      * @return List of tx summaries for all wallet transactions
-     * @throws IOException
-     * @throws ApiException
      */
-    public List<TransactionSummary> getAllTransactions(int limit, int offset) throws IOException, ApiException {
+    public List<TransactionSummary> getAllTransactions(int limit, int offset) throws
+            IOException,
+            ApiException {
         return getAccountTransactions(MULTI_ADDRESS_ALL, limit, offset);
     }
 
     /**
-     * Updates internal balance and transaction list for imported addresses
-     * @param limit Amount of transactions per page
+     * Gets BCH transaction list for all wallet accounts/addresses
+     *
+     * @param limit  Amount of transactions per page
+     * @param offset Page offset
+     * @return List of tx summaries for all wallet transactions
+     */
+    public List<TransactionSummary> getAllTransactionsBch(int limit, int offset) throws
+            IOException,
+            ApiException {
+        return getAccountTransactionsBch(MULTI_ADDRESS_ALL, limit, offset);
+    }
+
+    /**
+     * Updates internal balance and transaction list for imported BTC addresses
+     *
+     * @param limit  Amount of transactions per page
      * @param offset Page offset
      * @return Consolidated list of tx summaries for specified imported transactions
-     * @throws IOException
-     * @throws ApiException
      */
     public List<TransactionSummary> getImportedAddressesTransactions(int limit, int offset)
-        throws IOException, ApiException {
+            throws IOException, ApiException {
         List<String> activeXpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
         List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
         List<String> activeLegacy = getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
@@ -817,16 +872,34 @@ public class PayloadManager {
     }
 
     /**
-     * Gets transaction list for account
-     * @param xpub
-     * @param limit Amount of transactions per page
+     * Updates internal balance and transaction list for imported BCH addresses
+     *
+     * @param limit  Amount of transactions per page
      * @param offset Page offset
-     * @return List of tx summaries for specified xpubs transactions
-     * @throws IOException
-     * @throws ApiException
+     * @return Consolidated list of tx summaries for specified imported transactions
+     */
+    public List<TransactionSummary> getImportedAddressesTransactionsBch(int limit, int offset)
+            throws IOException, ApiException {
+        List<String> activeXpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
+        List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
+        List<String> activeLegacy = getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
+
+        ArrayList<String> all = new ArrayList<>(activeXpubs);
+        all.addAll(activeLegacy);
+
+        return multiAddressFactoryBch.getAccountTransactions(all, watchOnly, activeLegacy, null, limit, offset);
+    }
+
+    /**
+     * Gets BTC transaction list for an {@link Account}.
+     *
+     * @param xpub   The xPub to get transactions from
+     * @param limit  Amount of transactions per page
+     * @param offset Page offset
+     * @return List of BTC tx summaries for specified xpubs transactions
      */
     public List<TransactionSummary> getAccountTransactions(String xpub, int limit, int offset)
-        throws IOException, ApiException {
+            throws IOException, ApiException {
 
         List<String> activeXpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
         List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
@@ -839,17 +912,39 @@ public class PayloadManager {
     }
 
     /**
-     * Calculates if an address belongs to any xpubs in wallet.
+     * Gets BCH transaction list for an {@link Account}..
+     *
+     * @param xpub   The xPub to get transactions from
+     * @param limit  Amount of transactions per page
+     * @param offset Page offset
+     * @return List of BCH tx summaries for specified xpubs transactions
+     */
+    public List<TransactionSummary> getAccountTransactionsBch(String xpub, int limit, int offset)
+            throws IOException, ApiException {
+
+        List<String> activeXpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
+        List<String> watchOnly = getPayload().getWatchOnlyAddressStringList();
+        List<String> activeLegacy = getPayload().getLegacyAddressStringList(LegacyAddress.NORMAL_ADDRESS);
+
+        ArrayList<String> all = new ArrayList<>(activeXpubs);
+        all.addAll(activeLegacy);
+
+        return multiAddressFactoryBch.getAccountTransactions(all, watchOnly, null, xpub, limit, offset);
+    }
+
+    /**
+     * Calculates if an address belongs to any xpubs in wallet. Accepts both BTC and BCH addresses.
      * Make sure multi address is up to date before executing this method.
-     * @param address
-     * @return
+     *
+     * @param address Either a BTC or BCH address
+     * @return A boolean, true if the address belongs to an xPub
      */
     public boolean isOwnHDAddress(String address) {
         return multiAddressFactory.isOwnHDAddress(address) || multiAddressFactoryBch.isOwnHDAddress(address);
     }
 
     /**
-     * Converts any address to a label.
+     * Converts any Bitcoin address to a label.
      *
      * @param address Accepts account receive or change chain address, as well as legacy address.
      * @return Account or legacy address label
@@ -857,6 +952,29 @@ public class PayloadManager {
     public String getLabelFromAddress(String address) {
         String label;
         String xpub = multiAddressFactory.getXpubFromAddress(address);
+
+        if (xpub != null) {
+            label = getPayload().getHdWallets().get(HD_WALLET_INDEX).getLabelFromXpub(xpub);
+        } else {
+            label = getPayload().getLabelFromLegacyAddress(address);
+        }
+
+        if (label == null || label.isEmpty()) {
+            label = address;
+        }
+
+        return label;
+    }
+
+    /**
+     * Converts any Bitcoin Cash address to a label.
+     *
+     * @param address Accepts account receive or change chain address, as well as legacy address.
+     * @return Account or legacy address label
+     */
+    public String getLabelFromBchAddress(String address) {
+        String label;
+        String xpub = multiAddressFactoryBch.getXpubFromAddress(address);
 
         if (xpub != null) {
             label = getPayload().getHdWallets().get(HD_WALLET_INDEX).getLabelFromXpub(xpub);
@@ -892,83 +1010,125 @@ public class PayloadManager {
     }
 
     /**
-     * Gets next receive address. Excludes reserved addresses.
-     * @param account
-     * @return
-     * @throws IOException
-     * @throws HDWalletException
+     * Gets next BTC receive address. Excludes reserved BTC addresses.
+     *
+     * @param account The account from which to derive an address
+     * @return A BTC address
      */
     public String getNextReceiveAddress(Account account) throws HDWalletException {
-
-        int nextIndex = getNextReceiveAddressIndex(account);
-
-        HDAccount hdAccount = getPayload().getHdWallets().get(0)
-            .getHDAccountFromAccountBody(account);
-
-        return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
+        int nextIndex = getNextReceiveAddressIndexBtc(account);
+        return getReceiveAddress(account, nextIndex);
     }
 
     /**
-     * Allows you to generate a receive address at an arbitrary number of positions on the chain
+     * Gets next BCH receive address. Excludes reserved BCH addresses.
+     *
+     * @param account The account from which to derive an address
+     * @return A BCH address
+     */
+    public String getNextReceiveAddressBch(Account account) throws HDWalletException {
+        int nextIndex = getNextReceiveAddressIndexBch(account);
+        return getReceiveAddress(account, nextIndex);
+    }
+
+    /**
+     * Allows you to generate a BTC receive address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
      * @param account  The {@link Account} you wish to generate an address from
-     * @param position Represents how many positions on the chain beyond what is already used
-     *                 that you wish to generate
-     * @return A bitcoin address
+     * @param position Represents how many positions on the chain beyond what is already used that
+     *                 you wish to generate
+     * @return A Bitcoin address
      */
     @Nullable
     public String getReceiveAddressAtPosition(Account account, int position) {
-        try {
-            HDAccount hdAccount = getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
-            int nextIndex = getNextReceiveAddressIndex(account);
-            return hdAccount.getReceive().getAddressAt(nextIndex + position).getAddressString();
-        } catch (HDWalletException e) {
-            return null;
-        }
+        int nextIndex = getNextReceiveAddressIndexBtc(account);
+        return getReceiveAddressAtArbitraryPosition(account, nextIndex + position);
     }
 
     /**
-     * Allows you to get an address from any given point on the receive chain.
+     * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
+     * from the next valid unused address. For example, the passing 5 as the position will generate
+     * an address which correlates with the next available address + 5 positions.
+     *
+     * @param account  The {@link Account} you wish to generate an address from
+     * @param position Represents how many positions on the chain beyond what is already used that
+     *                 you wish to generate
+     * @return A Bitcoin Cash address
+     */
+    @Nullable
+    public String getReceiveAddressAtPositionBch(Account account, int position) {
+        int nextIndex = getNextReceiveAddressIndexBch(account);
+        return getReceiveAddressAtArbitraryPosition(account, nextIndex + position);
+    }
+
+    /**
+     * Allows you to generate a BTC or BCH address from any given point on the receive chain.
      *
      * @param account  The {@link Account} you wish to generate an address from
      * @param position What position on the chain the address you wish to create is
-     * @return A bitcoin address
+     * @return A Bitcoin or Bitcoin Cash address
      */
     @Nullable
     public String getReceiveAddressAtArbitraryPosition(Account account, int position) {
         try {
-            HDAccount hdAccount = getPayload().getHdWallets().get(0).getHDAccountFromAccountBody(account);
-            return hdAccount.getReceive().getAddressAt(position).getAddressString();
+            return getReceiveAddress(account, position);
         } catch (HDWalletException e) {
             return null;
         }
     }
 
-    private int getNextReceiveAddressIndex(Account account)  {
+    private int getNextReceiveAddressIndexBtc(Account account)  {
         return multiAddressFactory.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
     }
 
-    private int getNextChangeAddressIndex(Account account)  {
+    private int getNextChangeAddressIndexBtc(Account account)  {
         return multiAddressFactory.getNextChangeAddressIndex(account.getXpub());
     }
 
+    private int getNextReceiveAddressIndexBch(Account account)  {
+        return multiAddressFactoryBch.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
+    }
+
+    private int getNextChangeAddressIndexBch(Account account)  {
+        return multiAddressFactoryBch.getNextChangeAddressIndex(account.getXpub());
+    }
+
+    private String getReceiveAddress(Account account, int position) throws HDWalletException {
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+                .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getReceive().getAddressAt(position).getAddressString();
+    }
+
+    private String getChangeAddress(Account account, int position) throws HDWalletException {
+        HDAccount hdAccount = getPayload().getHdWallets().get(0)
+                .getHDAccountFromAccountBody(account);
+
+        return hdAccount.getChange().getAddressAt(position).getAddressString();
+    }
+
     /**
-     * Gets next change address.
-     * @param account
-     * @return
-     * @throws IOException
-     * @throws HDWalletException
+     * Gets next BTC change address in the chain.
+     *
+     * @param account The {@link Account} from which you wish to derive a change address
+     * @return A Bitcoin change address
      */
     public String getNextChangeAddress(Account account) throws HDWalletException {
+        int nextIndex = getNextChangeAddressIndexBtc(account);
+        return getChangeAddress(account, nextIndex);
+    }
 
-        int nextIndex = getNextChangeAddressIndex(account);
-
-        HDAccount hdAccount = getPayload().getHdWallets().get(0)
-            .getHDAccountFromAccountBody(account);
-
-        return hdAccount.getChange().getAddressAt(nextIndex).getAddressString();
+    /**
+     * Gets next BCH change address in the chain.
+     *
+     * @param account The {@link Account} from which you wish to derive a change address
+     * @return A Bitcoin Cash change address
+     */
+    public String getNextChangeAddressBch(Account account) throws HDWalletException {
+        int nextIndex = getNextChangeAddressIndexBch(account);
+        return getChangeAddress(account, nextIndex);
     }
 
     public void incrementNextReceiveAddress(Account account) {
@@ -979,32 +1139,46 @@ public class PayloadManager {
         multiAddressFactory.incrementNextChangeAddress(account.getXpub());
     }
 
-    @Nullable
-    public String getNextReceiveAddressAndReserve(Account account, String reserveLabel)
-        throws HDWalletException, EncryptionException, NoSuchAlgorithmException, IOException, ServerConnectionException {
+    public void incrementNextReceiveAddressBch(Account account) {
+        multiAddressFactoryBch.incrementNextReceiveAddress(account.getXpub(), account.getAddressLabels());
+    }
 
-        int nextIndex = getNextReceiveAddressIndex(account);
+    public void incrementNextChangeAddressBch(Account account) {
+        multiAddressFactoryBch.incrementNextChangeAddress(account.getXpub());
+    }
+
+    public String getNextReceiveAddressAndReserve(Account account, String reserveLabel)
+            throws
+            HDWalletException,
+            EncryptionException,
+            NoSuchAlgorithmException,
+            IOException,
+            ServerConnectionException {
+
+        int nextIndex = getNextReceiveAddressIndexBtc(account);
 
         reserveAddress(account, nextIndex, reserveLabel);
 
-        HDAccount hdAccount = getPayload().getHdWallets().get(0)
-            .getHDAccountFromAccountBody(account);
-
-        return hdAccount.getReceive().getAddressAt(nextIndex).getAddressString();
+        return getReceiveAddress(account, nextIndex);
     }
 
     public void reserveAddress(Account account, int index, String label)
-        throws HDWalletException, EncryptionException, NoSuchAlgorithmException, IOException, ServerConnectionException {
+            throws
+            HDWalletException,
+            EncryptionException,
+            NoSuchAlgorithmException,
+            IOException,
+            ServerConnectionException {
 
         account.addAddressLabel(index, label);
-        if(!save()) {
+        if (!save()) {
             throw new ServerConnectionException("Unable to reserve address.");
         }
     }
 
-    //********************************************************************************************//
-    //*                                        Balance                                           *//
-    //********************************************************************************************//
+    ///////////////////////////////////////////////////////////////////////////
+    // BALANCE BITCOIN
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Balance API - Final balance for address.
@@ -1013,8 +1187,7 @@ public class PayloadManager {
      */
     public BigInteger getAddressBalance(String address) {
         BigInteger result = balanceManager.getAddressBalance(address);
-        if(result == null)result = BigInteger.ZERO;
-        return result;
+        return result == null ? BigInteger.ZERO : result;
     }
 
     /**
@@ -1023,8 +1196,7 @@ public class PayloadManager {
      */
     public BigInteger getWalletBalance() {
         BigInteger result = balanceManager.getWalletBalance();
-        if(result == null)result = BigInteger.ZERO;
-        return result;
+        return result == null ? BigInteger.ZERO : result;
     }
 
     /**
@@ -1033,8 +1205,7 @@ public class PayloadManager {
      */
     public BigInteger getImportedAddressesBalance() {
         BigInteger result = balanceManager.getImportedAddressesBalance();
-        if(result == null)result = BigInteger.ZERO;
-        return result;
+        return result == null ? BigInteger.ZERO : result;
     }
 
     /**
@@ -1047,7 +1218,6 @@ public class PayloadManager {
      * @throws IOException
      */
     public void updateAllBalances() throws ServerConnectionException, IOException {
-
         List<String> legacyAddressList = getPayload().getLegacyAddressStringList();
         ArrayList<String> all = new ArrayList<>(getAllAccountsAndAddresses());
 
@@ -1066,7 +1236,7 @@ public class PayloadManager {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // BALANCE BCH
+    // BALANCE BITCOIN CASH
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -1122,8 +1292,7 @@ public class PayloadManager {
      * @param amount  The amount to be subtracted from the address's BCH balance
      * @param address A valid Bitcoin or Bitcoin cash address
      */
-    public void subtractAmountFromAddressBalanceBch(String address, BigInteger amount) throws
-            Exception {
+    public void subtractAmountFromAddressBalanceBch(String address, BigInteger amount) throws Exception {
         balanceManagerBch.subtractAmountFromAddressBalance(address, amount);
     }
 

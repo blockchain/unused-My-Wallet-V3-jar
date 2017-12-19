@@ -30,7 +30,7 @@ public class BalanceManager {
     private HashMap<String, BigInteger> balanceMap;
 
     BalanceManager(BlockExplorer blockExplorer) {
-        log.info("Initializing BalanceManager");
+        getLog().info("Initializing BalanceManager");
         this.blockExplorer = blockExplorer;
         this.balanceMap = new HashMap<>();
     }
@@ -38,7 +38,7 @@ public class BalanceManager {
     public void subtractAmountFromAddressBalance(String address, BigInteger amount)
             throws Exception {
 
-        log.info("Updating internal balance of address " + address);
+        getLog().info("Updating internal balance of address " + address);
 
         //Update individual address
         BigInteger currentBalance = balanceMap.get(address);
@@ -74,7 +74,7 @@ public class BalanceManager {
             IOException {
         Call<HashMap<String, Balance>> call = getBalanceOfAddresses(allAccountsAndAddresses);
 
-        log.info("Fetching wallet balances");
+        getLog().info("Fetching wallet balances");
 
         BigInteger walletFinalBalance = BigInteger.ZERO;
         BigInteger importedFinalBalance = BigInteger.ZERO;
@@ -112,5 +112,9 @@ public class BalanceManager {
 
     BlockExplorer getBlockExplorer() {
         return blockExplorer;
+    }
+
+    Logger getLog() {
+        return log;
     }
 }

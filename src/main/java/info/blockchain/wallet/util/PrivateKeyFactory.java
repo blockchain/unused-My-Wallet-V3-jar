@@ -6,6 +6,7 @@ import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.ApiException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
@@ -13,14 +14,15 @@ import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.MainNetParams;
 import org.spongycastle.util.encoders.Hex;
-import retrofit2.Call;
-import retrofit2.Response;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class PrivateKeyFactory {
@@ -108,7 +110,7 @@ public class PrivateKeyFactory {
         return determineKey(hash.toString());
     }
 
-    private ECKey determineKey(String hash) throws Exception {
+    private ECKey determineKey(String hash) {
 
         ECKey uncompressedKey = decodeHexPK(hash, false);
         ECKey compressedKey = decodeHexPK(hash, true);
@@ -121,7 +123,8 @@ public class PrivateKeyFactory {
             list.add(uncompressedAddress);
             list.add(compressedAddress);
 
-            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
+            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                    BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
             Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, FilterType.RemoveUnspendable);
 
             Response<HashMap<String, Balance>> exe = call.execute();
@@ -148,7 +151,7 @@ public class PrivateKeyFactory {
         }
     }
 
-    private ECKey decodeBase58PK(String base58Priv) throws Exception {
+    private ECKey decodeBase58PK(String base58Priv) {
         byte[] privBytes = Base58.decode(base58Priv);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
@@ -169,7 +172,7 @@ public class PrivateKeyFactory {
         return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
-    private ECKey decodePK(String base58Priv) throws Exception {
+    private ECKey decodePK(String base58Priv) {
         return decodeBase58PK(base58Priv);
     }
 

@@ -1,9 +1,8 @@
 package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.Environment;
-import info.blockchain.wallet.api.PersistentUrls;
-
 import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
+
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.params.MainNetParams;
 import org.junit.After;
@@ -17,8 +16,6 @@ import io.reactivex.functions.Function;
 import io.reactivex.internal.schedulers.TrampolineScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -81,19 +78,19 @@ public abstract class MockedResponseTest {
 
         RxJavaPlugins.setInitIoSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
             @Override
-            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) {
                 return TrampolineScheduler.instance();
             }
         });
         RxJavaPlugins.setInitComputationSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
             @Override
-            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) {
                 return TrampolineScheduler.instance();
             }
         });
         RxJavaPlugins.setInitNewThreadSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
             @Override
-            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) {
                 return TrampolineScheduler.instance();
             }
         });
@@ -105,7 +102,6 @@ public abstract class MockedResponseTest {
     }
 
     private static OkHttpClient getOkHttpClient() {
-
         return new OkHttpClient.Builder()
                 .addInterceptor(mockInterceptor)//Mock responses
                 .addInterceptor(new ApiInterceptor())//Extensive logging

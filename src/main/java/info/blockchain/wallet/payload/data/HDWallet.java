@@ -1,5 +1,8 @@
 package info.blockchain.wallet.payload.data;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -7,8 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.Balance;
@@ -20,11 +22,11 @@ import info.blockchain.wallet.bip44.HDAddress;
 import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import info.blockchain.wallet.exceptions.DecryptionException;
-import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.payment.SpendableUnspentOutputs;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.PrivateKeyFactory;
+
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -33,11 +35,18 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Hex;
-import retrofit2.Response;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.*;
+
+import retrofit2.Response;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -219,8 +228,8 @@ public class HDWallet {
     }
 
     public static HDWallet fromJson(String json)
-        throws IOException, DecryptionException, MnemonicWordException, DecoderException,
-        MnemonicChecksumException, MnemonicLengthException, InvalidCipherTextException, HDWalletException {
+        throws IOException, MnemonicWordException, DecoderException,
+        MnemonicChecksumException, MnemonicLengthException, HDWalletException {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
@@ -266,8 +275,8 @@ public class HDWallet {
     }
 
     public Account addAccount(String label)
-        throws IOException, DecryptionException, InvalidCipherTextException, DecoderException, MnemonicLengthException,
-        MnemonicWordException, MnemonicChecksumException, EncryptionException, HDWalletException {
+        throws
+            HDWalletException {
 
         if(HD == null) {
             throw new HDWalletException("HD wallet not instantiated");
@@ -290,9 +299,7 @@ public class HDWallet {
         return accountBody;
     }
 
-    public Account addAccount(String label, String xpriv, String xpub)
-        throws IOException, DecryptionException, InvalidCipherTextException, DecoderException, MnemonicLengthException,
-        MnemonicWordException, MnemonicChecksumException, EncryptionException {
+    public Account addAccount(String label, String xpriv, String xpub) {
 
         Account accountBody = new Account();
         accountBody.setLabel(label);
@@ -330,6 +337,7 @@ public class HDWallet {
 
         BlockExplorer blockExplorer = new BlockExplorer(
             BlockchainFramework.getRetrofitExplorerInstance(),
+            BlockchainFramework.getRetrofitApiInstance(),
             BlockchainFramework.getApiCode());
 
         HDWallet hdWalletBody = new HDWallet();
@@ -485,9 +493,7 @@ public class HDWallet {
      * Bip44 master private key. Not to be confused with bci HDWallet seed
      * @return
      */
-    public DeterministicKey getMasterKey()
-        throws DecryptionException, MnemonicWordException, DecoderException, IOException,
-        MnemonicChecksumException, MnemonicLengthException, InvalidCipherTextException, HDWalletException {
+    public DeterministicKey getMasterKey() throws HDWalletException {
 
         validateHD();
         return HD.getMasterKey();
