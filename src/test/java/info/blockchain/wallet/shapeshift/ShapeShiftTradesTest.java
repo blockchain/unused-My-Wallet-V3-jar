@@ -9,11 +9,14 @@ import info.blockchain.wallet.shapeshift.data.Quote;
 import info.blockchain.wallet.shapeshift.data.Trade;
 import info.blockchain.wallet.shapeshift.data.Trade.STATUS;
 import info.blockchain.wallet.util.MetadataUtil;
-import java.util.ArrayList;
-import java.util.LinkedList;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class ShapeShiftTradesTest extends MockedResponseTest {
 
@@ -81,10 +84,10 @@ public class ShapeShiftTradesTest extends MockedResponseTest {
         Assert.assertEquals("76c2ce1e-7638-4848-84d2-1bc3e7e35003", trade.getQuote().getOrderId());
         Assert.assertEquals("38etuiWCZmURkQQ5SZaB3bA77rpLejZRCy", trade.getQuote().getDeposit());
         Assert.assertEquals(0, trade.getQuote().getExpiration());
-        Assert.assertEquals(15.86248012, trade.getQuote().getQuotedRate(), 0);
-        Assert.assertEquals(0.001, trade.getQuote().getMinerFee(), 0);
+        Assert.assertEquals(BigDecimal.valueOf(15.86248012), trade.getQuote().getQuotedRate());
+        Assert.assertEquals(BigDecimal.valueOf(0.001), trade.getQuote().getMinerFee());
         Assert.assertEquals("0x14f2bd143692b14d170c34b2ee25ee5fc61e8570", trade.getQuote().getWithdrawal());
-        Assert.assertEquals(0.02697539, trade.getQuote().getWithdrawalAmount(), 0);
+        Assert.assertEquals(BigDecimal.valueOf(0.02697539), trade.getQuote().getWithdrawalAmount());
     }
 
     @Test
@@ -109,8 +112,8 @@ public class ShapeShiftTradesTest extends MockedResponseTest {
         Assert.assertEquals("34bb9ddc58584697edaf6b1158657d6db28799b86e01af3f86bb2954b11c2d7f", trade.getHashIn());
         Assert.assertEquals(0, trade.getTimestamp());
         Assert.assertEquals("76c2ce1e-7638-4848-84d2-1bc3e7e35003", trade.getQuote().getOrderId());
-        Assert.assertEquals(15.86248012, trade.getQuote().getQuotedRate(), 0);
-        Assert.assertEquals(0.001, trade.getQuote().getMinerFee(), 0);
+        Assert.assertEquals(BigDecimal.valueOf(15.86248012), trade.getQuote().getQuotedRate());
+        Assert.assertEquals(BigDecimal.valueOf(0.001), trade.getQuote().getMinerFee());
         Assert.assertEquals("38etuiWCZmURkQQ5SZaB3bA77rpLejZRCy", trade.getQuote().getDeposit());
     }
 

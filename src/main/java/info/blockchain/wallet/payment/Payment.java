@@ -103,13 +103,17 @@ public class Payment {
     public Transaction makeSimpleTransaction(@Nonnull List<UnspentOutput> unspentCoins,
                                               @Nonnull HashMap<String, BigInteger> receivingAddresses,
                                               @Nonnull BigInteger fee,
-                                              @Nonnull String changeAddress)
+                                              String changeAddress)
             throws InsufficientMoneyException, AddressFormatException {
         return PaymentTx.makeSimpleTransaction(unspentCoins, receivingAddresses, fee, changeAddress);
     }
 
     public void signSimpleTransaction(@Nonnull Transaction transaction, @Nonnull List<ECKey> keys) {
-        PaymentTx.signSimpleTransaction(transaction, keys);
+        PaymentTx.signSimpleTransaction(transaction, keys, false);
+    }
+
+    public void signBCHTransaction(@Nonnull Transaction transaction, @Nonnull List<ECKey> keys) {
+        PaymentTx.signSimpleTransaction(transaction, keys, true);
     }
 
     public Call<ResponseBody> publishSimpleTransaction(@Nonnull Transaction transaction)

@@ -79,9 +79,10 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 dependencies {
     compile files('libs/api-client-0.1.15-SNAPSHOT.jar')
+    compile files('libs/bitcoinj-core-0.15-SNAPSHOT.jar')
     // TODO: Switch this back once the client is published
 //    compile group: 'info.blockchain', name: 'api-client', version: '0.1.15-SNAPSHOT'
-    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
+//    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
     compile 'com.madgag.spongycastle:prov:1.53.0.0'
     compile ('org.web3j:core-android:2.2.1')
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
@@ -100,6 +101,12 @@ dependencies {
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     compile group: 'com.squareup.okio', name: 'okio', version: '1.11.0'
     compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+
+    //bitcoinj dependencies
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version:'2.6.1'
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version:'2.0.1'
+    compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }

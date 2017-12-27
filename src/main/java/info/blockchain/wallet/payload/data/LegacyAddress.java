@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.subgraph.orchid.encoders.Hex;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
@@ -24,6 +23,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import okhttp3.ResponseBody;
+import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
 

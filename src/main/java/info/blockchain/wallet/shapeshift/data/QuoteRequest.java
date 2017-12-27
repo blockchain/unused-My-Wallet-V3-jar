@@ -19,8 +19,12 @@ import java.io.IOException;
 public class QuoteRequest {
 
     //the amount to be sent to the withdrawal address
-    @JsonProperty("amount")
-    private double amount;
+    @JsonProperty("depositAmount")
+    private double depositAmount;
+
+    //the amount to be withdrawn
+    @JsonProperty("withdrawalAmount")
+    private double withdrawalAmount;
 
     //the address for coin to be sent to
     @JsonProperty("withdrawal")
@@ -38,12 +42,20 @@ public class QuoteRequest {
     @JsonProperty("apiKey")
     private String apiKey;
 
-    public double getAmount() {
-        return amount;
+    public double getDepositAmount() {
+        return depositAmount;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setDepositAmount(double depositAmount) {
+        this.depositAmount = depositAmount;
+    }
+
+    public double getWithdrawalAmount() {
+        return withdrawalAmount;
+    }
+
+    public void setWithdrawalAmount(double withdrawalAmount) {
+        this.withdrawalAmount = withdrawalAmount;
     }
 
     public String getWithdrawal() {

@@ -1,16 +1,22 @@
 package info.blockchain.wallet.shapeshift;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.shapeshift.data.MarketInfo;
 import info.blockchain.wallet.shapeshift.data.Quote;
 import info.blockchain.wallet.shapeshift.data.QuoteRequest;
 import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.Trade;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
-import io.reactivex.observers.TestObserver;
+
+import java.math.BigDecimal;
 import org.junit.Test;
+
+import java.math.BigDecimal;
+
+import io.reactivex.observers.TestObserver;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ShapeShiftApiTest extends MockedResponseTest {
 
@@ -46,7 +52,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
                 + "\"minerFee\":\"0.001\"}}");
 
         QuoteRequest request = new QuoteRequest();
-        request.setAmount(0.1102969);
+        request.setDepositAmount(0.1102969);
         request.setPair("eth_btc");
         final TestObserver<QuoteResponseWrapper> testObserver = subject.getApproximateQuote(request).test();
 
@@ -54,11 +60,11 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         testObserver.assertNoErrors();
         Quote wrapper = testObserver.values().get(0).getWrapper();
         assertEquals("eth_btc", wrapper.getPair());
-        assertEquals(0.11029696, wrapper.getWithdrawalAmount(), 0);
-        assertEquals(1.7278182, wrapper.getDepositAmount(), 0);
-        assertEquals(1000, wrapper.getExpiration());
-        assertEquals(0.06441474, wrapper.getQuotedRate(), 0);
-        assertEquals(0.001, wrapper.getMinerFee(), 0);
+        assertEquals(BigDecimal.valueOf(0.11029696), wrapper.getWithdrawalAmount());
+        assertEquals(BigDecimal.valueOf(1.7278182), wrapper.getDepositAmount());
+        assertEquals(1000L, wrapper.getExpiration());
+        assertEquals(BigDecimal.valueOf(0.06441474), wrapper.getQuotedRate());
+        assertEquals(BigDecimal.valueOf(0.001), wrapper.getMinerFee());
     }
 
     @Test
@@ -80,14 +86,15 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         testObserver.assertComplete();
         testObserver.assertNoErrors();
         TradeStatusResponse response = testObserver.values().get(0);
-        assertEquals("complete", response.getStatus());
+        assertEquals(Trade.STATUS.COMPLETE, response.getStatus());
         assertEquals("3PpfQbaETF1PCUh2iZKfMoyMhCmZWmVz9Z", response.getAddress());
         assertEquals("0x9240d92140a48164ef71d9b0fade096583354e5a", response.getWithdraw());
-        assertEquals(0.0001332, response.getIncomingCoin(), 0);
+        assertEquals(BigDecimal.valueOf(0.0001332), response.getIncomingCoin());
         assertEquals("BTC", response.getIncomingType());
-        assertEquals(0.00099547, response.getOutgoingCoin(), 0);
+        assertEquals(BigDecimal.valueOf(0.00099547), response.getOutgoingCoin());
         assertEquals("ETH", response.getOutgoingType());
         assertEquals("0xc1361e8ec096dfe48f524bd67fe811e5fd86a41c868ff5843f04619906882123", response.getTransaction());
+        assertEquals("BTC_ETH", response.getPair());
         assertNull(response.getError());
     }
 }

@@ -1,25 +1,33 @@
 package info.blockchain.wallet.shapeshift;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.shapeshift.data.Trade;
 import info.blockchain.wallet.util.MetadataUtil;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+
 import org.bitcoinj.crypto.DeterministicKey;
 import org.spongycastle.crypto.InvalidCipherTextException;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ShapeShiftTrades {
 
     private static final int METADATA_TYPE_EXTERNAL = 6;
 
     @JsonProperty("trades")
-    private ArrayList<Trade> trades;
+    private List<Trade> trades;
 
     private Metadata metadata;
 
@@ -30,11 +38,9 @@ public class ShapeShiftTrades {
      * Creates new shapeshift trade metadata.
      *
      * @param walletMasterKey DeterministicKey of root node
-     * @throws java.io.IOException
-     * @throws info.blockchain.wallet.exceptions.MetadataException
      */
     public ShapeShiftTrades(DeterministicKey walletMasterKey)
-        throws IOException, MetadataException, NoSuchAlgorithmException {
+            throws IOException, MetadataException, NoSuchAlgorithmException {
 
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(walletMasterKey);
 
@@ -45,18 +51,18 @@ public class ShapeShiftTrades {
     /**
      * Loads existing trades from derived trades metadata node.
      *
-     * @param metaDataHDNode
      * @return Existing shapeshift trades or Null if no existing trades found.
-     * @throws MetadataException
-     * @throws IOException
      * @throws InvalidCipherTextException MetadataHdNode encryption/decryption error
      */
-    public static ShapeShiftTrades load(DeterministicKey metaDataHDNode) throws MetadataException, IOException, InvalidCipherTextException {
+    public static ShapeShiftTrades load(DeterministicKey metaDataHDNode) throws
+            MetadataException,
+            IOException,
+            InvalidCipherTextException {
 
         Metadata metadata = getShapeShiftMetadataNode(metaDataHDNode);
         String walletJson = metadata.getMetadata();
 
-        if(walletJson != null) {
+        if (walletJson != null) {
             ShapeShiftTrades tradeData = fromJson(walletJson);
             tradeData.metadata = metadata;
             return tradeData;
@@ -66,12 +72,14 @@ public class ShapeShiftTrades {
     }
 
     private static Metadata getShapeShiftMetadataNode(DeterministicKey metaDataHDNode)
-        throws IOException, MetadataException {
+            throws IOException, MetadataException {
         return new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
     }
 
-    public void save()
-        throws IOException, MetadataException, InvalidCipherTextException {
+    public synchronized void save() throws
+            IOException,
+            MetadataException,
+            InvalidCipherTextException {
         metadata.putMetadata(toJson());
     }
 
@@ -79,11 +87,11 @@ public class ShapeShiftTrades {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-            .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-            .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
-            .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
         return mapper.readValue(json, ShapeShiftTrades.class);
     }
@@ -92,11 +100,11 @@ public class ShapeShiftTrades {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public ArrayList<Trade> getTrades() {
+    public List<Trade> getTrades() {
         return trades;
     }
 
-    public void setTrades(ArrayList<Trade> trades) {
+    public synchronized void setTrades(List<Trade> trades) {
         this.trades = trades;
     }
 }

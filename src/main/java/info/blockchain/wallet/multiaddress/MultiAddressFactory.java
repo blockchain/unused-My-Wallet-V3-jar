@@ -13,7 +13,6 @@ import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabel;
 
-import info.blockchain.wallet.payment.Payment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +41,8 @@ public class MultiAddressFactory {
 
     //Field for testing if address belongs to us - Quicker than derivation
     private HashMap<String, String> addressToXpubMap;
+
+    public static final String ADDRESS_DECODE_ERROR = "[--address_decode_error--]";
 
     public MultiAddressFactory(BlockExplorer blockExplorer) {
         log.info("Initializing MultiAddressFactory");
@@ -263,8 +264,8 @@ public class MultiAddressFactory {
                         }
 
                     } else {
-                        //Possible Segwit transaction - Not supported yet.
-                        //throw new IllegalStateException("inputAddr is null");
+                        //No input address available
+                        txSummary.inputsMap.put(ADDRESS_DECODE_ERROR, inputValue);
                     }
 
                 } else {
@@ -325,12 +326,9 @@ public class MultiAddressFactory {
                         isLegacy = true;
                     }
                 } else {
-                    if(outputValue.compareTo(Payment.DUST) == 0) {
-                        //Output to dust-service - Ignore
-                    } else {
-                        //Possible Segwit transaction - Not supported yet.
-                        //throw new IllegalStateException("outputAddr is null");
-                    }
+                    //No output address available
+                    txSummary.outputsMap.put(ADDRESS_DECODE_ERROR, outputValue);
+
                 }
             }
 

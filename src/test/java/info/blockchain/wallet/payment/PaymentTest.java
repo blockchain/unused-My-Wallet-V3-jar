@@ -1,18 +1,47 @@
 package info.blockchain.wallet.payment;
 
+import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.api.data.UnspentOutputs;
+import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.bip44.HDAccount;
+import info.blockchain.wallet.bip44.HDAddress;
+import info.blockchain.wallet.bip44.HDChain;
+import info.blockchain.wallet.bip44.HDWallet;
+import info.blockchain.wallet.bip44.HDWalletFactory;
+import info.blockchain.wallet.bip44.HDWalletFactory.Language;
+import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.test_data.UnspentTestData;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import io.reactivex.observers.TestObserver;
+import java.io.ByteArrayOutputStream;
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Random;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.MessageSerializer;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.TransactionInput;
+import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.bitcoinj.crypto.TransactionSignature;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.MainNetParamsBCH;
+import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptBuilder;
+import org.junit.Assert;
 import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -27,6 +56,11 @@ import static org.junit.Assert.*;
 public class PaymentTest extends MockedResponseTest {
 
     private Payment subject = new Payment();
+
+    private String getTestData(String file) throws Exception {
+        URI uri = getClass().getClassLoader().getResource(file).toURI();
+        return new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
+    }
 
     @Test
     public void estimatedFee() throws Exception {
@@ -487,5 +521,53 @@ public class PaymentTest extends MockedResponseTest {
                 receivers,
                 bigIntFee,
                 changeAddress);
+    }
+
+    @Test
+    public void signBCHTransaction() throws Exception {
+
+        //Arrange
+        subject = new Payment();
+
+        String unspentApiResponse = getTestData("transaction/bch_unspent_output.txt");
+        UnspentOutputs unspentOutputs = new UnspentOutputs().fromJson(unspentApiResponse);
+
+        BigInteger sweepable = BigInteger.valueOf(327036L);
+        BigInteger aboluteFee = BigInteger.valueOf(27);
+
+        SpendableUnspentOutputs paymentBundle = subject.getSpendableCoins(
+            unspentOutputs,
+            sweepable,
+            aboluteFee);
+
+        String receiveAddress = "1JEggWq9VVaVnDmdTbYuHmJXN4icdF89Kq";
+
+        final HashMap<String, BigInteger> receivers = new HashMap<>();
+        receivers.put(receiveAddress, sweepable);
+
+        Transaction tx = subject.makeSimpleTransaction(
+            paymentBundle.getSpendableOutputs(),
+            receivers,
+            aboluteFee,
+            null);
+
+        Assert.assertEquals("0100000003cf759867fb887f188d4207f2f79582ed25ee00b9244f37a3e7555c13e1577a550000000000ffffffff5f2061d611a866145b99d75ac4d0885d399c7904b2851e443d0a19fddab86b8e0000000000ffffffff15261589a6a5d95842306db374b3a3edf77c3acfc46f77c023187b1830d5f7920100000000ffffffff017cfd0400000000001976a914bd10ab8b35f4343aa9c083d2b6217f2f33f1321288ac00000000",
+            Hex.toHexString(tx.bitcoinSerialize()));
+        Assert.assertEquals("e3b0013c04cb7169037d9c38065a852ba0de24a929e87e299c2fe773e3815f5d",
+            tx.getHashAsString());
+
+        List<ECKey> keys = new ArrayList<>();
+        keys.add(new PrivateKeyFactory().getKey(PrivateKeyFactory.WIF_COMPRESSED, "Kyf1r2iNDikTTGEemDtsGP4jgcSqyYupsc4Rs2jQqHgwUZJNoyHK"));
+        keys.add(new PrivateKeyFactory().getKey(PrivateKeyFactory.WIF_COMPRESSED, "L57gn4CnJMdJAiaKXwRL9zFGNqcrvJT4mSJLXPdkFwPBYdvfYLAG"));
+        keys.add(new PrivateKeyFactory().getKey(PrivateKeyFactory.WIF_COMPRESSED, "KyGNbFSewezfpHfghxFfyoj3uscpFjLKih75PyU1ZoRkMwPuSWjb"));
+
+        //Act
+        subject.signBCHTransaction(tx, keys);
+
+        //Assert
+        Assert.assertEquals("0100000003cf759867fb887f188d4207f2f79582ed25ee00b9244f37a3e7555c13e1577a55000000006a473044022069e5f3d471baace21221038888a9594b875a3b37724e0fa1b0c5800b1fddb85d022051226d123de59e62ea17dfc11fc7beef625e977063507939997b0a44bfd702d94121034eeeae0afd407733476ec3b6d729ffaae408ffd678eeba8c4b8fd2fb4b716f87ffffffff5f2061d611a866145b99d75ac4d0885d399c7904b2851e443d0a19fddab86b8e000000006b483045022100a939cba6701f55499f4b8b8f777d820eaa626ab559a8752039b6c3717e297fc7022068d025a99b41886d6228efd0fdb57a039ec72362567cab77b792f565bd7912c841210248eb68f88e4a90df7159887c0acdb888c643d13fd2df45c3b4c45414f11d7635ffffffff15261589a6a5d95842306db374b3a3edf77c3acfc46f77c023187b1830d5f792010000006b483045022100b14958c39c42d20f52e36ba9f3fb8d6b7e97528ef5ea793bd4f108cb2d5f1cb9022002f3f9dcaca4de2f8c9a60527edcbd6e0740fd1031ee781197de46064d6f60dd412103183db6bf9edfa63716905fa267546ffd59647cc00448a7a6aa6c0c44bf4d0a87ffffffff017cfd0400000000001976a914bd10ab8b35f4343aa9c083d2b6217f2f33f1321288ac00000000",
+            Hex.toHexString(tx.bitcoinSerialize()));
+        Assert.assertEquals("e93cf0fb44ff3c3d9f2cde59d0a69a3b3daac0f7991f92bc8389f33c9a55f762",
+            tx.getHashAsString());
     }
 }
