@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -61,13 +60,15 @@ public class TestVectorBip39 {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public TestVectorCoin getCoinTestVectors(String path) throws Exception {
+    public TestVectorCoin getCoinTestVectors(String uriScheme, String coinPath) throws Exception {
 
-        for(TestVectorCoin coin : coinList) {
-            if(coin.getCoinPath().equals(path)) {
+        for (TestVectorCoin coin : coinList) {
+            if (coin.getCoinUriScheme().equals(uriScheme) &&
+                coin.getCoinPath().equals(coinPath)) {
                 return coin;
             }
         }
-        throw new Exception("Coin path "+path+" not found. Add test vectors for this coin to it to test_EN_BIP39.json");
+        throw new Exception("Coin uri scheme " + uriScheme + " and path " + coinPath
+            + " not found. Add test vectors for this coin to it to test_EN_BIP39.json");
     }
 }

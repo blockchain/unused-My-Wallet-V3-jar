@@ -18,18 +18,32 @@ import java.io.IOException;
     isGetterVisibility = Visibility.NONE)
 public class TestVectorAddress {
 
-    @JsonProperty("receive")
-    private String receive;
+    @JsonProperty("receiveLegacy")
+    private String receiveLegacy;
 
-    @JsonProperty("change")
-    private String change;
+    @JsonProperty("changeLegacy")
+    private String changeLegacy;
 
-    public String getReceive() {
-        return receive;
+    @JsonProperty("receiveSegwit")
+    private String receiveSegwit;
+
+    @JsonProperty("changeSegwit")
+    private String changeSegwit;
+
+    public String getReceiveLegacy() {
+        return receiveLegacy;
     }
 
-    public String getChange() {
-        return change;
+    public String getChangeLegacy() {
+        return changeLegacy;
+    }
+
+    public String getReceiveSegwit() {
+        return receiveSegwit;
+    }
+
+    public String getChangeSegwit() {
+        return changeSegwit;
     }
 
     public static TestVectorAddress fromJson(String json) throws IOException {

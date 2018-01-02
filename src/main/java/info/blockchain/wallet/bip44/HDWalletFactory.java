@@ -10,6 +10,7 @@ import java.util.Locale;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.bitcoinj.core.AddressFormatException;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
@@ -84,7 +85,7 @@ public class HDWalletFactory {
      * @param nbAccounts create this number of accounts
      * @return HDWallet
      */
-    public static HDWallet restoreWallet(AbstractBitcoinNetParams networkParameters, Language language, String data, String passphrase,
+    public static HDWallet restoreWallet(NetworkParameters networkParameters, Language language, String data, String passphrase,
         int nbAccounts)
         throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
 

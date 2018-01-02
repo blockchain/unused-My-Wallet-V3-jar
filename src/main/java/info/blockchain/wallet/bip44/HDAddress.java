@@ -74,9 +74,20 @@ public class HDAddress {
      * Return public address for this instance.
      *
      * @return String
+     *
      */
+    /** @deprecated Use {@link #getAddressBase58()} */
+    @Deprecated
     public String getAddressString() {
-        return ecKey.toAddress(params).toString();
+        return getAddressBase58();
+    }
+
+    public String getAddressBase58() {
+        return ecKey.toAddress(params).toBase58();
+    }
+
+    public String getAddressBech32() {
+        return ecKey.toAddress(params).toBech32();
     }
 
     /**

@@ -182,7 +182,7 @@ public class PaymentTx {
         KeyChainGroup keybag = new KeyChainGroup(PersistentUrls.getInstance().getCurrentNetworkParams());
         keybag.importKeys(keys);
 
-        KeyBag maybeDecryptingKeyBag = new DecryptingKeyBag(keybag, null);
+        KeyBag maybeDecryptingKeyBag = new DecryptingKeyBag(keybag);
 
         List<TransactionInput> inputs = tx.getInputs();
         List<TransactionOutput> outputs = tx.getOutputs();

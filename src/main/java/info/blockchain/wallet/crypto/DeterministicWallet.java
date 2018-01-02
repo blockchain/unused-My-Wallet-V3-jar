@@ -22,9 +22,6 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * // TODO: 21/12/2017 Add logs
- */
 public abstract class DeterministicWallet implements DeterministicNode {
 
     private static final Logger log = LoggerFactory.getLogger(DeterministicWallet.class);
@@ -37,8 +34,6 @@ public abstract class DeterministicWallet implements DeterministicNode {
             new LinuxSecureRandom();
         }
     }
-
-    private static final int MNEMONIC_LENGTH = 12;
 
     private byte[] masterSeed;
     private byte[] entropy;
@@ -59,10 +54,10 @@ public abstract class DeterministicWallet implements DeterministicNode {
      * @throws MnemonicChecksumException
      * @throws IOException
      */
-    public DeterministicWallet(String coinPath, String passphrase)
+    public DeterministicWallet(String coinPath, int mnemonicLength, String passphrase)
         throws MnemonicException, IOException {
 
-        this.entropy = generateSecureRandomNumber();
+        this.entropy = generateSecureRandomNumber(mnemonicLength);
         init(coinPath, passphrase);
     }
 
@@ -110,9 +105,9 @@ public abstract class DeterministicWallet implements DeterministicNode {
         return ImmutableList.<ChildNumber>builder().addAll(HDUtils.parsePath(coinPath)).build();
     }
 
-    private byte[] generateSecureRandomNumber() {
+    private byte[] generateSecureRandomNumber(int mnemonicLength) {
         // len == 16 (12 words), len == 24 (18 words), len == 32 (24 words)
-        int len = MNEMONIC_LENGTH / 3 * 4;
+        int len = mnemonicLength / 3 * 4;
 
         SecureRandom random = new SecureRandom();
         byte[] seed = new byte[len];

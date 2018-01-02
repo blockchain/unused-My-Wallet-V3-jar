@@ -22,8 +22,8 @@ public class TestVectorCoin {
     @JsonProperty("coinPath")
     private String coinPath;
 
-    @JsonProperty("coinName")
-    private String coinName;
+    @JsonProperty("coinUriScheme")
+    private String coinUriScheme;
 
     @JsonProperty("accounts")
     private ArrayList<TestVectorAccount> accountList;
@@ -32,8 +32,8 @@ public class TestVectorCoin {
         return coinPath;
     }
 
-    public String getCoinName() {
-        return coinName;
+    public String getCoinUriScheme() {
+        return coinUriScheme;
     }
 
     public ArrayList<TestVectorAccount> getAccountList() {

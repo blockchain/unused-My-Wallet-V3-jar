@@ -15,9 +15,10 @@ import java.util.List;
 import org.bitcoinj.params.AbstractBitcoinCashNetParams;
 import org.bitcoinj.params.MainNetParamsBCH;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-public class BitcoinCashWalletTest {
+public class BitcoinCashWalletBtcChainTest {
 
     BitcoinCashWallet subject;
     AbstractBitcoinCashNetParams params = MainNetParamsBCH.get();
@@ -34,14 +35,14 @@ public class BitcoinCashWalletTest {
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
 
         subject = new BitcoinCashWallet(split(vector.getMnemonic()),
-            vector.getPassphrase(), BitcoinCashWallet.COIN_PATH, params);
+            vector.getPassphrase(), BitcoinWallet.COIN_PATH, params);
         subject.addAccount();
         Assert.assertNotNull(subject.getPrivB58(0));
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void getPrivB58_badIndex() throws Exception {
-        subject = new BitcoinCashWallet(params, BitcoinCashWallet.COIN_PATH);
+        subject = new BitcoinCashWallet(params, BitcoinWallet.COIN_PATH);
         Assert.assertNull(subject.getPrivB58(1));
     }
 
@@ -51,7 +52,7 @@ public class BitcoinCashWalletTest {
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
 
         subject = new BitcoinCashWallet(split(vector.getMnemonic()),
-            vector.getPassphrase(), BitcoinCashWallet.COIN_PATH, params);
+            vector.getPassphrase(), BitcoinWallet.COIN_PATH, params);
 
         //m / purpose' / coin_type' / account' / change / address_index
         //m/44H/0H/0H/0/0

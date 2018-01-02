@@ -55,7 +55,7 @@ public class BitcoinWalletTest {
 
         //m / purpose' / coin_type' / account' / change / address_index
         //m/44H/0H/0H/0/0
-        TestVectorCoin coin = vector.getCoinTestVectors(subject.getPath());
+        TestVectorCoin coin = vector.getCoinTestVectors(subject.getUriScheme(), subject.getPath());
 
         int accountIndex = 0;
         for (TestVectorAccount account : coin.getAccountList()) {
@@ -63,11 +63,17 @@ public class BitcoinWalletTest {
             subject.addAccount();
 
             int addressIndex = 0;
-            for(TestVectorAddress address : account.getAddresses()) {
-                Assert.assertEquals(address.getChange(),
-                    subject.getChangeAddressAt(accountIndex, addressIndex));
-                Assert.assertEquals(address.getReceive(),
+            for (TestVectorAddress address : account.getAddresses()) {
+
+                Assert.assertEquals(address.getReceiveLegacy(),
                     subject.getReceiveAddressAt(accountIndex, addressIndex));
+                Assert.assertEquals(address.getChangeLegacy(),
+                    subject.getChangeAddressAt(accountIndex, addressIndex));
+
+                Assert.assertEquals(address.getReceiveSegwit(),
+                    subject.getReceiveSegwitAddressAt(accountIndex, addressIndex));
+                Assert.assertEquals(address.getChangeSegwit(),
+                    subject.getChangeSegwitAddressAt(accountIndex, addressIndex));
 
                 addressIndex++;
             }
