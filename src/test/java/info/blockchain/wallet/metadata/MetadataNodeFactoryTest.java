@@ -9,8 +9,8 @@ import info.blockchain.wallet.util.RestClient;
 import java.util.LinkedList;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.params.MainBchNetParams;
-import org.bitcoinj.params.MainBtcNetParams;
+import org.bitcoinj.params.BitcoinCashMainNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,13 +66,13 @@ public class MetadataNodeFactoryTest {
             }
 
             @Override
-            public NetworkParameters getBtcNetworkParameters() {
-                return MainBtcNetParams.get();
+            public NetworkParameters getBitcoinParams() {
+                return BitcoinMainNetParams.get();
             }
 
             @Override
-            public NetworkParameters getBchNetworkParameters() {
-                return MainBchNetParams.get();
+            public NetworkParameters getBitcoinCashParams() {
+                return BitcoinCashMainNetParams.get();
             }
 
             @Override
@@ -113,8 +113,8 @@ public class MetadataNodeFactoryTest {
         mockInterceptor.setResponseString("{\"status\": \"success\"}");
         metadataNodeFactory.saveMetadataHdNodes(HDKeyDerivation.createMasterPrivateKey(Hex.decode(masterKeyHex)));
 
-        Assert.assertTrue(metadataNodeFactory.getMetadataNode().serializePrivB58(MainBtcNetParams.get()).equals(metadataB58));
-        Assert.assertTrue(metadataNodeFactory.getSharedMetadataNode().serializePrivB58(MainBtcNetParams.get()).equals(sharedMetadataB58));
+        Assert.assertTrue(metadataNodeFactory.getMetadataNode().serializePrivB58(BitcoinMainNetParams.get()).equals(metadataB58));
+        Assert.assertTrue(metadataNodeFactory.getSharedMetadataNode().serializePrivB58(BitcoinMainNetParams.get()).equals(sharedMetadataB58));
     }
 
     @Test

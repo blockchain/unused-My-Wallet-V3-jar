@@ -20,7 +20,7 @@ public class EthereumWalletTest extends MockedResponseTest {
 
     private HDWallet getWallet(String seedHex) throws Exception {
         return HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getBtcNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBitcoinParams(), Language.US,
                 seedHex, "", 1);
     }
 

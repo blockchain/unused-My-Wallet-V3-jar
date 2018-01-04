@@ -97,10 +97,10 @@ public class Tools {
             keyUnCompressed = ECKey.fromPrivate(priv2, false);
         }
 
-        if (keyCompressed.toAddress(PersistentUrls.getInstance().getBtcNetworkParams())
+        if (keyCompressed.toAddress(PersistentUrls.getInstance().getBitcoinParams())
                 .toString().equals(address)) {
             ecKey = keyCompressed;
-        } else if (keyUnCompressed.toAddress(PersistentUrls.getInstance().getBtcNetworkParams())
+        } else if (keyUnCompressed.toAddress(PersistentUrls.getInstance().getBitcoinParams())
                 .toString().equals(address)) {
             ecKey = keyUnCompressed;
         } else {
@@ -124,7 +124,7 @@ public class Tools {
     }
 
     public static List<String> getAddressList(int chain, String xpub, int startIndex, int endIndex) {
-        HDAccount hdAccount = new HDAccount(PersistentUrls.getInstance().getBtcNetworkParams(),
+        HDAccount hdAccount = new HDAccount(PersistentUrls.getInstance().getBitcoinParams(),
                 xpub);
 
         List<String> list = new ArrayList<>();

@@ -64,7 +64,7 @@ public class SharedMetadata {
     }
 
     public String getXpub() {
-        return node.serializePubB58(PersistentUrls.getInstance().getBtcNetworkParams());
+        return node.serializePubB58(PersistentUrls.getInstance().getBitcoinParams());
     }
 
     public void setToken(String token) {
@@ -303,7 +303,7 @@ public class SharedMetadata {
                 msg.getSignature());
 
         String senderAddress = msg.getSender();
-        String addressFromSignature = key.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString();
+        String addressFromSignature = key.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString();
 
         if (!senderAddress.equals(addressFromSignature)) {
             throw new ValidationException("Signature is not well-formed");
@@ -378,7 +378,7 @@ public class SharedMetadata {
             UnsupportedEncodingException,
             InvalidCipherTextException {
         ECKey myKey = getNode();
-        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getBtcNetworkParams());
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getBitcoinParams());
 
         byte[] sharedSecret = otherKey.getPubKeyPoint().multiply(myKey.getPrivKey()).getEncoded();
         byte[] sharedKey = Sha256Hash.hash(sharedSecret);
@@ -390,7 +390,7 @@ public class SharedMetadata {
             InvalidCipherTextException {
 
         ECKey myKey = getNode();
-        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getBtcNetworkParams());
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getBitcoinParams());
 
         byte[] sharedSecret = otherKey.getPubKeyPoint().multiply(myKey.getPrivKey()).getEncoded();
         byte[] sharedKey = Sha256Hash.hash(sharedSecret);
@@ -415,7 +415,7 @@ public class SharedMetadata {
 //            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setAddress(sharedMetaDataHDNode.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
+            metadata.setAddress(sharedMetaDataHDNode.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString());
             metadata.setNode(sharedMetaDataHDNode);
 
             return metadata;

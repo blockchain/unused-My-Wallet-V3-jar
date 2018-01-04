@@ -55,10 +55,10 @@ public class MetadataNodeFactory {
 
         sharedMetadataNode = DeterministicKey.deserializeB58(
                 remoteMetadataNodes.getMdid(),
-                PersistentUrls.getInstance().getBtcNetworkParams());
+                PersistentUrls.getInstance().getBitcoinParams());
         metadataNode = DeterministicKey.deserializeB58(
                 remoteMetadataNodes.getMetadata(),
-                PersistentUrls.getInstance().getBtcNetworkParams());
+                PersistentUrls.getInstance().getBitcoinParams());
 
         return true;
     }
@@ -70,8 +70,8 @@ public class MetadataNodeFactory {
 
         //Save nodes hex on 2nd pw metadata
         RemoteMetadataNodes remoteMetadataNodes = new RemoteMetadataNodes();
-        remoteMetadataNodes.setMdid(smd.serializePrivB58(PersistentUrls.getInstance().getBtcNetworkParams()));
-        remoteMetadataNodes.setMetadata(md.serializePrivB58(PersistentUrls.getInstance().getBtcNetworkParams()));
+        remoteMetadataNodes.setMdid(smd.serializePrivB58(PersistentUrls.getInstance().getBitcoinParams()));
+        remoteMetadataNodes.setMetadata(md.serializePrivB58(PersistentUrls.getInstance().getBitcoinParams()));
         secondPwNode.putMetadata(remoteMetadataNodes.toJson());
 
         return loadNodes(remoteMetadataNodes);
@@ -90,7 +90,7 @@ public class MetadataNodeFactory {
 
         Metadata metadata = new Metadata();
         metadata.setEncrypted(true);
-        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
+        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString());
         metadata.setNode(key);
         metadata.setEncryptionKey(enc);
         metadata.setType(-1);
@@ -111,7 +111,7 @@ public class MetadataNodeFactory {
 
         Metadata metadata = new Metadata();
         metadata.setEncrypted(true);
-        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
+        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString());
         metadata.setNode(key);
         metadata.setEncryptionKey(key.getPrivKeyBytes());
         metadata.setType(-1);

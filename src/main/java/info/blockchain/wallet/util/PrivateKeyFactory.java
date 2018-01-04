@@ -16,7 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.params.MainBtcNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -35,7 +35,7 @@ public class PrivateKeyFactory {
     public String getFormat(String key) {
 
         // TODO: 04/01/2018 Pass params in. What about other coin params?
-        boolean isTestnet = !(PersistentUrls.getInstance().getBtcNetworkParams() instanceof MainBtcNetParams);
+        boolean isTestnet = !(PersistentUrls.getInstance().getBitcoinParams() instanceof BitcoinMainNetParams);
 
         // 51 characters base58, always starts with a '5'  (or '9', for testnet)
         if (!isTestnet && key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$") ||
@@ -89,7 +89,7 @@ public class PrivateKeyFactory {
         switch (format) {
             case WIF_UNCOMPRESSED:
             case WIF_COMPRESSED:
-                DumpedPrivateKey pk = DumpedPrivateKey.fromBase58(PersistentUrls.getInstance().getBtcNetworkParams(), data);
+                DumpedPrivateKey pk = DumpedPrivateKey.fromBase58(PersistentUrls.getInstance().getBitcoinParams(), data);
                 return pk.getKey();
             case BASE58:
                 return decodeBase58PK(data);
@@ -116,8 +116,8 @@ public class PrivateKeyFactory {
         ECKey compressedKey = decodeHexPK(hash, true);
 
         try {
-            String uncompressedAddress = uncompressedKey.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString();
-            String compressedAddress = compressedKey.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString();
+            String uncompressedAddress = uncompressedKey.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString();
+            String compressedAddress = compressedKey.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString();
 
             ArrayList<String> list = new ArrayList<>();
             list.add(uncompressedAddress);

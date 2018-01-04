@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.MainBchNetParams;
+import org.bitcoinj.params.BitcoinCashMainNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +21,7 @@ import org.junit.Test;
 public class BitcoinCashWalletBtcChainTest {
 
     BitcoinCashWallet subject;
-    NetworkParameters params = MainBchNetParams.get();
+    NetworkParameters params = BitcoinCashMainNetParams.get();
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();

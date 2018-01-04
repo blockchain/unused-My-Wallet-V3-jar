@@ -54,7 +54,7 @@ public class PaymentTx {
         log.info("Making transaction");
 
         Transaction transaction = new Transaction(PersistentUrls.getInstance()
-            .getBtcNetworkParams());
+            .getBitcoinParams());
 
         //Outputs
         BigInteger outputValueSum = addTransactionOutputs(transaction, receivingAddresses);
@@ -92,7 +92,7 @@ public class PaymentTx {
             }
 
             Address address = Address.fromBase58(PersistentUrls.getInstance()
-                .getBtcNetworkParams(), toAddress);
+                .getBitcoinParams(), toAddress);
             Coin coin = Coin.valueOf(amount.longValue());
 
             transaction.addOutput(coin, address);
@@ -107,7 +107,7 @@ public class PaymentTx {
         throws InsufficientMoneyException {
 
         NetworkParameters networkParams = PersistentUrls.getInstance()
-            .getBtcNetworkParams();
+            .getBitcoinParams();
 
         BigInteger inputValueSum = BigInteger.ZERO;
         BigInteger minFreeOutputSize = BigInteger.valueOf(1000000);
@@ -159,7 +159,7 @@ public class PaymentTx {
         BigInteger outputValueSum, BigInteger inputValueSum) throws AddressFormatException {
 
         NetworkParameters networkParams = PersistentUrls.getInstance()
-            .getBtcNetworkParams();
+            .getBitcoinParams();
 
         BigInteger change = inputValueSum.subtract(outputValueSum).subtract(fee);
 
@@ -180,7 +180,7 @@ public class PaymentTx {
     public static synchronized void signSimpleTransaction(Transaction tx, List<ECKey> keys, boolean useForkId) {
 
         log.info("Signing transaction");
-        KeyChainGroup keybag = new KeyChainGroup(PersistentUrls.getInstance().getBtcNetworkParams());
+        KeyChainGroup keybag = new KeyChainGroup(PersistentUrls.getInstance().getBitcoinParams());
         keybag.importKeys(keys);
 
         KeyBag maybeDecryptingKeyBag = new DecryptingKeyBag(keybag);

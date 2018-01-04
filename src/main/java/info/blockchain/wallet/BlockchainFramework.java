@@ -31,12 +31,12 @@ public final class BlockchainFramework {
         return blockchainInterface.getEnvironment();
     }
 
-    public static NetworkParameters getBtcNetworkParameters() {
-        return blockchainInterface.getBtcNetworkParameters();
+    public static NetworkParameters getBitcoinParams() {
+        return blockchainInterface.getBitcoinParams();
     }
 
-    public static NetworkParameters getBchNetworkParameters() {
-        return blockchainInterface.getBchNetworkParameters();
+    public static NetworkParameters getBitcoinCashParams() {
+        return blockchainInterface.getBitcoinCashParams();
     }
 
     public static String getApiCode() {

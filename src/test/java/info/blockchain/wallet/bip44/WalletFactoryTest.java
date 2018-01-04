@@ -4,7 +4,7 @@ import info.blockchain.wallet.bip44.HDWalletFactory.Language;
 import java.io.IOException;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.crypto.MnemonicException;
-import org.bitcoinj.params.MainBtcNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class WalletFactoryTest {
         String path = "M/44H";
 
         HDWallet wallet = HDWalletFactory
-            .createWallet(MainBtcNetParams.get(), Language.US, mnemonicLength, passphrase, 1);
+            .createWallet(BitcoinMainNetParams.get(), Language.US, mnemonicLength, passphrase, 1);
 
         Assert.assertEquals(mnemonicLength, wallet.getMnemonicOld().split(" ").length);
         Assert.assertEquals(passphrase, wallet.getPassphrase());
@@ -37,7 +37,7 @@ public class WalletFactoryTest {
 
         try {
             wallet = HDWalletFactory
-                .restoreWallet(MainBtcNetParams.get(), Language.US, mnemonic, passphrase,
+                .restoreWallet(BitcoinMainNetParams.get(), Language.US, mnemonic, passphrase,
                     accountListSize);
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,7 +66,7 @@ public class WalletFactoryTest {
 
         try {
             wallet = HDWalletFactory
-                .restoreWallet(MainBtcNetParams.get(), Language.US,
+                .restoreWallet(BitcoinMainNetParams.get(), Language.US,
                     "all all all all all all all all all all all all bogus", null, 1);
         } catch (Exception e) {
             ;
@@ -86,7 +86,7 @@ public class WalletFactoryTest {
 
         try {
             wallet = HDWalletFactory
-                .restoreWallet(MainBtcNetParams.get(), Language.US, hexSeed, passphrase,
+                .restoreWallet(BitcoinMainNetParams.get(), Language.US, hexSeed, passphrase,
                     accountListSize);
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,10 +108,10 @@ public class WalletFactoryTest {
 
         try {
             restoredWallet1 = HDWalletFactory
-                .restoreWallet(MainBtcNetParams.get(), Language.US,
+                .restoreWallet(BitcoinMainNetParams.get(), Language.US,
                     "all all all all all all all all all all all all", passphrase1, 1);
             restoredWallet2 = HDWalletFactory
-                .restoreWallet(MainBtcNetParams.get(), Language.US,
+                .restoreWallet(BitcoinMainNetParams.get(), Language.US,
                     "all all all all all all all all all all all all", passphrase1, 1);
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,10 +137,10 @@ public class WalletFactoryTest {
 
         try {
             wallet1 = HDWalletFactory
-                .restoreWallet(MainBtcNetParams.get(), Language.US,
+                .restoreWallet(BitcoinMainNetParams.get(), Language.US,
                     "all all all all all all all all all all all all", passphrase1, 1);
             wallet2 = HDWalletFactory
-                .restoreWallet(MainBtcNetParams.get(), Language.US,
+                .restoreWallet(BitcoinMainNetParams.get(), Language.US,
                     "all all all all all all all all all all all all", passphrase2, 1);
         } catch (Exception e) {
             e.printStackTrace();
@@ -157,7 +157,7 @@ public class WalletFactoryTest {
 
     @Test
     public void testAccount() throws AddressFormatException {
-        HDAccount account = new HDAccount(MainBtcNetParams.get(),
+        HDAccount account = new HDAccount(BitcoinMainNetParams.get(),
             "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV",
             1);
         Assert.assertEquals(
@@ -165,7 +165,7 @@ public class WalletFactoryTest {
             account.getXpub());
         Assert.assertEquals(1, account.getId());
 
-        account = new HDAccount(MainBtcNetParams.get(),
+        account = new HDAccount(BitcoinMainNetParams.get(),
             "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV");
         Assert.assertEquals(
             "xpub6CbTPgFYkRqMQZiX2WYEiVHWGJUjAsZAvSvMq3z52KczYQrZPQ9DjKwHQBmAMJVY3kLeBQ4T818MBf2cTiGkJSkmS8CDT1Wp7Dw4vFMygEV",

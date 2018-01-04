@@ -448,7 +448,7 @@ public class Wallet {
 
         List<LegacyAddress> addressList = getLegacyAddressList();
 
-        String address = key.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString();
+        String address = key.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString();
 
         LegacyAddress matchingAddressBody = null;
 

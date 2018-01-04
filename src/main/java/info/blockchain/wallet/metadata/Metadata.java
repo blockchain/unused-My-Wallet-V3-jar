@@ -276,7 +276,7 @@ public class Metadata {
 
             Metadata metadata = new Metadata();
             metadata.setEncrypted(isEncrypted);
-            metadata.setAddress(node.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
+            metadata.setAddress(node.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString());
             metadata.setNode(node);
             metadata.setEncryptionKey(encryptionKey);
             metadata.setType(type);

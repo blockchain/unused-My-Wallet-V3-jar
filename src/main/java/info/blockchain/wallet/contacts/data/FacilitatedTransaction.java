@@ -142,7 +142,7 @@ public class FacilitatedTransaction {
     @JsonIgnore
     public String toBitcoinURI() {
         return BitcoinURI.convertToBitcoinURI(
-                PersistentUrls.getInstance().getBtcNetworkParams(),
+                PersistentUrls.getInstance().getBitcoinParams(),
                 address,
                 Coin.valueOf(intendedAmount),
                 null,

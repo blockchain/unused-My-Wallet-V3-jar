@@ -32,12 +32,12 @@ public interface FrameworkInterface {
     /**
      * Provides the currently chosen Network Parameters for Bitcoin, as dictated by the top-level app
      */
-    NetworkParameters getBtcNetworkParameters();
+    NetworkParameters getBitcoinParams();
 
     /**
      * Provides the currently chosen Network Parameters for Bitcoin Cash, as dictated by the top-level app
      */
-    NetworkParameters getBchNetworkParameters();
+    NetworkParameters getBitcoinCashParams();
 
     /**
      * Provides an ApiCode used for bci platform usage statistics.

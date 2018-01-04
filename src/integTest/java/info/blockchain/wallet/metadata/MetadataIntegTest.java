@@ -15,7 +15,7 @@ public class MetadataIntegTest extends BaseIntegTest {
     private HDWallet getWallet() throws Exception {
 
         return HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getBtcNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBitcoinParams(), Language.US,
                 "15e23aa73d25994f1921a1256f93f72c",
                 "",
                 1);

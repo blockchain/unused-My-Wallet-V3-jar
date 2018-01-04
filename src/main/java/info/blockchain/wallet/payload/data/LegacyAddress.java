@@ -158,7 +158,7 @@ public class LegacyAddress {
 
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setPrivateKeyFromBytes(ecKey.getPrivKeyBytes());
-        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString());
         legacyAddress.setCreatedDeviceName(BlockchainFramework.getDevice());
         legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BlockchainFramework.getAppVersion());
@@ -171,7 +171,7 @@ public class LegacyAddress {
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setPrivateKeyFromBytes(ecKey.getPrivKeyBytes());
 
-        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toBase58());
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toBase58());
         legacyAddress.setCreatedDeviceName(BlockchainFramework.getDevice());
         legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BlockchainFramework.getAppVersion());

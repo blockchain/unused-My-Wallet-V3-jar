@@ -13,14 +13,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.MainBtcNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class BitcoinWalletTest {
 
     BitcoinWallet subject;
-    NetworkParameters params = MainBtcNetParams.get();
+    NetworkParameters params = BitcoinMainNetParams.get();
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();

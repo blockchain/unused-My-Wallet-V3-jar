@@ -109,7 +109,7 @@ public class FormatsUtil {
         boolean ret;
 
         try {
-            Address.fromBase58(PersistentUrls.getInstance().getBtcNetworkParams(), address);
+            Address.fromBase58(PersistentUrls.getInstance().getBitcoinParams(), address);
             ret = true;
         } catch (WrongNetworkException wne) {
             ret = false;

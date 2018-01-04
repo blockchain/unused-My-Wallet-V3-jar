@@ -37,17 +37,17 @@ public class PersistentUrls {
     }
 
     /**
-     * @deprecated Replaced by {@link #getBtcNetworkParams()}
+     * @deprecated Replaced by {@link #getBitcoinParams()}
      */
     public NetworkParameters getCurrentNetworkParams() {
-        return getBtcNetworkParams();
+        return getBitcoinParams();
     }
 
-    public NetworkParameters getBtcNetworkParams() {
-        return BlockchainFramework.getBtcNetworkParameters();
+    public NetworkParameters getBitcoinParams() {
+        return BlockchainFramework.getBitcoinParams();
     }
 
-    public NetworkParameters getBchNetworkParams() {
-        return BlockchainFramework.getBchNetworkParameters();
+    public NetworkParameters getBitcoinCashParams() {
+        return BlockchainFramework.getBitcoinCashParams();
     }
 }
