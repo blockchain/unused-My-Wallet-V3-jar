@@ -6,23 +6,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.api.WalletApi;
 import info.blockchain.wallet.util.Util;
-
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.ECKey;
-
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Nonnull;
-
 import okhttp3.ResponseBody;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.ECKey;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -163,7 +158,7 @@ public class LegacyAddress {
 
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setPrivateKeyFromBytes(ecKey.getPrivKeyBytes());
-        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
         legacyAddress.setCreatedDeviceName(BlockchainFramework.getDevice());
         legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BlockchainFramework.getAppVersion());
@@ -176,7 +171,7 @@ public class LegacyAddress {
         LegacyAddress legacyAddress = new LegacyAddress();
         legacyAddress.setPrivateKeyFromBytes(ecKey.getPrivKeyBytes());
 
-        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toBase58());
+        legacyAddress.setAddress(ecKey.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toBase58());
         legacyAddress.setCreatedDeviceName(BlockchainFramework.getDevice());
         legacyAddress.setCreatedTime(System.currentTimeMillis());
         legacyAddress.setCreatedDeviceVersion(BlockchainFramework.getAppVersion());

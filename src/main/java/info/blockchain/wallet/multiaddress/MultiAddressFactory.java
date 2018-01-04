@@ -1,5 +1,7 @@
 package info.blockchain.wallet.multiaddress;
 
+import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
+
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.AddressSummary;
@@ -12,10 +14,6 @@ import info.blockchain.wallet.bip44.HDChain;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -25,10 +23,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Response;
-
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
 
 public class MultiAddressFactory {
 

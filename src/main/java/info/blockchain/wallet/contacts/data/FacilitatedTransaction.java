@@ -6,14 +6,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.blockchain.wallet.api.PersistentUrls;
-
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.uri.BitcoinURI;
-
 import java.io.IOException;
 import java.util.UUID;
+import org.bitcoinj.core.Coin;
+import org.bitcoinj.uri.BitcoinURI;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -145,7 +142,7 @@ public class FacilitatedTransaction {
     @JsonIgnore
     public String toBitcoinURI() {
         return BitcoinURI.convertToBitcoinURI(
-                PersistentUrls.getInstance().getCurrentNetworkParams(),
+                PersistentUrls.getInstance().getBtcNetworkParams(),
                 address,
                 Coin.valueOf(intendedAmount),
                 null,

@@ -16,7 +16,7 @@ public class SharedMetadataTest extends MockedResponseTest {
     @Before
     public void setUp() throws Exception {
         key = HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBtcNetworkParams(), Language.US,
                 "15e23aa73d25994f1921a1256f93f72c", "", 1).getMasterKey();
     }
 
@@ -105,12 +105,12 @@ public class SharedMetadataTest extends MockedResponseTest {
     public void decryptFrom() throws Exception {
 
         DeterministicKey a_key = HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBtcNetworkParams(), Language.US,
                 "15e23aa73d25994f1921a1256f93f72c", "", 1).getMasterKey();
         SharedMetadata a_sharedMetadata = new SharedMetadata.Builder(a_key).build();
 
         DeterministicKey b_key = HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBtcNetworkParams(), Language.US,
                 "20e3939d08ddf727f34a130704cd925e", "", 1).getMasterKey();
         SharedMetadata b_sharedMetadata = new SharedMetadata.Builder(b_key).build();
 

@@ -4,8 +4,9 @@ import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.MainBchNetParams;
+import org.bitcoinj.params.MainBtcNetParams;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -50,8 +51,13 @@ public abstract class BaseIntegTest {
             }
 
             @Override
-            public AbstractBitcoinNetParams getNetworkParameters() {
-                return MainNetParams.get();
+            public NetworkParameters getBtcNetworkParameters() {
+                return MainBtcNetParams.get();
+            }
+
+            @Override
+            public NetworkParameters getBchNetworkParameters() {
+                return MainBchNetParams.get();
             }
 
             @Override

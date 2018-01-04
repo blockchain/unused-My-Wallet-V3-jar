@@ -2,17 +2,12 @@ package info.blockchain.wallet.metadata;
 
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
-import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.data.RemoteMetadataNodes;
 import info.blockchain.wallet.util.MetadataUtil;
-
-import java.io.IOException;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.DeterministicKey;
-
 import java.math.BigInteger;
 import java.security.MessageDigest;
-import org.spongycastle.crypto.InvalidCipherTextException;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.crypto.DeterministicKey;
 
 /**
  * Restores derived metadata nodes from a metadata node derived from user credentials.
@@ -60,10 +55,10 @@ public class MetadataNodeFactory {
 
         sharedMetadataNode = DeterministicKey.deserializeB58(
                 remoteMetadataNodes.getMdid(),
-                PersistentUrls.getInstance().getCurrentNetworkParams());
+                PersistentUrls.getInstance().getBtcNetworkParams());
         metadataNode = DeterministicKey.deserializeB58(
                 remoteMetadataNodes.getMetadata(),
-                PersistentUrls.getInstance().getCurrentNetworkParams());
+                PersistentUrls.getInstance().getBtcNetworkParams());
 
         return true;
     }
@@ -75,8 +70,8 @@ public class MetadataNodeFactory {
 
         //Save nodes hex on 2nd pw metadata
         RemoteMetadataNodes remoteMetadataNodes = new RemoteMetadataNodes();
-        remoteMetadataNodes.setMdid(smd.serializePrivB58(PersistentUrls.getInstance().getCurrentNetworkParams()));
-        remoteMetadataNodes.setMetadata(md.serializePrivB58(PersistentUrls.getInstance().getCurrentNetworkParams()));
+        remoteMetadataNodes.setMdid(smd.serializePrivB58(PersistentUrls.getInstance().getBtcNetworkParams()));
+        remoteMetadataNodes.setMetadata(md.serializePrivB58(PersistentUrls.getInstance().getBtcNetworkParams()));
         secondPwNode.putMetadata(remoteMetadataNodes.toJson());
 
         return loadNodes(remoteMetadataNodes);
@@ -95,7 +90,7 @@ public class MetadataNodeFactory {
 
         Metadata metadata = new Metadata();
         metadata.setEncrypted(true);
-        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
         metadata.setNode(key);
         metadata.setEncryptionKey(enc);
         metadata.setType(-1);
@@ -116,7 +111,7 @@ public class MetadataNodeFactory {
 
         Metadata metadata = new Metadata();
         metadata.setEncrypted(true);
-        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+        metadata.setAddress(key.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString());
         metadata.setNode(key);
         metadata.setEncryptionKey(key.getPrivKeyBytes());
         metadata.setType(-1);

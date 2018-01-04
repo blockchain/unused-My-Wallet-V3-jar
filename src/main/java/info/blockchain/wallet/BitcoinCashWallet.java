@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.MnemonicException;
-import org.bitcoinj.params.AbstractBitcoinCashNetParams;
 
 public class BitcoinCashWallet extends DeterministicWallet {
 
@@ -17,7 +17,7 @@ public class BitcoinCashWallet extends DeterministicWallet {
     public int BCH_FORK_HEIGHT = 478558;
     public static final String COIN_PATH = "M/44H/145H";
     private static final int MNEMONIC_LENGTH = 12;
-    AbstractBitcoinCashNetParams params;
+    NetworkParameters params;
 
     /**
      * Generates random BitcoinWallet with one account no passphrase.
@@ -26,7 +26,7 @@ public class BitcoinCashWallet extends DeterministicWallet {
      * @throws MnemonicException
      * @throws IOException
      */
-    public BitcoinCashWallet(AbstractBitcoinCashNetParams params, String coinPath)
+    public BitcoinCashWallet(NetworkParameters params, String coinPath)
         throws MnemonicException, IOException {
         super(coinPath, MNEMONIC_LENGTH, "");
         this.params = params;
@@ -42,7 +42,7 @@ public class BitcoinCashWallet extends DeterministicWallet {
      * @throws IOException
      */
     public BitcoinCashWallet(String passphrase,
-        AbstractBitcoinCashNetParams params, String coinPath)
+        NetworkParameters params, String coinPath)
         throws MnemonicException, IOException {
         super(coinPath, MNEMONIC_LENGTH, passphrase);
         this.params = params;
@@ -59,7 +59,7 @@ public class BitcoinCashWallet extends DeterministicWallet {
      * @throws IOException
      */
     public BitcoinCashWallet(String entropyHex, String passphrase, String coinPath,
-        AbstractBitcoinCashNetParams params)
+        NetworkParameters params)
         throws MnemonicException, IOException, DecoderException {
         super(coinPath, entropyHex, passphrase);
         this.params = params;
@@ -76,7 +76,7 @@ public class BitcoinCashWallet extends DeterministicWallet {
      * @throws IOException
      */
     public BitcoinCashWallet(List<String> mnemonic, String passphrase, String coinPath,
-        AbstractBitcoinCashNetParams params)
+        NetworkParameters params)
         throws MnemonicException, IOException {
         super(coinPath, mnemonic, passphrase);
         this.params = params;

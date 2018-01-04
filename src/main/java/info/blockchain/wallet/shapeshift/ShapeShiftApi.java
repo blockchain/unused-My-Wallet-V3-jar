@@ -2,8 +2,8 @@ package info.blockchain.wallet.shapeshift;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.shapeshift.data.MarketInfo;
-import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
 import info.blockchain.wallet.shapeshift.data.QuoteRequest;
+import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
 import info.blockchain.wallet.shapeshift.data.SendAmountResponseWrapper;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 import io.reactivex.Observable;

@@ -1,7 +1,6 @@
 package info.blockchain.wallet.util;
 
 import com.google.common.primitives.UnsignedBytes;
-
 import java.util.Comparator;
 
 /**

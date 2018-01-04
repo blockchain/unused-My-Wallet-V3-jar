@@ -13,7 +13,6 @@ import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.crypto.MnemonicException;
-import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,7 @@ public class HDWalletFactory {
      * @param nbAccounts create this number of accounts
      * @return HDWallet
      */
-    public static HDWallet createWallet(AbstractBitcoinNetParams networkParameters, Language language, int nbWords, String passphrase,
+    public static HDWallet createWallet(NetworkParameters networkParameters, Language language, int nbWords, String passphrase,
         int nbAccounts) throws IOException, MnemonicException.MnemonicLengthException {
         log.info("Generating HDWallet");
         Locale locale = getLocale(language);
@@ -127,7 +126,7 @@ public class HDWalletFactory {
         return hdw;
     }
 
-    public static HDWallet restoreWatchOnlyWallet(AbstractBitcoinNetParams networkParameters, ArrayList<String> xpubList)
+    public static HDWallet restoreWatchOnlyWallet(NetworkParameters networkParameters, ArrayList<String> xpubList)
         throws AddressFormatException, IOException, DecoderException, MnemonicException.MnemonicLengthException, MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
 
         return new HDWallet(networkParameters, xpubList);

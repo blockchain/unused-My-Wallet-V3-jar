@@ -2,7 +2,7 @@ package info.blockchain.wallet.bip44;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.MainBtcNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class AddressTest {
     public void setup() {
         key = HDKeyDerivation
             .createMasterPrivateKey(seed.getBytes());
-        address = new HDAddress(MainNetParams.get(), key, 0);
+        address = new HDAddress(MainBtcNetParams.get(), key, 0);
     }
 
     @Test

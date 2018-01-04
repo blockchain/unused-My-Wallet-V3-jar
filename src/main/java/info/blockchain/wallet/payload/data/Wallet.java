@@ -9,12 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
 import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
 import java.io.IOException;
@@ -34,7 +32,6 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
-import retrofit2.Response;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -451,7 +448,7 @@ public class Wallet {
 
         List<LegacyAddress> addressList = getLegacyAddressList();
 
-        String address = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
+        String address = key.toAddress(PersistentUrls.getInstance().getBtcNetworkParams()).toString();
 
         LegacyAddress matchingAddressBody = null;
 

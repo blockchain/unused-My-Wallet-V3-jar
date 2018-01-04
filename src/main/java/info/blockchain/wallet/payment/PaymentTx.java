@@ -1,6 +1,7 @@
 package info.blockchain.wallet.payment;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.pushtx.PushTx;
@@ -20,12 +21,12 @@ import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ProtocolException;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.params.AbstractBitcoinNetParams;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
 import org.bitcoinj.script.ScriptException;
@@ -53,7 +54,7 @@ public class PaymentTx {
         log.info("Making transaction");
 
         Transaction transaction = new Transaction(PersistentUrls.getInstance()
-            .getCurrentNetworkParams());
+            .getBtcNetworkParams());
 
         //Outputs
         BigInteger outputValueSum = addTransactionOutputs(transaction, receivingAddresses);
@@ -91,7 +92,7 @@ public class PaymentTx {
             }
 
             Address address = Address.fromBase58(PersistentUrls.getInstance()
-                .getCurrentNetworkParams(), toAddress);
+                .getBtcNetworkParams(), toAddress);
             Coin coin = Coin.valueOf(amount.longValue());
 
             transaction.addOutput(coin, address);
@@ -105,8 +106,8 @@ public class PaymentTx {
         List<UnspentOutput> unspentCoins, BigInteger valueNeeded)
         throws InsufficientMoneyException {
 
-        AbstractBitcoinNetParams networkParams = PersistentUrls.getInstance()
-            .getCurrentNetworkParams();
+        NetworkParameters networkParams = PersistentUrls.getInstance()
+            .getBtcNetworkParams();
 
         BigInteger inputValueSum = BigInteger.ZERO;
         BigInteger minFreeOutputSize = BigInteger.valueOf(1000000);
@@ -157,8 +158,8 @@ public class PaymentTx {
         @Nonnull String changeAddress,
         BigInteger outputValueSum, BigInteger inputValueSum) throws AddressFormatException {
 
-        AbstractBitcoinNetParams networkParams = PersistentUrls.getInstance()
-            .getCurrentNetworkParams();
+        NetworkParameters networkParams = PersistentUrls.getInstance()
+            .getBtcNetworkParams();
 
         BigInteger change = inputValueSum.subtract(outputValueSum).subtract(fee);
 
@@ -179,7 +180,7 @@ public class PaymentTx {
     public static synchronized void signSimpleTransaction(Transaction tx, List<ECKey> keys, boolean useForkId) {
 
         log.info("Signing transaction");
-        KeyChainGroup keybag = new KeyChainGroup(PersistentUrls.getInstance().getCurrentNetworkParams());
+        KeyChainGroup keybag = new KeyChainGroup(PersistentUrls.getInstance().getBtcNetworkParams());
         keybag.importKeys(keys);
 
         KeyBag maybeDecryptingKeyBag = new DecryptingKeyBag(keybag);

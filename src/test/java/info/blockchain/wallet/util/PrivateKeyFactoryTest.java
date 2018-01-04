@@ -4,8 +4,8 @@ import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.api.PersistentUrls;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.TestNet3Params;
+import org.bitcoinj.params.MainBtcNetParams;
+import org.bitcoinj.params.TestBtcNet3Params;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +82,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
 
         String key = "KyCHxZe68e5PNfqh8Ls8DrihMuweHKxvjtm3PGTrj43MyWuvN2aE";
 
-        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof TestNet3Params) {
+        if(PersistentUrls.getInstance().getBtcNetworkParams() instanceof TestBtcNet3Params) {
             key = "cUQEjQs1kQ5MdrKfKwV3GLq5onJ7tQ2uBmMuqWHvdfwru7vCj3jT";
         }
 
@@ -95,7 +95,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
 
         String key = "5JKxWHiBf1GX2A83BRVxYG4xpqsbfR3w9kQtppAUUJ6jnafURkm";
 
-        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof TestNet3Params) {
+        if(PersistentUrls.getInstance().getBtcNetworkParams() instanceof TestBtcNet3Params) {
             key = "938XkbQZo5mwX6jk81ZdmFv2ziytri1tFDmcXvmAS5HxiMZeBkn";
         }
 
@@ -121,7 +121,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
         //Act
         String format = privateKeyFactory.getFormat(miniKey);
         ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
-        Address address = ecKey.toAddress(MainNetParams.get());
+        Address address = ecKey.toAddress(MainBtcNetParams.get());
 
         //Assert
         Assert.assertEquals(miniCompressedAddress, address.toString());
@@ -138,10 +138,10 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
         //Act
         String format = privateKeyFactory.getFormat(miniKey);
         ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
-        Address address = ecKey.toAddress(MainNetParams.get());
+        Address address = ecKey.toAddress(MainBtcNetParams.get());
 
         //Assert
-        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams) {
+        if(PersistentUrls.getInstance().getBtcNetworkParams() instanceof MainBtcNetParams) {
             Assert.assertEquals(miniUncompressedAddress, address.toString());
             Assert.assertTrue(!ecKey.isCompressed());
         }
@@ -157,7 +157,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
         //Act
         String format = privateKeyFactory.getFormat(miniKey);
         ECKey ecKey = privateKeyFactory.getKey(format, miniKey);
-        Address address = ecKey.toAddress(MainNetParams.get());
+        Address address = ecKey.toAddress(MainBtcNetParams.get());
 
         //Assert
         Assert.assertEquals(miniCompressedAddress, address.toString());
@@ -174,7 +174,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
         //Act
         String format = privateKeyFactory.getFormat(hexKey);
         ECKey ecKey = privateKeyFactory.getKey(format, hexKey);
-        Address address = ecKey.toAddress(MainNetParams.get());
+        Address address = ecKey.toAddress(MainBtcNetParams.get());
 
         //Assert
         Assert.assertEquals(hexCompressedAddress, address.toString());
@@ -192,7 +192,7 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
         //Act
         String format = privateKeyFactory.getFormat(hexKey);
         ECKey ecKey = privateKeyFactory.getKey(format, hexKey);
-        Address address = ecKey.toAddress(MainNetParams.get());
+        Address address = ecKey.toAddress(MainBtcNetParams.get());
 
         //Assert
         Assert.assertEquals(hexCompressedAddress, address.toString());
@@ -210,11 +210,11 @@ public class PrivateKeyFactoryTest extends MockedResponseTest {
         //Act
         String format = privateKeyFactory.getFormat(hexKey);
         ECKey ecKey = privateKeyFactory.getKey(format, hexKey);
-        Address address = ecKey.toAddress(MainNetParams.get());
+        Address address = ecKey.toAddress(MainBtcNetParams.get());
 
         //Assert
         Assert.assertEquals(PrivateKeyFactory.HEX, format);
-        if(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams) {
+        if(PersistentUrls.getInstance().getBtcNetworkParams() instanceof MainBtcNetParams) {
             Assert.assertEquals(hexUncompressedAddress, address.toString());
             Assert.assertTrue(!ecKey.isCompressed());
         }

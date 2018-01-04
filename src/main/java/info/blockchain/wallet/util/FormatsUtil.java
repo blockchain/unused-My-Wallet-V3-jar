@@ -103,12 +103,13 @@ public class FormatsUtil {
         return ret;
     }
 
+    // TODO: 04/01/2018 Pass params in. What about other coin params?
     public static boolean isValidBitcoinAddress(final String address) {
 
         boolean ret;
 
         try {
-            Address.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), address);
+            Address.fromBase58(PersistentUrls.getInstance().getBtcNetworkParams(), address);
             ret = true;
         } catch (WrongNetworkException wne) {
             ret = false;

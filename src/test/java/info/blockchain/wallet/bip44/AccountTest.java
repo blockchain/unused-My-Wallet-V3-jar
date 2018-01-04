@@ -2,7 +2,7 @@ package info.blockchain.wallet.bip44;
 
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.MainBtcNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,30 +25,30 @@ public class AccountTest {
 
     @Test
     public void xpubstr() throws Exception {
-        HDAccount account = new HDAccount(MainNetParams.get(), xpub);
+        HDAccount account = new HDAccount(MainBtcNetParams.get(), xpub);
         Assert.assertEquals(xpub,account.getXpub());
     }
 
     @Test
     public void xprvstr() throws Exception {
-        HDAccount account = new HDAccount(MainNetParams.get(), key, 0);
+        HDAccount account = new HDAccount(MainBtcNetParams.get(), key, 0);
         Assert.assertEquals(xpriv,account.getXPriv());
     }
 
     @Test
     public void getId() throws Exception {
-        HDAccount account = new HDAccount(MainNetParams.get(), xpub, 1);
+        HDAccount account = new HDAccount(MainBtcNetParams.get(), xpub, 1);
         Assert.assertEquals(xpub,account.getXpub());
         Assert.assertEquals(1,account.getId());
 
-        account = new HDAccount(MainNetParams.get(), xpub);
+        account = new HDAccount(MainBtcNetParams.get(), xpub);
         Assert.assertEquals(xpub,account.getXpub());
         Assert.assertEquals(0,account.getId());
     }
 
     @Test
     public void getReceive() throws Exception {
-        HDAccount account = new HDAccount(MainNetParams.get(), key, 0);
+        HDAccount account = new HDAccount(MainBtcNetParams.get(), key, 0);
         Assert.assertTrue(account.getReceive().isReceive());
         Assert.assertEquals("M/0H/0",account.getReceive().getPath());
         Assert.assertEquals("1GfNtDKUu9KZt8ae7c9UM6NUD1uViZcsEA",account.getReceive().getAddressAt(0).getAddressString());
@@ -56,7 +56,7 @@ public class AccountTest {
 
     @Test
     public void getChange() throws Exception {
-        HDAccount account = new HDAccount(MainNetParams.get(), key, 0);
+        HDAccount account = new HDAccount(MainBtcNetParams.get(), key, 0);
         Assert.assertFalse(account.getChange().isReceive());
         Assert.assertEquals("M/0H/1",account.getChange().getPath());
         Assert.assertEquals("12boKefnALjsXoQXyHg79aU7qSAFfg5Nze",account.getChange().getAddressAt(0).getAddressString());
@@ -64,7 +64,7 @@ public class AccountTest {
 
     @Test
     public void getChain() throws Exception {
-        HDAccount account = new HDAccount(MainNetParams.get(), key, 0);
+        HDAccount account = new HDAccount(MainBtcNetParams.get(), key, 0);
         Assert.assertFalse(account.getChain(1).isReceive());
         Assert.assertEquals("M/0H/1",account.getChain(1).getPath());
         Assert.assertEquals("12boKefnALjsXoQXyHg79aU7qSAFfg5Nze",account.getChain(1).getAddressAt(0).getAddressString());
@@ -72,7 +72,7 @@ public class AccountTest {
 
     @Test
     public void getPath() throws Exception {
-        HDAccount account = new HDAccount(MainNetParams.get(), key, 0);
+        HDAccount account = new HDAccount(MainBtcNetParams.get(), key, 0);
         Assert.assertEquals("M/0H",account.getPath());
     }
 }

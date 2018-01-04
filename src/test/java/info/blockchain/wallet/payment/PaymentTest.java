@@ -1,57 +1,35 @@
 package info.blockchain.wallet.payment;
 
-import info.blockchain.api.data.UnspentOutput;
-import info.blockchain.wallet.MockedResponseTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import info.blockchain.api.data.UnspentOutputs;
-import info.blockchain.wallet.api.PersistentUrls;
-import info.blockchain.wallet.bip44.HDAccount;
-import info.blockchain.wallet.bip44.HDAddress;
-import info.blockchain.wallet.bip44.HDChain;
-import info.blockchain.wallet.bip44.HDWallet;
-import info.blockchain.wallet.bip44.HDWalletFactory;
-import info.blockchain.wallet.bip44.HDWalletFactory.Language;
-import info.blockchain.wallet.payload.PayloadManager;
-import info.blockchain.wallet.test_data.UnspentTestData;
+import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.api.data.Fee;
 import info.blockchain.wallet.api.data.FeeList;
+import info.blockchain.wallet.test_data.UnspentTestData;
 import info.blockchain.wallet.util.PrivateKeyFactory;
 import io.reactivex.observers.TestObserver;
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.MessageSerializer;
-import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionInput;
-import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.TransactionSignature;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.MainNetParamsBCH;
-import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class PaymentTest extends MockedResponseTest {
 

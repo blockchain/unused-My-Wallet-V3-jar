@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.MnemonicException;
-import org.bitcoinj.params.AbstractBitcoinNetParams;
 
 /**
  * <p>
@@ -20,7 +20,7 @@ public class BitcoinWallet extends DeterministicWallet{
 
     public static final String COIN_PATH = "M/44H/0H";
     private static final int MNEMONIC_LENGTH = 12;
-    AbstractBitcoinNetParams params;
+    NetworkParameters params;
 
     /**
      * Generates random BitcoinWallet with one account.
@@ -28,7 +28,7 @@ public class BitcoinWallet extends DeterministicWallet{
      * @throws MnemonicException
      * @throws IOException
      */
-    public BitcoinWallet(AbstractBitcoinNetParams params)
+    public BitcoinWallet(NetworkParameters params)
         throws MnemonicException, IOException {
         super(COIN_PATH, MNEMONIC_LENGTH, "");
         this.params = params;
@@ -43,7 +43,7 @@ public class BitcoinWallet extends DeterministicWallet{
      * @throws IOException
      */
     public BitcoinWallet(String passphrase,
-        AbstractBitcoinNetParams params)
+        NetworkParameters params)
         throws MnemonicException, IOException {
         super(COIN_PATH, MNEMONIC_LENGTH, passphrase);
         this.params = params;
@@ -59,7 +59,7 @@ public class BitcoinWallet extends DeterministicWallet{
      * @throws IOException
      */
     public BitcoinWallet(String entropyHex, String passphrase,
-        AbstractBitcoinNetParams params)
+        NetworkParameters params)
         throws MnemonicException, IOException, DecoderException {
         super(COIN_PATH, entropyHex, passphrase);
         this.params = params;
@@ -75,7 +75,7 @@ public class BitcoinWallet extends DeterministicWallet{
      * @throws MnemonicException
      * @throws IOException
      */
-    public BitcoinWallet(List<String> mnemonic, String passphrase, AbstractBitcoinNetParams params)
+    public BitcoinWallet(List<String> mnemonic, String passphrase, NetworkParameters params)
         throws MnemonicException, IOException {
         super(COIN_PATH, mnemonic, passphrase);
         this.params = params;

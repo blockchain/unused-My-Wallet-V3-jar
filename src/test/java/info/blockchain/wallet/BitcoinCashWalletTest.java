@@ -12,15 +12,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.bitcoinj.params.AbstractBitcoinCashNetParams;
-import org.bitcoinj.params.MainNetParamsBCH;
+import org.bitcoinj.params.AbstractBchNetParams;
+import org.bitcoinj.params.MainBchNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class BitcoinCashWalletTest {
 
     BitcoinCashWallet subject;
-    AbstractBitcoinCashNetParams params = MainNetParamsBCH.get();
+    AbstractBchNetParams params = MainBchNetParams.get();
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();

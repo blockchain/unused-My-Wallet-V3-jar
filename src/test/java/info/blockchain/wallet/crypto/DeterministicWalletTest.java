@@ -14,15 +14,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.binary.Hex;
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.MainBtcNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DeterministicWalletTest {
 
     BitcoinWallet subject; //Any DeterministicWallet will do
-    AbstractBitcoinNetParams params = MainNetParams.get(); //Won't affect this test but needed.
+    NetworkParameters params = MainBtcNetParams.get(); //Won't affect this test but needed.
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();

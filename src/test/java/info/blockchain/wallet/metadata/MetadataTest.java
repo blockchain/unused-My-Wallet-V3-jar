@@ -12,9 +12,10 @@ import info.blockchain.wallet.contacts.data.PublicContactDetails;
 import info.blockchain.wallet.util.MetadataUtil;
 import info.blockchain.wallet.util.RestClient;
 
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.MainBchNetParams;
+import org.bitcoinj.params.MainBtcNetParams;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,8 +67,13 @@ public class MetadataTest {
             }
 
             @Override
-            public AbstractBitcoinNetParams getNetworkParameters() {
-                return MainNetParams.get();
+            public NetworkParameters getBtcNetworkParameters() {
+                return MainBtcNetParams.get();
+            }
+
+            @Override
+            public NetworkParameters getBchNetworkParameters() {
+                return MainBchNetParams.get();
             }
 
             @Override
@@ -90,7 +96,7 @@ public class MetadataTest {
     private HDWallet getWallet() throws Exception {
 
         return HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBtcNetworkParams(), Language.US,
                 "15e23aa73d25994f1921a1256f93f72c", "", 1);
     }
 
