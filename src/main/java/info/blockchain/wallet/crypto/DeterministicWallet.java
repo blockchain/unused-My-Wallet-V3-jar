@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -35,14 +36,14 @@ public abstract class DeterministicWallet implements DeterministicNode {
         }
     }
 
-    private byte[] masterSeed;
-    private byte[] entropy;
-    private List<String> mnemonic;
-    private String passphrase;
+    protected byte[] masterSeed;
+    protected byte[] entropy;
+    protected List<String> mnemonic;
+    protected String passphrase;
 
-    private DeterministicKey node;
-    private DeterministicKey deterministicWalletKey;
-    private List<DeterministicAccount> accounts;
+    protected DeterministicKey node;
+    protected DeterministicKey deterministicWalletKey;
+    protected List<DeterministicAccount> accounts;
 
     /**
      * Generates new wallet for given coin path and passphrase

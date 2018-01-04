@@ -8,10 +8,13 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.AbstractBitcoinCashNetParams;
-import org.spongycastle.util.encoders.Hex;
 
 public class BitcoinCashWallet extends DeterministicWallet {
 
+    /**
+     * Coin parameters
+     */
+    public int BCH_FORK_HEIGHT = 478558;
     public static final String COIN_PATH = "M/44H/145H";
     private static final int MNEMONIC_LENGTH = 12;
     AbstractBitcoinCashNetParams params;
@@ -64,8 +67,7 @@ public class BitcoinCashWallet extends DeterministicWallet {
     }
 
     /**
-     * Restores BitcoinWallet from supplied mnemonic with no accounts with passphrase. // TODO:
-     * 22/12/2017 Check amount of accounts to be restored/added
+     * Restores BitcoinWallet from supplied mnemonic with no accounts with passphrase.
      *
      * @param mnemonic Mnemonic to be used to restore bitcoin wallet
      * @param passphrase Passphrase to be used
@@ -99,11 +101,19 @@ public class BitcoinCashWallet extends DeterministicWallet {
         }
     }
 
+    /**
+     * @deprecated since 14 January 2017, replaced by {@link #getReceiveAddressAt(int, int)}
+     */
+    @Deprecated
     public String getReceiveLegacyAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getReceiveECKeyAt(accountIndex, addressIndex);
         return key.toAddress(params).toBase58();
     }
 
+    /**
+     * @deprecated since 14 January 2017, replaced by {@link #getChangeAddressAt(int, int)}
+     */
+    @Deprecated
     public String getChangeLegacyAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getChangeECKeyAt(accountIndex, addressIndex);
         return key.toAddress(params).toBase58();

@@ -1,18 +1,14 @@
 package info.blockchain.wallet;
 
+import com.google.common.annotations.Beta;
 import info.blockchain.wallet.crypto.DeterministicWallet;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.Bech32;
 import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.SegwitAddress;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.spongycastle.util.encoders.Hex;
 
 /**
  * <p>
@@ -114,11 +110,19 @@ public class BitcoinWallet extends DeterministicWallet{
         return key.toAddress(params).toString();
     }
 
+    /**
+     * Experimental. Not ready for production yet.
+     */
+    @Beta
     public String getReceiveSegwitAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getReceiveECKeyAt(accountIndex, addressIndex);
         return key.toAddress(params).toBech32();
     }
 
+    /**
+     * Experimental. Not ready for production yet.
+     */
+    @Beta
     public String getChangeSegwitAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getChangeECKeyAt(accountIndex, addressIndex);
         return key.toAddress(params).toBech32();
