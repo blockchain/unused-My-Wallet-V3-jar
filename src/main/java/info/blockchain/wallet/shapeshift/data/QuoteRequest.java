@@ -7,24 +7,26 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE,
-    getterVisibility = JsonAutoDetect.Visibility.NONE,
-    setterVisibility = JsonAutoDetect.Visibility.NONE,
-    creatorVisibility = JsonAutoDetect.Visibility.NONE,
-    isGetterVisibility = JsonAutoDetect.Visibility.NONE)
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE,
+        creatorVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 public class QuoteRequest {
 
     //the amount to be sent to the withdrawal address
     @JsonProperty("depositAmount")
-    private double depositAmount;
+    private BigDecimal depositAmount = BigDecimal.ZERO;
 
     //the amount to be withdrawn
     @JsonProperty("withdrawalAmount")
-    private double withdrawalAmount;
+    private BigDecimal withdrawalAmount = BigDecimal.ZERO;
 
     //the address for coin to be sent to
     @JsonProperty("withdrawal")
@@ -42,19 +44,19 @@ public class QuoteRequest {
     @JsonProperty("apiKey")
     private String apiKey;
 
-    public double getDepositAmount() {
+    public BigDecimal getDepositAmount() {
         return depositAmount;
     }
 
-    public void setDepositAmount(double depositAmount) {
+    public void setDepositAmount(BigDecimal depositAmount) {
         this.depositAmount = depositAmount;
     }
 
-    public double getWithdrawalAmount() {
+    public BigDecimal getWithdrawalAmount() {
         return withdrawalAmount;
     }
 
-    public void setWithdrawalAmount(double withdrawalAmount) {
+    public void setWithdrawalAmount(BigDecimal withdrawalAmount) {
         this.withdrawalAmount = withdrawalAmount;
     }
 

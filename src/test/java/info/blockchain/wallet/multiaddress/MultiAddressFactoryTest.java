@@ -1,10 +1,15 @@
 package info.blockchain.wallet.multiaddress;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.MockedResponseTest;
-import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabel;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -12,21 +17,20 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
-public class MultiAddressFactoryTest extends MockedResponseTest{
+public class MultiAddressFactoryTest extends MockedResponseTest {
 
-    MultiAddressFactory multiAddressFactory;
+    private MultiAddressFactory multiAddressFactory;
 
     private final String dormantAddress = "1jH7K4RJrQBXijtLj1JpzqPRhR7MdFtaW";
     private final String dormantXpub = "xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         multiAddressFactory = new MultiAddressFactory(
-            new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode()));
+            new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                    BlockchainFramework.getRetrofitApiInstance(),
+                    BlockchainFramework.getApiCode()));
     }
 
     @Test

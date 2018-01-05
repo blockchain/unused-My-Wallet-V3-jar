@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import retrofit2.Call;
 import retrofit2.Response;
 
 public class MultiAddressFactory {
@@ -42,7 +44,7 @@ public class MultiAddressFactory {
     public static final String ADDRESS_DECODE_ERROR = "[--address_decode_error--]";
 
     public MultiAddressFactory(BlockExplorer blockExplorer) {
-        log.info("Initializing MultiAddressFactory");
+        getLog().info("Initializing MultiAddressFactory");
         this.blockExplorer = blockExplorer;
         this.addressToXpubMap = new HashMap<>();
         this.nextReceiveAddressMap = new HashMap<>();
@@ -53,29 +55,41 @@ public class MultiAddressFactory {
         return addressToXpubMap.get(address);
     }
 
-    private MultiAddress getMultiAddress(List<String> allActive, String onlyShow, int limit, int offset) throws IOException, ApiException{
+    private MultiAddress getMultiAddress(List<String> allActive, String onlyShow, int limit, int offset) throws IOException, ApiException {
 
-        log.info("Fetching multiaddress for {} accounts/addresses", allActive.size());
+        getLog().info("Fetching multiaddress for {} accounts/addresses", allActive.size());
 
-        if (onlyShow!=null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
+        if (onlyShow != null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
 
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
+            Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, null).execute();
 
-            if(call.isSuccessful()) {
+            if (call.isSuccessful()) {
                 return call.body();
             } else {
                 throw new ApiException(call.errorBody().string());
             }
 
         } else {
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
+            Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, onlyShow).execute();
 
-            if(call.isSuccessful()) {
+            if (call.isSuccessful()) {
                 return call.body();
             } else {
                 throw new ApiException(call.errorBody().string());
             }
         }
+    }
+
+    protected Call<MultiAddress> getMultiAddress(List<String> allActive, int limit, int offset, String context) {
+        return getBlockExplorer().getMultiAddress("btc", allActive, context, FilterType.RemoveUnspendable, limit, offset);
+    }
+
+    BlockExplorer getBlockExplorer() {
+        return blockExplorer;
+    }
+
+    Logger getLog() {
+        return log;
     }
 
     /**
@@ -93,7 +107,7 @@ public class MultiAddressFactory {
     public List<TransactionSummary> getAccountTransactions(ArrayList<String> all, List<String> watchOnly, List<String> activeLegacy, String onlyShow, int limit, int offset)
         throws IOException, ApiException {
 
-        log.info("Get transactions. limit {}, offset {}", limit, offset);
+        getLog().info("Get transactions. limit {}, offset {}", limit, offset);
 
         MultiAddress multiAddress = getMultiAddress(all, onlyShow, limit, offset);
         if(multiAddress == null || multiAddress.getTxs() == null) {
@@ -110,7 +124,7 @@ public class MultiAddressFactory {
         }
 
         int index = nextChangeAddressMap.get(xpub);
-        log.info("Next change index = {}", index);
+        getLog().info("Next change index = {}", index);
         return index;
     }
 
@@ -129,7 +143,7 @@ public class MultiAddressFactory {
             }
         }
 
-        log.info("Next receive index = {}", receiveIndex);
+        getLog().info("Next receive index = {}", receiveIndex);
         return receiveIndex;
     }
 
@@ -147,7 +161,7 @@ public class MultiAddressFactory {
         int receiveIndex = getNextReceiveAddressIndex(xpub, reservedAddresses);
         receiveIndex++;
 
-        log.info("Increment next receive index to {}", receiveIndex);
+        getLog().info("Increment next receive index to {}", receiveIndex);
         nextReceiveAddressMap.put(xpub, receiveIndex);
     }
 
@@ -156,7 +170,7 @@ public class MultiAddressFactory {
         int index = getNextChangeAddressIndex(xpub);
         index++;
 
-        log.info("Increment next change index to {}", index);
+        getLog().info("Increment next change index to {}", index);
         nextChangeAddressMap.put(xpub, index);
     }
 

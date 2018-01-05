@@ -123,7 +123,8 @@ public class PrivateKeyFactory {
             list.add(uncompressedAddress);
             list.add(compressedAddress);
 
-            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
+            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                    BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
             Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, FilterType.RemoveUnspendable);
 
             Response<HashMap<String, Balance>> exe = call.execute();
@@ -150,7 +151,7 @@ public class PrivateKeyFactory {
         }
     }
 
-    private ECKey decodeBase58PK(String base58Priv) throws Exception {
+    private ECKey decodeBase58PK(String base58Priv) {
         byte[] privBytes = Base58.decode(base58Priv);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
@@ -171,7 +172,7 @@ public class PrivateKeyFactory {
         return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
-    private ECKey decodePK(String base58Priv) throws Exception {
+    private ECKey decodePK(String base58Priv) {
         return decodeBase58PK(base58Priv);
     }
 

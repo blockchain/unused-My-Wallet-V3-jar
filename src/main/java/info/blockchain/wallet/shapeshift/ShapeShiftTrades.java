@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.Metadata;
+import info.blockchain.wallet.shapeshift.data.State;
 import info.blockchain.wallet.shapeshift.data.Trade;
 import info.blockchain.wallet.util.MetadataUtil;
 import java.io.IOException;
@@ -25,6 +26,8 @@ public class ShapeShiftTrades {
 
     @JsonProperty("trades")
     private List<Trade> trades;
+    @JsonProperty("USAState")
+    private State state;
 
     private Metadata metadata;
 
@@ -101,7 +104,18 @@ public class ShapeShiftTrades {
         return trades;
     }
 
+    @JsonProperty("USAState")
+    public State getUsState() {
+        return state;
+    }
+
     public synchronized void setTrades(List<Trade> trades) {
         this.trades = trades;
     }
+
+    @JsonProperty("USAState")
+    public void setUsState(State state) {
+        this.state = state;
+    }
+
 }

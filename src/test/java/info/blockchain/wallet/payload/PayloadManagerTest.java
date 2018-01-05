@@ -11,13 +11,7 @@ import info.blockchain.wallet.payload.data.Account;
 import info.blockchain.wallet.payload.data.AddressLabel;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -25,15 +19,23 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 public class PayloadManagerTest extends MockedResponseTest {
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         PayloadManager.getInstance().wipe();
     }
 
     @Test
-    public void getInstance() throws Exception {
+    public void getInstance() {
         Assert.assertNotNull(PayloadManager.getInstance());
     }
 
@@ -50,7 +52,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         PayloadManager.getInstance().create("My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
-            .getPayload();
+                .getPayload();
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
         Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
@@ -78,11 +80,11 @@ public class PayloadManagerTest extends MockedResponseTest {
         LinkedList<String> responseList = new LinkedList<>();
         //Responses for checking how many accounts to recover
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_all_balance_1.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_all_balance_1.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_all_balance_2.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_all_balance_2.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_all_balance_3.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_all_balance_3.txt").toURI())), Charset.forName("utf-8")));
         responseList.add("HDWallet successfully synced with server");
 
         //responses for initializing multi address
@@ -103,7 +105,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
-            .getPayload();
+                .getPayload();
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
         Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
@@ -123,11 +125,11 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_all_balance_1.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_all_balance_1.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_all_balance_2.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_all_balance_2.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_all_balance_3.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_all_balance_3.txt").toURI())), Charset.forName("utf-8")));
         responseList.add("Save failed");
         mockInterceptor.setResponseStringList(responseList);
 
@@ -142,7 +144,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
-            .getPayload();
+                .getPayload();
 
         Assert.assertEquals(36, walletBody.getGuid().length());//GUIDs are 36 in length
         Assert.assertEquals("My HDWallet", walletBody.getHdWallets().get(0).getAccounts().get(0).getLabel());
@@ -159,9 +161,9 @@ public class PayloadManagerTest extends MockedResponseTest {
     public void initializeAndDecrypt_unsupported_version() throws Exception {
 
         URI uri = getClass().getClassLoader()
-            .getResource("wallet_v4_unsupported.txt").toURI();
+                .getResource("wallet_v4_unsupported.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
-            Charset.forName("utf-8"));
+                Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(walletBase);
         PayloadManager.getInstance().initializeAndDecrypt("any_shared_key", "any_guid", "SomeTestPassword");
@@ -172,7 +174,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         URI uri = getClass().getClassLoader().getResource("wallet_v3_3.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
-            Charset.forName("utf-8"));
+                Charset.forName("utf-8"));
 
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(walletBase);
@@ -188,7 +190,7 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         URI uri = getClass().getClassLoader().getResource("invalid_guid.txt").toURI();
         String walletBase = new String(Files.readAllBytes(Paths.get(uri)),
-            Charset.forName("utf-8"));
+                Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(walletBase);
         mockInterceptor.setResponseCode(500);
@@ -217,7 +219,7 @@ public class PayloadManagerTest extends MockedResponseTest {
     }
 
     @Test
-    public void upgradeV2PayloadToV3() throws Exception{
+    public void upgradeV2PayloadToV3() {
         //Tested in integration tests
     }
 
@@ -321,15 +323,15 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
         LegacyAddress legacyAddressBody = PayloadManager.getInstance().getPayload()
-            .getLegacyAddressList().get(0);
+                .getLegacyAddressList().get(0);
 
         ECKey ecKey = DeterministicKey
-            .fromPrivate(Base58.decode(legacyAddressBody.getPrivateKey()));
+                .fromPrivate(Base58.decode(legacyAddressBody.getPrivateKey()));
 
 
         legacyAddressBody.setPrivateKey(null);
         mockInterceptor.setResponseString("MyWallet save successful.");
-        PayloadManager.getInstance().setKeyForLegacyAddress(ecKey,null);
+        PayloadManager.getInstance().setKeyForLegacyAddress(ecKey, null);
     }
 
     @Test
@@ -357,7 +359,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
         LegacyAddress existingLegacyAddressBody = PayloadManager.getInstance().getPayload()
-            .getLegacyAddressList().get(0);
+                .getLegacyAddressList().get(0);
 
         //Try non matching ECKey
         ECKey ecKey = new ECKey();
@@ -372,7 +374,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         mockInterceptor.setResponseStringList(responseList);
 
         LegacyAddress newlyAdded = PayloadManager.getInstance()
-            .setKeyForLegacyAddress(ecKey, null);
+                .setKeyForLegacyAddress(ecKey, null);
 
         //Ensure new address is created if no match found
         Assert.assertNotNull(newlyAdded);
@@ -407,15 +409,15 @@ public class PayloadManagerTest extends MockedResponseTest {
         Assert.assertEquals(1, PayloadManager.getInstance().getPayload().getLegacyAddressList().size());
 
         LegacyAddress legacyAddressBody = PayloadManager.getInstance().getPayload()
-            .getLegacyAddressList().get(0);
+                .getLegacyAddressList().get(0);
 
         ECKey ecKey = DeterministicKey
-            .fromPrivate(Base58.decode(legacyAddressBody.getPrivateKey()));
+                .fromPrivate(Base58.decode(legacyAddressBody.getPrivateKey()));
 
         legacyAddressBody.setPrivateKey(null);
         mockInterceptor.setResponseCode(500);
         mockInterceptor.setResponseString("Oops something went wrong");
-        PayloadManager.getInstance().setKeyForLegacyAddress(ecKey,null);
+        PayloadManager.getInstance().setKeyForLegacyAddress(ecKey, null);
 
         //Ensure private key reverted on save fail
         Assert.assertNull(legacyAddressBody.getPrivateKey());
@@ -430,14 +432,15 @@ public class PayloadManagerTest extends MockedResponseTest {
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(walletBase);
         responseList.add("{}");
+        responseList.add("{}");
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
+                "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m2.txt").toURI())), Charset.forName("utf-8")));
+                "multiaddress/wallet_v3_5_m2.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m3.txt").toURI())), Charset.forName("utf-8")));
+                "multiaddress/wallet_v3_5_m3.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_5_m4.txt").toURI())), Charset.forName("utf-8")));
+                "multiaddress/wallet_v3_5_m4.txt").toURI())), Charset.forName("utf-8")));
         mockInterceptor.setResponseStringList(responseList);
 
         PayloadManager.getInstance().initializeAndDecrypt("06f6fa9c-d0fe-403d-815a-111ee26888e2", "4750d125-5344-4b79-9cf9-6e3c97bc9523", "MyTestWallet");
@@ -447,9 +450,9 @@ public class PayloadManagerTest extends MockedResponseTest {
         //Reserve an address to ensure it gets skipped
         List<AddressLabel> labelList = new ArrayList<>();
         labelList.add(AddressLabel.fromJson("{\n"
-            + "              \"index\": 1,\n"
-            + "              \"label\": \"Reserved\"\n"
-            + "            }"));
+                + "              \"index\": 1,\n"
+                + "              \"label\": \"Reserved\"\n"
+                + "            }"));
 
         Account account = wallet.getHdWallets().get(0).getAccounts().get(0);
         account.setAddressLabels(labelList);
@@ -483,8 +486,12 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(walletBase);
+        // Bitcoin
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+        // Bitcoin Cash
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+                "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
 
         mockInterceptor.setResponseStringList(responseList);
 
@@ -492,7 +499,7 @@ public class PayloadManagerTest extends MockedResponseTest {
         payloadManager.initializeAndDecrypt("any", "any", "MyTestWallet");
 
         //'All' wallet balance and transactions
-        Assert.assertEquals(743071,payloadManager.getWalletBalance().longValue());
+        Assert.assertEquals(743071, payloadManager.getWalletBalance().longValue());
 
         //Imported addresses consolidated
         Assert.assertEquals(137505, PayloadManager.getInstance().getImportedAddressesBalance().longValue());
@@ -516,10 +523,18 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(walletBase);
+        // Bitcoin
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+        // Bitcoin cash
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
+                "balance/wallet_v3_6_balance.txt").toURI())), Charset.forName("utf-8")));
+        // Bitcoin
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+                "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
+        // Bitcoin cash
+        responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
+                "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
         mockInterceptor.setResponseStringList(responseList);
 
         PayloadManager payloadManager = PayloadManager.getInstance();
@@ -528,11 +543,11 @@ public class PayloadManagerTest extends MockedResponseTest {
         //Account 1
         String first = "xpub6CdH6yzYXhTtR7UHJHtoTeWm3nbuyg9msj3rJvFnfMew9CBff6Rp62zdTrC57Spz4TpeRPL8m9xLiVaddpjEx4Dzidtk44rd4N2xu9XTrSV";
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m2.txt").toURI())), Charset.forName("utf-8")));
+                "multiaddress/wallet_v3_6_m2.txt").toURI())), Charset.forName("utf-8")));
 
         List<TransactionSummary> transactionSummaries = payloadManager
-            .getAccountTransactions(first, 50, 0);
-        Assert.assertEquals(8,transactionSummaries.size());
+                .getAccountTransactions(first, 50, 0);
+        Assert.assertEquals(8, transactionSummaries.size());
         TransactionSummary summary = transactionSummaries.get(0);
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
@@ -602,10 +617,10 @@ public class PayloadManagerTest extends MockedResponseTest {
         //Account 2
         String second = "xpub6CdH6yzYXhTtTGPPL4Djjp1HqFmAPx4uyqoG6Ffz9nPysv8vR8t8PEJ3RGaSRwMm7kRZ3MAcKgB6u4g1znFo82j4q2hdShmDyw3zuMxhDSL";
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
+                "multiaddress/wallet_v3_6_m3.txt").toURI())), Charset.forName("utf-8")));
         transactionSummaries = payloadManager
-            .getAccountTransactions(second, 50, 0);
-        Assert.assertEquals(2,transactionSummaries.size());
+                .getAccountTransactions(second, 50, 0);
+        Assert.assertEquals(2, transactionSummaries.size());
         summary = transactionSummaries.get(0);
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
@@ -625,12 +640,12 @@ public class PayloadManagerTest extends MockedResponseTest {
 
         //Imported addresses (consolidated)
         mockInterceptor.setResponseString(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
-            "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
+                "multiaddress/wallet_v3_6_m1.txt").toURI())), Charset.forName("utf-8")));
         transactionSummaries = payloadManager.getImportedAddressesTransactions(50, 0);
         Assert.assertEquals(2, transactionSummaries.size());
 
         summary = transactionSummaries.get(0);
-        Assert.assertEquals(2,transactionSummaries.size());
+        Assert.assertEquals(2, transactionSummaries.size());
         Assert.assertEquals(68563, summary.getTotal().longValue());
         Assert.assertEquals(Direction.TRANSFERRED, summary.getDirection());
         Assert.assertEquals(1, summary.getInputsMap().size());

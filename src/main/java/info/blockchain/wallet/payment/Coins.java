@@ -21,9 +21,10 @@ class Coins {
 
     private static final Logger log = LoggerFactory.getLogger(Coins.class);
 
-    public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
+    public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) {
         log.info("Fetching unspent coins");
-        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
+        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
         return blockExplorer.getUnspentOutputs(addresses);
     }
 

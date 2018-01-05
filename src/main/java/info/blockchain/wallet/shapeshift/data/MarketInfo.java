@@ -7,7 +7,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -22,41 +24,41 @@ public class MarketInfo {
     private String pair;
 
     @JsonProperty("rate")
-    private Double rate;
+    private BigDecimal rate;
 
     @JsonProperty("limit")
-    private Double limit;
+    private BigDecimal limit;
 
     @JsonProperty("minimum")
-    private Double minimum;
+    private BigDecimal minimum;
 
     @JsonProperty("maxLimit")
-    private Double maxLimit;
+    private BigDecimal maxLimit;
 
     @JsonProperty("minerFee")
-    private Double minerFee;
+    private BigDecimal minerFee;
 
     public String getPair() {
         return pair;
     }
 
-    public Double getRate() {
+    public BigDecimal getRate() {
         return rate;
     }
 
-    public Double getLimit() {
+    public BigDecimal getLimit() {
         return limit;
     }
 
-    public Double getMinimum() {
+    public BigDecimal getMinimum() {
         return minimum;
     }
 
-    public Double getMaxLimit() {
+    public BigDecimal getMaxLimit() {
         return maxLimit;
     }
 
-    public Double getMinerFee() {
+    public BigDecimal getMinerFee() {
         return minerFee;
     }
 
