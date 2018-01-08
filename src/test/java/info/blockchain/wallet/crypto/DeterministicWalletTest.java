@@ -3,7 +3,6 @@ package info.blockchain.wallet.crypto;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.base.Joiner;
-import info.blockchain.wallet.BitcoinWallet;
 import info.blockchain.wallet.test_data.TestVectorBip39;
 import info.blockchain.wallet.test_data.TestVectorBip39List;
 import java.net.URI;
@@ -14,15 +13,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.binary.Hex;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DeterministicWalletTest {
 
-    BitcoinWallet subject; //Any DeterministicWallet will do
-    NetworkParameters params = BitcoinMainNetParams.get(); //Won't affect this test but needed.
+    TestWallet subject;
+    public static final String COIN_PATH = "M/44H/0H";
+    private static final int MNEMONIC_LENGTH = 12;
+
+    class TestWallet extends DeterministicWallet {
+
+        public TestWallet(String coinPath, int mnemonicLength, String passphrase) {
+            super(coinPath, mnemonicLength, passphrase);
+        }
+
+        public TestWallet(String coinPath, String entropyHex, String passphrase) {
+            super(coinPath, entropyHex, passphrase);
+        }
+
+        public TestWallet(String coinPath, List<String> mnemonic, String passphrase) {
+            super(coinPath, mnemonic, passphrase);
+        }
+    }
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();
@@ -36,13 +49,13 @@ public class DeterministicWalletTest {
     @Test
     public void construct1() throws Exception {
 
-        subject = new BitcoinWallet(params);
+        subject = new TestWallet(COIN_PATH, MNEMONIC_LENGTH, "");
 
         Assert.assertNotNull(subject.getSeedHex());
         Assert.assertNotNull(subject.getEntropyHex());
         assertEquals(12, subject.getMnemonic().size());
         assertEquals("", subject.getPassphrase());
-        assertEquals(1, subject.getAccountTotal());
+        assertEquals(0, subject.getAccountTotal());
     }
 
     /**
@@ -51,13 +64,13 @@ public class DeterministicWalletTest {
     @Test
     public void construct2() throws Exception {
 
-        subject = new BitcoinWallet("somePassphrase", params);
+        subject = new TestWallet(COIN_PATH, MNEMONIC_LENGTH,"somePassphrase");
 
         Assert.assertNotNull(subject.getSeedHex());
         Assert.assertNotNull(subject.getEntropyHex());
         assertEquals(12, subject.getMnemonic().size());
         assertEquals("somePassphrase", subject.getPassphrase());
-        assertEquals(1, subject.getAccountTotal());
+        assertEquals(0, subject.getAccountTotal());
     }
 
     /**
@@ -71,13 +84,13 @@ public class DeterministicWalletTest {
 
         for (TestVectorBip39 vector : testVectors.getVectors()) {
 
-            subject = new BitcoinWallet(vector.getEntropy(), vector.getPassphrase(), params);
+            subject = new TestWallet(COIN_PATH, vector.getEntropy(), vector.getPassphrase());
 
             assertEquals(vector.getSeed(), subject.getSeedHex());
             assertEquals(vector.getEntropy(), subject.getEntropyHex());
             assertEquals(vector.getMnemonic(), Joiner.on(" ").join(subject.getMnemonic()));
             assertEquals(vector.getPassphrase(), subject.getPassphrase());
-            assertEquals(1, subject.getAccountTotal());
+            assertEquals(0, subject.getAccountTotal());
         }
     }
 
@@ -92,8 +105,7 @@ public class DeterministicWalletTest {
 
         for (TestVectorBip39 vector : testVectors.getVectors()) {
 
-            subject = new BitcoinWallet(split(vector.getMnemonic()), vector.getPassphrase(),
-                params);
+            subject = new TestWallet(COIN_PATH, split(vector.getMnemonic()), vector.getPassphrase());
 
             assertEquals(vector.getSeed(), subject.getSeedHex());
             assertEquals(vector.getEntropy(), subject.getEntropyHex());
@@ -115,10 +127,9 @@ public class DeterministicWalletTest {
 
         TestVectorBip39 vector = testVectors.getVectors().get(24);
 
-        BitcoinWallet subject1 = new BitcoinWallet(split(vector.getMnemonic()),
-            vector.getPassphrase(), params);
-        BitcoinWallet subject2 = new BitcoinWallet(split(vector.getMnemonic()), "Other passphrase",
-            params);
+        TestWallet subject1 = new TestWallet(COIN_PATH, split(vector.getMnemonic()),
+            vector.getPassphrase());
+        TestWallet subject2 = new TestWallet(COIN_PATH, split(vector.getMnemonic()), "Other passphrase");
 
         Assert.assertNotEquals(subject1.getSeedHex(), subject2.getSeedHex());
         assertEquals(subject1.getEntropyHex(), subject2.getEntropyHex());
@@ -128,32 +139,31 @@ public class DeterministicWalletTest {
     @Test
     public void addAccount() throws Exception {
 
-        subject = new BitcoinWallet(params);
+        subject = new TestWallet(COIN_PATH, MNEMONIC_LENGTH, "");
 
         Assert.assertNotNull(subject.getSeedHex());
         Assert.assertNotNull(subject.getEntropyHex());
         assertEquals(12, subject.getMnemonic().size());
         assertEquals("", subject.getPassphrase());
-        assertEquals(1, subject.getAccountTotal());
+        assertEquals(0, subject.getAccountTotal());
 
         subject.addAccount();
-        assertEquals(2, subject.getAccountTotal());
+        assertEquals(1, subject.getAccountTotal());
         subject.addAccount();
-        assertEquals(3, subject.getAccountTotal());
+        assertEquals(2, subject.getAccountTotal());
     }
 
     @Test
     public void getReceiveECKeyAt() throws Exception {
 
-        subject = new BitcoinWallet(params);
+        subject = new TestWallet(COIN_PATH, MNEMONIC_LENGTH, "");
         TestVectorBip39List testVectors = getTestVectors();
         TestVectorBip39 vector = testVectors.getVectors().get(24);
 
-        subject = new BitcoinWallet(split(vector.getMnemonic()),
-            vector.getPassphrase(), params);
+        subject = new TestWallet(COIN_PATH, split(vector.getMnemonic()),
+            vector.getPassphrase());
 
         assertEquals("0660cc198330660cc198330660cc1983", subject.getEntropyHex());
-        System.out.println(subject.getMnemonic());
 
         subject.addAccount();
         assertEquals("03c6d9cc725bb7e19c026df03bf693ee1171371a8eaf25f04b7a58f6befabcd38c",

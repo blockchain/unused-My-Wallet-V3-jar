@@ -29,6 +29,14 @@ public class AbstractCoinAccount {
     @JsonProperty("archived")
     private boolean archived;
 
+    public AbstractCoinAccount() {
+    }
+
+    public AbstractCoinAccount(String label, boolean archived) {
+        this.label = label;
+        this.archived = archived;
+    }
+
     public String getLabel() {
         return label;
     }

@@ -1,85 +1,69 @@
 package info.blockchain.wallet;
 
-import info.blockchain.wallet.crypto.DeterministicWallet;
-import java.io.IOException;
+import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.coin.BlockchainStoreWallet;
+import info.blockchain.wallet.exceptions.WalletMetadataException;
 import java.util.List;
-import org.apache.commons.codec.DecoderException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.DeterministicKey;
-import org.bitcoinj.crypto.MnemonicException;
 
-public class BitcoinCashWallet extends DeterministicWallet {
+public class BitcoinCashWallet extends BlockchainStoreWallet {
 
     /**
      * Coin parameters
      */
     public int BCH_FORK_HEIGHT = 478558;
-    public static final String COIN_PATH = "M/44H/145H";
+    public static final String BITCOIN_COIN_PATH = "M/44H/0H";
+    public static final String BITCOINCASH_COIN_PATH = "M/44H/145H";
     private static final int MNEMONIC_LENGTH = 12;
     NetworkParameters params;
 
     /**
-     * Generates random BitcoinWallet with one account no passphrase.
-     *
-     * @param params BitcoinNetParams to be used
-     * @throws MnemonicException
-     * @throws IOException
+     * Coin metadata store
      */
-    public BitcoinCashWallet(NetworkParameters params, String coinPath)
-        throws MnemonicException, IOException {
-        super(coinPath, MNEMONIC_LENGTH, "");
-        this.params = params;
-        addAccount();
+    private static final int METADATA_TYPE_EXTERNAL = 7;
+
+    private void init() {
+        params = PersistentUrls.getInstance().getBitcoinCashParams();
     }
 
-    /**
-     * Generates random BitcoinWallet with one account with passphrase.
-     *
-     * @param passphrase Passphrase to be used
-     * @param params BitcoinNetParams to be used
-     * @throws MnemonicException
-     * @throws IOException
-     */
-    public BitcoinCashWallet(String passphrase,
-        NetworkParameters params, String coinPath)
-        throws MnemonicException, IOException {
-        super(coinPath, MNEMONIC_LENGTH, passphrase);
-        this.params = params;
-        addAccount();
+    private BitcoinCashWallet(String coinPath, String passphrase)
+        throws WalletMetadataException {
+        super(METADATA_TYPE_EXTERNAL, coinPath, MNEMONIC_LENGTH, passphrase);
+        init();
     }
 
-    /**
-     * Generates BitcoinWallet from supplied entropy with one account with passphrase.
-     *
-     * @param entropyHex Hex of entropy to be used to generate bitcoin wallet
-     * @param passphrase Passphrase to be used
-     * @param params BitcoinNetParams to be used
-     * @throws MnemonicException
-     * @throws IOException
-     */
-    public BitcoinCashWallet(String entropyHex, String passphrase, String coinPath,
-        NetworkParameters params)
-        throws MnemonicException, IOException, DecoderException {
-        super(coinPath, entropyHex, passphrase);
-        this.params = params;
-        addAccount();
+    private BitcoinCashWallet(String coinPath, String entropyHex, String passphrase)
+        throws WalletMetadataException {
+        super(METADATA_TYPE_EXTERNAL, coinPath, entropyHex, passphrase);
+        init();
     }
 
-    /**
-     * Restores BitcoinWallet from supplied mnemonic with no accounts with passphrase.
-     *
-     * @param mnemonic Mnemonic to be used to restore bitcoin wallet
-     * @param passphrase Passphrase to be used
-     * @param params BitcoinNetParams to be used
-     * @throws MnemonicException
-     * @throws IOException
-     */
-    public BitcoinCashWallet(List<String> mnemonic, String passphrase, String coinPath,
-        NetworkParameters params)
-        throws MnemonicException, IOException {
-        super(coinPath, mnemonic, passphrase);
-        this.params = params;
+    private BitcoinCashWallet(String coinPath, List<String> mnemonic, String passphrase)
+        throws WalletMetadataException {
+        super(METADATA_TYPE_EXTERNAL, coinPath, mnemonic, passphrase);
+        init();
+    }
+
+    public static synchronized BitcoinCashWallet create(String coinPath)
+        throws WalletMetadataException {
+        return new BitcoinCashWallet(coinPath, "");
+    }
+
+    public static synchronized BitcoinCashWallet create(String coinPath, String passphrase)
+        throws WalletMetadataException {
+        return new BitcoinCashWallet(coinPath, passphrase);
+    }
+
+    public static synchronized BitcoinCashWallet restore(String coinPath, String entropyHex, String passphrase)
+        throws WalletMetadataException {
+        return new BitcoinCashWallet(coinPath, entropyHex, passphrase);
+    }
+
+    public static synchronized BitcoinCashWallet restore(String coinPath, List<String> mnemonic, String passphrase)
+        throws WalletMetadataException {
+        return new BitcoinCashWallet(coinPath, mnemonic, passphrase);
     }
 
     public String getUriScheme() {

@@ -11,16 +11,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.BitcoinCashMainNetParams;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class BitcoinCashWalletTest {
+public class BitcoinCashWalletTest extends MockedResponseTest{
 
     BitcoinCashWallet subject;
-    NetworkParameters params = BitcoinCashMainNetParams.get();
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();
@@ -28,20 +27,31 @@ public class BitcoinCashWalletTest {
         return TestVectorBip39List.fromJson(response);
     }
 
+    /*
+    Really not convenient to have a web call in a constructor, but what can we do.
+     */
+    private void mockMetadataFetchMagic() {
+        int code = 404;
+        String response = "{\"message\":\"Not Found\"}";
+        mockInterceptor.setResponseList(new LinkedList<Pair>(Arrays.asList(Pair.of(code, response))));
+    }
+
     @Test
     public void getPrivB58() throws Exception {
 
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
+        mockMetadataFetchMagic();
 
-        subject = new BitcoinCashWallet(split(vector.getMnemonic()),
-            vector.getPassphrase(), BitcoinCashWallet.COIN_PATH, params);
+        subject = BitcoinCashWallet
+            .restore(BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()), vector.getPassphrase());
         subject.addAccount();
         Assert.assertNotNull(subject.getPrivB58(0));
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void getPrivB58_badIndex() throws Exception {
-        subject = new BitcoinCashWallet(params, BitcoinCashWallet.COIN_PATH);
+        mockMetadataFetchMagic();
+        subject = BitcoinCashWallet.create(BitcoinCashWallet.BITCOINCASH_COIN_PATH);
         Assert.assertNull(subject.getPrivB58(1));
     }
 
@@ -49,9 +59,10 @@ public class BitcoinCashWalletTest {
     public void testAddressDerivations() throws Exception {
 
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
+        mockMetadataFetchMagic();
 
-        subject = new BitcoinCashWallet(split(vector.getMnemonic()),
-            vector.getPassphrase(), BitcoinCashWallet.COIN_PATH, params);
+        subject = BitcoinCashWallet.restore(BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()),
+            vector.getPassphrase());
 
         //m / purpose' / coin_type' / account' / change / address_index
         //m/44H/0H/0H/0/0

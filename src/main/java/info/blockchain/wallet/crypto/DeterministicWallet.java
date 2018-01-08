@@ -1,6 +1,7 @@
 package info.blockchain.wallet.crypto;
 
 import com.google.common.collect.ImmutableList;
+import info.blockchain.wallet.exceptions.DeterministicWalletException;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -22,6 +23,13 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>A DeterministicWallet calculates and keeps a whole tree (hierarchy) of keys originating from a
+ * single root key. This implements part of the BIP 32 specification.</p>
+ *
+ * <p>The hierarchy is started from a single root key {@link #node} which can be calculated from a
+ * {@link #masterSeed}</p>
+ */
 public abstract class DeterministicWallet implements DeterministicNode {
 
     private static final Logger log = LoggerFactory.getLogger(DeterministicWallet.class);
@@ -54,8 +62,7 @@ public abstract class DeterministicWallet implements DeterministicNode {
      * @throws MnemonicChecksumException
      * @throws IOException
      */
-    public DeterministicWallet(String coinPath, int mnemonicLength, String passphrase)
-        throws MnemonicException, IOException {
+    public DeterministicWallet(String coinPath, int mnemonicLength, String passphrase) {
 
         this.entropy = generateSecureRandomNumber(mnemonicLength);
         init(coinPath, passphrase);
@@ -73,10 +80,13 @@ public abstract class DeterministicWallet implements DeterministicNode {
      * @throws IOException
      * @throws DecoderException
      */
-    public DeterministicWallet(String coinPath, String entropyHex, String passphrase)
-        throws MnemonicException, IOException, DecoderException {
+    public DeterministicWallet(String coinPath, String entropyHex, String passphrase) {
 
-        this.entropy = Hex.decodeHex(entropyHex.toCharArray());
+        try {
+            this.entropy = Hex.decodeHex(entropyHex.toCharArray());
+        }catch (DecoderException e){
+            throw new DeterministicWalletException("Illegal entropyHex supplied", e);
+        }
         init(coinPath, passphrase);
     }
 
@@ -91,13 +101,17 @@ public abstract class DeterministicWallet implements DeterministicNode {
      * @throws MnemonicChecksumException
      * @throws IOException
      */
-    public DeterministicWallet(String coinPath, List<String> mnemonic, String passphrase)
-        throws MnemonicException, IOException {
+    public DeterministicWallet(String coinPath, List<String> mnemonic, String passphrase) {
 
-        MnemonicCode mc = new MnemonicCode();
+        try {
+            MnemonicCode mc = new MnemonicCode();
 
-        this.masterSeed = MnemonicCode.toSeed(mnemonic, passphrase);
-        this.entropy = mc.toEntropy(mnemonic);
+            this.masterSeed = MnemonicCode.toSeed(mnemonic, passphrase);
+            this.entropy = mc.toEntropy(mnemonic);
+        } catch (IOException | MnemonicException e) {
+            throw new DeterministicWalletException("Unrecoverable mnemonic exception", e);
+        }
+
         init(coinPath, passphrase);
     }
 
@@ -116,13 +130,18 @@ public abstract class DeterministicWallet implements DeterministicNode {
         return seed;
     }
 
-    private void init(String coinPath, String passphrase) throws MnemonicException, IOException {
-        MnemonicCode mc = new MnemonicCode();
-        this.mnemonic = mc.toMnemonic(entropy);
-        this.masterSeed = MnemonicCode.toSeed(mnemonic, passphrase);
-        this.passphrase = passphrase;
+    private void init(String coinPath, String passphrase) {
 
-        mc.check(this.mnemonic);
+        try {
+            MnemonicCode mc = new MnemonicCode();
+            this.mnemonic = mc.toMnemonic(entropy);
+            this.masterSeed = MnemonicCode.toSeed(mnemonic, passphrase);
+            this.passphrase = passphrase;
+
+            mc.check(this.mnemonic);
+        }catch (IOException|MnemonicException e) {
+            throw new DeterministicWalletException("Unrecoverable mnemonic exception", e);
+        }
 
         this.accounts = new ArrayList();
         this.node = HDKeyDerivation.createMasterPrivateKey(masterSeed);

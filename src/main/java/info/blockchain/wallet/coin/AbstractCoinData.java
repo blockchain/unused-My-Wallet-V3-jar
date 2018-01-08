@@ -59,6 +59,10 @@ public class AbstractCoinData {
         this.hasSeen = hasSeen;
     }
 
+    public void addAccount(AbstractCoinAccount account) {
+        accounts.add(account);
+    }
+
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
