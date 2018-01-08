@@ -105,7 +105,7 @@ dependencies {
     //bitcoinj dependencies
     compile group: 'com.google.protobuf', name: 'protobuf-java', version:'2.6.1'
     compile group: 'com.google.code.findbugs', name: 'jsr305', version:'2.0.1'
-    compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+    compile group: 'com.google.guava', name: 'guava', version: '23.5-android'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
