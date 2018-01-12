@@ -728,6 +728,7 @@ public class PayloadManager {
      * @throws IOException  Thrown if there are network issues
      * @throws ApiException Thrown if the call isn't successful
      */
+    @Deprecated
     public LinkedHashMap<String, Balance> getBalanceOfBchAddresses(List<String> addresses) throws
             IOException,
             ApiException {
@@ -842,6 +843,7 @@ public class PayloadManager {
      * @param offset Page offset
      * @return List of tx summaries for all wallet transactions
      */
+    @Deprecated
     public List<TransactionSummary> getAllTransactionsBch(int limit, int offset) throws
             IOException,
             ApiException {
@@ -874,6 +876,7 @@ public class PayloadManager {
      * @param offset Page offset
      * @return Consolidated list of tx summaries for specified imported transactions
      */
+    @Deprecated
     public List<TransactionSummary> getImportedAddressesTransactionsBch(int limit, int offset)
             throws IOException, ApiException {
         List<String> activeXpubs = getPayload().getHdWallets().get(0).getActiveXpubs();
@@ -915,6 +918,7 @@ public class PayloadManager {
      * @param offset Page offset
      * @return List of BCH tx summaries for specified xpubs transactions
      */
+    @Deprecated
     public List<TransactionSummary> getAccountTransactionsBch(String xpub, int limit, int offset)
             throws IOException, ApiException {
 
@@ -968,6 +972,7 @@ public class PayloadManager {
      * @param address Accepts account receive or change chain address, as well as legacy address.
      * @return Account or legacy address label
      */
+    @Deprecated
     public String getLabelFromBchAddress(String address) {
         String label;
         String xpub = multiAddressFactoryBch.getXpubFromAddress(address);
@@ -1001,6 +1006,7 @@ public class PayloadManager {
      * @return  An xPub as a String
      */
     @Nullable
+    @Deprecated
     public String getXpubFromBchAddress(String address) {
         return multiAddressFactoryBch.getXpubFromAddress(address);
     }
@@ -1022,6 +1028,7 @@ public class PayloadManager {
      * @param account The account from which to derive an address
      * @return A BCH address
      */
+    @Deprecated
     public String getNextReceiveAddressBch(Account account) throws HDWalletException {
         int nextIndex = getNextReceiveAddressIndexBch(account);
         return getReceiveAddress(account, nextIndex);
@@ -1054,6 +1061,7 @@ public class PayloadManager {
      * @return A Bitcoin Cash address
      */
     @Nullable
+    @Deprecated
     public String getReceiveAddressAtPositionBch(Account account, int position) {
         int nextIndex = getNextReceiveAddressIndexBch(account);
         return getReceiveAddressAtArbitraryPosition(account, nextIndex + position);
@@ -1083,10 +1091,12 @@ public class PayloadManager {
         return multiAddressFactory.getNextChangeAddressIndex(account.getXpub());
     }
 
+    @Deprecated
     private int getNextReceiveAddressIndexBch(Account account)  {
         return multiAddressFactoryBch.getNextReceiveAddressIndex(account.getXpub(), account.getAddressLabels());
     }
 
+    @Deprecated
     private int getNextChangeAddressIndexBch(Account account)  {
         return multiAddressFactoryBch.getNextChangeAddressIndex(account.getXpub());
     }
@@ -1122,6 +1132,7 @@ public class PayloadManager {
      * @param account The {@link Account} from which you wish to derive a change address
      * @return A Bitcoin Cash change address
      */
+    @Deprecated
     public String getNextChangeAddressBch(Account account) throws HDWalletException {
         int nextIndex = getNextChangeAddressIndexBch(account);
         return getChangeAddress(account, nextIndex);
@@ -1135,10 +1146,12 @@ public class PayloadManager {
         multiAddressFactory.incrementNextChangeAddress(account.getXpub());
     }
 
+    @Deprecated
     public void incrementNextReceiveAddressBch(Account account) {
         multiAddressFactoryBch.incrementNextReceiveAddress(account.getXpub(), account.getAddressLabels());
     }
 
+    @Deprecated
     public void incrementNextChangeAddressBch(Account account) {
         multiAddressFactoryBch.incrementNextChangeAddress(account.getXpub());
     }
@@ -1241,6 +1254,7 @@ public class PayloadManager {
      * @param address A valid Bitcoin or Bitcoin cash address
      * @return The addresses's balance as a {@link BigInteger}
      */
+    @Deprecated
     public BigInteger getAddressBalanceBch(String address) {
         BigInteger result = balanceManagerBch.getAddressBalance(address);
         return result == null ? BigInteger.ZERO : result;
@@ -1251,6 +1265,7 @@ public class PayloadManager {
      *
      * @return The wallet's BCH balance as a {@link BigInteger}
      */
+    @Deprecated
     public BigInteger getWalletBalanceBch() {
         BigInteger result = balanceManagerBch.getWalletBalance();
         return result == null ? BigInteger.ZERO : result;
@@ -1261,6 +1276,7 @@ public class PayloadManager {
      *
      * @return The BCH balance as a {@link BigInteger}
      */
+    @Deprecated
     public BigInteger getImportedAddressesBalanceBch() {
         BigInteger result = balanceManagerBch.getImportedAddressesBalance();
         return result == null ? BigInteger.ZERO : result;
@@ -1273,6 +1289,7 @@ public class PayloadManager {
      * the amount of transactions per address which we can use to limit the calls to multiaddress
      * when the limit is reached.
      */
+    @Deprecated
     public void updateAllBalancesBch() throws ServerConnectionException, IOException {
         List<String> legacyAddressList = getPayload().getLegacyAddressStringList();
         ArrayList<String> all = new ArrayList<>(getAllAccountsAndAddresses());
@@ -1288,6 +1305,7 @@ public class PayloadManager {
      * @param amount  The amount to be subtracted from the address's BCH balance
      * @param address A valid Bitcoin or Bitcoin cash address
      */
+    @Deprecated
     public void subtractAmountFromAddressBalanceBch(String address, BigInteger amount) throws Exception {
         balanceManagerBch.subtractAmountFromAddressBalance(address, amount);
     }

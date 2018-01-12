@@ -1,8 +1,5 @@
 package info.blockchain.wallet.payload;
 
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL_LEGACY;
-
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.Balance;
@@ -21,6 +18,8 @@ import retrofit2.Response;
 public class BalanceManager {
 
     private static Logger log = LoggerFactory.getLogger(BalanceManager.class);
+    private static final String WALLET_BALANCE = "all";
+    private static final String IMPORTED_ADDRESSES_BALANCE = "all_legacy";
 
     private BlockExplorer blockExplorer;
 
@@ -46,12 +45,12 @@ public class BalanceManager {
         balanceMap.put(address, newBalance);
 
         //Update wallet balance
-        currentBalance = balanceMap.get(MULTI_ADDRESS_ALL);
+        currentBalance = balanceMap.get(WALLET_BALANCE);
         if (currentBalance == null) {
             throw new Exception("No info for this address. updateAllBalances should be called first.");
         }
         newBalance = currentBalance.subtract(amount);
-        balanceMap.put(MULTI_ADDRESS_ALL, newBalance);
+        balanceMap.put(WALLET_BALANCE, newBalance);
     }
 
     public BigInteger getAddressBalance(String address) {
@@ -59,11 +58,11 @@ public class BalanceManager {
     }
 
     public BigInteger getWalletBalance() {
-        return balanceMap.get(MULTI_ADDRESS_ALL);
+        return balanceMap.get(WALLET_BALANCE);
     }
 
     public BigInteger getImportedAddressesBalance() {
-        return balanceMap.get(PayloadManager.MULTI_ADDRESS_ALL_LEGACY);
+        return balanceMap.get(IMPORTED_ADDRESSES_BALANCE);
     }
 
     public void updateAllBalances(List<String> legacyAddressList, List<String> allAccountsAndAddresses) throws
@@ -95,8 +94,8 @@ public class BalanceManager {
                 }
             }
 
-            balanceMap.put(MULTI_ADDRESS_ALL, walletFinalBalance);
-            balanceMap.put(MULTI_ADDRESS_ALL_LEGACY, importedFinalBalance);
+            balanceMap.put(WALLET_BALANCE, walletFinalBalance);
+            balanceMap.put(IMPORTED_ADDRESSES_BALANCE, importedFinalBalance);
 
         } else {
             throw new ServerConnectionException(exe.errorBody().string());

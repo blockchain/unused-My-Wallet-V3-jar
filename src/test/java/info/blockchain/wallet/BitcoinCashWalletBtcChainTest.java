@@ -45,8 +45,8 @@ public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
         mockMetadataFetchMagic();
 
-        subject = BitcoinCashWallet
-            .restore(params, BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()), vector.getPassphrase());
+        subject = BitcoinCashWallet.Companion
+            .restore(params, BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()), vector.getPassphrase());
         subject.addAccount();
         Assert.assertNotNull(subject.getAccountPrivB58(0));
     }
@@ -54,7 +54,8 @@ public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
     @Test(expected = IndexOutOfBoundsException.class)
     public void getPrivB58_badIndex() throws Exception {
         mockMetadataFetchMagic();
-        subject = BitcoinCashWallet.create(params, BitcoinCashWallet.BITCOIN_COIN_PATH);
+        subject = BitcoinCashWallet.Companion
+            .create(params, BitcoinCashWallet.Companion.getBITCOIN_COIN_PATH());
         Assert.assertNull(subject.getAccountPrivB58(1));
     }
 
@@ -64,7 +65,8 @@ public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
         mockMetadataFetchMagic();
 
-        subject = BitcoinCashWallet.restore(params, BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()),
+        subject = BitcoinCashWallet.Companion
+            .restore(params, BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()),
             vector.getPassphrase());
 
         //m / purpose' / coin_type' / account' / change / address_index

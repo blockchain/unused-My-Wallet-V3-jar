@@ -1,7 +1,5 @@
 package info.blockchain.wallet.multiaddress;
 
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
-
 import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.AddressSummary;
@@ -13,6 +11,7 @@ import info.blockchain.api.data.Xpub;
 import info.blockchain.wallet.bip44.HDChain;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
+import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.AddressLabel;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -59,24 +58,12 @@ public class MultiAddressFactory {
 
         getLog().info("Fetching multiaddress for {} accounts/addresses", allActive.size());
 
-        if (onlyShow != null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
+        Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, onlyShow).execute();
 
-            Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, null).execute();
-
-            if (call.isSuccessful()) {
-                return call.body();
-            } else {
-                throw new ApiException(call.errorBody().string());
-            }
-
+        if (call.isSuccessful()) {
+            return call.body();
         } else {
-            Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, onlyShow).execute();
-
-            if (call.isSuccessful()) {
-                return call.body();
-            } else {
-                throw new ApiException(call.errorBody().string());
-            }
+            throw new ApiException(call.errorBody().string());
         }
     }
 
@@ -104,7 +91,7 @@ public class MultiAddressFactory {
      * @throws IOException
      * @throws ApiException
      */
-    public List<TransactionSummary> getAccountTransactions(ArrayList<String> all, List<String> watchOnly, List<String> activeLegacy, String onlyShow, int limit, int offset)
+    public List<TransactionSummary> getAccountTransactions(List<String> all, List<String> watchOnly, List<String> activeLegacy, String onlyShow, int limit, int offset)
         throws IOException, ApiException {
 
         getLog().info("Get transactions. limit {}, offset {}", limit, offset);
@@ -196,7 +183,7 @@ public class MultiAddressFactory {
         }
     }
 
-    public List<TransactionSummary> summarize(ArrayList<String> ownAddressesAndXpubs,
+    public List<TransactionSummary> summarize(List<String> ownAddressesAndXpubs,
                                               List<String> watchOnlyAddresses,
                                               MultiAddress multiAddress,
                                               List<String> legacy) {
@@ -390,7 +377,7 @@ public class MultiAddressFactory {
         return summaryList;
     }
 
-    private void filterOwnedAddresses(ArrayList<String> ownAddressesAndXpubs,
+    private void filterOwnedAddresses(List<String> ownAddressesAndXpubs,
         HashMap<String, BigInteger> inputsMap,
         HashMap<String, BigInteger> outputsMap, Direction direction) {
 

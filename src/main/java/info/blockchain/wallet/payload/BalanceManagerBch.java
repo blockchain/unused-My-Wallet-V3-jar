@@ -16,7 +16,7 @@ public class BalanceManagerBch extends BalanceManager {
 
     private static Logger log = LoggerFactory.getLogger(BalanceManagerBch.class);
 
-    BalanceManagerBch(BlockExplorer blockExplorer) {
+    public BalanceManagerBch(BlockExplorer blockExplorer) {
         super(blockExplorer);
     }
 

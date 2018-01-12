@@ -48,7 +48,7 @@ public abstract class DeterministicWallet implements DeterministicNode {
         }
     }
 
-    private NetworkParameters params;
+    protected NetworkParameters params;
 
     protected byte[] masterSeed;
     protected byte[] entropy;
