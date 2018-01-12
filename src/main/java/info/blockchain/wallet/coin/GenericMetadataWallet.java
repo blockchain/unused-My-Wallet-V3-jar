@@ -22,7 +22,7 @@ import java.util.ArrayList;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class AbstractCoinData {
+public class GenericMetadataWallet {
 
     @JsonProperty("default_account_idx")
     private int defaultAcccountIdx;
@@ -31,9 +31,9 @@ public class AbstractCoinData {
     private boolean hasSeen;
 
     @JsonProperty("accounts")
-    private ArrayList<AbstractCoinAccount> accounts;
+    private ArrayList<GenericMetadataAccount> accounts;
 
-    public AbstractCoinData() {
+    public GenericMetadataWallet() {
         accounts = new ArrayList<>();
         defaultAcccountIdx = 0;
         hasSeen = false;
@@ -47,7 +47,7 @@ public class AbstractCoinData {
         return hasSeen;
     }
 
-    public ArrayList<AbstractCoinAccount> getAccounts() {
+    public ArrayList<GenericMetadataAccount> getAccounts() {
         return accounts;
     }
 
@@ -59,15 +59,19 @@ public class AbstractCoinData {
         this.hasSeen = hasSeen;
     }
 
-    public void addAccount(AbstractCoinAccount account) {
+    public void addAccount(GenericMetadataAccount account) {
         accounts.add(account);
+    }
+
+    public void setAccounts(ArrayList<GenericMetadataAccount> accounts) {
+        this.accounts = accounts;
     }
 
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public static AbstractCoinData fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, AbstractCoinData.class);
+    public static GenericMetadataWallet fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, GenericMetadataWallet.class);
     }
 }

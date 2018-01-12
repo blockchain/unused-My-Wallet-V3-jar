@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bitcoinj.params.BitcoinCashMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,16 +44,16 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
         mockMetadataFetchMagic();
 
         subject = BitcoinCashWallet
-            .restore(BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()), vector.getPassphrase());
+            .restore(BitcoinCashMainNetParams.get(), BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()), vector.getPassphrase());
         subject.addAccount();
-        Assert.assertNotNull(subject.getPrivB58(0));
+        Assert.assertNotNull(subject.getAccountPrivB58(0));
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
     public void getPrivB58_badIndex() throws Exception {
         mockMetadataFetchMagic();
-        subject = BitcoinCashWallet.create(BitcoinCashWallet.BITCOINCASH_COIN_PATH);
-        Assert.assertNull(subject.getPrivB58(1));
+        subject = BitcoinCashWallet.create(BitcoinCashMainNetParams.get(), BitcoinCashWallet.BITCOINCASH_COIN_PATH);
+        Assert.assertNull(subject.getAccountPrivB58(1));
     }
 
     @Test
@@ -61,7 +62,7 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
         mockMetadataFetchMagic();
 
-        subject = BitcoinCashWallet.restore(BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()),
+        subject = BitcoinCashWallet.restore(BitcoinCashMainNetParams.get(), BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()),
             vector.getPassphrase());
 
         //m / purpose' / coin_type' / account' / change / address_index
@@ -77,14 +78,14 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
             for(TestVectorAddress address : account.getAddresses()) {
 
                 Assert.assertEquals(address.getReceiveLegacy(),
-                    subject.getReceiveLegacyAddressAt(accountIndex, addressIndex));
+                    subject.getReceiveAddressAt(accountIndex, addressIndex));
                 Assert.assertEquals(address.getChangeLegacy(),
-                    subject.getChangeLegacyAddressAt(accountIndex, addressIndex));
+                    subject.getChangeAddressAt(accountIndex, addressIndex));
 
                 Assert.assertEquals(address.getReceiveSegwit(),
-                    subject.getReceiveAddressAt(accountIndex, addressIndex));
+                    subject.getReceiveCashAddressAt(accountIndex, addressIndex));
                 Assert.assertEquals(address.getChangeSegwit(),
-                    subject.getChangeAddressAt(accountIndex, addressIndex));
+                    subject.getChangeCashAddressAt(accountIndex, addressIndex));
 
                 addressIndex++;
             }

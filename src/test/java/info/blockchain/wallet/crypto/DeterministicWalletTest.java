@@ -1,6 +1,8 @@
 package info.blockchain.wallet.crypto;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Joiner;
 import info.blockchain.wallet.test_data.TestVectorBip39;
@@ -13,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.binary.Hex;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,19 +25,24 @@ public class DeterministicWalletTest {
     TestWallet subject;
     public static final String COIN_PATH = "M/44H/0H";
     private static final int MNEMONIC_LENGTH = 12;
+    private static final NetworkParameters params = BitcoinMainNetParams.get();
 
     class TestWallet extends DeterministicWallet {
 
         public TestWallet(String coinPath, int mnemonicLength, String passphrase) {
-            super(coinPath, mnemonicLength, passphrase);
+            super(params, coinPath, mnemonicLength, passphrase);
         }
 
         public TestWallet(String coinPath, String entropyHex, String passphrase) {
-            super(coinPath, entropyHex, passphrase);
+            super(params, coinPath, entropyHex, passphrase);
         }
 
         public TestWallet(String coinPath, List<String> mnemonic, String passphrase) {
-            super(coinPath, mnemonic, passphrase);
+            super(params, coinPath, mnemonic, passphrase);
+        }
+
+        public TestWallet() {
+            super(params);
         }
     }
 
@@ -116,6 +125,23 @@ public class DeterministicWalletTest {
     }
 
     /**
+     * Watch only Wallet from given mnemonic and passphrase
+     *
+     * @throws Exception
+     */
+    @Test
+    public void construct5() throws Exception {
+
+        subject = new TestWallet();
+
+        assertTrue(subject.isWatchOnly());
+        assertNull(subject.getEntropyHex());
+        assertNull(subject.getMnemonic());
+        assertNull(subject.getPassphrase());
+        assertEquals(0, subject.getAccountTotal());
+    }
+
+    /**
      * Ensure restored wallet with different passphrase results in different seed, but still same
      * entropy and mnemonic.
      *
@@ -180,6 +206,61 @@ public class DeterministicWalletTest {
             Hex.encodeHexString(subject.getReceiveECKeyAt(1, 5).getPubKey()));
         assertEquals("022e3589f454389f18fc92b84ad717f6953c230a0cb63ffb8bb46dd8f3cdd5f8b3",
             Hex.encodeHexString(subject.getReceiveECKeyAt(1, 10).getPubKey()));
+    }
+
+    /**
+     * Watch only Wallet from given mnemonic and passphrase
+     *
+     * @throws Exception
+     */
+    @Test
+    public void addWatchOnlyAccount() throws Exception {
+        TestVectorBip39List testVectors = getTestVectors();
+
+        for (TestVectorBip39 vector : testVectors.getVectors()) {
+
+            TestWallet realWallet = new TestWallet(COIN_PATH, split(vector.getMnemonic()), vector.getPassphrase());
+            realWallet.addAccount();
+            realWallet.addAccount();
+
+            subject = new TestWallet();
+
+            for(DeterministicAccount account : realWallet.getAccounts()) {
+                subject.addWatchOnlyAccount(account.getNode().serializePubB58(
+                    params));
+            }
+
+            assertTrue(subject.isWatchOnly());
+            assertNull(subject.getEntropyHex());
+            assertNull(subject.getMnemonic());
+            assertNull(subject.getPassphrase());
+            assertEquals(2, subject.getAccountTotal());
+
+            //Check both accounts xpriv are null
+            assertNull(subject.getAccountPrivB58(0));
+            assertNull(subject.getAccountPrivB58(1));
+
+            //Check both accounts addresses match
+            assertEquals(realWallet.getChangeBase58AddressAt(0,0)
+                ,subject.getChangeBase58AddressAt(0, 0));
+            assertEquals(realWallet.getReceiveBase58AddressAt(0,0)
+                ,subject.getReceiveBase58AddressAt(0, 0));
+
+            assertEquals(realWallet.getChangeBase58AddressAt(1,0)
+                ,subject.getChangeBase58AddressAt(1, 0));
+            assertEquals(realWallet.getReceiveBase58AddressAt(1,0)
+                ,subject.getReceiveBase58AddressAt(1, 0));
+
+            assertEquals(realWallet.getChangeBech32AddressAt(0,0)
+                ,subject.getChangeBech32AddressAt(0, 0));
+            assertEquals(realWallet.getReceiveBech32AddressAt(0,0)
+                ,subject.getReceiveBech32AddressAt(0, 0));
+
+            assertEquals(realWallet.getChangeBech32AddressAt(1,0)
+                ,subject.getChangeBech32AddressAt(1, 0));
+            assertEquals(realWallet.getReceiveBech32AddressAt(1,0)
+                ,subject.getReceiveBech32AddressAt(1, 0));
+        }
     }
 
     public static List<String> split(String words) {

@@ -2,6 +2,7 @@ package info.blockchain.wallet.coin;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +22,7 @@ import java.io.IOException;
     setterVisibility = Visibility.NONE,
     creatorVisibility = Visibility.NONE,
     isGetterVisibility = Visibility.NONE)
-public class AbstractCoinAccount {
+public class GenericMetadataAccount {
 
     @JsonProperty("label")
     private String label;
@@ -29,10 +30,13 @@ public class AbstractCoinAccount {
     @JsonProperty("archived")
     private boolean archived;
 
-    public AbstractCoinAccount() {
+    @JsonIgnore
+    private String xpub;
+
+    public GenericMetadataAccount() {
     }
 
-    public AbstractCoinAccount(String label, boolean archived) {
+    public GenericMetadataAccount(String label, boolean archived) {
         this.label = label;
         this.archived = archived;
     }
@@ -53,11 +57,19 @@ public class AbstractCoinAccount {
         this.archived = archived;
     }
 
+    public String getXpub() {
+        return xpub;
+    }
+
+    public void setXpub(String xpub) {
+        this.xpub = xpub;
+    }
+
     public String toJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(this);
     }
 
-    public static AbstractCoinAccount fromJson(String json) throws IOException {
-        return new ObjectMapper().readValue(json, AbstractCoinAccount.class);
+    public static GenericMetadataAccount fromJson(String json) throws IOException {
+        return new ObjectMapper().readValue(json, GenericMetadataAccount.class);
     }
 }
