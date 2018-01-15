@@ -41,7 +41,7 @@ public class WalletApiTest extends MockedResponseTest {
     public void getEncryptedPayload() throws IOException, URISyntaxException {
         URI uri = getClass().getClassLoader().getResource("encrypted-payload.txt").toURI();
         String encryptedPayload = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
-
+        mockInterceptor.setResponseCode(200);
         mockInterceptor.setResponseString(encryptedPayload);
         final TestObserver<Response<ResponseBody>> testObserver =
                 subject.fetchEncryptedPayload("a09910d9-1906-4ea1-a956-2508c3fe0661", "").test();

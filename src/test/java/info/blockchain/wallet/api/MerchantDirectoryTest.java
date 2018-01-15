@@ -4,6 +4,7 @@ import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.api.data.Merchant;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URI;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import io.reactivex.observers.TestObserver;
 
+@Ignore
 public class MerchantDirectoryTest extends MockedResponseTest {
 
     @Test

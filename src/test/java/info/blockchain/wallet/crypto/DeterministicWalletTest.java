@@ -19,30 +19,30 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
 
 public class DeterministicWalletTest {
 
     TestWallet subject;
     public static final String COIN_PATH = "M/44H/0H";
     private static final int MNEMONIC_LENGTH = 12;
-    private static final NetworkParameters params = BitcoinMainNetParams.get();
 
     class TestWallet extends DeterministicWallet {
 
         public TestWallet(String coinPath, int mnemonicLength, String passphrase) {
-            super(params, coinPath, mnemonicLength, passphrase);
+            super(BitcoinMainNetParams.get(), coinPath, mnemonicLength, passphrase);
         }
 
         public TestWallet(String coinPath, String entropyHex, String passphrase) {
-            super(params, coinPath, entropyHex, passphrase);
+            super(BitcoinMainNetParams.get(), coinPath, entropyHex, passphrase);
         }
 
         public TestWallet(String coinPath, List<String> mnemonic, String passphrase) {
-            super(params, coinPath, mnemonic, passphrase);
+            super(BitcoinMainNetParams.get(), coinPath, mnemonic, passphrase);
         }
 
         public TestWallet() {
-            super(params);
+            super(BitcoinMainNetParams.get());
         }
     }
 
@@ -227,7 +227,7 @@ public class DeterministicWalletTest {
 
             for(DeterministicAccount account : realWallet.getAccounts()) {
                 subject.addWatchOnlyAccount(account.getNode().serializePubB58(
-                    params));
+                    BitcoinMainNetParams.get()));
             }
 
             assertTrue(subject.isWatchOnly());
