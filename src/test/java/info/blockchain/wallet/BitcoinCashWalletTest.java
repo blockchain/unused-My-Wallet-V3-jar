@@ -1,5 +1,6 @@
 package info.blockchain.wallet;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.test_data.TestVectorAccount;
 import info.blockchain.wallet.test_data.TestVectorAddress;
 import info.blockchain.wallet.test_data.TestVectorBip39;
@@ -17,10 +18,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.params.BitcoinCashMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
 
 public class BitcoinCashWalletTest extends MockedResponseTest{
 
     BitcoinCashWallet subject;
+
+    @Mock BlockExplorer blockExplorer = new BlockExplorer();
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();
@@ -44,7 +48,7 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
         mockMetadataFetchMagic();
 
         subject = BitcoinCashWallet.Companion
-            .restore(BitcoinCashMainNetParams.get(),
+            .restore(blockExplorer, BitcoinCashMainNetParams.get(),
                 BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()), vector.getPassphrase());
         subject.addAccount();
         Assert.assertNotNull(subject.getAccountPrivB58(0));
@@ -53,7 +57,7 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
     @Test(expected = IndexOutOfBoundsException.class)
     public void getPrivB58_badIndex() throws Exception {
         mockMetadataFetchMagic();
-        subject = BitcoinCashWallet.Companion.create(BitcoinCashMainNetParams.get(),
+        subject = BitcoinCashWallet.Companion.create(blockExplorer, BitcoinCashMainNetParams.get(),
             BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH());
         Assert.assertNull(subject.getAccountPrivB58(1));
     }
@@ -64,7 +68,7 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
         mockMetadataFetchMagic();
 
-        subject = BitcoinCashWallet.Companion.restore(BitcoinCashMainNetParams.get(),
+        subject = BitcoinCashWallet.Companion.restore(blockExplorer, BitcoinCashMainNetParams.get(),
             BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()),
             vector.getPassphrase());
 

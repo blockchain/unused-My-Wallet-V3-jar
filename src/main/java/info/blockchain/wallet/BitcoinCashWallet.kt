@@ -13,25 +13,26 @@ import java.math.BigInteger
 
 class BitcoinCashWallet : DeterministicWallet {
 
-    internal var balanceManager: BalanceManagerBch
-    internal var multiAddressFactory: MultiAddressFactoryBch
+    internal lateinit var balanceManager: BalanceManagerBch
+    internal lateinit var multiAddressFactory: MultiAddressFactoryBch
 
-    init {
-        val blockExplorer = BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
-                BlockchainFramework.getRetrofitApiInstance(),
-                BlockchainFramework.getApiCode())
-        balanceManager = BalanceManagerBch(blockExplorer)
-        multiAddressFactory = MultiAddressFactoryBch(blockExplorer)
+    private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, passphrase: String) : super(params, coinPath, MNEMONIC_LENGTH, passphrase) {
+        setupApi(blockExplorer)
     }
 
-    private constructor(params: NetworkParameters, coinPath: String, passphrase: String) : super(params, coinPath, MNEMONIC_LENGTH, passphrase) {}
+    private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, entropyHex: String, passphrase: String) : super(params, coinPath, entropyHex, passphrase) {
+        setupApi(blockExplorer)}
 
-    private constructor(params: NetworkParameters, coinPath: String, entropyHex: String, passphrase: String) : super(params, coinPath, entropyHex, passphrase) {}
+    private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, mnemonic: List<String>, passphrase: String) : super(params, coinPath, mnemonic, passphrase) {
+        setupApi(blockExplorer)}
 
-    private constructor(params: NetworkParameters, coinPath: String, mnemonic: List<String>, passphrase: String) : super(params, coinPath, mnemonic, passphrase) {}
+    private constructor(blockExplorer: BlockExplorer, params: NetworkParameters) : super(params) {
+        setupApi(blockExplorer)}
 
-    private constructor(params: NetworkParameters) : super(params) {}
-
+    private fun setupApi(blockExplorer: BlockExplorer) {
+        this.balanceManager = BalanceManagerBch(blockExplorer)
+        this.multiAddressFactory = MultiAddressFactoryBch(blockExplorer)
+    }
 
     @Deprecated("since 14 January 2017, replaced by {@link #getReceiveCashAddressAt(int, int)}")
     fun getReceiveAddressAt(accountIndex: Int, addressIndex: Int): String {
@@ -155,28 +156,28 @@ class BitcoinCashWallet : DeterministicWallet {
         val METADATA_TYPE_EXTERNAL = 7
 
         @Synchronized
-        fun create(params: NetworkParameters, coinPath: String): BitcoinCashWallet {
-            return BitcoinCashWallet(params, coinPath, "")
+        fun create(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String): BitcoinCashWallet {
+            return BitcoinCashWallet(blockExplorer, params, coinPath, "")
         }
 
         @Synchronized
-        fun create(params: NetworkParameters, coinPath: String, passphrase: String): BitcoinCashWallet {
-            return BitcoinCashWallet(params, coinPath, passphrase)
+        fun create(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, passphrase: String): BitcoinCashWallet {
+            return BitcoinCashWallet(blockExplorer, params, coinPath, passphrase)
         }
 
         @Synchronized
-        fun restore(params: NetworkParameters, coinPath: String, entropyHex: String, passphrase: String): BitcoinCashWallet {
-            return BitcoinCashWallet(params, coinPath, entropyHex, passphrase)
+        fun restore(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, entropyHex: String, passphrase: String): BitcoinCashWallet {
+            return BitcoinCashWallet(blockExplorer, params, coinPath, entropyHex, passphrase)
         }
 
         @Synchronized
-        fun restore(params: NetworkParameters, coinPath: String, mnemonic: List<String>, passphrase: String): BitcoinCashWallet {
-            return BitcoinCashWallet(params, coinPath, mnemonic, passphrase)
+        fun restore(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, mnemonic: List<String>, passphrase: String): BitcoinCashWallet {
+            return BitcoinCashWallet(blockExplorer, params, coinPath, mnemonic, passphrase)
         }
 
         @Synchronized
-        fun createWatchOnly(params: NetworkParameters): BitcoinCashWallet {
-            return BitcoinCashWallet(params)
+        fun createWatchOnly(blockExplorer: BlockExplorer, params: NetworkParameters): BitcoinCashWallet {
+            return BitcoinCashWallet(blockExplorer, params)
         }
     }
 }

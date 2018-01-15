@@ -1,5 +1,6 @@
 package info.blockchain.wallet;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.test_data.TestVectorAccount;
 import info.blockchain.wallet.test_data.TestVectorAddress;
 import info.blockchain.wallet.test_data.TestVectorBip39;
@@ -18,11 +19,13 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.BitcoinCashMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
 
 public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
 
     BitcoinCashWallet subject;
     NetworkParameters params = BitcoinCashMainNetParams.get();
+    @Mock BlockExplorer blockExplorer = new BlockExplorer();
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();
@@ -46,7 +49,7 @@ public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
         mockMetadataFetchMagic();
 
         subject = BitcoinCashWallet.Companion
-            .restore(params, BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()), vector.getPassphrase());
+            .restore(blockExplorer, params, BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()), vector.getPassphrase());
         subject.addAccount();
         Assert.assertNotNull(subject.getAccountPrivB58(0));
     }
@@ -55,7 +58,7 @@ public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
     public void getPrivB58_badIndex() throws Exception {
         mockMetadataFetchMagic();
         subject = BitcoinCashWallet.Companion
-            .create(params, BitcoinCashWallet.Companion.getBITCOIN_COIN_PATH());
+            .create(blockExplorer, params, BitcoinCashWallet.Companion.getBITCOIN_COIN_PATH());
         Assert.assertNull(subject.getAccountPrivB58(1));
     }
 
@@ -66,7 +69,7 @@ public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
         mockMetadataFetchMagic();
 
         subject = BitcoinCashWallet.Companion
-            .restore(params, BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()),
+            .restore(blockExplorer, params, BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()),
             vector.getPassphrase());
 
         //m / purpose' / coin_type' / account' / change / address_index
