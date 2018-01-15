@@ -11,7 +11,7 @@ import org.bitcoinj.core.NetworkParameters
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
-class BitcoinCashWallet : DeterministicWallet {
+open class BitcoinCashWallet : DeterministicWallet {
 
     internal lateinit var balanceManager: BalanceManagerBch
     internal lateinit var multiAddressFactory: MultiAddressFactoryBch
@@ -21,13 +21,16 @@ class BitcoinCashWallet : DeterministicWallet {
     }
 
     private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, entropyHex: String, passphrase: String) : super(params, coinPath, entropyHex, passphrase) {
-        setupApi(blockExplorer)}
+        setupApi(blockExplorer)
+    }
 
     private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, mnemonic: List<String>, passphrase: String) : super(params, coinPath, mnemonic, passphrase) {
-        setupApi(blockExplorer)}
+        setupApi(blockExplorer)
+    }
 
     private constructor(blockExplorer: BlockExplorer, params: NetworkParameters) : super(params) {
-        setupApi(blockExplorer)}
+        setupApi(blockExplorer)
+    }
 
     private fun setupApi(blockExplorer: BlockExplorer) {
         this.balanceManager = BalanceManagerBch(blockExplorer)
@@ -55,21 +58,17 @@ class BitcoinCashWallet : DeterministicWallet {
         return getChangeBech32AddressAt(accountIndex, addressIndex)
     }
 
-    fun updateAllBalances(activeXpubs: List<String>) {
-        Completable.fromCallable {
-            balanceManager.updateAllBalances(ArrayList(), activeXpubs)
-        }
+    fun updateAllBalances(activeXpubs: List<String>) = Completable.fromCallable {
+        balanceManager.updateAllBalances(ArrayList(), activeXpubs)
     }
 
     fun getAddressBalance(address: String) = balanceManager.getAddressBalance(address)
 
     fun getWalletBalance() = balanceManager.getWalletBalance()
 
-    fun getTransactions(activeXpubs: List<String>, context: String?, limit: Int, offset: Int) {
-        Completable.fromCallable {
-            val watchOnly = listOf<String>()
-            multiAddressFactory.getAccountTransactions(activeXpubs, watchOnly, null, context, limit, offset)
-        }
+    fun getTransactions(activeXpubs: List<String>, context: String?, limit: Int, offset: Int) = Completable.fromCallable {
+        val watchOnly = listOf<String>()
+        multiAddressFactory.getAccountTransactions(activeXpubs, watchOnly, null, context, limit, offset)
     }
 
     /**
