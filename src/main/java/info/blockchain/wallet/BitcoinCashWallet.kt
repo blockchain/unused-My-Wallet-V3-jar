@@ -1,19 +1,15 @@
 package info.blockchain.wallet
 
 import info.blockchain.api.blockexplorer.BlockExplorer
-import info.blockchain.api.data.Balance
 import info.blockchain.wallet.crypto.DeterministicChain
 import info.blockchain.wallet.crypto.DeterministicWallet
-import info.blockchain.wallet.exceptions.ApiException
 import info.blockchain.wallet.multiaddress.MultiAddressFactoryBch
 import info.blockchain.wallet.payload.BalanceManagerBch
 import io.reactivex.Completable
+import java.util.ArrayList
 import org.bitcoinj.core.NetworkParameters
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.math.BigInteger
-import java.util.*
-import kotlin.collections.LinkedHashMap
 
 open class BitcoinCashWallet : DeterministicWallet {
 
@@ -67,28 +63,6 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     fun getAddressBalance(address: String) = balanceManager.getAddressBalance(address)
-
-    /**
-     * Returns a [LinkedHashMap] of [Balance] objects keyed to their respective Bitcoin
-     * Cash addresses.
-     *
-     * @param addresses A List of Bitcoin Cash addresses as Strings
-     * @return A [LinkedHashMap] where they key is the address String, and the value is a
-     * [Balance] object
-     * @throws IOException  Thrown if there are network issues
-     * @throws ApiException Thrown if the call isn't successful
-     */
-    @Throws(IOException::class, ApiException::class)
-    fun getBalanceOfBchAddresses(addresses: List<String>): LinkedHashMap<String, Balance> {
-        val response = balanceManager.getBalanceOfAddresses(addresses).execute()
-        if (response.isSuccessful) {
-            val balanceHashMap = response.body()
-            // Place into map to maintain order, as API may return them in a random order
-            return addresses.associate { it to balanceHashMap[it]!! }.toMap(LinkedHashMap())
-        } else {
-            throw ApiException("""${response.code()}: ${response.errorBody().string()}""")
-        }
-    }
 
     fun getWalletBalance() = balanceManager.getWalletBalance()
 
