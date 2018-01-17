@@ -644,7 +644,7 @@ public class PayloadManager {
             all.addAll(xpubs);
         }
 
-        //Add all addresses, archived or not
+        //Add all addresses unless archived
         all.addAll(getPayload().getLegacyAddressStringList());
 
         log.info("Getting BTC account and address list: List size = {}", all.size());
