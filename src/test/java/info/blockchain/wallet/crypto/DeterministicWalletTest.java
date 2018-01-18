@@ -251,15 +251,15 @@ public class DeterministicWalletTest {
             assertEquals(realWallet.getReceiveBase58AddressAt(1,0)
                 ,subject.getReceiveBase58AddressAt(1, 0));
 
-            assertEquals(realWallet.getChangeBech32AddressAt(0,0)
-                ,subject.getChangeBech32AddressAt(0, 0));
-            assertEquals(realWallet.getReceiveBech32AddressAt(0,0)
-                ,subject.getReceiveBech32AddressAt(0, 0));
+            assertEquals(realWallet.getChangeCashAddressAt(0,0)
+                ,subject.getChangeCashAddressAt(0, 0));
+            assertEquals(realWallet.getReceiveCashAddressAt(0,0)
+                ,subject.getReceiveCashAddressAt(0, 0));
 
-            assertEquals(realWallet.getChangeBech32AddressAt(1,0)
-                ,subject.getChangeBech32AddressAt(1, 0));
-            assertEquals(realWallet.getReceiveBech32AddressAt(1,0)
-                ,subject.getReceiveBech32AddressAt(1, 0));
+            assertEquals(realWallet.getChangeCashAddressAt(1,0)
+                ,subject.getChangeCashAddressAt(1, 0));
+            assertEquals(realWallet.getReceiveCashAddressAt(1,0)
+                ,subject.getReceiveCashAddressAt(1, 0));
         }
     }
 

@@ -24,11 +24,11 @@ public class TestVectorAddress {
     @JsonProperty("changeLegacy")
     private String changeLegacy;
 
-    @JsonProperty("receiveSegwit")
-    private String receiveSegwit;
+    @JsonProperty("receiveCashAddress")
+    private String receiveCashAddress;
 
-    @JsonProperty("changeSegwit")
-    private String changeSegwit;
+    @JsonProperty("changeCashAddress")
+    private String changeCashAddress;
 
     public String getReceiveLegacy() {
         return receiveLegacy;
@@ -38,12 +38,12 @@ public class TestVectorAddress {
         return changeLegacy;
     }
 
-    public String getReceiveSegwit() {
-        return receiveSegwit;
+    public String getReceiveCashAddress() {
+        return receiveCashAddress;
     }
 
-    public String getChangeSegwit() {
-        return changeSegwit;
+    public String getChangeCashAddress() {
+        return changeCashAddress;
     }
 
     public static TestVectorAddress fromJson(String json) throws IOException {
