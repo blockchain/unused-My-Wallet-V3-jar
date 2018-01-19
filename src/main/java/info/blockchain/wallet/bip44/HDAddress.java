@@ -86,10 +86,6 @@ public class HDAddress {
         return ecKey.toAddress(params).toBase58();
     }
 
-    public String getAddressBech32() {
-        return ecKey.toAddress(params).toBech32();
-    }
-
     /**
      * Return private key for this address (compressed WIF format).
      *
