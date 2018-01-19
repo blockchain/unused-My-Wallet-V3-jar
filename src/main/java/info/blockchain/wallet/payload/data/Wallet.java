@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
@@ -15,15 +16,7 @@ import info.blockchain.wallet.exceptions.HDWalletException;
 import info.blockchain.wallet.exceptions.NoSuchAddressException;
 import info.blockchain.wallet.util.DoubleEncryptionFactory;
 import info.blockchain.wallet.util.FormatsUtil;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import javax.annotation.Nullable;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.core.Base58;
@@ -32,6 +25,17 @@ import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
 import org.spongycastle.crypto.InvalidCipherTextException;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -214,7 +218,7 @@ public class Wallet {
 
     public static Wallet fromJson(String json)
         throws IOException, MnemonicLengthException, MnemonicWordException, MnemonicChecksumException,
-        DecoderException, InvalidCipherTextException, DecryptionException, HDWalletException {
+        DecoderException, HDWalletException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
             .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
@@ -466,9 +470,9 @@ public class Wallet {
             //Double encryption
             String encryptedKey = Base58.encode(key.getPrivKeyBytes());
             String encrypted2 = DoubleEncryptionFactory.encrypt(encryptedKey,
-                getSharedKey(),
-                secondPassword != null ? secondPassword : null,
-                getOptions().getPbkdf2Iterations());
+                    getSharedKey(),
+                    secondPassword,
+                    getOptions().getPbkdf2Iterations());
 
             matchingAddressBody.setPrivateKey(encrypted2);
 
@@ -483,7 +487,9 @@ public class Wallet {
 
         List<String> addrs = new ArrayList<>();
         for (LegacyAddress legacyAddress : keys) {
-            addrs.add(legacyAddress.getAddress());
+            if (legacyAddress.getTag() != LegacyAddress.ARCHIVED_ADDRESS) {
+                addrs.add(legacyAddress.getAddress());
+            }
         }
 
         return addrs;

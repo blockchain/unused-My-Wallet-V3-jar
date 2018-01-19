@@ -4,14 +4,17 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.blockexplorer.FilterType;
 import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.exceptions.ServerConnectionException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import retrofit2.Call;
 import retrofit2.Response;
 

@@ -5,8 +5,8 @@ import info.blockchain.wallet.crypto.DeterministicChain
 import info.blockchain.wallet.crypto.DeterministicWallet
 import info.blockchain.wallet.multiaddress.MultiAddressFactoryBch
 import info.blockchain.wallet.payload.BalanceManagerBch
+import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
-import java.util.ArrayList
 import org.bitcoinj.core.NetworkParameters
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
@@ -58,13 +58,30 @@ open class BitcoinCashWallet : DeterministicWallet {
         return getChangeBech32AddressAt(accountIndex, addressIndex)
     }
 
-    fun updateAllBalances(activeXpubs: List<String>) = Completable.fromCallable {
-        balanceManager.updateAllBalances(ArrayList(), activeXpubs)
-    }
+    /**
+     * Updates the state of the [BalanceManagerBch], which ingests the balances for each address or
+     * xPub.
+     *
+     * @param legacyAddressList A list of [LegacyAddress] addresses
+     * @param allAccountsAndAddresses A list of both xPubs from HD accounts and [LegacyAddress]
+     * addresses
+     */
+    fun updateAllBalances(legacyAddressList: List<String>, allAccountsAndAddresses: List<String>) =
+            Completable.fromCallable {
+                balanceManager.updateAllBalances(legacyAddressList, allAccountsAndAddresses)
+            }
 
-    fun getAddressBalance(address: String) = balanceManager.getAddressBalance(address)
+    fun getAddressBalance(address: String): BigInteger =
+            balanceManager.getAddressBalance(address) ?: BigInteger.ZERO
 
-    fun getWalletBalance() = balanceManager.getWalletBalance()
+    fun getWalletBalance(): BigInteger = balanceManager.walletBalance ?: BigInteger.ZERO
+
+    /**
+     * Returns the balance of all imported addresses in BCH, excluding those belonging to
+     * archived addresses.
+     */
+    fun getImportedAddressBalance(): BigInteger =
+            balanceManager.importedAddressesBalance ?: BigInteger.ZERO
 
     fun getTransactions(activeXpubs: List<String>, context: String?, limit: Int, offset: Int) = Completable.fromCallable {
         val watchOnly = listOf<String>()
