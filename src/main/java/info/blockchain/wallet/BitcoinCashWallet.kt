@@ -1,19 +1,15 @@
 package info.blockchain.wallet
 
 import info.blockchain.api.blockexplorer.BlockExplorer
-import info.blockchain.api.data.Balance
 import info.blockchain.wallet.crypto.DeterministicChain
 import info.blockchain.wallet.crypto.DeterministicWallet
-import info.blockchain.wallet.exceptions.ApiException
 import info.blockchain.wallet.multiaddress.MultiAddressFactoryBch
 import info.blockchain.wallet.payload.BalanceManagerBch
+import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import org.bitcoinj.core.NetworkParameters
 import org.slf4j.LoggerFactory
-import java.io.IOException
 import java.math.BigInteger
-import java.util.*
-import kotlin.collections.LinkedHashMap
 
 open class BitcoinCashWallet : DeterministicWallet {
 
@@ -52,35 +48,30 @@ open class BitcoinCashWallet : DeterministicWallet {
         return getChangeBase58AddressAt(accountIndex, addressIndex)
     }
 
-    fun updateAllBalances(activeXpubs: List<String>) = Completable.fromCallable {
-        balanceManager.updateAllBalances(ArrayList(), activeXpubs)
-    }
+    /**
+     * Updates the state of the [BalanceManagerBch], which ingests the balances for each address or
+     * xPub.
+     *
+     * @param legacyAddressList A list of [LegacyAddress] addresses
+     * @param allAccountsAndAddresses A list of both xPubs from HD accounts and [LegacyAddress]
+     * addresses
+     */
+    fun updateAllBalances(legacyAddressList: List<String>, allAccountsAndAddresses: List<String>) =
+            Completable.fromCallable {
+                balanceManager.updateAllBalances(legacyAddressList, allAccountsAndAddresses)
+            }
 
-    fun getAddressBalance(address: String) = balanceManager.getAddressBalance(address)
+    fun getAddressBalance(address: String): BigInteger =
+            balanceManager.getAddressBalance(address) ?: BigInteger.ZERO
+
+    fun getWalletBalance(): BigInteger = balanceManager.walletBalance ?: BigInteger.ZERO
 
     /**
-     * Returns a [LinkedHashMap] of [Balance] objects keyed to their respective Bitcoin
-     * Cash addresses.
-     *
-     * @param addresses A List of Bitcoin Cash addresses as Strings
-     * @return A [LinkedHashMap] where they key is the address String, and the value is a
-     * [Balance] object
-     * @throws IOException  Thrown if there are network issues
-     * @throws ApiException Thrown if the call isn't successful
+     * Returns the balance of all imported addresses in BCH, excluding those belonging to
+     * archived addresses.
      */
-    @Throws(IOException::class, ApiException::class)
-    fun getBalanceOfBchAddresses(addresses: List<String>): LinkedHashMap<String, Balance> {
-        val response = balanceManager.getBalanceOfAddresses(addresses).execute()
-        if (response.isSuccessful) {
-            val balanceHashMap = response.body()
-            // Place into map to maintain order, as API may return them in a random order
-            return addresses.associate { it to balanceHashMap[it]!! }.toMap(LinkedHashMap())
-        } else {
-            throw ApiException("""${response.code()}: ${response.errorBody().string()}""")
-        }
-    }
-
-    fun getWalletBalance() = balanceManager.getWalletBalance()
+    fun getImportedAddressBalance(): BigInteger =
+            balanceManager.importedAddressesBalance ?: BigInteger.ZERO
 
     fun getTransactions(activeXpubs: List<String>, context: String?, limit: Int, offset: Int) = Completable.fromCallable {
         val watchOnly = listOf<String>()

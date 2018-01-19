@@ -644,7 +644,7 @@ public class PayloadManager {
             all.addAll(xpubs);
         }
 
-        //Add all addresses, archived or not
+        //Add all addresses unless archived
         all.addAll(getPayload().getLegacyAddressStringList());
 
         log.info("Getting BTC account and address list: List size = {}", all.size());
@@ -716,6 +716,36 @@ public class PayloadManager {
             }
 
             log.info("Get map for BTC address balances: Map size = {}", map.size());
+            return map;
+        } else {
+            throw new ApiException(response.code() + ": " + response.errorBody().string());
+        }
+    }
+
+    /**
+     * Returns a {@link LinkedHashMap} of {@link Balance} objects keyed to their respective Bitcoin
+     * Cash addresses.
+     *
+     * @param addresses A List of Bitcoin Cash addresses as Strings
+     * @return A {@link LinkedHashMap} where they key is the address String, and the value is a
+     * {@link Balance} object
+     * @throws IOException  Thrown if there are network issues
+     * @throws ApiException Thrown if the call isn't successful
+     */
+    public LinkedHashMap<String, Balance> getBalanceOfBchAddresses(List<String> addresses) throws
+            IOException,
+            ApiException {
+        LinkedHashMap<String, Balance> map = new LinkedHashMap<>();
+
+        final Response<HashMap<String, Balance>> response = balanceManagerBch.getBalanceOfAddresses(addresses).execute();
+        if (response.isSuccessful()) {
+            final HashMap<String, Balance> balanceHashMap = response.body();
+            // Place into map to maintain order, as API may return them in a random order
+            for (String address : addresses) {
+                map.put(address, balanceHashMap.get(address));
+            }
+
+            log.info("Get map for BCH address balances: Map size = {}", map.size());
             return map;
         } else {
             throw new ApiException(response.code() + ": " + response.errorBody().string());
