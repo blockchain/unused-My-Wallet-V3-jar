@@ -160,15 +160,11 @@
               "addresses": [
                 {
                   "receiveLegacy": "1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL",
-                  "changeLegacy": "1DyHzbQUoQEsLxJn6M7fMD8Xdt1XvNiwNE",
-                  "receiveSegwit": "bc1qh3xqdu88mg5txlhz9lyuj03tk77c7vzuzhmf7h",
-                  "changeSegwit": "bc1q3er06q84gyrhm8qld2rukpp86w9y7zwrqjles7"
+                  "changeLegacy": "1DyHzbQUoQEsLxJn6M7fMD8Xdt1XvNiwNE"
                 },
                 {
                   "receiveLegacy": "1GWFxtwWmNVqotUPXLcKVL2mUKpshuJYo",
-                  "changeLegacy": "139SnSTcoTF7jpkqh4wZFc7y6fQ1SLj4oR",
-                  "receiveSegwit": "bc1qqth2n26l3rvzn3gpwc97cdy2tw49tneczf0f4l",
-                  "changeSegwit": "bc1qz7y352xnfggy83u2vm6j5x0pre5mj9706e03hh"
+                  "changeLegacy": "139SnSTcoTF7jpkqh4wZFc7y6fQ1SLj4oR"
                 }
               ]
             },
@@ -176,15 +172,11 @@
               "addresses": [
                 {
                   "receiveLegacy": "1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9",
-                  "changeLegacy": "1LDXMxD2rsDHevMEoQAv8jqdgBZ5QNq2z8",
-                  "receiveSegwit": "bc1q3vsks47w0e88lvpwqy8yjarymx0m939sa73xew",
-                  "changeSegwit": "bc1q6tytnj96zysehsaxa5au0vnm5px3y0haugugew"
+                  "changeLegacy": "1LDXMxD2rsDHevMEoQAv8jqdgBZ5QNq2z8"
                 },
                 {
                   "receiveLegacy": "1JU5KeFft721edDn21TjHsWspP3WRUwKks",
-                  "changeLegacy": "14ngocLr2N2d4Pm4oBCRa4DRzu9R1au35t",
-                  "receiveSegwit": "bc1qh7v05pyz2ta9ptx3snneeydag4cajrs7xwhhdx",
-                  "changeSegwit": "bc1q9xx9ym6u3mnq5ct3gwgu6aax2lefrvppu8xajq"
+                  "changeLegacy": "14ngocLr2N2d4Pm4oBCRa4DRzu9R1au35t"
                 }
               ]
             }
@@ -200,14 +192,14 @@
                 {
                   "receiveLegacy": "1JAd7XCBzGudGpJQSDSfpmJhiygtLQWaGL",
                   "changeLegacy": "1DyHzbQUoQEsLxJn6M7fMD8Xdt1XvNiwNE",
-                  "receiveSegwit": "bitcoincash:qh3xqdu88mg5txlhz9lyuj03tk77c7vzu520vfe",
-                  "changeSegwit": "bitcoincash:q3er06q84gyrhm8qld2rukpp86w9y7zwrk0tu8s"
+                  "receiveCashAddress": "bitcoincash:qz7ycphsuldz3vm7ughunjf79wmmmrestsqd65ppxy",
+                  "changeCashAddress": "bitcoincash:qz8ydlgq74qswlvura4g0jcyylfc5ncfcvcd59nyt0"
                 },
                 {
                   "receiveLegacy": "1GWFxtwWmNVqotUPXLcKVL2mUKpshuJYo",
                   "changeLegacy": "139SnSTcoTF7jpkqh4wZFc7y6fQ1SLj4oR",
-                  "receiveSegwit": "bitcoincash:qqth2n26l3rvzn3gpwc97cdy2tw49tnec55mvz3",
-                  "changeSegwit": "bitcoincash:qz7y352xnfggy83u2vm6j5x0pre5mj970vym5qe"
+                  "receiveCashAddress": "bitcoincash:qqth2n26l3rvzn3gpwc97cdy2tw49tnec55mvz3",
+                  "changeCashAddress": "bitcoincash:qz7y352xnfggy83u2vm6j5x0pre5mj970vym5qe"
                 }
               ]
             },
@@ -216,14 +208,14 @@
                 {
                   "receiveLegacy": "1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9",
                   "changeLegacy": "1LDXMxD2rsDHevMEoQAv8jqdgBZ5QNq2z8",
-                  "receiveSegwit": "bitcoincash:q3vsks47w0e88lvpwqy8yjarymx0m939str9rwq",
-                  "changeSegwit": "bitcoincash:q6tytnj96zysehsaxa5au0vnm5px3y0ha24gdwq"
+                  "receiveCashAddress": "bitcoincash:q3vsks47w0e88lvpwqy8yjarymx0m939str9rwq",
+                  "changeCashAddress": "bitcoincash:q6tytnj96zysehsaxa5au0vnm5px3y0ha24gdwq"
                 },
                 {
                   "receiveLegacy": "1JU5KeFft721edDn21TjHsWspP3WRUwKks",
                   "changeLegacy": "14ngocLr2N2d4Pm4oBCRa4DRzu9R1au35t",
-                  "receiveSegwit": "bitcoincash:qh7v05pyz2ta9ptx3snneeydag4cajrs7snrj6g",
-                  "changeSegwit": "bitcoincash:q9xx9ym6u3mnq5ct3gwgu6aax2lefrvpp26jc9w"
+                  "receiveCashAddress": "bitcoincash:qh7v05pyz2ta9ptx3snneeydag4cajrs7snrj6g",
+                  "changeCashAddress": "bitcoincash:q9xx9ym6u3mnq5ct3gwgu6aax2lefrvpp26jc9w"
                 }
               ]
             }
@@ -239,14 +231,14 @@
                 {
                   "receiveLegacy": "1MH9KKcvdCTY44xVDC2k3fjBbX5Cz29N1q",
                   "changeLegacy": "1HADRPJpgqBzThepERpVXNi6qRgiLQRNoE",
-                  "receiveSegwit": "bitcoincash:qmecpecfw2a3etjrraymhcaka0mlqc4wp343q8l",
-                  "changeSegwit": "bitcoincash:qk9qplnn730cj8jy2q3n7pmg3uwulhm652mks5h"
+                  "receiveCashAddress": "bitcoincash:qr08q88p9etk89wgv05nwlrkm4l0urz4cyl36hh9sv",
+                  "changeCashAddress": "bitcoincash:qzc5q87w069lzg7g3gzx0c8dz83mn7l02scej5aluw"
                 },
                 {
                   "receiveLegacy": "1LRspCZNFJcbuNKQkXgHMDucctFRQya5a3",
                   "changeLegacy": "18snS5ZFJ7R7jT4yBzTeupxoXnbku2T4r7",
-                  "receiveSegwit": "bitcoincash:q650v5jtftn050el5k42s0zf78t2nl6wcsjrr5j",
-                  "changeSegwit": "bitcoincash:q2e3e4pca3dfmsz9jhrn0j3gknxek469z96j0l9"
+                  "receiveCashAddress": "bitcoincash:qr23ajjfd9wd73l87j642puf8cad20lfmqdgwvpat4",
+                  "changeCashAddress": "bitcoincash:qptx8x58rk948wqgk2uwd729z6vmx6hg5glsmtmewq"
                 }
               ]
             },
@@ -255,14 +247,14 @@
                 {
                   "receiveLegacy": "132rpc2Si2vWdjXxFKDJnNgsQFcYqRQy9G",
                   "changeLegacy": "1Bi6AYGcCQ4ot3CvYhvpyLjmq9KDphL4Gd",
-                  "receiveSegwit": "bitcoincash:qze9yzlz9mcy9h302atn96d4jpzgz2fzur0xpvk",
-                  "changeSegwit": "bitcoincash:qw4mflylc0ccc4kxn70c0nqy7nefuslep0qpeq7"
+                  "receiveCashAddress": "bitcoincash:qqty5stugh0qsk79at4wvhfkkgyfqffytsu04h9xhf",
+                  "changeCashAddress": "bitcoincash:qp6hd8unlplrrzkc60elp7vqn6098jrlyyga5acx5d"
                 },
                 {
                   "receiveLegacy": "1kT3R2E2431Nb3Q9Pj2aWZWoHN4KWfqVb",
                   "changeLegacy": "18gWxeitNYyP4TRMRHkqKteY816c3sx9yy",
-                  "receiveSegwit": "bitcoincash:qpqmeluuzwp6kdh3x33yx5nu72n98r8hdw8hk8s",
-                  "changeSegwit": "bitcoincash:q23ppef4shqwxfumvhctn2292fkppnpurlymrlh"
+                  "receiveCashAddress": "bitcoincash:qqyr08lnsfc82ek7y6xys6j0ne2v5uv7a5pj9v0t07",
+                  "changeCashAddress": "bitcoincash:qp2yy89xkzupce8ndjlpwdfg4fxcyxv8svd8q8q863"
                 }
               ]
             }

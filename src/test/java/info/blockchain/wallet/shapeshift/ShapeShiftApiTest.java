@@ -79,6 +79,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
                         + "\t\"outgoingType\": \"ETH\",\n"
                         + "\t\"transaction\": \"0xc1361e8ec096dfe48f524bd67fe811e5fd86a41c868ff5843f04619906882123\"\n"
                         + "}");
+        mockInterceptor.setResponseCode(200);
 
         final TestObserver<TradeStatusResponse> testObserver = subject.getTradeStatus("someAddress").test();
 

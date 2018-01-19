@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.CashAddress;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Utils;
@@ -284,13 +286,18 @@ public abstract class DeterministicWallet implements DeterministicNode {
         return key.toAddress(params).toBase58();
     }
 
-    protected String getReceiveBech32AddressAt(int accountIndex, int addressIndex) throws Exception {
+    public String getReceiveCashAddressAt(int accountIndex, int addressIndex) throws Exception {
         ECKey key = getReceiveECKeyAt(accountIndex, addressIndex);
-        return key.toAddress(params).toBech32();
+        return ecKeyToCashAddress(key);
     }
 
-    public String getChangeBech32AddressAt(int accountIndex, int addressIndex) throws Exception {
+    public String getChangeCashAddressAt(int accountIndex, int addressIndex) throws Exception {
         ECKey key = getChangeECKeyAt(accountIndex, addressIndex);
-        return key.toAddress(params).toBech32();
+        return ecKeyToCashAddress(key);
+    }
+
+    private String ecKeyToCashAddress(ECKey key) {
+        Address address = key.toAddress(params);
+        return address.toCashAddress();
     }
 }

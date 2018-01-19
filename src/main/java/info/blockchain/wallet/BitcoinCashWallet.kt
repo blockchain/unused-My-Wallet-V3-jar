@@ -48,16 +48,6 @@ open class BitcoinCashWallet : DeterministicWallet {
         return getChangeBase58AddressAt(accountIndex, addressIndex)
     }
 
-    @Throws(Exception::class)
-    fun getReceiveCashAddressAt(accountIndex: Int, addressIndex: Int): String {
-        return getReceiveBech32AddressAt(accountIndex, addressIndex)
-    }
-
-    @Throws(Exception::class)
-    fun getChangeCashAddressAt(accountIndex: Int, addressIndex: Int): String {
-        return getChangeBech32AddressAt(accountIndex, addressIndex)
-    }
-
     /**
      * Updates the state of the [BalanceManagerBch], which ingests the balances for each address or
      * xPub.
@@ -103,7 +93,7 @@ open class BitcoinCashWallet : DeterministicWallet {
         val nextIndex = multiAddressFactory.getNextReceiveAddressIndex(xpub, listOf())
         return getAccountAt(accountIndex).chains[DeterministicChain.RECEIVE_CHAIN]
                 .getAddressAt(nextIndex + addressIndex).ecKey.toAddress(params)
-                .toBech32()
+                .toCashAddress()
     }
 
     fun getNextReceiveCashAddress(accountIndex: Int): String {
