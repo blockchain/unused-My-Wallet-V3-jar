@@ -198,8 +198,8 @@
                 {
                   "receiveLegacy": "1GWFxtwWmNVqotUPXLcKVL2mUKpshuJYo",
                   "changeLegacy": "139SnSTcoTF7jpkqh4wZFc7y6fQ1SLj4oR",
-                  "receiveCashAddress": "bitcoincash:qqth2n26l3rvzn3gpwc97cdy2tw49tnec55mvz3",
-                  "changeCashAddress": "bitcoincash:qz7y352xnfggy83u2vm6j5x0pre5mj970vym5qe"
+                  "receiveCashAddress": "bitcoincash:qqpwa2dtt7yds2w9q9mqhmp53fd654w08q4stgujy5",
+                  "changeCashAddress": "bitcoincash:qqtcjx3g6d9pqs783fn022seuy0xnwgheunkx6wh09"
                 }
               ]
             },
@@ -208,14 +208,14 @@
                 {
                   "receiveLegacy": "1Dgews942GZs2GV7JT5v1t4KxuaDZpJgG9",
                   "changeLegacy": "1LDXMxD2rsDHevMEoQAv8jqdgBZ5QNq2z8",
-                  "receiveCashAddress": "bitcoincash:q3vsks47w0e88lvpwqy8yjarymx0m939str9rwq",
-                  "changeCashAddress": "bitcoincash:q6tytnj96zysehsaxa5au0vnm5px3y0ha24gdwq"
+                  "receiveCashAddress": "bitcoincash:qz9jz6zheelyulas9cqsujt5vnvelvkykqj4rpqqt3",
+                  "changeCashAddress": "bitcoincash:qrfv3wwghggjrx7r5mknh3aj0wsy6y37l536q6l8d2"
                 },
                 {
                   "receiveLegacy": "1JU5KeFft721edDn21TjHsWspP3WRUwKks",
                   "changeLegacy": "14ngocLr2N2d4Pm4oBCRa4DRzu9R1au35t",
-                  "receiveCashAddress": "bitcoincash:qh7v05pyz2ta9ptx3snneeydag4cajrs7snrj6g",
-                  "changeCashAddress": "bitcoincash:q9xx9ym6u3mnq5ct3gwgu6aax2lefrvpp26jc9w"
+                  "receiveCashAddress": "bitcoincash:qzle37sysff0559v6xzw08y3h4zhrkgwrct982ypjz",
+                  "changeCashAddress": "bitcoincash:qq5cc5n0tj8wvznpw9pernth5etl9ydsyyj98me2uh"
                 }
               ]
             }

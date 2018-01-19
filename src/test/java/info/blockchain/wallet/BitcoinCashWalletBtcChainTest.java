@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.BitcoinCashMainNetParams;
 import org.junit.Assert;
@@ -64,7 +65,6 @@ public class BitcoinCashWalletBtcChainTest extends MockedResponseTest{
     }
 
     @Test
-    @Ignore //// TODO: 18/01/2018 GET TEST VECTORS FOR THIS!!!!!
     public void testAddressDerivations() throws Exception {
 
         TestVectorBip39 vector = getTestVectors().getVectors().get(24);
