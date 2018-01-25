@@ -42,7 +42,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest {
         mockInterceptor.setResponseString(response);
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
-            new ArrayList<>(Arrays.asList(dormantAddress)), new ArrayList<String>(), null, dormantAddress, 100, 0);
+            new ArrayList<>(Arrays.asList(dormantAddress)), new ArrayList<String>(), null, dormantAddress, 100, 0, 0);
 
         Assert.assertEquals(2, summary.size());
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
@@ -63,7 +63,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest {
         mockInterceptor.setResponseString(response);
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
-            new ArrayList<>(Arrays.asList(dormantXpub)), new ArrayList<String>(), null, dormantXpub, 100, 0);
+            new ArrayList<>(Arrays.asList(dormantXpub)), new ArrayList<String>(), null, dormantXpub, 100, 0, 0);
 
         Assert.assertEquals(34, summary.size());
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
@@ -91,7 +91,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest {
         mockInterceptor.setResponseString(response);
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
-            new ArrayList<>(Arrays.asList(dormantAddress, dormantXpub)), new ArrayList<String>(), null, null, 100, 0);
+            new ArrayList<>(Arrays.asList(dormantAddress, dormantXpub)), new ArrayList<String>(), null, null, 100, 0, 0);
 
         Assert.assertEquals(36, summary.size());
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
@@ -125,7 +125,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest {
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
             new ArrayList<>(Arrays.asList(xpub1, xpub2, address)), new ArrayList<String>(),
-            null, null, 100, 0);
+            null, null, 100, 0, 0);
 
         Assert.assertEquals(7, summary.size());
 
@@ -208,7 +208,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest {
 
         List<TransactionSummary> transactionSummaries = multiAddressFactory.getAccountTransactions(
             new ArrayList<>(Arrays.asList(xpub1, xpub2, address)), new ArrayList<String>(),
-            null, null, 100, 0);
+            null, null, 100, 0, 0);
 
         Assert.assertEquals(8, transactionSummaries.size());
 

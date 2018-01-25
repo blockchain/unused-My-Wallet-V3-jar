@@ -7,6 +7,7 @@ import info.blockchain.wallet.multiaddress.MultiAddressFactoryBch
 import info.blockchain.wallet.payload.BalanceManagerBch
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
+import io.reactivex.Observable
 import org.bitcoinj.core.NetworkParameters
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
@@ -73,10 +74,20 @@ open class BitcoinCashWallet : DeterministicWallet {
     fun getImportedAddressBalance(): BigInteger =
             balanceManager.importedAddressesBalance ?: BigInteger.ZERO
 
-    fun getTransactions(activeXpubs: List<String>, context: String?, limit: Int, offset: Int) = Completable.fromCallable {
-        val watchOnly = listOf<String>()
-        multiAddressFactory.getAccountTransactions(activeXpubs, watchOnly, null, context, limit, offset)
-    }
+    /**
+     *
+     * @param legacyAddressList A list of all xpubs and legacy addresses
+     * @param watchOnly A list of watch-only legacy addresses
+     * @param activeLegacy A list of active legacy addresses. Used to flag transactions as 'watch only'
+     * @param context Xpub or legacy address. Used to fetch transaction only relating to this address.
+     * @param limit Maximum amount of transactions fetched
+     * @param offset Page offset
+     * @return All wallet transactions, all legacy transactions, or transaction relating to a single context/address
+     */
+    fun getTransactions(legacyAddressList: List<String>?, watchOnly: List<String>,
+                        activeXpubs: List<String>, context: String?, limit: Int, offset: Int) =
+            multiAddressFactory.getAccountTransactions(activeXpubs,
+                    watchOnly, legacyAddressList, context, limit, offset, BCH_FORK_HEIGHT)
 
     /**
      * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
