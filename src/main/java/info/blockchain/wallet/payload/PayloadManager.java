@@ -836,7 +836,7 @@ public class PayloadManager {
     public List<TransactionSummary> getAllTransactions(int limit, int offset) throws
             IOException,
             ApiException {
-        return getAccountTransactions(MULTI_ADDRESS_ALL, limit, offset);
+        return getAccountTransactions(null, limit, offset);
     }
 
     /**
@@ -869,7 +869,7 @@ public class PayloadManager {
         ArrayList<String> all = new ArrayList<>(activeXpubs);
         all.addAll(activeLegacy);
 
-        return multiAddressFactory.getAccountTransactions(all, watchOnly, activeLegacy, null, limit, offset);
+        return multiAddressFactory.getAccountTransactions(all, watchOnly, activeLegacy, null, limit, offset, 0);
     }
 
     /**
@@ -889,7 +889,7 @@ public class PayloadManager {
         ArrayList<String> all = new ArrayList<>(activeXpubs);
         all.addAll(activeLegacy);
 
-        return multiAddressFactoryBch.getAccountTransactions(all, watchOnly, activeLegacy, null, limit, offset);
+        return multiAddressFactoryBch.getAccountTransactions(all, watchOnly, activeLegacy, null, limit, offset, 0);
     }
 
     /**
@@ -910,7 +910,7 @@ public class PayloadManager {
         ArrayList<String> all = new ArrayList<>(activeXpubs);
         all.addAll(activeLegacy);
 
-        return multiAddressFactory.getAccountTransactions(all, watchOnly, null, xpub, limit, offset);
+        return multiAddressFactory.getAccountTransactions(all, watchOnly, null, xpub, limit, offset, 0);
     }
 
     /**
@@ -932,7 +932,7 @@ public class PayloadManager {
         ArrayList<String> all = new ArrayList<>(activeXpubs);
         all.addAll(activeLegacy);
 
-        return multiAddressFactoryBch.getAccountTransactions(all, watchOnly, null, xpub, limit, offset);
+        return multiAddressFactoryBch.getAccountTransactions(all, watchOnly, null, xpub, limit, offset, 0);
     }
 
     /**
