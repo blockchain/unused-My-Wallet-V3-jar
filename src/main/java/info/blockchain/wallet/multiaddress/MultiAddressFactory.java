@@ -87,7 +87,7 @@ public class MultiAddressFactory {
      * @param all A list of all xpubs and legacy addresses
      * @param watchOnly A list of watch-only legacy addresses
      * @param activeLegacy A list of active legacy addresses. Used to flag transactions as 'watch
-     * only'. NB - must be null
+     * only'.
      * @param onlyShow Xpub or legacy address. Used to fetch transaction only relating to this
      * address.
      * @param limit Maximum amount of transactions fetched
