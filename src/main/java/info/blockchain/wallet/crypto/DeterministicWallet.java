@@ -1,18 +1,13 @@
 package info.blockchain.wallet.crypto;
 
 import com.google.common.collect.ImmutableList;
+
 import info.blockchain.wallet.exceptions.DeterministicWalletException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
+import info.blockchain.wallet.util.HexUtils;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.bitcoinj.core.Address;
-import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.CashAddress;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Utils;
@@ -26,9 +21,13 @@ import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicChecksumException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.bitcoinj.crypto.MnemonicException.MnemonicWordException;
-import org.bitcoinj.params.BitcoinMainNetParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>A DeterministicWallet calculates and keeps a whole tree (hierarchy) of keys originating from a
@@ -232,12 +231,12 @@ public abstract class DeterministicWallet implements DeterministicNode {
     }
 
     public String getSeedHex() {
-        return Hex.encodeHexString(masterSeed);
+        return HexUtils.encodeHexString(masterSeed);
     }
 
     public String getEntropyHex() {
         if (entropy != null) {
-            return Hex.encodeHexString(entropy);
+            return HexUtils.encodeHexString(entropy);
         } else {
             return null;
         }

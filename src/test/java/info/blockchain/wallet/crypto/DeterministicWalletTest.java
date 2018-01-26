@@ -1,12 +1,15 @@
 package info.blockchain.wallet.crypto;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.base.Joiner;
+
 import info.blockchain.wallet.test_data.TestVectorBip39;
 import info.blockchain.wallet.test_data.TestVectorBip39List;
+import info.blockchain.wallet.util.HexUtils;
+
+import org.bitcoinj.params.BitcoinMainNetParams;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -14,12 +17,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.codec.binary.Hex;
-import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.BitcoinMainNetParams;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mock;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class DeterministicWalletTest {
 
@@ -193,19 +194,19 @@ public class DeterministicWalletTest {
 
         subject.addAccount();
         assertEquals("03c6d9cc725bb7e19c026df03bf693ee1171371a8eaf25f04b7a58f6befabcd38c",
-            Hex.encodeHexString(subject.getReceiveECKeyAt(0, 0).getPubKey()));
+            HexUtils.encodeHexString(subject.getReceiveECKeyAt(0, 0).getPubKey()));
         assertEquals("02a7a079c1ef9916b289c2ff21a992c808d0de3dfcf8a9f163205c5c9e21f55d5c",
-            Hex.encodeHexString(subject.getReceiveECKeyAt(0, 5).getPubKey()));
+            HexUtils.encodeHexString(subject.getReceiveECKeyAt(0, 5).getPubKey()));
         assertEquals("038bac33bcdaeec5626e2f2c5680a9fdc5e551d4e1167f272825bea98e6158d4c8",
-            Hex.encodeHexString(subject.getReceiveECKeyAt(0, 10).getPubKey()));
+            HexUtils.encodeHexString(subject.getReceiveECKeyAt(0, 10).getPubKey()));
 
         subject.addAccount();
         assertEquals("034fd90850dfab2ae698c9cf58ce3182d4d06676e1abf012331659c9434098100a",
-            Hex.encodeHexString(subject.getReceiveECKeyAt(1, 0).getPubKey()));
+            HexUtils.encodeHexString(subject.getReceiveECKeyAt(1, 0).getPubKey()));
         assertEquals("020b1383f111bcc2c7af28107e08e1cc652f866bc762d5f39cad75102999cd1d05",
-            Hex.encodeHexString(subject.getReceiveECKeyAt(1, 5).getPubKey()));
+            HexUtils.encodeHexString(subject.getReceiveECKeyAt(1, 5).getPubKey()));
         assertEquals("022e3589f454389f18fc92b84ad717f6953c230a0cb63ffb8bb46dd8f3cdd5f8b3",
-            Hex.encodeHexString(subject.getReceiveECKeyAt(1, 10).getPubKey()));
+            HexUtils.encodeHexString(subject.getReceiveECKeyAt(1, 10).getPubKey()));
     }
 
     /**
