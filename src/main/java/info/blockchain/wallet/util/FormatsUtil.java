@@ -1,11 +1,11 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.api.PersistentUrls;
-import java.nio.ByteBuffer;
-import java.util.regex.Pattern;
+
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.CashAddress;
 import org.bitcoinj.core.WrongNetworkException;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
@@ -14,6 +14,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.Hash;
 import org.web3j.utils.Numeric;
+
+import java.nio.ByteBuffer;
+import java.util.regex.Pattern;
 
 public class FormatsUtil {
 
@@ -194,7 +197,7 @@ public class FormatsUtil {
 
     public static boolean isKeyEncrypted(String data) {
 
-        if(data != null && isBase64(data)){
+        if (data != null && isBase64(data)) {
             try {
                 Base58.decode(data);
                 return false;
@@ -209,7 +212,7 @@ public class FormatsUtil {
 
     public static boolean isKeyUnencrypted(String data) {
 
-        if(data == null)
+        if (data == null)
             return false;
 
         try {
@@ -220,22 +223,20 @@ public class FormatsUtil {
         }
     }
 
-    private static boolean isBase64(String data){
+    private static boolean isBase64(String data) {
         String regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
         return (data.matches(regex) && !containsSpaces(data));
     }
 
     private static boolean containsSpaces(String data) {
         return data.contains(" ") ||
-                data.contains("\n")||
-                data.contains("\r")||
+                data.contains("\n") ||
+                data.contains("\r") ||
                 data.contains("\t");
     }
 
     /**
      * Check for poorly formed BIP21 URIs
-     * @param uri
-     * @return
      */
     public static String getURIFromPoorlyFormedBIP21(String uri) {
         if (uri.startsWith("bitcoin://") && uri.length() > 10) {
@@ -259,12 +260,34 @@ public class FormatsUtil {
         if (address == null || address.isEmpty() || !ignoreCaseEthAddrPattern.matcher(address).find()) {
             return false;
         } else if (lowerCaseEthAddrPattern.matcher(address).find()
-            || upperCaseEthAddrPattern.matcher(address).find()) {
+                || upperCaseEthAddrPattern.matcher(address).find()) {
             // if it's all small caps or caps return true
             return true;
         } else {
             // if it is mixed caps it is a checksum address and needs to be validated
             return validateChecksumEthereumAddress(address);
+        }
+    }
+
+    /**
+     * Verify that a String is a valid BECH32 Bitcoin Cash address.
+     *
+     * @param address    The String you wish to test
+     * @return Is this a valid BECH32 format BCH address
+     */
+    public static Boolean isValidBitcoinCashAddress(String address) {
+        /*
+         * Check basic address requirements, i.e. is not empty
+         */
+        if (address == null || address.isEmpty()) {
+            return false;
+        } else {
+            try {
+                CashAddress.decode(address);
+                return true;
+            } catch (AddressFormatException e) {
+                return false;
+            }
         }
     }
 
@@ -277,7 +300,7 @@ public class FormatsUtil {
                 // char with the same index, and each lowercase letter with a 0 bit
                 int charInt = Integer.parseInt(Character.toString(hash.charAt(i)), 16);
                 if ((Character.isUpperCase(address.charAt(i)) && charInt <= 7)
-                    || (Character.isLowerCase(address.charAt(i)) && charInt > 7)) {
+                        || (Character.isLowerCase(address.charAt(i)) && charInt > 7)) {
                     return false;
                 }
             }
