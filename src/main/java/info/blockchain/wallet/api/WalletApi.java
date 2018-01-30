@@ -1,21 +1,23 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.data.FeeList;
-import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.api.data.WalletOptions;
-import io.reactivex.Observable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.spongycastle.util.encoders.Hex;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Nullable;
+
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
-import org.apache.commons.lang3.StringUtils;
-import org.spongycastle.util.encoders.Hex;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -39,10 +41,6 @@ public class WalletApi {
                     .create(WalletEndpoints.class);
         }
         return walletServer;
-    }
-
-    public Observable<FeeList> getDynamicFee() {
-        return getApiInstance().getFees();
     }
 
     public Call<ResponseBody> getRandomBytesCall() {
@@ -187,10 +185,6 @@ public class WalletApi {
         return getExplorerInstance().fetchPairingEncryptionPassword("pairing-encryption-password",
                 guid,
                 BlockchainFramework.getApiCode());
-    }
-
-    public Observable<List<Merchant>> getAllMerchants() {
-        return getApiInstance().getAllMerchants();
     }
 
     public Observable<Settings> fetchSettings(String method, String guid, String sharedKey) {

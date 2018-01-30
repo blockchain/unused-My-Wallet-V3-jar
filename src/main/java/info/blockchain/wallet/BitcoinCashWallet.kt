@@ -4,28 +4,46 @@ import info.blockchain.api.blockexplorer.BlockExplorer
 import info.blockchain.wallet.crypto.DeterministicChain
 import info.blockchain.wallet.crypto.DeterministicWallet
 import info.blockchain.wallet.multiaddress.MultiAddressFactoryBch
+import info.blockchain.wallet.multiaddress.TransactionSummary
 import info.blockchain.wallet.payload.BalanceManagerBch
 import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
-import io.reactivex.Observable
 import org.bitcoinj.core.NetworkParameters
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
+@Suppress("unused")
 open class BitcoinCashWallet : DeterministicWallet {
 
-    internal lateinit var balanceManager: BalanceManagerBch
-    internal lateinit var multiAddressFactory: MultiAddressFactoryBch
+    private lateinit var balanceManager: BalanceManagerBch
+    private lateinit var multiAddressFactory: MultiAddressFactoryBch
 
-    private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, passphrase: String) : super(params, coinPath, MNEMONIC_LENGTH, passphrase) {
+    private constructor(
+            blockExplorer: BlockExplorer,
+            params: NetworkParameters,
+            coinPath: String,
+            passphrase: String
+    ) : super(params, coinPath, MNEMONIC_LENGTH, passphrase) {
         setupApi(blockExplorer)
     }
 
-    private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, entropyHex: String, passphrase: String) : super(params, coinPath, entropyHex, passphrase) {
+    private constructor(
+            blockExplorer: BlockExplorer,
+            params: NetworkParameters,
+            coinPath: String,
+            entropyHex: String,
+            passphrase: String
+    ) : super(params, coinPath, entropyHex, passphrase) {
         setupApi(blockExplorer)
     }
 
-    private constructor(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String, mnemonic: List<String>, passphrase: String) : super(params, coinPath, mnemonic, passphrase) {
+    private constructor(
+            blockExplorer: BlockExplorer,
+            params: NetworkParameters,
+            coinPath: String,
+            mnemonic: List<String>,
+            passphrase: String
+    ) : super(params, coinPath, mnemonic, passphrase) {
         setupApi(blockExplorer)
     }
 
@@ -38,13 +56,24 @@ open class BitcoinCashWallet : DeterministicWallet {
         this.multiAddressFactory = MultiAddressFactoryBch(blockExplorer)
     }
 
-    @Deprecated("since 14 January 2017, replaced by {@link #getReceiveCashAddressAt(int, int)}")
+    @Deprecated(
+            message = "since 14 January 2017",
+            replaceWith = ReplaceWith(
+                    "bitcoinCashWallet.getReceiveCashAddressAt(int, int)",
+                    "info.blockchain.wallet.BitcoinCashWallet"
+            )
+    )
     fun getReceiveAddressAt(accountIndex: Int, addressIndex: Int): String {
         return getReceiveBase58AddressAt(accountIndex, addressIndex)
     }
 
-
-    @Deprecated("since 14 January 2017, replaced by {@link #getChangeCashAddressAt(int, int)}")
+    @Deprecated(
+            message = "since 14 January 2017",
+            replaceWith = ReplaceWith(
+                    "bitcoinCashWallet.getChangeCashAddressAt(int, int)",
+                    "info.blockchain.wallet.BitcoinCashWallet"
+            )
+    )
     fun getChangeAddressAt(accountIndex: Int, addressIndex: Int): String {
         return getChangeBase58AddressAt(accountIndex, addressIndex)
     }
@@ -57,7 +86,7 @@ open class BitcoinCashWallet : DeterministicWallet {
      * @param allAccountsAndAddresses A list of both xPubs from HD accounts and [LegacyAddress]
      * addresses
      */
-    fun updateAllBalances(legacyAddressList: List<String>, allAccountsAndAddresses: List<String>) =
+    fun updateAllBalances(legacyAddressList: List<String>, allAccountsAndAddresses: List<String>): Completable =
             Completable.fromCallable {
                 balanceManager.updateAllBalances(legacyAddressList, allAccountsAndAddresses)
             }
@@ -78,24 +107,36 @@ open class BitcoinCashWallet : DeterministicWallet {
      *
      * @param legacyAddressList A list of all xpubs and legacy addresses
      * @param watchOnly A list of watch-only legacy addresses
-     * @param activeLegacy A list of active legacy addresses. Used to flag transactions as 'watch only'
+     * @param activeXpubs A list of active xPubs addresses.
      * @param context Xpub or legacy address. Used to fetch transaction only relating to this address.
      * @param limit Maximum amount of transactions fetched
      * @param offset Page offset
      * @return All wallet transactions, all legacy transactions, or transaction relating to a single context/address
      */
-    fun getTransactions(legacyAddressList: List<String>?, watchOnly: List<String>,
-                        activeXpubs: List<String>, context: String?, limit: Int, offset: Int) =
-            multiAddressFactory.getAccountTransactions(activeXpubs,
-                    watchOnly, legacyAddressList, context, limit, offset, BCH_FORK_HEIGHT)
+    fun getTransactions(
+            legacyAddressList: List<String>?,
+            watchOnly: List<String>,
+            activeXpubs: List<String>,
+            context: String?,
+            limit: Int,
+            offset: Int
+    ): MutableList<TransactionSummary> = multiAddressFactory.getAccountTransactions(
+            activeXpubs,
+            watchOnly,
+            legacyAddressList,
+            context,
+            limit,
+            offset,
+            BCH_FORK_HEIGHT
+    )
 
     /**
      * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
-     * @param account  The [Account] you wish to generate an address from
-     * @param position Represents how many positions on the chain beyond what is already used that
+     * @param accountIndex  The index of the [Account] you wish to generate an address from
+     * @param addressIndex Represents how many positions on the chain beyond what is already used that
      * you wish to generate
      * @return A Bitcoin Cash address
      */
@@ -110,13 +151,13 @@ open class BitcoinCashWallet : DeterministicWallet {
     fun getNextReceiveCashAddress(accountIndex: Int): String {
         val xpub = getAccountPubB58(accountIndex)
         val addressIndex = multiAddressFactory.getNextReceiveAddressIndex(xpub, listOf())
-        return getReceiveCashAddressAt(accountIndex, addressIndex!!)
+        return getReceiveCashAddressAt(accountIndex, addressIndex)
     }
 
     fun getNextChangeCashAddress(accountIndex: Int): String {
         val xpub = getAccountPubB58(accountIndex)
         val addressIndex = multiAddressFactory.getNextChangeAddressIndex(xpub)
-        return getChangeCashAddressAt(accountIndex, addressIndex!!)
+        return getChangeCashAddressAt(accountIndex, addressIndex)
     }
 
     fun incrementNextReceiveAddressBch(xpub: String) {
@@ -162,15 +203,15 @@ open class BitcoinCashWallet : DeterministicWallet {
          * Coin parameters
          */
         private val log = LoggerFactory.getLogger(BitcoinCashWallet::class.java)
-        val BITCOIN_COIN_PATH = "M/44H/0H"
-        val BITCOINCASH_COIN_PATH = "M/44H/145H"
-        val MNEMONIC_LENGTH = 12
-        var BCH_FORK_HEIGHT = 478558
+        const val BITCOIN_COIN_PATH = "M/44H/0H"
+        const val BITCOINCASH_COIN_PATH = "M/44H/145H"
+        const val MNEMONIC_LENGTH = 12
+        const val BCH_FORK_HEIGHT = 478558
 
         /**
          * Coin metadata store
          */
-        val METADATA_TYPE_EXTERNAL = 7
+        const val METADATA_TYPE_EXTERNAL = 7
 
         @Synchronized
         fun create(blockExplorer: BlockExplorer, params: NetworkParameters, coinPath: String): BitcoinCashWallet {

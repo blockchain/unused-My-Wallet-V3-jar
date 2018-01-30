@@ -33,6 +33,9 @@ public class WalletOptions {
     @JsonProperty("mobileInfo")
     private Map<String, String> mobileInfo = new HashMap<>();
 
+    @JsonProperty("bcash")
+    private Map<String, Integer> bitcoinCashFees = new HashMap<>();
+
     public List<String> getBuySellCountries() {
         return buySellCountries;
     }
@@ -60,4 +63,9 @@ public class WalletOptions {
     public Map<String, String> getMobileInfo() {
         return mobileInfo;
     }
+
+    public int getBchFeePerByte() {
+        return bitcoinCashFees.get("feePerByte");
+    }
+
 }

@@ -6,25 +6,28 @@ import info.blockchain.wallet.test_data.TestVectorAddress;
 import info.blockchain.wallet.test_data.TestVectorBip39;
 import info.blockchain.wallet.test_data.TestVectorBip39List;
 import info.blockchain.wallet.test_data.TestVectorCoin;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.params.BitcoinCashMainNetParams;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mock;
 
-public class BitcoinCashWalletTest extends MockedResponseTest{
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
-    BitcoinCashWallet subject;
+public class BitcoinCashWalletTest extends MockedResponseTest {
 
-    @Mock BlockExplorer blockExplorer = new BlockExplorer();
+    private BitcoinCashWallet subject;
+
+    @Mock private BlockExplorer blockExplorer = new BlockExplorer();
 
     private TestVectorBip39List getTestVectors() throws Exception {
         URI uri = getClass().getClassLoader().getResource("hd/test_EN_BIP39.json").toURI();
@@ -38,7 +41,7 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
     private void mockMetadataFetchMagic() {
         int code = 404;
         String response = "{\"message\":\"Not Found\"}";
-        mockInterceptor.setResponseList(new LinkedList<Pair>(Arrays.asList(Pair.of(code, response))));
+        mockInterceptor.setResponseList(new LinkedList<Pair>(Collections.singletonList(Pair.of(code, response))));
     }
 
     @Test
@@ -48,17 +51,17 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
         mockMetadataFetchMagic();
 
         subject = BitcoinCashWallet.Companion
-            .restore(blockExplorer, BitcoinCashMainNetParams.get(),
-                BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()), vector.getPassphrase());
+                .restore(blockExplorer, BitcoinCashMainNetParams.get(),
+                        BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()), vector.getPassphrase());
         subject.addAccount();
         Assert.assertNotNull(subject.getAccountPrivB58(0));
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void getPrivB58_badIndex() throws Exception {
+    public void getPrivB58_badIndex() {
         mockMetadataFetchMagic();
         subject = BitcoinCashWallet.Companion.create(blockExplorer, BitcoinCashMainNetParams.get(),
-            BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH());
+                BitcoinCashWallet.BITCOINCASH_COIN_PATH);
         Assert.assertNull(subject.getAccountPrivB58(1));
     }
 
@@ -69,8 +72,8 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
         mockMetadataFetchMagic();
 
         subject = BitcoinCashWallet.Companion.restore(blockExplorer, BitcoinCashMainNetParams.get(),
-            BitcoinCashWallet.Companion.getBITCOINCASH_COIN_PATH(), split(vector.getMnemonic()),
-            vector.getPassphrase());
+                BitcoinCashWallet.BITCOINCASH_COIN_PATH, split(vector.getMnemonic()),
+                vector.getPassphrase());
 
         //m / purpose' / coin_type' / account' / change / address_index
         //m/44H/0H/0H/0/0
@@ -82,17 +85,17 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
             subject.addAccount();
 
             int addressIndex = 0;
-            for(TestVectorAddress address : account.getAddresses()) {
+            for (TestVectorAddress address : account.getAddresses()) {
 
                 Assert.assertEquals(address.getReceiveLegacy(),
-                    subject.getReceiveAddressAt(accountIndex, addressIndex));
+                        subject.getReceiveAddressAt(accountIndex, addressIndex));
                 Assert.assertEquals(address.getChangeLegacy(),
-                    subject.getChangeAddressAt(accountIndex, addressIndex));
+                        subject.getChangeAddressAt(accountIndex, addressIndex));
 
                 Assert.assertEquals(address.getReceiveCashAddress(),
-                    subject.getReceiveCashAddressAt(accountIndex, addressIndex));
+                        subject.getReceiveCashAddressAt(accountIndex, addressIndex));
                 Assert.assertEquals(address.getChangeCashAddress(),
-                    subject.getChangeCashAddressAt(accountIndex, addressIndex));
+                        subject.getChangeCashAddressAt(accountIndex, addressIndex));
 
                 addressIndex++;
             }
@@ -101,7 +104,7 @@ public class BitcoinCashWalletTest extends MockedResponseTest{
         }
     }
 
-    public static List<String> split(String words) {
+    private static List<String> split(String words) {
         return new ArrayList<>(Arrays.asList(words.split("\\s+")));
     }
 }
