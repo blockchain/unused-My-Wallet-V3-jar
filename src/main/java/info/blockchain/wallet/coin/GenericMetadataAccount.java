@@ -2,12 +2,12 @@ package info.blockchain.wallet.coin;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 
 /**
@@ -30,7 +30,7 @@ public class GenericMetadataAccount {
     @JsonProperty("archived")
     private boolean archived;
 
-    @JsonIgnore
+    @JsonProperty("xpub")
     private String xpub;
 
     public GenericMetadataAccount() {
@@ -66,7 +66,10 @@ public class GenericMetadataAccount {
     }
 
     public String toJson() throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(this);
+        // This is done to avoid storing the xPub in Metadata, but allowing serialization to take
+        // place in-app.
+        final GenericMetadataAccount safeCopy = new GenericMetadataAccount(this.label, this.archived);
+        return new ObjectMapper().writeValueAsString(safeCopy);
     }
 
     public static GenericMetadataAccount fromJson(String json) throws IOException {
