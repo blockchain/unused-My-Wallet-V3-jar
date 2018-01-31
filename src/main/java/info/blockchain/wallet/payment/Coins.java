@@ -4,17 +4,19 @@ import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.api.data.UnspentOutput;
 import info.blockchain.api.data.UnspentOutputs;
 import info.blockchain.wallet.BlockchainFramework;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import retrofit2.Call;
 
 class Coins {
@@ -25,7 +27,14 @@ class Coins {
         log.info("Fetching unspent coins");
         BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
                 BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
-        return blockExplorer.getUnspentOutputs(addresses);
+        return blockExplorer.getUnspentOutputs("btc", addresses, null, null);
+    }
+
+    public static Call<UnspentOutputs> getUnspentBchCoins(List<String> addresses) {
+        log.info("Fetching unspent coins");
+        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
+        return blockExplorer.getUnspentOutputs("bch", addresses, null, null);
     }
 
     public static Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs coins, BigInteger feePerKb){

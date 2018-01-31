@@ -28,16 +28,6 @@ public class WalletApiIntegTest extends BaseIntegTest {
     private WalletApi walletApi = new WalletApi();
 
     @Test
-    public void getDynamicFee() throws Exception {
-        final TestObserver<FeeList> testObserver = walletApi.getDynamicFee().test();
-
-        testObserver.assertComplete();
-        testObserver.assertNoErrors();
-        assertNotNull(testObserver.values().get(0));
-        assertNotNull(testObserver.values().get(0).toJson());
-    }
-
-    @Test
     public void getRandomBytesCall() throws Exception {
         Response<ResponseBody> call = walletApi.getRandomBytesCall().execute();
 
