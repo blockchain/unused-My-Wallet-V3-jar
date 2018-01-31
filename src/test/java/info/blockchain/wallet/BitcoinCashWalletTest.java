@@ -88,9 +88,9 @@ public class BitcoinCashWalletTest extends MockedResponseTest {
             for (TestVectorAddress address : account.getAddresses()) {
 
                 Assert.assertEquals(address.getReceiveLegacy(),
-                        subject.getReceiveAddressAt(accountIndex, addressIndex));
+                        subject.getReceiveAddressAtPosition(accountIndex, addressIndex));
                 Assert.assertEquals(address.getChangeLegacy(),
-                        subject.getChangeAddressAt(accountIndex, addressIndex));
+                        subject.getChangeAddressAtPosition(accountIndex, addressIndex));
 
                 Assert.assertEquals(address.getReceiveCashAddress(),
                         subject.getReceiveCashAddressAt(accountIndex, addressIndex));

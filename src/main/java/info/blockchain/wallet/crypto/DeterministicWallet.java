@@ -285,12 +285,12 @@ public abstract class DeterministicWallet implements DeterministicNode {
         return key.toAddress(params).toBase58();
     }
 
-    public String getReceiveCashAddressAt(int accountIndex, int addressIndex) throws Exception {
+    public String getReceiveCashAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getReceiveECKeyAt(accountIndex, addressIndex);
         return ecKeyToCashAddress(key);
     }
 
-    public String getChangeCashAddressAt(int accountIndex, int addressIndex) throws Exception {
+    public String getChangeCashAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getChangeECKeyAt(accountIndex, addressIndex);
         return ecKeyToCashAddress(key);
     }
