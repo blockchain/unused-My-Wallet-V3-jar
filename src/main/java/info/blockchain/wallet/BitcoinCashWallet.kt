@@ -1,7 +1,6 @@
 package info.blockchain.wallet
 
 import info.blockchain.api.blockexplorer.BlockExplorer
-import info.blockchain.wallet.crypto.DeterministicChain
 import info.blockchain.wallet.crypto.DeterministicWallet
 import info.blockchain.wallet.multiaddress.MultiAddressFactoryBch
 import info.blockchain.wallet.multiaddress.TransactionSummary
@@ -54,28 +53,6 @@ open class BitcoinCashWallet : DeterministicWallet {
     private fun setupApi(blockExplorer: BlockExplorer) {
         this.balanceManager = BalanceManagerBch(blockExplorer)
         this.multiAddressFactory = MultiAddressFactoryBch(blockExplorer)
-    }
-
-    @Deprecated(
-            message = "since 14 January 2017",
-            replaceWith = ReplaceWith(
-                    "bitcoinCashWallet.getReceiveCashAddressAt(int, int)",
-                    "info.blockchain.wallet.BitcoinCashWallet"
-            )
-    )
-    fun getReceiveAddressAt(accountIndex: Int, addressIndex: Int): String {
-        return getReceiveBase58AddressAt(accountIndex, addressIndex)
-    }
-
-    @Deprecated(
-            message = "since 14 January 2017",
-            replaceWith = ReplaceWith(
-                    "bitcoinCashWallet.getChangeCashAddressAt(int, int)",
-                    "info.blockchain.wallet.BitcoinCashWallet"
-            )
-    )
-    fun getChangeAddressAt(accountIndex: Int, addressIndex: Int): String {
-        return getChangeBase58AddressAt(accountIndex, addressIndex)
     }
 
     /**
@@ -131,6 +108,32 @@ open class BitcoinCashWallet : DeterministicWallet {
     )
 
     /**
+     * Generates a Base58 Bitcoin Cash receive address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash receive address in Base58 format
+     */
+    fun getNextReceiveAddress(accountIndex: Int): String {
+        val xpub = getAccountPubB58(accountIndex)
+        val addressIndex = multiAddressFactory.getNextReceiveAddressIndex(xpub, listOf())
+        return getReceiveBase58AddressAt(accountIndex, addressIndex)
+    }
+
+    /**
+     * Generates a Base58 Bitcoin Cash change address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash change address in Base58 format
+     */
+    fun getNextChangeAddress(accountIndex: Int): String {
+        val xpub = getAccountPubB58(accountIndex)
+        val addressIndex = multiAddressFactory.getNextChangeAddressIndex(xpub)
+        return getChangeBase58AddressAt(accountIndex, addressIndex)
+    }
+
+    /**
      * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
@@ -138,26 +141,24 @@ open class BitcoinCashWallet : DeterministicWallet {
      * @param accountIndex  The index of the [Account] you wish to generate an address from
      * @param addressIndex Represents how many positions on the chain beyond what is already used that
      * you wish to generate
-     * @return A Bitcoin Cash address
+     * @return A Bitcoin Cash receive address in Base58 format
      */
-    fun getReceiveAddressAtPositionBch(accountIndex: Int, addressIndex: Int): String? {
-        val xpub = getAccountPubB58(accountIndex)
-        val nextIndex = multiAddressFactory.getNextReceiveAddressIndex(xpub, listOf())
-        return getAccountAt(accountIndex).chains[DeterministicChain.RECEIVE_CHAIN]
-                .getAddressAt(nextIndex + addressIndex).ecKey.toAddress(params)
-                .toCashAddress()
+    fun getReceiveAddressAtPosition(accountIndex: Int, addressIndex: Int): String {
+        return getReceiveBase58AddressAt(accountIndex, addressIndex)
     }
 
-    fun getNextReceiveCashAddress(accountIndex: Int): String {
-        val xpub = getAccountPubB58(accountIndex)
-        val addressIndex = multiAddressFactory.getNextReceiveAddressIndex(xpub, listOf())
-        return getReceiveCashAddressAt(accountIndex, addressIndex)
-    }
-
-    fun getNextChangeCashAddress(accountIndex: Int): String {
-        val xpub = getAccountPubB58(accountIndex)
-        val addressIndex = multiAddressFactory.getNextChangeAddressIndex(xpub)
-        return getChangeCashAddressAt(accountIndex, addressIndex)
+    /**
+     * Allows you to generate a BCH change address at an arbitrary number of positions on the chain
+     * from the next valid unused address. For example, the passing 5 as the position will generate
+     * an address which correlates with the next available address + 5 positions.
+     *
+     * @param accountIndex  The index of the [Account] you wish to generate an address from
+     * @param addressIndex Represents how many positions on the chain beyond what is already used that
+     * you wish to generate
+     * @return A Bitcoin Cash change address in Base58 format
+     */
+    fun getChangeAddressAtPosition(accountIndex: Int, addressIndex: Int): String {
+        return getChangeBase58AddressAt(accountIndex, addressIndex)
     }
 
     fun incrementNextReceiveAddressBch(xpub: String) {
