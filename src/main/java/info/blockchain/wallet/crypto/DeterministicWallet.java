@@ -275,6 +275,7 @@ public abstract class DeterministicWallet implements DeterministicNode {
             .getAddressAt(addressIndex).getEcKey();
     }
 
+    // TODO: 01/02/2018 The below receive/change address strings are coin specific - Consider abstracting
     protected String getReceiveBase58AddressAt(int accountIndex, int addressIndex) {
         ECKey key = getReceiveECKeyAt(accountIndex, addressIndex);
         return key.toAddress(params).toBase58();
@@ -287,16 +288,11 @@ public abstract class DeterministicWallet implements DeterministicNode {
 
     public String getReceiveCashAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getReceiveECKeyAt(accountIndex, addressIndex);
-        return ecKeyToCashAddress(key);
+        return key.toAddress(params).toCashAddress();
     }
 
     public String getChangeCashAddressAt(int accountIndex, int addressIndex) {
         ECKey key = getChangeECKeyAt(accountIndex, addressIndex);
-        return ecKeyToCashAddress(key);
-    }
-
-    private String ecKeyToCashAddress(ECKey key) {
-        Address address = key.toAddress(params);
-        return address.toCashAddress();
+        return key.toAddress(params).toCashAddress();
     }
 }
