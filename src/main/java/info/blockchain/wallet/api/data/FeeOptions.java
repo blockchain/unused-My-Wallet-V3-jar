@@ -48,4 +48,20 @@ public class FeeOptions {
     public FeeLimits getLimits() {
         return limits;
     }
+
+    public void setGasLimit(long gasLimit) {
+        this.gasLimit = gasLimit;
+    }
+
+    public void setRegularFee(long regularFee) {
+        this.regularFee = regularFee;
+    }
+
+    public void setPriorityFee(long priorityFee) {
+        this.priorityFee = priorityFee;
+    }
+
+    public void setLimits(FeeLimits limits) {
+        this.limits = limits;
+    }
 }

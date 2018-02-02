@@ -10,6 +10,18 @@ import io.reactivex.Completable
 import org.bitcoinj.core.NetworkParameters
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
+import info.blockchain.wallet.util.PrivateKeyFactory.WIF_COMPRESSED
+import info.blockchain.wallet.bip44.HDAddress
+import info.blockchain.api.data.UnspentOutput
+import info.blockchain.wallet.bip44.HDAccount
+import info.blockchain.wallet.coin.GenericMetadataAccount
+import info.blockchain.wallet.crypto.DeterministicAccount
+import info.blockchain.wallet.exceptions.HDWalletException
+import java.util.ArrayList
+import info.blockchain.wallet.payment.SpendableUnspentOutputs
+import info.blockchain.wallet.payload.data.Account
+import org.bitcoinj.core.ECKey
+
 
 @Suppress("unused")
 open class BitcoinCashWallet : DeterministicWallet {
@@ -74,7 +86,7 @@ open class BitcoinCashWallet : DeterministicWallet {
     fun getWalletBalance(): BigInteger = balanceManager.walletBalance ?: BigInteger.ZERO
 
     /**
-     * Returns the balance of all imported addresses in BCH, excluding those belonging to
+     * Returns the balance of all imported addresses, excluding those belonging to
      * archived addresses.
      */
     fun getImportedAddressBalance(): BigInteger =
@@ -134,7 +146,7 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     /**
-     * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
+     * Allows you to generate a receive address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
@@ -148,7 +160,7 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     /**
-     * Allows you to generate a BCH change address at an arbitrary number of positions on the chain
+     * Allows you to generate a change address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
@@ -161,41 +173,67 @@ open class BitcoinCashWallet : DeterministicWallet {
         return getChangeBase58AddressAt(accountIndex, addressIndex)
     }
 
-    fun incrementNextReceiveAddressBch(xpub: String) {
+    fun incrementNextReceiveAddress(xpub: String) {
         multiAddressFactory.incrementNextReceiveAddress(xpub, listOf())
     }
 
-    fun incrementNextChangeAddressBch(xpub: String) {
+    fun incrementNextChangeAddress(xpub: String) {
         multiAddressFactory.incrementNextChangeAddress(xpub)
     }
 
+    /**
+     * Returns whether or not an address belongs to this wallet.
+     * @param address The base58 address you want to query
+     * @return
+     */
     fun isOwnAddress(address: String) =
             multiAddressFactory.isOwnHDAddress(address)
 
+    /**
+     * Returns an xPub from an address if the address belongs to this wallet.
+     * @param address The Bitcoin Cash base58 address you want to query
+     * @return  An xPub as a String
+     */
     fun getXpubFromAddress(address: String): String? {
         return multiAddressFactory.getXpubFromAddress(address)
     }
 
     /**
-     * Returns an xPub from a Bitcoin Cash address if the address belongs to this wallet.
-     * @param address The Bitcoin Cash address you want to query
-     * @return  An xPub as a String
-     */
-    fun getXpubFromBchAddress(address: String): String? {
-        return multiAddressFactory.getXpubFromAddress(address)
-    }
-
-    /**
-     * Updates address balance as well as wallet balance in BCH. This is used to immediately update
+     * Updates address balance as well as wallet balance in [BalanceManagerBch]. This is used to immediately update
      * balances after a successful transaction which speeds up the balance the UI reflects without
      * the need to wait for incoming websocket notification.
      *
-     * @param amount  The amount to be subtracted from the address's BCH balance
-     * @param address A valid Bitcoin or Bitcoin cash address
+     * @param amount  The amount to be subtracted from the address's balance
+     * @param address A valid Bitcoin cash address in base58 format
      */
     @Throws(Exception::class)
     fun subtractAmountFromAddressBalance(address: String, amount: BigInteger) {
         balanceManager.subtractAmountFromAddressBalance(address, amount)
+    }
+
+    @Throws(HDWalletException::class)
+    fun getHDKeysForSigning(account: DeterministicAccount,
+                            unspentOutputs: List<UnspentOutput>): List<ECKey> {
+
+        if (!account.node.hasPrivKey())
+            throw HDWalletException("Wallet private key unavailable. First decrypt with second password.")
+        else {
+            val keys = ArrayList<ECKey>()
+
+            if (account != null) {
+                for (unspentOutput in unspentOutputs) {
+                    if (unspentOutput.xpub != null) {
+                        val split = unspentOutput.xpub.path.split("/".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                        val chain = Integer.parseInt(split[1])
+                        val addressIndex = Integer.parseInt(split[2])
+                        val address = account!!.chains[chain]!!.getAddressAt(addressIndex)
+                        keys.add(address.ecKey)
+                    }
+                }
+            }
+
+            return keys
+        }
     }
 
     companion object {
