@@ -432,7 +432,6 @@ public class PayloadManagerTest extends MockedResponseTest {
         LinkedList<String> responseList = new LinkedList<>();
         responseList.add(walletBase);
         responseList.add("{}");
-        responseList.add("{}");
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
                 "multiaddress/wallet_v3_5_m1.txt").toURI())), Charset.forName("utf-8")));
         responseList.add(new String(Files.readAllBytes(Paths.get(getClass().getClassLoader().getResource(
