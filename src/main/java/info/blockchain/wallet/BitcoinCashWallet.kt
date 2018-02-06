@@ -170,13 +170,15 @@ open class BitcoinCashWallet : DeterministicWallet {
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
-     * @param accountIndex  The index of the [Account] you wish to generate an address from
-     * @param addressIndex Represents how many positions on the chain beyond what is already used that
-     * you wish to generate
-     * @return A Bitcoin Cash receive address in Base58 format
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @param position Represents how many positions on the chain beyond what is already used that
+     *                 you wish to generate
+     * @return A Bitcoin Cash receive address in Base58
      */
-    fun getReceiveAddressAtPosition(accountIndex: Int, addressIndex: Int): String {
-        return getReceiveBase58AddressAt(accountIndex, addressIndex)
+    fun getReceiveAddressAtPosition(accountIndex: Int, position: Int): String {
+        val xpub = getAccountPubB58(accountIndex)
+        val addressIndex = multiAddressFactory.getNextReceiveAddressIndex(xpub, listOf())
+        return getReceiveBase58AddressAt(accountIndex, addressIndex + position)
     }
 
     /**
@@ -184,12 +186,36 @@ open class BitcoinCashWallet : DeterministicWallet {
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
-     * @param accountIndex  The index of the [Account] you wish to generate an address from
-     * @param addressIndex Represents how many positions on the chain beyond what is already used that
-     * you wish to generate
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @param position Represents how many positions on the chain beyond what is already used that
+     *                 you wish to generate
+     * @return A Bitcoin Cash change address in Base58
+     */
+    fun getChangeAddressAtPosition(accountIndex: Int, position: Int): String {
+        val xpub = getAccountPubB58(accountIndex)
+        val addressIndex = multiAddressFactory.getNextChangeAddressIndex(xpub)
+        return getChangeBase58AddressAt(accountIndex, addressIndex + position)
+    }
+
+    /**
+     * Allows you to generate a receive address from any given point on the receive chain.
+     *
+     * @param accountIndex  The index of the account you wish to generate an address from
+     * @param addressIndex What position on the chain the address you wish to create is
+     * @return A Bitcoin Cash receive address in Base58 format
+     */
+    fun getReceiveAddressAtArbitraryPosition(accountIndex: Int, addressIndex: Int): String {
+        return getReceiveBase58AddressAt(accountIndex, addressIndex)
+    }
+
+    /**
+     * Allows you to generate a change address from any given point on the change chain.
+     *
+     * @param accountIndex  The index of the account you wish to generate an address from
+     * @param addressIndex What position on the chain the address you wish to create is
      * @return A Bitcoin Cash change address in Base58 format
      */
-    fun getChangeAddressAtPosition(accountIndex: Int, addressIndex: Int): String {
+    fun getChangeAddressAtArbitraryPosition(accountIndex: Int, addressIndex: Int): String {
         return getChangeBase58AddressAt(accountIndex, addressIndex)
     }
 
@@ -240,15 +266,13 @@ open class BitcoinCashWallet : DeterministicWallet {
         else {
             val keys = ArrayList<ECKey>()
 
-            if (account != null) {
-                for (unspentOutput in unspentOutputs) {
-                    if (unspentOutput.xpub != null) {
-                        val split = unspentOutput.xpub.path.split("/".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                        val chain = Integer.parseInt(split[1])
-                        val addressIndex = Integer.parseInt(split[2])
-                        val address = account!!.chains[chain]!!.getAddressAt(addressIndex)
-                        keys.add(address.ecKey)
-                    }
+            for (unspentOutput in unspentOutputs) {
+                if (unspentOutput.xpub != null) {
+                    val split = unspentOutput.xpub.path.split("/".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    val chain = Integer.parseInt(split[1])
+                    val addressIndex = Integer.parseInt(split[2])
+                    val address = account.chains[chain]!!.getAddressAt(addressIndex)
+                    keys.add(address.ecKey)
                 }
             }
 

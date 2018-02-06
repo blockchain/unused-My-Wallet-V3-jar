@@ -2,25 +2,27 @@ package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.MockedResponseTest;
 import info.blockchain.wallet.api.data.FeeOptions;
-import io.reactivex.observers.TestObserver;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+
+import io.reactivex.observers.TestObserver;
 
 public class FeeApiTest extends MockedResponseTest {
 
     @Test
-    @Ignore // TODO: 12/01/2018  These are failing
     public void getFeeOptions() throws Exception {
 
         URI uri = getClass().getClassLoader().getResource("fee_options.txt").toURI();
         String feeOptions = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(feeOptions);
+        mockInterceptor.setResponseCode(200);
         final TestObserver<FeeOptions> testObserver = new FeeApi().getFeeOptions().test();
 
         testObserver.assertComplete();
@@ -34,13 +36,13 @@ public class FeeApiTest extends MockedResponseTest {
     }
 
     @Test
-    @Ignore // TODO: 12/01/2018  These are failing
     public void getEthFeeOptions() throws Exception {
 
         URI uri = getClass().getClassLoader().getResource("fee_eth_options.txt").toURI();
         String feeOptions = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
 
         mockInterceptor.setResponseString(feeOptions);
+        mockInterceptor.setResponseCode(200);
         final TestObserver<FeeOptions> testObserver = new FeeApi().getEthFeeOptions().test();
 
         testObserver.assertComplete();
