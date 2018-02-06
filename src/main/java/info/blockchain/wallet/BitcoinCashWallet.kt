@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.util.*
 
-
 @Suppress("unused")
 open class BitcoinCashWallet : DeterministicWallet {
 
@@ -128,6 +127,19 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     /**
+     * Generates a bech32 Bitcoin Cash receive address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash receive address in bech32 format
+     */
+    fun getNextReceiveCashAddress(accountIndex: Int): String {
+        val xpub = getAccountPubB58(accountIndex)
+        val addressIndex = multiAddressFactory.getNextReceiveAddressIndex(xpub, listOf())
+        return getReceiveCashAddressAt(accountIndex, addressIndex)
+    }
+
+    /**
      * Generates a Base58 Bitcoin Cash change address for an account at a given position. The
      * address returned will be the next unused in the chain.
      *
@@ -141,7 +153,20 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     /**
-     * Allows you to generate a BCH receive address at an arbitrary number of positions on the chain
+     * Generates a bech32 Bitcoin Cash change address for an account at a given position. The
+     * address returned will be the next unused in the chain.
+     *
+     * @param accountIndex The index of the [DeterministicAccount] you wish to generate an address from
+     * @return A Bitcoin Cash change address in bech32 format
+     */
+    fun getNextChangeCashAddress(accountIndex: Int): String {
+        val xpub = getAccountPubB58(accountIndex)
+        val addressIndex = multiAddressFactory.getNextChangeAddressIndex(xpub)
+        return getChangeCashAddressAt(accountIndex, addressIndex)
+    }
+
+    /**
+     * Allows you to generate a receive address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
@@ -157,7 +182,7 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     /**
-     * Allows you to generate a BCH change address at an arbitrary number of positions on the chain
+     * Allows you to generate a change address at an arbitrary number of positions on the chain
      * from the next valid unused address. For example, the passing 5 as the position will generate
      * an address which correlates with the next available address + 5 positions.
      *
@@ -173,9 +198,9 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     /**
-     * Allows you to generate a BCH receive address from any given point on the receive chain.
+     * Allows you to generate a receive address from any given point on the receive chain.
      *
-     * @param accountIndex  The index of the [Account] you wish to generate an address from
+     * @param accountIndex  The index of the account you wish to generate an address from
      * @param addressIndex What position on the chain the address you wish to create is
      * @return A Bitcoin Cash receive address in Base58 format
      */
@@ -184,9 +209,9 @@ open class BitcoinCashWallet : DeterministicWallet {
     }
 
     /**
-     * Allows you to generate a BCH change address from any given point on the change chain.
+     * Allows you to generate a change address from any given point on the change chain.
      *
-     * @param accountIndex  The index of the [Account] you wish to generate an address from
+     * @param accountIndex  The index of the account you wish to generate an address from
      * @param addressIndex What position on the chain the address you wish to create is
      * @return A Bitcoin Cash change address in Base58 format
      */

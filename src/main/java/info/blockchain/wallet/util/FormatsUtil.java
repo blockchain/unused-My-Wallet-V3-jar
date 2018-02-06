@@ -6,6 +6,7 @@ import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.CashAddress;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.WrongNetworkException;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
@@ -106,7 +107,6 @@ public class FormatsUtil {
         return ret;
     }
 
-    // TODO: 04/01/2018 Pass params in. What about other coin params?
     public static boolean isValidBitcoinAddress(final String address) {
 
         boolean ret;
@@ -275,7 +275,7 @@ public class FormatsUtil {
      * @param address    The String you wish to test
      * @return Is this a valid BECH32 format BCH address
      */
-    public static Boolean isValidBitcoinCashAddress(String address) {
+    public static Boolean isValidBitcoinCashAddress(NetworkParameters networkParameters, String address) {
         /*
          * Check basic address requirements, i.e. is not empty
          */
@@ -286,7 +286,16 @@ public class FormatsUtil {
                 CashAddress.decode(address);
                 return true;
             } catch (AddressFormatException e) {
-                return false;
+
+                if (address.startsWith(networkParameters.getBech32AddressPrefix())) {
+                    return false;
+                } else {
+                    return isValidBitcoinCashAddress(
+                        networkParameters,
+                        networkParameters.getBech32AddressPrefix() +
+                            (char)(networkParameters.getBech32AddressSeparator()) +
+                            address);
+                }
             }
         }
     }
