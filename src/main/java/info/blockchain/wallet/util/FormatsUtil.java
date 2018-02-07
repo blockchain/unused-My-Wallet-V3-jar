@@ -1,7 +1,8 @@
 package info.blockchain.wallet.util;
 
 import info.blockchain.wallet.api.PersistentUrls;
-
+import java.nio.ByteBuffer;
+import java.util.regex.Pattern;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -15,9 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.Hash;
 import org.web3j.utils.Numeric;
-
-import java.nio.ByteBuffer;
-import java.util.regex.Pattern;
 
 public class FormatsUtil {
 
@@ -43,6 +41,8 @@ public class FormatsUtil {
     }
 
     public static boolean isBitcoinUri(final String s) {
+
+        if(s == null)return false;
 
         boolean ret;
 
@@ -73,22 +73,26 @@ public class FormatsUtil {
 
     public static String getBitcoinAddress(final String s) {
 
+        if(s == null)return "";
+
         String ret;
         BitcoinURI uri;
 
         try {
             uri = new BitcoinURI(s);
             Address address = uri.getAddress();
-            assert address != null;
+            if(address == null) throw new BitcoinURIParseException(s+" is not valid bitcoin uri.");
             ret = address.toString();
         } catch (BitcoinURIParseException bupe) {
-            ret = null;
+            ret = "";
         }
 
         return ret;
     }
 
     public static String getBitcoinAmount(final String s) {
+
+        if(s == null)return "0.0000";
 
         String ret;
         BitcoinURI uri;
@@ -101,7 +105,7 @@ public class FormatsUtil {
                 ret = "0.0000";
             }
         } catch (BitcoinURIParseException bupe) {
-            ret = null;
+            ret = "0.0000";
         }
 
         return ret;
@@ -110,6 +114,9 @@ public class FormatsUtil {
     public static boolean isValidBitcoinAddress(final String address) {
 
         boolean ret;
+
+        if(address == null)
+            return false;
 
         try {
             Address.fromBase58(PersistentUrls.getInstance().getBitcoinParams(), address);

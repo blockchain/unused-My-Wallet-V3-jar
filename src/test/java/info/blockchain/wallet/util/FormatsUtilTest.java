@@ -1,19 +1,20 @@
 package info.blockchain.wallet.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.bitcoinj.params.BitcoinCashMainNetParams;
 import org.bitcoinj.params.BitcoinCashTestNet3Params;
 import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class FormatsUtilTest {
 
     @Test
     public void isEncrypted() throws Exception {
 
-        assertTrue(!FormatsUtil.isKeyEncrypted(null));
-        assertTrue(!FormatsUtil.isKeyEncrypted("3tcnfpTzY6G6oL4NujXkXJfpkEJr69fDSRESuA76izac"));
+        assertFalse(FormatsUtil.isKeyEncrypted(null));
+        assertFalse(FormatsUtil.isKeyEncrypted("3tcnfpTzY6G6oL4NujXkXJfpkEJr69fDSRESuA76izac"));
 
         assertTrue(FormatsUtil.isKeyEncrypted("51jTHC6+phVaDTqZOyldKRRqrZQiXm/IhTMAjM/G9eCVQJt6POLTsKQT29RlFH9vH2tbJaowM5firNiSiNNIPw=="));
         assertTrue(FormatsUtil.isKeyEncrypted("QQBIDa4SO84Uow1AlWo/1STqO2n5OXN6seU2eULjK/4ydHYW/LRTmBQT3eyIgdYCnNtJ1QBSatZ/9d4oNbkH0pmPeZEd+4Sekz9zoqfJs35k0kt7R3De+L6cqYymLpQJLELZwlP78SmWnlC31pCAB/lklBXwlv9xcSRq9qO9sLk="));
@@ -22,9 +23,9 @@ public class FormatsUtilTest {
     @Test
     public void isUnencrypted() throws Exception {
 
-        assertTrue(!FormatsUtil.isKeyUnencrypted(null));
-        assertTrue(!FormatsUtil.isKeyUnencrypted("51jTHC6+phVaDTqZOyldKRRqrZQiXm/IhTMAjM/G9eCVQJt6POLTsKQT29RlFH9vH2tbJaowM5firNiSiNNIPw=="));
-        assertTrue(!FormatsUtil.isKeyUnencrypted("QQBIDa4SO84Uow1AlWo/1STqO2n5OXN6seU2eULjK/4ydHYW/LRTmBQT3eyIgdYCnNtJ1QBSatZ/9d4oNbkH0pmPeZEd+4Sekz9zoqfJs35k0kt7R3De+L6cqYymLpQJLELZwlP78SmWnlC31pCAB/lklBXwlv9xcSRq9qO9sLk="));
+        assertFalse(FormatsUtil.isKeyUnencrypted(null));
+        assertFalse(FormatsUtil.isKeyUnencrypted("51jTHC6+phVaDTqZOyldKRRqrZQiXm/IhTMAjM/G9eCVQJt6POLTsKQT29RlFH9vH2tbJaowM5firNiSiNNIPw=="));
+        assertFalse(FormatsUtil.isKeyUnencrypted("QQBIDa4SO84Uow1AlWo/1STqO2n5OXN6seU2eULjK/4ydHYW/LRTmBQT3eyIgdYCnNtJ1QBSatZ/9d4oNbkH0pmPeZEd+4Sekz9zoqfJs35k0kt7R3De+L6cqYymLpQJLELZwlP78SmWnlC31pCAB/lklBXwlv9xcSRq9qO9sLk="));
         assertTrue(FormatsUtil.isKeyUnencrypted("3tcnfpTzY6G6oL4NujXkXJfpkEJr69fDSRESuA76izac"));
     }
 
@@ -49,4 +50,39 @@ public class FormatsUtilTest {
         assertTrue(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8pc"));
     }
 
+    @Test
+    public void getBitcoinAddress() throws Exception {
+
+        assertEquals("", FormatsUtil.getBitcoinAddress(null));
+        assertEquals("", FormatsUtil.getBitcoinAddress(""));
+        assertEquals("", FormatsUtil.getBitcoinAddress("Tobi Kadachi"));
+        assertEquals("", FormatsUtil.getBitcoinAddress("bitcoin:?r=https://bitpay.com/i/AX146S9yK1ftUPmZGoNr9B"));
+        assertEquals("12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu", FormatsUtil.getBitcoinAddress("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu"));
+        assertEquals("12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu", FormatsUtil.getBitcoinAddress("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu?amount=1.2"));
+        assertEquals("12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu", FormatsUtil.getBitcoinAddress("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu?amount=1.2&message=Payment&label=Satoshi&extra=other-param"));
+    }
+
+    @Test
+    public void getBitcoinAmount() throws Exception {
+
+        assertEquals("0.0000", FormatsUtil.getBitcoinAmount(null));
+        assertEquals("0.0000", FormatsUtil.getBitcoinAmount(""));
+        assertEquals("0.0000", FormatsUtil.getBitcoinAmount("Tobi Kadachi"));
+        assertEquals("0.0000", FormatsUtil.getBitcoinAmount("bitcoin:?r=https://bitpay.com/i/AX146S9yK1ftUPmZGoNr9B"));
+        assertEquals("0.0000", FormatsUtil.getBitcoinAmount("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu"));
+        assertEquals("120000000", FormatsUtil.getBitcoinAmount("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu?amount=1.2"));
+        assertEquals("120000000", FormatsUtil.getBitcoinAmount("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu?amount=1.2&message=Payment&label=Satoshi&extra=other-param"));
+    }
+
+    @Test
+    public void isBitcoinUri() throws Exception {
+
+        assertFalse(FormatsUtil.isBitcoinUri(null));
+        assertFalse(FormatsUtil.isBitcoinUri(""));
+        assertFalse(FormatsUtil.isBitcoinUri("Tobi Kadachi"));
+        assertTrue(FormatsUtil.isBitcoinUri("bitcoin:?r=https://bitpay.com/i/AX146S9yK1ftUPmZGoNr9B"));
+        assertTrue(FormatsUtil.isBitcoinUri("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu"));
+        assertTrue(FormatsUtil.isBitcoinUri("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu?amount=1.2"));
+        assertTrue(FormatsUtil.isBitcoinUri("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu?amount=1.2&message=Payment&label=Satoshi&extra=other-param"));
+    }
 }
