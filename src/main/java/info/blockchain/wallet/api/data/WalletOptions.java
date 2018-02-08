@@ -27,6 +27,9 @@ public class WalletOptions {
     @JsonProperty("shapeshift")
     private ShapeShiftOptions shapeshift;
 
+    @JsonProperty("ethereum")
+    private EthereumOptions ethereum;
+
     @JsonProperty("androidUpgrade")
     private Map<String, Integer> androidUpgrade = new HashMap<>();
 
@@ -54,6 +57,10 @@ public class WalletOptions {
 
     public ShapeShiftOptions getShapeshift() {
         return shapeshift;
+    }
+
+    public EthereumOptions getEthereum() {
+        return ethereum;
     }
 
     public Map<String, Integer> getAndroidUpgrade() {

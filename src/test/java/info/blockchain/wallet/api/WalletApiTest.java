@@ -107,4 +107,26 @@ public class WalletApiTest extends MockedResponseTest {
         assertEquals(1.0, result.getRolloutFraction(), 0);
         assertEquals(20, result.getUpperLimit());
     }
+
+    @Test
+    public void getEthereumOptions() throws IOException, URISyntaxException {
+        mockInterceptor.setResponseString("{\n"
+            + "\t\"androidBuyPercent\": 1.00,\n"
+            + "\t\"android\": {\n"
+            + "\t\t\"showUnocoin\": false\n"
+            + "\t},\n"
+            + "\"ethereum\": {\n"
+            + "    \"lastTxFuse\": 600\n"
+            + "  }"
+            + "}");
+        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
+
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+
+        long lastTxFuse = testObserver.values().get(0)
+            .getEthereum().getLastTxFuse();
+
+        assertEquals(600, lastTxFuse);
+    }
 }

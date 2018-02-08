@@ -165,4 +165,12 @@ public class EthereumWallet {
     public void setLastTransactionHash(String txHash) {
         walletData.setLastTx(txHash);
     }
+
+    public void setLastTransactionTimestamp(long timestamp) {
+        walletData.setLastTxTimestamp(timestamp);
+    }
+
+    public long getLastTransactionTimestamp() {
+        return walletData.getLastTxTimestamp();
+    }
 }

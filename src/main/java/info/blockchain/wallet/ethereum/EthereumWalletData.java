@@ -35,6 +35,9 @@ public class EthereumWalletData {
     @JsonProperty("last_tx")
     private String lastTx;
 
+    @JsonProperty("last_tx_timestamp")
+    private long lastTxTimestamp;
+
     public boolean hasSeen() {
         return hasSeen;
     }
@@ -85,5 +88,13 @@ public class EthereumWalletData {
 
     public void setLastTx(String lastTx) {
         this.lastTx = lastTx;
+    }
+
+    public long getLastTxTimestamp() {
+        return lastTxTimestamp;
+    }
+
+    public void setLastTxTimestamp(long lastTxTimestamp) {
+        this.lastTxTimestamp = lastTxTimestamp;
     }
 }
