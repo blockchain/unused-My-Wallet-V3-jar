@@ -84,12 +84,14 @@ public class MultiAddressFactory {
     }
 
     /**
-     * @param all A list of all xpubs and legacy addresses
-     * @param watchOnly A list of watch-only legacy addresses
-     * @param activeLegacy A list of active legacy addresses. Used to flag transactions as 'watch
-     * only'.
+     * @param all A list of all xpubs and legacy addresses whose transactions are to
+     * be retrieved from API.
+     * @param watchOnly A list of watch-only legacy addresses. Used to flag transactions as 'watch-only'
+     * @param activeLegacy (Hacky! Needs a rethink) Only set this when fetching a transaction list
+     * for imported addresses, otherwise set as Null.
+     * A list of all active legacy addresses. Used for 'Imported address' transaction list.
      * @param onlyShow Xpub or legacy address. Used to fetch transaction only relating to this
-     * address.
+     * address. Set as Null for a consolidated list like 'All Accounts' or 'Imported'.
      * @param limit Maximum amount of transactions fetched
      * @param offset Page offset
      * @return
@@ -329,6 +331,9 @@ public class MultiAddressFactory {
                                 changeMap.put(outputAddr, outputValue);
                             }
 
+                        } else if (txSummary.inputsMap.keySet().contains(outputAddr)) {
+                            //Our change
+                            changeMap.put(outputAddr, outputValue);
                         } else {
                             //Address does not belong to us
                             txSummary.outputsMap.put(outputAddr, outputValue);
@@ -353,7 +358,6 @@ public class MultiAddressFactory {
 
             //If we are filtering for legacy and nothing found
             if (legacy != null && !isLegacy) {
-                System.out.println("wat");
                 continue;
             }
 
