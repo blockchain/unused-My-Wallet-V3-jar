@@ -220,8 +220,9 @@ public class MultiAddressFactory {
 
         for (Transaction tx : txs) {
 
-            if (tx.getBlockHeight() < startingBlockHeight) {
+            if (tx.getBlockHeight() != 0 && tx.getBlockHeight() < startingBlockHeight) {
                 //Filter out txs before blockHeight (mainly for BCH)
+                //Block height will be 0 until included in a block
                 continue;
             }
 
