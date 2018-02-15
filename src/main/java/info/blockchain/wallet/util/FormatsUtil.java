@@ -282,11 +282,10 @@ public class FormatsUtil {
      * @param address    The String you wish to test
      * @return Is this a valid BECH32 format BCH address
      */
-    public static Boolean isValidBitcoinCashAddress(String address) {
+    public static Boolean isValidBitcoinCashAddress(NetworkParameters networkParameters, String address) {
         /*
          * Check basic address requirements, i.e. is not empty
          */
-        NetworkParameters networkParameters = PersistentUrls.getInstance().getBitcoinCashParams();
 
         if (address == null || address.isEmpty()) {
             return false;
@@ -299,7 +298,7 @@ public class FormatsUtil {
                 if (address.startsWith(networkParameters.getBech32AddressPrefix())) {
                     return false;
                 } else {
-                    return isValidBitcoinCashAddress(
+                    return isValidBitcoinCashAddress(networkParameters,
                         networkParameters.getBech32AddressPrefix() +
                             (char)(networkParameters.getBech32AddressSeparator()) +
                             address);
@@ -330,20 +329,19 @@ public class FormatsUtil {
      * @param address
      * @return Short cash address (Example: qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p)
      */
-    public static String toShortCashAddress(String address) {
+    public static String toShortCashAddress(NetworkParameters networkParameters, String address) {
 
         if (address == null && address.isEmpty()) {
             throw new AddressFormatException("Invalid address format - "+address);
         }
 
-        NetworkParameters networkParameters = PersistentUrls.getInstance().getBitcoinCashParams();
         String result = address;
 
         if (isValidBitcoinAddress(address)) {
             address = Address.fromBase58(networkParameters, address).toCashAddress();
         }
 
-        if (isValidBitcoinCashAddress(address)) {
+        if (isValidBitcoinCashAddress(networkParameters, address)) {
             result = address.replace(
                 networkParameters.getBech32AddressPrefix() + (char)networkParameters
                     .getBech32AddressSeparator(), "");

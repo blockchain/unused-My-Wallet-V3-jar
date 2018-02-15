@@ -20,11 +20,6 @@ import retrofit2.Retrofit;
 
 public class FormatsUtilTest {
 
-    @Before
-    public void setup() {
-        initFramework(false);
-    }
-
     @Test
     public void isEncrypted() throws Exception {
 
@@ -46,25 +41,24 @@ public class FormatsUtilTest {
 
     @Test
     public void isValidBitcoinCashAddress() {
-        assertFalse(FormatsUtil.isValidBitcoinCashAddress(null));
-        assertFalse(FormatsUtil.isValidBitcoinCashAddress(""));
-        assertFalse(FormatsUtil.isValidBitcoinCashAddress("test string"));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), null));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), ""));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "test string"));
         // Standard BTC address
-        assertFalse(FormatsUtil.isValidBitcoinCashAddress("19dPodLBKT4Fpym4PJ3UfkoMBDiTGkHw2V"));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "19dPodLBKT4Fpym4PJ3UfkoMBDiTGkHw2V"));
         // BECH32 Segwit BTC address
-        assertFalse(FormatsUtil.isValidBitcoinCashAddress("3MG8XBSphrQg8HLkz51Y6vJVgtXV1R8qS6"));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "3MG8XBSphrQg8HLkz51Y6vJVgtXV1R8qS6"));
         // Valid BECH32 BCH address
-        assertTrue(FormatsUtil.isValidBitcoinCashAddress("bitcoincash:qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8pc"));
+        assertTrue(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "bitcoincash:qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8pc"));
         // Valid BECH32 BCH address but with single digit changed
-        assertFalse(FormatsUtil.isValidBitcoinCashAddress("bitcoincash:qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8pd"));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "bitcoincash:qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8pd"));
         // Valid BECH32 BCH address but with single digit missing
-        assertFalse(FormatsUtil.isValidBitcoinCashAddress("bitcoincash:qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8p"));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "bitcoincash:qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8p"));
         // Valid BECH32 BCH address - no prefix
-        assertTrue(FormatsUtil.isValidBitcoinCashAddress("qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8pc"));
+        assertTrue(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "qp02xpzz9qq0u7mtefw028mtlkszshxxdv0xsgv8pc"));
 
         // Valid Testnet cash address
-        initFramework(true);
-        assertTrue(FormatsUtil.isValidBitcoinCashAddress("bchtest:ppm2qsznhks23z7629mms6s4cwef74vcwvhanqgjxu"));
+        assertTrue(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashTestNet3Params.get(), "bchtest:ppm2qsznhks23z7629mms6s4cwef74vcwvhanqgjxu"));
     }
 
     @Test
@@ -107,88 +101,29 @@ public class FormatsUtilTest {
     public void toShortCashAddressValid() throws Exception {
 
         assertEquals("qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p",
-            FormatsUtil.toShortCashAddress("bitcoincash:qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p"));
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "bitcoincash:qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p"));
 
         assertEquals("qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p",
-            FormatsUtil.toShortCashAddress("1BppmEwfuWCB3mbGqah2YuQZEZQGK3MfWc"));
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "1BppmEwfuWCB3mbGqah2YuQZEZQGK3MfWc"));
 
         assertEquals("qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p",
-            FormatsUtil.toShortCashAddress("qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p"));
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p"));
     }
 
     @Test
     public void toShortCashAddressInvalid() throws Exception {
 
         try {
-            FormatsUtil.toShortCashAddress("bitcoincashqpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a");
-            FormatsUtil.toShortCashAddress("qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a");
-            FormatsUtil.toShortCashAddress("bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu");
-            FormatsUtil.toShortCashAddress("bitcoincash:gdx6z");
-            FormatsUtil.toShortCashAddress("bitcoincash:");
-            FormatsUtil.toShortCashAddress("");
-            FormatsUtil.toShortCashAddress(null);
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "bitcoincashqpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a");
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a");
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "bitcoin:12A1MyfXbW6RhdRAZEqofac5jCQQjwEPBu");
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "bitcoincash:gdx6z");
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "bitcoincash:");
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), "");
+            FormatsUtil.toShortCashAddress(BitcoinCashMainNetParams.get(), null);
             fail("Addresses should not be valid.");
         }catch (AddressFormatException e) {
             assertTrue("Failed as expected",true);
         }
-    }
-
-
-    private void initFramework(final boolean isTestnet) {
-        BlockchainFramework.init(new FrameworkInterface() {
-            @Override
-            public Retrofit getRetrofitApiInstance() {
-                return null;
-            }
-
-            @Override
-            public Retrofit getRetrofitExplorerInstance() {
-                return null;
-            }
-
-            @Override
-            public Retrofit getRetrofitShapeShiftInstance() {
-                return null;
-            }
-
-            @Override
-            public Environment getEnvironment() {
-                return null;
-            }
-
-            @Override
-            public NetworkParameters getBitcoinParams() {
-                if (isTestnet) {
-                    return BitcoinTestNet3Params.get();
-                } else {
-                    return BitcoinMainNetParams.get();
-                }
-
-            }
-
-            @Override
-            public NetworkParameters getBitcoinCashParams() {
-                if (isTestnet) {
-                    return BitcoinCashTestNet3Params.get();
-                } else {
-                    return BitcoinCashMainNetParams.get();
-                }
-            }
-
-            @Override
-            public String getApiCode() {
-                return null;
-            }
-
-            @Override
-            public String getDevice() {
-                return null;
-            }
-
-            @Override
-            public String getAppVersion() {
-                return null;
-            }
-        });
     }
 }
