@@ -2,7 +2,6 @@ package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.data.FeeOptions;
-
 import io.reactivex.Observable;
 
 public class FeeApi {

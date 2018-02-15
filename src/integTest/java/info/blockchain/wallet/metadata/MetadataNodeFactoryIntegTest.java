@@ -5,11 +5,7 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDWallet;
 import info.blockchain.wallet.bip44.HDWalletFactory;
 import info.blockchain.wallet.bip44.HDWalletFactory.Language;
-import info.blockchain.wallet.contacts.data.PublicContactDetails;
-import info.blockchain.wallet.util.MetadataUtil;
-import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class MetadataNodeFactoryIntegTest extends BaseIntegTest {
@@ -18,7 +14,7 @@ public class MetadataNodeFactoryIntegTest extends BaseIntegTest {
 
     private HDWallet getWallet() throws Exception {
         return HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBitcoinParams(), Language.US,
                 "15e23aa73d25994f1921a1256f93f72c",
                 "",
                 1);

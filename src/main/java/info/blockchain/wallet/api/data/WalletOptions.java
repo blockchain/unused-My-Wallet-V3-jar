@@ -3,7 +3,6 @@ package info.blockchain.wallet.api.data;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,11 +27,17 @@ public class WalletOptions {
     @JsonProperty("shapeshift")
     private ShapeShiftOptions shapeshift;
 
+    @JsonProperty("ethereum")
+    private EthereumOptions ethereum;
+
     @JsonProperty("androidUpgrade")
     private Map<String, Integer> androidUpgrade = new HashMap<>();
 
     @JsonProperty("mobileInfo")
     private Map<String, String> mobileInfo = new HashMap<>();
+
+    @JsonProperty("bcash")
+    private Map<String, Integer> bitcoinCashFees = new HashMap<>();
 
     public List<String> getBuySellCountries() {
         return buySellCountries;
@@ -54,6 +59,10 @@ public class WalletOptions {
         return shapeshift;
     }
 
+    public EthereumOptions getEthereum() {
+        return ethereum;
+    }
+
     public Map<String, Integer> getAndroidUpgrade() {
         return androidUpgrade;
     }
@@ -61,4 +70,9 @@ public class WalletOptions {
     public Map<String, String> getMobileInfo() {
         return mobileInfo;
     }
+
+    public int getBchFeePerByte() {
+        return bitcoinCashFees.get("feePerByte");
+    }
+
 }

@@ -2,12 +2,10 @@ package info.blockchain.wallet.prices;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.prices.data.PriceDatum;
-
-import java.util.List;
-import java.util.Map;
-
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @see <a href=https://api.blockchain.info/price/specs>Blockchain Price API specs</a>

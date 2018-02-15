@@ -1,9 +1,7 @@
 package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.Environment;
-
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-
+import org.bitcoinj.core.NetworkParameters;
 import retrofit2.Retrofit;
 
 /**
@@ -33,8 +31,12 @@ public final class BlockchainFramework {
         return blockchainInterface.getEnvironment();
     }
 
-    public static AbstractBitcoinNetParams getNetworkParameters() {
-        return blockchainInterface.getNetworkParameters();
+    public static NetworkParameters getBitcoinParams() {
+        return blockchainInterface.getBitcoinParams();
+    }
+
+    public static NetworkParameters getBitcoinCashParams() {
+        return blockchainInterface.getBitcoinCashParams();
     }
 
     public static String getApiCode() {

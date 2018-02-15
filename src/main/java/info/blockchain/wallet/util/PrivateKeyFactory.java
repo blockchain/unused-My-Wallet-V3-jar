@@ -6,21 +6,20 @@ import info.blockchain.api.data.Balance;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.exceptions.ApiException;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.ArrayUtils;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.DumpedPrivateKey;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.util.encoders.Hex;
-import retrofit2.Call;
-import retrofit2.Response;
-
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.DumpedPrivateKey;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.params.BitcoinMainNetParams;
+import org.spongycastle.util.encoders.Hex;
+import retrofit2.Call;
+import retrofit2.Response;
 
 @SuppressWarnings("WeakerAccess")
 public class PrivateKeyFactory {
@@ -35,7 +34,8 @@ public class PrivateKeyFactory {
 
     public String getFormat(String key) {
 
-        boolean isTestnet = !(PersistentUrls.getInstance().getCurrentNetworkParams() instanceof MainNetParams);
+        // TODO: 04/01/2018 Pass params in. What about other coin params?
+        boolean isTestnet = !(PersistentUrls.getInstance().getBitcoinParams() instanceof BitcoinMainNetParams);
 
         // 51 characters base58, always starts with a '5'  (or '9', for testnet)
         if (!isTestnet && key.matches("^5[1-9A-HJ-NP-Za-km-z]{50}$") ||
@@ -84,11 +84,12 @@ public class PrivateKeyFactory {
         }
     }
 
+    // TODO: 04/01/2018 Pass params in. What about other coin params?
     public ECKey getKey(String format, String data) throws Exception {
         switch (format) {
             case WIF_UNCOMPRESSED:
             case WIF_COMPRESSED:
-                DumpedPrivateKey pk = DumpedPrivateKey.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), data);
+                DumpedPrivateKey pk = DumpedPrivateKey.fromBase58(PersistentUrls.getInstance().getBitcoinParams(), data);
                 return pk.getKey();
             case BASE58:
                 return decodeBase58PK(data);
@@ -108,20 +109,22 @@ public class PrivateKeyFactory {
         return determineKey(hash.toString());
     }
 
+    // TODO: 04/01/2018 Pass params in. What about other coin params?
     private ECKey determineKey(String hash) throws Exception {
 
         ECKey uncompressedKey = decodeHexPK(hash, false);
         ECKey compressedKey = decodeHexPK(hash, true);
 
         try {
-            String uncompressedAddress = uncompressedKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
-            String compressedAddress = compressedKey.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
+            String uncompressedAddress = uncompressedKey.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString();
+            String compressedAddress = compressedKey.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString();
 
             ArrayList<String> list = new ArrayList<>();
             list.add(uncompressedAddress);
             list.add(compressedAddress);
 
-            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
+            BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                    BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
             Call<HashMap<String, Balance>> call = blockExplorer.getBalance(list, FilterType.RemoveUnspendable);
 
             Response<HashMap<String, Balance>> exe = call.execute();
@@ -148,7 +151,7 @@ public class PrivateKeyFactory {
         }
     }
 
-    private ECKey decodeBase58PK(String base58Priv) throws Exception {
+    private ECKey decodeBase58PK(String base58Priv) {
         byte[] privBytes = Base58.decode(base58Priv);
         // Prepend a zero byte to make the biginteger unsigned
         byte[] appendZeroByte = ArrayUtils.addAll(new byte[1], privBytes);
@@ -169,7 +172,7 @@ public class PrivateKeyFactory {
         return ECKey.fromPrivate(new BigInteger(appendZeroByte), compressed);
     }
 
-    private ECKey decodePK(String base58Priv) throws Exception {
+    private ECKey decodePK(String base58Priv) {
         return decodeBase58PK(base58Priv);
     }
 

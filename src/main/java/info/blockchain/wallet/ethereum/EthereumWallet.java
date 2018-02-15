@@ -7,18 +7,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.blockchain.wallet.exceptions.MetadataException;
 import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.util.MetadataUtil;
-
-import org.bitcoinj.crypto.DeterministicKey;
-import org.spongycastle.crypto.InvalidCipherTextException;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.spongycastle.crypto.InvalidCipherTextException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -167,5 +164,13 @@ public class EthereumWallet {
 
     public void setLastTransactionHash(String txHash) {
         walletData.setLastTx(txHash);
+    }
+
+    public void setLastTransactionTimestamp(long timestamp) {
+        walletData.setLastTxTimestamp(timestamp);
+    }
+
+    public long getLastTransactionTimestamp() {
+        return walletData.getLastTxTimestamp();
     }
 }

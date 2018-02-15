@@ -2,25 +2,19 @@ package info.blockchain.wallet.contacts.data;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import info.blockchain.wallet.metadata.data.Invitation;
-
+import io.mikael.urlbuilder.UrlBuilder;
+import io.mikael.urlbuilder.util.UrlParameterMultimap;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.annotation.Nonnull;
-
-import io.mikael.urlbuilder.UrlBuilder;
-import io.mikael.urlbuilder.util.UrlParameterMultimap;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)

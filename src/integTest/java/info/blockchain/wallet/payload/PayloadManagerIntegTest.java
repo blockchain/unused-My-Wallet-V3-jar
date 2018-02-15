@@ -1,25 +1,16 @@
 package info.blockchain.wallet.payload;
 
-import info.blockchain.api.blockexplorer.BlockExplorer;
-import info.blockchain.api.data.MultiAddress;
 import info.blockchain.wallet.BaseIntegTest;
-import info.blockchain.wallet.multiaddress.MultiAddressFactory;
-import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.HDWallet;
 import info.blockchain.wallet.payload.data.LegacyAddress;
 import info.blockchain.wallet.payload.data.Wallet;
-import info.blockchain.wallet.payload.data.WalletWrapper;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import retrofit2.Call;
 
-public class PayloadManagerIntegTest extends BaseIntegTest{
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
+
+public class PayloadManagerIntegTest extends BaseIntegTest {
 
     @Test
     public void upgradeV2PayloadToV3() throws Exception {
@@ -70,7 +61,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
         PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My Bitcoin Wallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
-            .getPayload();
+                .getPayload();
 
         Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
         Assert.assertEquals(10, walletBody.getHdWallets().get(0).getAccounts().size());
@@ -88,7 +79,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
         PayloadManager.getInstance().recoverFromMnemonic(mnemonic, "My HDWallet", "name@email.com", "SomePassword");
 
         Wallet walletBody = PayloadManager.getInstance()
-            .getPayload();
+                .getPayload();
 
         Assert.assertEquals(seedHex, walletBody.getHdWallets().get(0).getSeedHex());
     }
@@ -101,7 +92,7 @@ public class PayloadManagerIntegTest extends BaseIntegTest{
         String pw = "testtesttest";
 
         PayloadManager payloadManager = PayloadManager.getInstance();
-        payloadManager.initializeAndDecrypt(sharedKey,guid,pw);
+        payloadManager.initializeAndDecrypt(sharedKey, guid, pw);
 
         Assert.assertEquals(guid, payloadManager.getPayload().getGuid());
         Assert.assertEquals(sharedKey, payloadManager.getPayload().getSharedKey());

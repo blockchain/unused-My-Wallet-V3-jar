@@ -41,7 +41,7 @@ public class WalletApiTest extends MockedResponseTest {
     public void getEncryptedPayload() throws IOException, URISyntaxException {
         URI uri = getClass().getClassLoader().getResource("encrypted-payload.txt").toURI();
         String encryptedPayload = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
-
+        mockInterceptor.setResponseCode(200);
         mockInterceptor.setResponseString(encryptedPayload);
         final TestObserver<Response<ResponseBody>> testObserver =
                 subject.fetchEncryptedPayload("a09910d9-1906-4ea1-a956-2508c3fe0661", "").test();
@@ -106,5 +106,27 @@ public class WalletApiTest extends MockedResponseTest {
         assertEquals("AZ", result.getStatesWhitelist().get(1));
         assertEquals(1.0, result.getRolloutFraction(), 0);
         assertEquals(20, result.getUpperLimit());
+    }
+
+    @Test
+    public void getEthereumOptions() throws IOException, URISyntaxException {
+        mockInterceptor.setResponseString("{\n"
+            + "\t\"androidBuyPercent\": 1.00,\n"
+            + "\t\"android\": {\n"
+            + "\t\t\"showUnocoin\": false\n"
+            + "\t},\n"
+            + "\"ethereum\": {\n"
+            + "    \"lastTxFuse\": 600\n"
+            + "  }"
+            + "}");
+        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
+
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+
+        long lastTxFuse = testObserver.values().get(0)
+            .getEthereum().getLastTxFuse();
+
+        assertEquals(600, lastTxFuse);
     }
 }

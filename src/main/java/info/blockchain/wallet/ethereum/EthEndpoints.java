@@ -4,10 +4,8 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
 import info.blockchain.wallet.ethereum.data.EthTxDetails;
-
-import java.util.HashMap;
-
 import io.reactivex.Observable;
+import java.util.HashMap;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;

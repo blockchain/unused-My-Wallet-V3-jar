@@ -2,12 +2,10 @@ package info.blockchain.wallet.contacts;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.blockchain.wallet.contacts.data.Contact;
 import info.blockchain.wallet.contacts.data.FacilitatedTransaction;
 import info.blockchain.wallet.contacts.data.PaymentBroadcasted;
 import info.blockchain.wallet.contacts.data.PaymentCancelledResponse;
-import info.blockchain.wallet.contacts.data.PaymentCurrency;
 import info.blockchain.wallet.contacts.data.PaymentDeclinedResponse;
 import info.blockchain.wallet.contacts.data.PaymentRequest;
 import info.blockchain.wallet.contacts.data.PublicContactDetails;
@@ -19,13 +17,6 @@ import info.blockchain.wallet.metadata.Metadata;
 import info.blockchain.wallet.metadata.SharedMetadata;
 import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
-
-import org.bitcoinj.crypto.DeterministicKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.InvalidCipherTextException;
-import org.spongycastle.util.encoders.Base64;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -37,8 +28,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
 import javax.annotation.Nonnull;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.util.encoders.Base64;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Contacts {

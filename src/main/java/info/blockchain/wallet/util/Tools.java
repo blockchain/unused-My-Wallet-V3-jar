@@ -3,7 +3,12 @@ package info.blockchain.wallet.util;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.bip44.HDAccount;
 import info.blockchain.wallet.payload.data.LegacyAddress;
-
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
@@ -11,15 +16,6 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.params.MainNetParams;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.annotation.Nonnull;
 
 public class Tools {
 
@@ -57,7 +53,7 @@ public class Tools {
             }
         });
 
-        Transaction sortedTransaction = new Transaction(MainNetParams.get());
+        Transaction sortedTransaction = new Transaction(transaction.getParams());
         for (TransactionInput input : inputList) {
             sortedTransaction.addInput(input);
         }
@@ -101,10 +97,10 @@ public class Tools {
             keyUnCompressed = ECKey.fromPrivate(priv2, false);
         }
 
-        if (keyCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams())
+        if (keyCompressed.toAddress(PersistentUrls.getInstance().getBitcoinParams())
                 .toString().equals(address)) {
             ecKey = keyCompressed;
-        } else if (keyUnCompressed.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams())
+        } else if (keyUnCompressed.toAddress(PersistentUrls.getInstance().getBitcoinParams())
                 .toString().equals(address)) {
             ecKey = keyUnCompressed;
         } else {
@@ -128,7 +124,7 @@ public class Tools {
     }
 
     public static List<String> getAddressList(int chain, String xpub, int startIndex, int endIndex) {
-        HDAccount hdAccount = new HDAccount(PersistentUrls.getInstance().getCurrentNetworkParams(),
+        HDAccount hdAccount = new HDAccount(PersistentUrls.getInstance().getBitcoinParams(),
                 xpub);
 
         List<String> list = new ArrayList<>();
