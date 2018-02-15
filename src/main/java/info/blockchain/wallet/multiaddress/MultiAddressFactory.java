@@ -11,11 +11,8 @@ import info.blockchain.api.data.Xpub;
 import info.blockchain.wallet.bip44.HDChain;
 import info.blockchain.wallet.exceptions.ApiException;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
+import info.blockchain.wallet.payload.PayloadManager;
 import info.blockchain.wallet.payload.data.AddressLabel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -25,10 +22,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import retrofit2.Call;
 import retrofit2.Response;
-
-import static info.blockchain.wallet.payload.PayloadManager.MULTI_ADDRESS_ALL;
 
 public class MultiAddressFactory {
 
@@ -42,8 +40,10 @@ public class MultiAddressFactory {
     //Field for testing if address belongs to us - Quicker than derivation
     private HashMap<String, String> addressToXpubMap;
 
+    public static final String ADDRESS_DECODE_ERROR = "[--address_decode_error--]";
+
     public MultiAddressFactory(BlockExplorer blockExplorer) {
-        log.info("Initializing MultiAddressFactory");
+        getLog().info("Initializing MultiAddressFactory");
         this.blockExplorer = blockExplorer;
         this.addressToXpubMap = new HashMap<>();
         this.nextReceiveAddressMap = new HashMap<>();
@@ -54,88 +54,103 @@ public class MultiAddressFactory {
         return addressToXpubMap.get(address);
     }
 
-    private MultiAddress getMultiAddress(List<String> allActive, String onlyShow, int limit, int offset) throws IOException, ApiException{
+    private MultiAddress getMultiAddress(List<String> allActive, String onlyShow, int limit,
+        int offset) throws IOException, ApiException {
 
-        log.info("Fetching multiaddress for {} accounts/addresses", allActive.size());
+        getLog().info("Fetching multiaddress for {} accounts/addresses", allActive.size());
 
-        if (onlyShow!=null && onlyShow.equals(MULTI_ADDRESS_ALL)) {
+        Response<MultiAddress> call = getMultiAddress(allActive, limit, offset, onlyShow).execute();
 
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, null, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
-
-            if(call.isSuccessful()) {
-                return call.body();
-            } else {
-                throw new ApiException(call.errorBody().string());
-            }
-
+        if (call.isSuccessful()) {
+            return call.body();
         } else {
-            Response<MultiAddress> call = blockExplorer.getMultiAddress(allActive, onlyShow, FilterType.RemoveUnspendable.getFilterInt(), limit, offset).execute();
-
-            if(call.isSuccessful()) {
-                return call.body();
-            } else {
-                throw new ApiException(call.errorBody().string());
-            }
+            throw new ApiException(call.errorBody().string());
         }
     }
 
+    protected Call<MultiAddress> getMultiAddress(List<String> allActive, int limit, int offset,
+        String context) {
+        return getBlockExplorer()
+            .getMultiAddress("btc", allActive, context, FilterType.RemoveUnspendable, limit,
+                offset);
+    }
+
+    BlockExplorer getBlockExplorer() {
+        return blockExplorer;
+    }
+
+    Logger getLog() {
+        return log;
+    }
+
     /**
-     *
-     * @param all A list of all xpubs and legacy addresses
-     * @param watchOnly A list of watch-only legacy addresses
-     * @param activeLegacy A list of active legacy addresses. Used to flag transactions as 'watch only'
-     * @param onlyShow Xpub or legacy address. Used to fetch transaction only relating to this address.
+     * @param all A list of all xpubs and legacy addresses whose transactions are to
+     * be retrieved from API.
+     * @param watchOnly A list of watch-only legacy addresses. Used to flag transactions as 'watch-only'
+     * @param activeLegacy (Hacky! Needs a rethink) Only set this when fetching a transaction list
+     * for imported addresses, otherwise set as Null.
+     * A list of all active legacy addresses. Used for 'Imported address' transaction list.
+     * @param onlyShow Xpub or legacy address. Used to fetch transaction only relating to this
+     * address. Set as Null for a consolidated list like 'All Accounts' or 'Imported'.
      * @param limit Maximum amount of transactions fetched
      * @param offset Page offset
      * @return
      * @throws IOException
      * @throws ApiException
      */
-    public List<TransactionSummary> getAccountTransactions(ArrayList<String> all, List<String> watchOnly, List<String> activeLegacy, String onlyShow, int limit, int offset)
+    public List<TransactionSummary> getAccountTransactions(List<String> all,
+        List<String> watchOnly,
+        List<String> activeLegacy,
+        String onlyShow,
+        int limit,
+        int offset,
+        int startingBlockHeight)
         throws IOException, ApiException {
 
-        log.info("Get transactions. limit {}, offset {}", limit, offset);
+        getLog().info("Get transactions. limit {}, offset {}", limit, offset);
 
         MultiAddress multiAddress = getMultiAddress(all, onlyShow, limit, offset);
-        if(multiAddress == null || multiAddress.getTxs() == null) {
+        if (multiAddress == null || multiAddress.getTxs() == null) {
             return new ArrayList<>();
         }
 
-        return summarize(all, watchOnly, multiAddress, activeLegacy);
+        return summarize(all, watchOnly, multiAddress, activeLegacy, startingBlockHeight);
     }
 
     public int getNextChangeAddressIndex(String xpub) {
 
-        if(!nextChangeAddressMap.containsKey(xpub)) {
+        if (!nextChangeAddressMap.containsKey(xpub)) {
             return 0;
         }
 
         int index = nextChangeAddressMap.get(xpub);
-        log.info("Next change index = {}", index);
+        getLog().info("Next change index = {}", index);
         return index;
     }
 
     public int getNextReceiveAddressIndex(String xpub, List<AddressLabel> reservedAddresses) {
 
-        if(!nextReceiveAddressMap.containsKey(xpub)) {
+        if (!nextReceiveAddressMap.containsKey(xpub)) {
             return 0;
         }
 
         Integer receiveIndex = nextReceiveAddressMap.get(xpub);
 
         //Skip reserved addresses
-        for(AddressLabel reservedAddress : reservedAddresses) {
-            if(reservedAddress.getIndex() == receiveIndex) {
+        for (AddressLabel reservedAddress : reservedAddresses) {
+            if (reservedAddress.getIndex() == receiveIndex) {
                 receiveIndex++;
             }
         }
 
-        log.info("Next receive index = {}", receiveIndex);
+        getLog().info("Next receive index = {}", receiveIndex);
         return receiveIndex;
     }
 
     public void sort(ArrayList<Transaction> txs) {
-        if(txs == null) return;
+        if (txs == null) {
+            return;
+        }
         Collections.sort(txs, new TxMostRecentDateComparator());
     }
 
@@ -148,7 +163,7 @@ public class MultiAddressFactory {
         int receiveIndex = getNextReceiveAddressIndex(xpub, reservedAddresses);
         receiveIndex++;
 
-        log.info("Increment next receive index to {}", receiveIndex);
+        getLog().info("Increment next receive index to {}", receiveIndex);
         nextReceiveAddressMap.put(xpub, receiveIndex);
     }
 
@@ -157,7 +172,7 @@ public class MultiAddressFactory {
         int index = getNextChangeAddressIndex(xpub);
         index++;
 
-        log.info("Increment next change index to {}", index);
+        getLog().info("Increment next change index to {}", index);
         nextChangeAddressMap.put(xpub, index);
     }
 
@@ -183,26 +198,33 @@ public class MultiAddressFactory {
         }
     }
 
-    public List<TransactionSummary> summarize(ArrayList<String> ownAddressesAndXpubs,
-                                              List<String> watchOnlyAddresses,
-                                              MultiAddress multiAddress,
-                                              List<String> legacy) {
+    public List<TransactionSummary> summarize(List<String> ownAddressesAndXpubs,
+        List<String> watchOnlyAddresses,
+        MultiAddress multiAddress,
+        List<String> legacy,
+        int startingBlockHeight) {
 
         List<TransactionSummary> summaryList = new ArrayList<>();
 
         //Set next address indexes
-        for(AddressSummary address : multiAddress.getAddresses()) {
-            nextReceiveAddressMap.put(address.getAddress(),address.getAccountIndex());
-            nextChangeAddressMap.put(address.getAddress(),address.getChangeIndex());
+        for (AddressSummary address : multiAddress.getAddresses()) {
+            nextReceiveAddressMap.put(address.getAddress(), address.getAccountIndex());
+            nextChangeAddressMap.put(address.getAddress(), address.getChangeIndex());
         }
 
         List<Transaction> txs = multiAddress.getTxs();
-        if(txs == null) {
+        if (txs == null) {
             //Address might not contain transactions
             return summaryList;
         }
 
-        for(Transaction tx : txs) {
+        for (Transaction tx : txs) {
+
+            if (tx.getBlockHeight() != 0 && tx.getBlockHeight() < startingBlockHeight) {
+                //Filter out txs before blockHeight (mainly for BCH)
+                //Block height will be 0 until included in a block
+                continue;
+            }
 
             boolean isLegacy = false;
 
@@ -225,14 +247,14 @@ public class MultiAddressFactory {
             //Inputs
             String inputAddr;
             BigInteger inputValue;
-            for(Input input : tx.getInputs()) {
+            for (Input input : tx.getInputs()) {
 
                 Output prevOut = input.getPrevOut();
-                if(prevOut != null) {
+                if (prevOut != null) {
 
                     inputAddr = prevOut.getAddr();
                     inputValue = prevOut.getValue();
-                    if(inputAddr != null) {
+                    if (inputAddr != null) {
 
                         //Transaction from HD account
                         Xpub xpubBody = prevOut.getXpub();
@@ -254,15 +276,17 @@ public class MultiAddressFactory {
                         }
 
                         //Keep track of inputs
-                        if(txSummary.inputsMap.containsKey(inputAddr)) {
-                            BigInteger prevValue = txSummary.inputsMap.get(inputAddr).add(inputValue);
+                        if (txSummary.inputsMap.containsKey(inputAddr)) {
+                            BigInteger prevValue = txSummary.inputsMap.get(inputAddr)
+                                .add(inputValue);
                             txSummary.inputsMap.put(inputAddr, prevValue);
                         } else {
                             txSummary.inputsMap.put(inputAddr, inputValue);
                         }
 
                     } else {
-                        throw new IllegalStateException("inputAddr is null");
+                        //No input address available
+                        txSummary.inputsMap.put(ADDRESS_DECODE_ERROR, inputValue);
                     }
 
                 } else {
@@ -273,11 +297,11 @@ public class MultiAddressFactory {
             HashMap<String, BigInteger> changeMap = new HashMap<>();
             String outputAddr;
             BigInteger outputValue;
-            for(Output output :tx.getOut()) {
+            for (Output output : tx.getOut()) {
 
                 outputAddr = output.getAddr();
                 outputValue = output.getValue();
-                if(outputAddr != null) {
+                if (outputAddr != null) {
 
                     Xpub xpubBody = output.getXpub();
                     if (xpubBody != null) {
@@ -294,9 +318,10 @@ public class MultiAddressFactory {
 
                     } else {
                         //If we own this address and it's not change coming back, it's a transfer
-                        if (ownAddressesAndXpubs.contains(outputAddr) && !txSummary.inputsMap.keySet().contains(outputAddr)) {
+                        if (ownAddressesAndXpubs.contains(outputAddr) && !txSummary.inputsMap
+                            .keySet().contains(outputAddr)) {
 
-                            if(txSummary.getDirection() == Direction.SENT) {
+                            if (txSummary.getDirection() == Direction.SENT) {
                                 txSummary.setDirection(Direction.TRANSFERRED);
                             }
 
@@ -307,6 +332,9 @@ public class MultiAddressFactory {
                                 changeMap.put(outputAddr, outputValue);
                             }
 
+                        } else if (txSummary.inputsMap.keySet().contains(outputAddr)) {
+                            //Our change
+                            changeMap.put(outputAddr, outputValue);
                         } else {
                             //Address does not belong to us
                             txSummary.outputsMap.put(outputAddr, outputValue);
@@ -323,7 +351,9 @@ public class MultiAddressFactory {
                         isLegacy = true;
                     }
                 } else {
-                    throw new IllegalStateException("outputAddr is null");
+                    //No output address available
+                    txSummary.outputsMap.put(ADDRESS_DECODE_ERROR, outputValue);
+
                 }
             }
 
@@ -334,10 +364,10 @@ public class MultiAddressFactory {
 
             //Remove input addresses not ours
             filterOwnedAddresses(
-                    ownAddressesAndXpubs,
-                    txSummary.inputsMap,
-                    txSummary.outputsMap,
-                    txSummary.getDirection());
+                ownAddressesAndXpubs,
+                txSummary.inputsMap,
+                txSummary.outputsMap,
+                txSummary.getDirection());
 
             txSummary.setHash(tx.getHash());
             txSummary.setTime(tx.getTime());
@@ -349,17 +379,17 @@ public class MultiAddressFactory {
                 txSummary.setTotal(total);
             } else {
                 BigInteger total = calculateTotalSent(
-                        txSummary.inputsMap,
-                        changeMap,
-                        tx.getFee(),
-                        txSummary.getDirection());
+                    txSummary.inputsMap,
+                    changeMap,
+                    tx.getFee(),
+                    txSummary.getDirection());
                 txSummary.setTotal(total);
             }
 
             //Set confirmations
             long latestBlock = multiAddress.getInfo().getLatestBlock().getHeight();
             long txBlockHeight = tx.getBlockHeight();
-            if(latestBlock > 0 && txBlockHeight > 0) {
+            if (latestBlock > 0 && txBlockHeight > 0) {
                 txSummary.setConfirmations((int) ((latestBlock - txBlockHeight) + 1));
             } else {
                 txSummary.setConfirmations(0);
@@ -374,22 +404,23 @@ public class MultiAddressFactory {
         return summaryList;
     }
 
-    private void filterOwnedAddresses(ArrayList<String> ownAddressesAndXpubs,
+    private void filterOwnedAddresses(List<String> ownAddressesAndXpubs,
         HashMap<String, BigInteger> inputsMap,
         HashMap<String, BigInteger> outputsMap, Direction direction) {
 
         Iterator<Entry<String, BigInteger>> iterator = inputsMap.entrySet().iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             Entry<String, BigInteger> item = iterator.next();
-            if(!ownAddressesAndXpubs.contains(item.getKey()) && direction.equals(Direction.SENT)) {
+            if (!ownAddressesAndXpubs.contains(item.getKey()) && direction.equals(Direction.SENT)) {
                 iterator.remove();
             }
         }
 
         iterator = outputsMap.entrySet().iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             Entry<String, BigInteger> item = iterator.next();
-            if(!ownAddressesAndXpubs.contains(item.getKey()) && direction.equals(Direction.RECEIVED)) {
+            if (!ownAddressesAndXpubs.contains(item.getKey()) && direction
+                .equals(Direction.RECEIVED)) {
                 iterator.remove();
             }
         }
@@ -399,27 +430,28 @@ public class MultiAddressFactory {
 
         BigInteger total = BigInteger.ZERO;
 
-        for(BigInteger output : outputsMap.values()) {
+        for (BigInteger output : outputsMap.values()) {
             total = total.add(output);
         }
 
         return total;
     }
 
-    private BigInteger calculateTotalSent(HashMap<String, BigInteger> inputsMap, HashMap<String, BigInteger> changeMap,
+    private BigInteger calculateTotalSent(HashMap<String, BigInteger> inputsMap,
+        HashMap<String, BigInteger> changeMap,
         BigInteger fee, Direction direction) {
 
         BigInteger total = BigInteger.ZERO;
 
-        for(BigInteger input : inputsMap.values()) {
+        for (BigInteger input : inputsMap.values()) {
             total = total.add(input);
         }
 
-        for(BigInteger change : changeMap.values()) {
+        for (BigInteger change : changeMap.values()) {
             total = total.subtract(change);
         }
 
-        if(direction == Direction.TRANSFERRED) {
+        if (direction == Direction.TRANSFERRED) {
             total = total.subtract(fee);
         }
 

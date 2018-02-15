@@ -2,9 +2,11 @@ package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.Environment;
 import info.blockchain.wallet.api.PersistentUrls;
+import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
 
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.BitcoinCashMainNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -16,7 +18,6 @@ import io.reactivex.functions.Function;
 import io.reactivex.internal.schedulers.TrampolineScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -40,18 +41,28 @@ public abstract class BaseIntegTest {
             }
 
             @Override
+            public Retrofit getRetrofitShapeShiftInstance() {
+                return getRetrofit(ShapeShiftUrls.SHAPESHIFT_URL, getOkHttpClient());
+            }
+
+            @Override
             public Environment getEnvironment() {
                 return Environment.PRODUCTION;
             }
 
             @Override
-            public AbstractBitcoinNetParams getNetworkParameters() {
-                return MainNetParams.get();
+            public NetworkParameters getBitcoinParams() {
+                return BitcoinMainNetParams.get();
+            }
+
+            @Override
+            public NetworkParameters getBitcoinCashParams() {
+                return BitcoinCashMainNetParams.get();
             }
 
             @Override
             public String getApiCode() {
-                return null;
+                return "Android-Integration-test";
             }
 
             @Override
@@ -95,13 +106,13 @@ public abstract class BaseIntegTest {
         RxJavaPlugins.reset();
     }
 
-    private static OkHttpClient getOkHttpClient() {
+    public static OkHttpClient getOkHttpClient() {
         return new OkHttpClient.Builder()
             .addInterceptor(new ApiInterceptor())//Extensive logging
                 .build();
     }
 
-    private static Retrofit getRetrofit(String url, OkHttpClient client) {
+    public static Retrofit getRetrofit(String url, OkHttpClient client) {
         return new Retrofit.Builder()
                 .baseUrl(url)
                 .client(client)

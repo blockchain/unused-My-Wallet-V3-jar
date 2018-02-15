@@ -3,7 +3,6 @@ package info.blockchain.wallet.util;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.exceptions.DecryptionException;
 import info.blockchain.wallet.exceptions.EncryptionException;
-import info.blockchain.wallet.settings.SettingsManager;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import org.slf4j.Logger;

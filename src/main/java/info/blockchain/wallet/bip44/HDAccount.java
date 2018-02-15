@@ -9,7 +9,7 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.crypto.ChildNumber;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 
 /**
  * HDAccount.java : an account in a BIP44 wallet
@@ -103,7 +103,7 @@ public class HDAccount {
      */
     private DeterministicKey createMasterPubKeyFromXPub(String xpubstr) throws AddressFormatException {
 
-        boolean isTestnet = !(this.params instanceof MainNetParams);
+        boolean isTestnet = !(this.params instanceof BitcoinMainNetParams);
 
         byte[] xpubBytes = Base58.decodeChecked(xpubstr);
 

@@ -6,14 +6,11 @@ import info.blockchain.wallet.ethereum.data.EthAddressResponseMap;
 import info.blockchain.wallet.ethereum.data.EthLatestBlock;
 import info.blockchain.wallet.ethereum.data.EthPushTxRequest;
 import info.blockchain.wallet.ethereum.data.EthTxDetails;
-
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import java.util.HashMap;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class EthAccountApi {

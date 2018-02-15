@@ -1,3 +1,13 @@
+buildscript {
+    ext.kotlin_version = '1.2.21'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 plugins {
     id 'java'
     id 'maven'
@@ -10,6 +20,7 @@ group = 'info.blockchain'
 version = PROJECT_VERSION
 
 apply from: "integTest.gradle"
+apply plugin: 'kotlin'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -67,17 +78,18 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 dependencies {
-    compile files('libs/api-client-0.1.15-SNAPSHOT.jar')
+    compile files('libs/bitcoinj-core-0.15-SNAPSHOT.jar')
+    compile files('libs/api-client-0.1.16-SNAPSHOT.jar')
     // TODO: Switch this back once the client is published
 //    compile group: 'info.blockchain', name: 'api-client', version: '0.1.15-SNAPSHOT'
-    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
+//    compile group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.14.4'
     compile 'com.madgag.spongycastle:prov:1.53.0.0'
     compile ('org.web3j:core-android:2.2.1')
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.5'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.3'
-    compile group: 'commons-codec', name: 'commons-codec', version: '1.4'
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.3'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
     compile group: 'io.mikael', name: 'urlbuilder', version: '2.0.8'
     compile group: 'org.json', name: 'json', version: '20160810'
@@ -89,12 +101,29 @@ dependencies {
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     compile group: 'com.squareup.okio', name: 'okio', version: '1.11.0'
     compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+
+    //bitcoinj dependencies
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version:'2.6.1'
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version:'2.0.1'
+    compile group: 'com.google.guava', name: 'guava', version: '23.5-android'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 jacocoTestReport {
     reports {
         xml.enabled = true // coveralls plugin depends on xml format report
         html.enabled = true
+    }
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.6"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.6"
     }
 }

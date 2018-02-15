@@ -36,7 +36,7 @@ public class ContactsIntegTest extends BaseIntegTest{
     private HDWallet getWallet() throws Exception {
 
         return HDWalletFactory
-            .restoreWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,
+            .restoreWallet(PersistentUrls.getInstance().getBitcoinParams(), Language.US,
                 "15e23aa73d25994f1921a1256f93f72c", "", 1);
     }
 
@@ -96,7 +96,7 @@ public class ContactsIntegTest extends BaseIntegTest{
         /*
         Create wallets
          */
-        HDWallet a_wallet = HDWalletFactory.createWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US, 12, "", 1);
+        HDWallet a_wallet = HDWalletFactory.createWallet(PersistentUrls.getInstance().getBitcoinParams(), Language.US, 12, "", 1);
         DeterministicKey sharedMetaDataHDNode = MetadataUtil
             .deriveSharedMetadataNode(a_wallet.getMasterKey());
         DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(a_wallet.getMasterKey());
@@ -104,7 +104,7 @@ public class ContactsIntegTest extends BaseIntegTest{
         a_contacts.publishXpub();
         a_contacts.fetch();
 
-        HDWallet b_wallet = HDWalletFactory.createWallet(PersistentUrls.getInstance().getCurrentNetworkParams(), Language.US,12, "", 1);
+        HDWallet b_wallet = HDWalletFactory.createWallet(PersistentUrls.getInstance().getBitcoinParams(), Language.US,12, "", 1);
         sharedMetaDataHDNode = MetadataUtil.deriveSharedMetadataNode(b_wallet.getMasterKey());
         metaDataHDNode = MetadataUtil.deriveMetadataNode(b_wallet.getMasterKey());
         Contacts b_contacts = new Contacts(metaDataHDNode, sharedMetaDataHDNode);

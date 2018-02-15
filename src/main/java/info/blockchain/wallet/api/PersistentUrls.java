@@ -1,8 +1,7 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
-
-import org.bitcoinj.params.AbstractBitcoinNetParams;
+import org.bitcoinj.core.NetworkParameters;
 
 @SuppressWarnings("WeakerAccess")
 public class PersistentUrls {
@@ -37,8 +36,18 @@ public class PersistentUrls {
         return BlockchainFramework.getEnvironment();
     }
 
-    public AbstractBitcoinNetParams getCurrentNetworkParams() {
-        return BlockchainFramework.getNetworkParameters();
+    /**
+     * @deprecated Replaced by {@link #getBitcoinParams()}
+     */
+    public NetworkParameters getCurrentNetworkParams() {
+        return getBitcoinParams();
     }
 
+    public NetworkParameters getBitcoinParams() {
+        return BlockchainFramework.getBitcoinParams();
+    }
+
+    public NetworkParameters getBitcoinCashParams() {
+        return BlockchainFramework.getBitcoinCashParams();
+    }
 }

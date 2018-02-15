@@ -1,10 +1,10 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.MockedResponseTest;
+import info.blockchain.wallet.api.data.ShapeShiftOptions;
 import info.blockchain.wallet.api.data.WalletOptions;
 import info.blockchain.wallet.payload.data.WalletBase;
 
-import io.reactivex.Observable;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -20,7 +20,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class WalletApiTest extends MockedResponseTest {
@@ -42,7 +41,7 @@ public class WalletApiTest extends MockedResponseTest {
     public void getEncryptedPayload() throws IOException, URISyntaxException {
         URI uri = getClass().getClassLoader().getResource("encrypted-payload.txt").toURI();
         String encryptedPayload = new String(Files.readAllBytes(Paths.get(uri)), Charset.forName("utf-8"));
-
+        mockInterceptor.setResponseCode(200);
         mockInterceptor.setResponseString(encryptedPayload);
         final TestObserver<Response<ResponseBody>> testObserver =
                 subject.fetchEncryptedPayload("a09910d9-1906-4ea1-a956-2508c3fe0661", "").test();
@@ -76,40 +75,58 @@ public class WalletApiTest extends MockedResponseTest {
     }
 
     @Test
-    public void getMobileNotice() throws IOException, URISyntaxException {
-        mockInterceptor.setResponseString("{\n"
-            + "  \"androidBuyPercent\": 1.00,\n"
-            + "  \"android\": {\n"
-            + "    \"showUnocoin\": false\n"
-            + "  },\n"
-            + "  \"mobile_notice\": {\n"
-            + "   \"en-EN\": \"Text warning 1 EN.\",\n"
-            + "   \"en-CA\": \"Text warning 2 CA.\"\n"
-            + "\t}\n"
-            + "}");
-        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
-
-        testObserver.assertComplete();
-        testObserver.assertNoErrors();
-        assertEquals("Text warning 1 EN.",
-            testObserver.values().get(0).getMobileNotice().get("en-EN"));
-        assertEquals("Text warning 2 CA.",
-            testObserver.values().get(0).getMobileNotice().get("en-CA"));
-    }
-
-    @Test
-    public void getMobileNotice_null() throws IOException, URISyntaxException {
+    public void getShapeshift() throws IOException, URISyntaxException {
         mockInterceptor.setResponseString("{\n"
             + "\t\"androidBuyPercent\": 1.00,\n"
             + "\t\"android\": {\n"
             + "\t\t\"showUnocoin\": false\n"
             + "\t},\n"
-            + "\t\"mobile_notice\": null\n"
+            + "\"shapeshift\": {\n"
+            + "    \"apiKey\": \"b7a7c320c19ea3a8e276c8921bc3ff79ec064d\",\n"
+            + "    \"statesWhitelist\": [\"AR\", \"AZ\"],\n"
+            + "    \"countriesBlacklist\": [\"RSA\", \"IT\"],\n"
+            + "    \"rolloutFraction\": 1,\n"
+            + "    \"upperLimit\": 20,\n"
+            + "    \"surveyLinks\": [\"https://blockchain.co1.qualtrics.com/jfe/form/asdasd\",\n"
+            + "                    \"https://blockchain.co1.qualtrics.com/jfe/form/asdasdasd\"]\n"
+            + "  }"
             + "}");
         final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
 
         testObserver.assertComplete();
         testObserver.assertNoErrors();
-        assertNull(testObserver.values().get(0).getMobileNotice());
+
+        ShapeShiftOptions result = testObserver.values().get(0)
+            .getShapeshift();
+
+        assertEquals("b7a7c320c19ea3a8e276c8921bc3ff79ec064d", result.getApiKey());
+        assertEquals("RSA", result.getCountriesBlacklist().get(0));
+        assertEquals("IT", result.getCountriesBlacklist().get(1));
+        assertEquals("AR", result.getStatesWhitelist().get(0));
+        assertEquals("AZ", result.getStatesWhitelist().get(1));
+        assertEquals(1.0, result.getRolloutFraction(), 0);
+        assertEquals(20, result.getUpperLimit());
+    }
+
+    @Test
+    public void getEthereumOptions() throws IOException, URISyntaxException {
+        mockInterceptor.setResponseString("{\n"
+            + "\t\"androidBuyPercent\": 1.00,\n"
+            + "\t\"android\": {\n"
+            + "\t\t\"showUnocoin\": false\n"
+            + "\t},\n"
+            + "\"ethereum\": {\n"
+            + "    \"lastTxFuse\": 600\n"
+            + "  }"
+            + "}");
+        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
+
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+
+        long lastTxFuse = testObserver.values().get(0)
+            .getEthereum().getLastTxFuse();
+
+        assertEquals(600, lastTxFuse);
     }
 }

@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.CashAddress;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.WrongNetworkException;
 import org.bitcoinj.uri.BitcoinURI;
 import org.bitcoinj.uri.BitcoinURIParseException;
@@ -40,6 +42,8 @@ public class FormatsUtil {
 
     public static boolean isBitcoinUri(final String s) {
 
+        if(s == null)return false;
+
         boolean ret;
 
         try {
@@ -69,22 +73,26 @@ public class FormatsUtil {
 
     public static String getBitcoinAddress(final String s) {
 
+        if(s == null)return "";
+
         String ret;
         BitcoinURI uri;
 
         try {
             uri = new BitcoinURI(s);
             Address address = uri.getAddress();
-            assert address != null;
+            if(address == null) throw new BitcoinURIParseException(s+" is not valid bitcoin uri.");
             ret = address.toString();
         } catch (BitcoinURIParseException bupe) {
-            ret = null;
+            ret = "";
         }
 
         return ret;
     }
 
     public static String getBitcoinAmount(final String s) {
+
+        if(s == null)return "0.0000";
 
         String ret;
         BitcoinURI uri;
@@ -97,7 +105,7 @@ public class FormatsUtil {
                 ret = "0.0000";
             }
         } catch (BitcoinURIParseException bupe) {
-            ret = null;
+            ret = "0.0000";
         }
 
         return ret;
@@ -107,8 +115,11 @@ public class FormatsUtil {
 
         boolean ret;
 
+        if(address == null)
+            return false;
+
         try {
-            Address.fromBase58(PersistentUrls.getInstance().getCurrentNetworkParams(), address);
+            Address.fromBase58(PersistentUrls.getInstance().getBitcoinParams(), address);
             ret = true;
         } catch (WrongNetworkException wne) {
             ret = false;
@@ -193,7 +204,7 @@ public class FormatsUtil {
 
     public static boolean isKeyEncrypted(String data) {
 
-        if(data != null && isBase64(data)){
+        if (data != null && isBase64(data)) {
             try {
                 Base58.decode(data);
                 return false;
@@ -208,7 +219,7 @@ public class FormatsUtil {
 
     public static boolean isKeyUnencrypted(String data) {
 
-        if(data == null)
+        if (data == null)
             return false;
 
         try {
@@ -219,22 +230,20 @@ public class FormatsUtil {
         }
     }
 
-    private static boolean isBase64(String data){
+    private static boolean isBase64(String data) {
         String regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
         return (data.matches(regex) && !containsSpaces(data));
     }
 
     private static boolean containsSpaces(String data) {
         return data.contains(" ") ||
-                data.contains("\n")||
-                data.contains("\r")||
+                data.contains("\n") ||
+                data.contains("\r") ||
                 data.contains("\t");
     }
 
     /**
      * Check for poorly formed BIP21 URIs
-     * @param uri
-     * @return
      */
     public static String getURIFromPoorlyFormedBIP21(String uri) {
         if (uri.startsWith("bitcoin://") && uri.length() > 10) {
@@ -258,12 +267,43 @@ public class FormatsUtil {
         if (address == null || address.isEmpty() || !ignoreCaseEthAddrPattern.matcher(address).find()) {
             return false;
         } else if (lowerCaseEthAddrPattern.matcher(address).find()
-            || upperCaseEthAddrPattern.matcher(address).find()) {
+                || upperCaseEthAddrPattern.matcher(address).find()) {
             // if it's all small caps or caps return true
             return true;
         } else {
             // if it is mixed caps it is a checksum address and needs to be validated
             return validateChecksumEthereumAddress(address);
+        }
+    }
+
+    /**
+     * Verify that a String is a valid BECH32 Bitcoin Cash address.
+     *
+     * @param address    The String you wish to test
+     * @return Is this a valid BECH32 format BCH address
+     */
+    public static Boolean isValidBitcoinCashAddress(NetworkParameters networkParameters, String address) {
+        /*
+         * Check basic address requirements, i.e. is not empty
+         */
+
+        if (address == null || address.isEmpty()) {
+            return false;
+        } else {
+            try {
+                CashAddress.decode(address);
+                return true;
+            } catch (AddressFormatException e) {
+
+                if (address.startsWith(networkParameters.getBech32AddressPrefix())) {
+                    return false;
+                } else {
+                    return isValidBitcoinCashAddress(networkParameters,
+                        networkParameters.getBech32AddressPrefix() +
+                            (char)(networkParameters.getBech32AddressSeparator()) +
+                            address);
+                }
+            }
         }
     }
 
@@ -276,11 +316,39 @@ public class FormatsUtil {
                 // char with the same index, and each lowercase letter with a 0 bit
                 int charInt = Integer.parseInt(Character.toString(hash.charAt(i)), 16);
                 if ((Character.isUpperCase(address.charAt(i)) && charInt <= 7)
-                    || (Character.isLowerCase(address.charAt(i)) && charInt > 7)) {
+                        || (Character.isLowerCase(address.charAt(i)) && charInt > 7)) {
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * Accepts bech32 cash address or base58 legacy address
+     * @param address
+     * @return Short cash address (Example: qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p)
+     */
+    public static String toShortCashAddress(NetworkParameters networkParameters, String address) {
+
+        if (address == null && address.isEmpty()) {
+            throw new AddressFormatException("Invalid address format - "+address);
+        }
+
+        String result = address;
+
+        if (isValidBitcoinAddress(address)) {
+            address = Address.fromBase58(networkParameters, address).toCashAddress();
+        }
+
+        if (isValidBitcoinCashAddress(networkParameters, address)) {
+            result = address.replace(
+                networkParameters.getBech32AddressPrefix() + (char)networkParameters
+                    .getBech32AddressSeparator(), "");
+        } else {
+            throw new AddressFormatException("Invalid address format - "+address);
+        }
+
+        return result;
     }
 }

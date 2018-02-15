@@ -1,9 +1,7 @@
 package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.Environment;
-
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-
+import org.bitcoinj.core.NetworkParameters;
 import retrofit2.Retrofit;
 
 public interface FrameworkInterface {
@@ -21,14 +19,25 @@ public interface FrameworkInterface {
     Retrofit getRetrofitExplorerInstance();
 
     /**
+     * Provides an instance of Retrofit with it's base URL set to {@link
+     * info.blockchain.wallet.shapeshift.ShapeShiftUrls#SHAPESHIFT_URL}
+     */
+    Retrofit getRetrofitShapeShiftInstance();
+
+    /**
      * Provides the currently chosen environment, as dictated by the top-level app
      */
     Environment getEnvironment();
 
     /**
-     * Provides the currently chosen Network Parameters, as dictated by the top-level app
+     * Provides the currently chosen Network Parameters for Bitcoin, as dictated by the top-level app
      */
-    AbstractBitcoinNetParams getNetworkParameters();
+    NetworkParameters getBitcoinParams();
+
+    /**
+     * Provides the currently chosen Network Parameters for Bitcoin Cash, as dictated by the top-level app
+     */
+    NetworkParameters getBitcoinCashParams();
 
     /**
      * Provides an ApiCode used for bci platform usage statistics.

@@ -10,26 +10,34 @@ import org.bitcoinj.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
-import retrofit2.Call;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import retrofit2.Call;
+
 class Coins {
 
     private static final Logger log = LoggerFactory.getLogger(Coins.class);
 
-    public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) throws IOException {
+    public static Call<UnspentOutputs> getUnspentCoins(List<String> addresses) {
         log.info("Fetching unspent coins");
-        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode());
-        return blockExplorer.getUnspentOutputs(addresses);
+        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
+        return blockExplorer.getUnspentOutputs("btc", addresses, null, null);
     }
 
-    public static Pair<BigInteger, BigInteger> getSweepableCoins(UnspentOutputs coins, BigInteger feePerKb){
+    public static Call<UnspentOutputs> getUnspentBchCoins(List<String> addresses) {
+        log.info("Fetching unspent coins");
+        BlockExplorer blockExplorer = new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                BlockchainFramework.getRetrofitApiInstance(), BlockchainFramework.getApiCode());
+        return blockExplorer.getUnspentOutputs("bch", addresses, null, null);
+    }
+
+    public static Pair<BigInteger, BigInteger> getMaximumAvailable(UnspentOutputs coins, BigInteger feePerKb){
 
         BigInteger sweepBalance = BigInteger.ZERO;
         BigInteger sweepFee;
@@ -38,7 +46,7 @@ class Coins {
 
         Collections.sort(unspentOutputs, new UnspentOutputAmountComparator());
 
-        ArrayList<UnspentOutput> usableCoins = new ArrayList<UnspentOutput>();
+        ArrayList<UnspentOutput> usableCoins = new ArrayList<>();
 
         double inputCost = inputCost(feePerKb);
 

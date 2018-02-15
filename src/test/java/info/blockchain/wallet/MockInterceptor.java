@@ -40,7 +40,6 @@ public class MockInterceptor implements Interceptor {
         this.responseStringList = responseStringList;
     }
 
-    @Deprecated
     public void setResponseString(String response) {
 
         this.responseStringList = new LinkedList<>();
@@ -52,7 +51,6 @@ public class MockInterceptor implements Interceptor {
         this.responseCodeList = responseCodeList;
     }
 
-    @Deprecated
     public void setResponseCode(int responseCode) {
 
         this.responseCodeList = new LinkedList<>();

@@ -1,10 +1,15 @@
 package info.blockchain.wallet.multiaddress;
 
+import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.MockedResponseTest;
-import info.blockchain.api.blockexplorer.BlockExplorer;
 import info.blockchain.wallet.multiaddress.TransactionSummary.Direction;
 import info.blockchain.wallet.payload.data.AddressLabel;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -12,21 +17,20 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
-public class MultiAddressFactoryTest extends MockedResponseTest{
+public class MultiAddressFactoryTest extends MockedResponseTest {
 
-    MultiAddressFactory multiAddressFactory;
+    private MultiAddressFactory multiAddressFactory;
 
     private final String dormantAddress = "1jH7K4RJrQBXijtLj1JpzqPRhR7MdFtaW";
     private final String dormantXpub = "xpub6CFgfYG9chNp7rzZ7ByXyAJruku5JSVhtGmGqR9tmeLRwu3jtioyBZpXC6GAnpMQPBQg5rviqTwMN4EwgMCZNVT3N22sSnM1yEfBQzjHXJt";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         multiAddressFactory = new MultiAddressFactory(
-            new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(), BlockchainFramework.getApiCode()));
+            new BlockExplorer(BlockchainFramework.getRetrofitExplorerInstance(),
+                    BlockchainFramework.getRetrofitApiInstance(),
+                    BlockchainFramework.getApiCode()));
     }
 
     @Test
@@ -38,7 +42,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         mockInterceptor.setResponseString(response);
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
-            new ArrayList<>(Arrays.asList(dormantAddress)), new ArrayList<String>(), null, dormantAddress, 100, 0);
+            new ArrayList<>(Arrays.asList(dormantAddress)), new ArrayList<String>(), null, dormantAddress, 100, 0, 0);
 
         Assert.assertEquals(2, summary.size());
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
@@ -59,7 +63,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         mockInterceptor.setResponseString(response);
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
-            new ArrayList<>(Arrays.asList(dormantXpub)), new ArrayList<String>(), null, dormantXpub, 100, 0);
+            new ArrayList<>(Arrays.asList(dormantXpub)), new ArrayList<String>(), null, dormantXpub, 100, 0, 0);
 
         Assert.assertEquals(34, summary.size());
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
@@ -87,7 +91,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
         mockInterceptor.setResponseString(response);
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
-            new ArrayList<>(Arrays.asList(dormantAddress, dormantXpub)), new ArrayList<String>(), null, null, 100, 0);
+            new ArrayList<>(Arrays.asList(dormantAddress, dormantXpub)), new ArrayList<String>(), null, null, 100, 0, 0);
 
         Assert.assertEquals(36, summary.size());
         Assert.assertEquals(1, summary.get(0).getInputsMap().size());
@@ -121,7 +125,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
 
         List<TransactionSummary> summary = multiAddressFactory.getAccountTransactions(
             new ArrayList<>(Arrays.asList(xpub1, xpub2, address)), new ArrayList<String>(),
-            null, null, 100, 0);
+            null, null, 100, 0, 0);
 
         Assert.assertEquals(7, summary.size());
 
@@ -204,7 +208,7 @@ public class MultiAddressFactoryTest extends MockedResponseTest{
 
         List<TransactionSummary> transactionSummaries = multiAddressFactory.getAccountTransactions(
             new ArrayList<>(Arrays.asList(xpub1, xpub2, address)), new ArrayList<String>(),
-            null, null, 100, 0);
+            null, null, 100, 0, 0);
 
         Assert.assertEquals(8, transactionSummaries.size());
 

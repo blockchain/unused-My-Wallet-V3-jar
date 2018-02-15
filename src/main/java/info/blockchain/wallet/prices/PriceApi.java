@@ -2,11 +2,10 @@ package info.blockchain.wallet.prices;
 
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.prices.data.PriceDatum;
-
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @see <a href=https://api.blockchain.info/price/specs>Blockchain Price API specs</a>
@@ -80,6 +79,18 @@ public class PriceApi {
                         return priceDatum.getPrice();
                     }
                 });
+    }
+
+    /**
+     * Provides a {@link Map} of currency codes to current {@link PriceDatum} objects for a given
+     * base cryptocurrency. For instance, getting "USD" would return the current price, timestamp
+     * and volume in an object. This is a direct replacement for the Ticker.
+     *
+     * @param base The base cryptocurrency that you want prices for, eg. ETH
+     * @return A {@link Map} of {@link PriceDatum} objects.
+     */
+    public Observable<Map<String, PriceDatum>> getPriceIndexes(String base) {
+        return getApiInstance().getPriceIndexes(base, BlockchainFramework.getApiCode());
     }
 
     /**

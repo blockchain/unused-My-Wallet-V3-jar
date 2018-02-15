@@ -3,7 +3,6 @@ package info.blockchain.wallet.metadata;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
@@ -14,25 +13,21 @@ import info.blockchain.wallet.metadata.data.Invitation;
 import info.blockchain.wallet.metadata.data.Message;
 import info.blockchain.wallet.metadata.data.MessageProcessRequest;
 import info.blockchain.wallet.metadata.data.Trusted;
-
-import java.util.NoSuchElementException;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Sha256Hash;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.json.JSONObject;
-import org.spongycastle.crypto.InvalidCipherTextException;
-import org.spongycastle.util.encoders.Base64;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.NoSuchElementException;
 import javax.annotation.Nonnull;
-
 import okhttp3.ResponseBody;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.crypto.DeterministicKey;
+import org.json.JSONObject;
+import org.spongycastle.crypto.InvalidCipherTextException;
+import org.spongycastle.util.encoders.Base64;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -69,7 +64,7 @@ public class SharedMetadata {
     }
 
     public String getXpub() {
-        return node.serializePubB58(PersistentUrls.getInstance().getCurrentNetworkParams());
+        return node.serializePubB58(PersistentUrls.getInstance().getBitcoinParams());
     }
 
     public void setToken(String token) {
@@ -308,7 +303,7 @@ public class SharedMetadata {
                 msg.getSignature());
 
         String senderAddress = msg.getSender();
-        String addressFromSignature = key.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString();
+        String addressFromSignature = key.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString();
 
         if (!senderAddress.equals(addressFromSignature)) {
             throw new ValidationException("Signature is not well-formed");
@@ -383,7 +378,7 @@ public class SharedMetadata {
             UnsupportedEncodingException,
             InvalidCipherTextException {
         ECKey myKey = getNode();
-        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getCurrentNetworkParams());
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getBitcoinParams());
 
         byte[] sharedSecret = otherKey.getPubKeyPoint().multiply(myKey.getPrivKey()).getEncoded();
         byte[] sharedKey = Sha256Hash.hash(sharedSecret);
@@ -395,7 +390,7 @@ public class SharedMetadata {
             InvalidCipherTextException {
 
         ECKey myKey = getNode();
-        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getCurrentNetworkParams());
+        DeterministicKey otherKey = DeterministicKey.deserializeB58(null, xpub, PersistentUrls.getInstance().getBitcoinParams());
 
         byte[] sharedSecret = otherKey.getPubKeyPoint().multiply(myKey.getPrivKey()).getEncoded();
         byte[] sharedKey = Sha256Hash.hash(sharedSecret);
@@ -420,7 +415,7 @@ public class SharedMetadata {
 //            DeterministicKey sharedMetaDataHDNode = MetadataUtil.deriveHardened(rootNode, MetadataUtil.getPurposeMdid());
 
             SharedMetadata metadata = new SharedMetadata();
-            metadata.setAddress(sharedMetaDataHDNode.toAddress(PersistentUrls.getInstance().getCurrentNetworkParams()).toString());
+            metadata.setAddress(sharedMetaDataHDNode.toAddress(PersistentUrls.getInstance().getBitcoinParams()).toString());
             metadata.setNode(sharedMetaDataHDNode);
 
             return metadata;

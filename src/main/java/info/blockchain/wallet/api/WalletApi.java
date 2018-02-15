@@ -1,8 +1,6 @@
 package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BlockchainFramework;
-import info.blockchain.wallet.api.data.FeeList;
-import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Settings;
 import info.blockchain.wallet.api.data.Status;
 import info.blockchain.wallet.api.data.WalletOptions;
@@ -43,10 +41,6 @@ public class WalletApi {
                     .create(WalletEndpoints.class);
         }
         return walletServer;
-    }
-
-    public Observable<FeeList> getDynamicFee() {
-        return getApiInstance().getFees();
     }
 
     public Call<ResponseBody> getRandomBytesCall() {
@@ -193,10 +187,6 @@ public class WalletApi {
                 BlockchainFramework.getApiCode());
     }
 
-    public Observable<List<Merchant>> getAllMerchants() {
-        return getApiInstance().getAllMerchants();
-    }
-
     public Observable<Settings> fetchSettings(String method, String guid, String sharedKey) {
         return getExplorerInstance().fetchSettings(method,
                 guid,
@@ -224,5 +214,4 @@ public class WalletApi {
     public Observable<WalletOptions> getWalletOptions() {
         return getExplorerInstance().getWalletOptions(BlockchainFramework.getApiCode());
     }
-
 }

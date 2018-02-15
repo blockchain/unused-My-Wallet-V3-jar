@@ -2,15 +2,12 @@ package info.blockchain.wallet.api;
 
 import info.blockchain.wallet.BaseIntegTest;
 import info.blockchain.wallet.api.data.FeeList;
-import info.blockchain.wallet.api.data.Merchant;
 import info.blockchain.wallet.api.data.Status;
 
-import org.json.JSONObject;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
 import java.security.SecureRandom;
-import java.util.List;
 
 import io.reactivex.observers.TestObserver;
 import okhttp3.ResponseBody;
@@ -29,16 +26,6 @@ public class WalletApiIntegTest extends BaseIntegTest {
     private String guid = "cfd055ed-1a7f-4a92-8584-2f4d01365034";
     private String sharedKey = "b4ff6bf5-17a9-4905-b54b-a526816aa100";
     private WalletApi walletApi = new WalletApi();
-
-    @Test
-    public void getDynamicFee() throws Exception {
-        final TestObserver<FeeList> testObserver = walletApi.getDynamicFee().test();
-
-        testObserver.assertComplete();
-        testObserver.assertNoErrors();
-        assertNotNull(testObserver.values().get(0));
-        assertNotNull(testObserver.values().get(0).toJson());
-    }
 
     @Test
     public void getRandomBytesCall() throws Exception {

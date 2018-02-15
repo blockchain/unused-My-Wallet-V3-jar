@@ -1,10 +1,9 @@
 package info.blockchain.wallet.prices;
 
 import info.blockchain.wallet.prices.data.PriceDatum;
-
-import java.util.List;
-
 import io.reactivex.Observable;
+import java.util.List;
+import java.util.Map;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -27,5 +26,9 @@ interface PriceEndpoints {
                                             @Query("quote") String quote,
                                             @Query("time") long time,
                                             @Query("api_key") String apiKey);
+
+    @GET(PriceUrls.PRICE_INDEXES)
+    Observable<Map<String, PriceDatum>> getPriceIndexes(@Query("base") String base,
+                                                        @Query("api_key") String apiKey);
 
 }

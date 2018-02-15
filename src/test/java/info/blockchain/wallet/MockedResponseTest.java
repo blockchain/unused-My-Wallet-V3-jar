@@ -1,10 +1,11 @@
 package info.blockchain.wallet;
 
 import info.blockchain.wallet.api.Environment;
-import info.blockchain.wallet.api.PersistentUrls;
 
-import org.bitcoinj.params.AbstractBitcoinNetParams;
-import org.bitcoinj.params.MainNetParams;
+import info.blockchain.wallet.shapeshift.ShapeShiftUrls;
+import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.params.BitcoinCashMainNetParams;
+import org.bitcoinj.params.BitcoinMainNetParams;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -16,8 +17,6 @@ import io.reactivex.functions.Function;
 import io.reactivex.internal.schedulers.TrampolineScheduler;
 import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -34,22 +33,32 @@ public abstract class MockedResponseTest {
         BlockchainFramework.init(new FrameworkInterface() {
             @Override
             public Retrofit getRetrofitApiInstance() {
-                return getRetrofit(PersistentUrls.API_URL, getOkHttpClient());
+                return getRetrofit("https://api.staging.blockchain.info/", getOkHttpClient());
             }
 
             @Override
             public Retrofit getRetrofitExplorerInstance() {
-                return getRetrofit(PersistentUrls.EXPLORER_URL, getOkHttpClient());
+                return getRetrofit("https://explorer.staging.blockchain.info/", getOkHttpClient());
+            }
+
+            @Override
+            public Retrofit getRetrofitShapeShiftInstance() {
+                return getRetrofit(ShapeShiftUrls.SHAPESHIFT_URL, getOkHttpClient());
             }
 
             @Override
             public Environment getEnvironment() {
-                return Environment.PRODUCTION;
+                return Environment.STAGING;
             }
 
             @Override
-            public AbstractBitcoinNetParams getNetworkParameters() {
-                return MainNetParams.get();
+            public NetworkParameters getBitcoinParams() {
+                return BitcoinMainNetParams.get();
+            }
+
+            @Override
+            public NetworkParameters getBitcoinCashParams() {
+                return BitcoinCashMainNetParams.get();
             }
 
             @Override
@@ -75,19 +84,19 @@ public abstract class MockedResponseTest {
 
         RxJavaPlugins.setInitIoSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
             @Override
-            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) {
                 return TrampolineScheduler.instance();
             }
         });
         RxJavaPlugins.setInitComputationSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
             @Override
-            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) {
                 return TrampolineScheduler.instance();
             }
         });
         RxJavaPlugins.setInitNewThreadSchedulerHandler(new Function<Callable<Scheduler>, Scheduler>() {
             @Override
-            public Scheduler apply(Callable<Scheduler> schedulerCallable) throws Exception {
+            public Scheduler apply(Callable<Scheduler> schedulerCallable) {
                 return TrampolineScheduler.instance();
             }
         });
@@ -99,7 +108,6 @@ public abstract class MockedResponseTest {
     }
 
     private static OkHttpClient getOkHttpClient() {
-
         return new OkHttpClient.Builder()
                 .addInterceptor(mockInterceptor)//Mock responses
                 .addInterceptor(new ApiInterceptor())//Extensive logging
