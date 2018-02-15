@@ -282,10 +282,12 @@ public class FormatsUtil {
      * @param address    The String you wish to test
      * @return Is this a valid BECH32 format BCH address
      */
-    public static Boolean isValidBitcoinCashAddress(NetworkParameters networkParameters, String address) {
+    public static Boolean isValidBitcoinCashAddress(String address) {
         /*
          * Check basic address requirements, i.e. is not empty
          */
+        NetworkParameters networkParameters = PersistentUrls.getInstance().getBitcoinCashParams();
+
         if (address == null || address.isEmpty()) {
             return false;
         } else {
@@ -298,7 +300,6 @@ public class FormatsUtil {
                     return false;
                 } else {
                     return isValidBitcoinCashAddress(
-                        networkParameters,
                         networkParameters.getBech32AddressPrefix() +
                             (char)(networkParameters.getBech32AddressSeparator()) +
                             address);
@@ -322,5 +323,34 @@ public class FormatsUtil {
             }
         }
         return true;
+    }
+
+    /**
+     * Accepts bech32 cash address or base58 legacy address
+     * @param address
+     * @return Short cash address (Example: qpmtetdtqpy5yhflnmmv8s35gkqfdnfdtywdqvue4p)
+     */
+    public static String toShortCashAddress(String address) {
+
+        if (address == null && address.isEmpty()) {
+            throw new AddressFormatException("Invalid address format - "+address);
+        }
+
+        NetworkParameters networkParameters = PersistentUrls.getInstance().getBitcoinCashParams();
+        String result = address;
+
+        if (isValidBitcoinAddress(address)) {
+            address = Address.fromBase58(networkParameters, address).toCashAddress();
+        }
+
+        if (isValidBitcoinCashAddress(address)) {
+            result = address.replace(
+                networkParameters.getBech32AddressPrefix() + (char)networkParameters
+                    .getBech32AddressSeparator(), "");
+        } else {
+            throw new AddressFormatException("Invalid address format - "+address);
+        }
+
+        return result;
     }
 }

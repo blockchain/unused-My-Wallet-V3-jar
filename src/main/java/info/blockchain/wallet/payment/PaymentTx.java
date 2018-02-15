@@ -70,7 +70,7 @@ public class PaymentTx {
         //Add Change
         if (changeAddress != null) {
 
-            if (FormatsUtil.isValidBitcoinCashAddress(networkParameters, changeAddress)) {
+            if (FormatsUtil.isValidBitcoinCashAddress(changeAddress)) {
                 String legacyAddress = CashAddress.toLegacy(networkParameters, changeAddress);
                 changeAddress = legacyAddress;
             }
@@ -106,7 +106,7 @@ public class PaymentTx {
 
             Coin coin = Coin.valueOf(amount.longValue());
 
-            if (FormatsUtil.isValidBitcoinCashAddress(networkParameters, toAddress)) {
+            if (FormatsUtil.isValidBitcoinCashAddress(toAddress)) {
                 String legacyAddress = CashAddress.toLegacy(networkParameters, toAddress);
                 toAddress = legacyAddress;
             }
