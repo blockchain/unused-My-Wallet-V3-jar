@@ -303,6 +303,8 @@ public class FormatsUtil {
                             (char)(networkParameters.getBech32AddressSeparator()) +
                             address);
                 }
+            } catch (Exception e) {
+                return false;
             }
         }
     }
