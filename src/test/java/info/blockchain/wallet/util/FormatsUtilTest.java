@@ -44,6 +44,7 @@ public class FormatsUtilTest {
         assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), null));
         assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), ""));
         assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "test string"));
+        assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashTestNet3Params.get(), "https://www.google.co.uk"));
         // Standard BTC address
         assertFalse(FormatsUtil.isValidBitcoinCashAddress(BitcoinCashMainNetParams.get(), "19dPodLBKT4Fpym4PJ3UfkoMBDiTGkHw2V"));
         // BECH32 Segwit BTC address
