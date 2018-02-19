@@ -25,7 +25,7 @@ public class EthAccountApiTest extends MockedResponseTest {
     private EthAccountApi subject = new EthAccountApi();
 
     @Test
-    public void getEthAccount() throws Exception {
+    public void getEthAccount() {
         // Arrange
         LinkedList<Pair> responses = new LinkedList<>();
         responses.add(Pair.of(200, ACCOUNT_RESPONSE));
@@ -51,7 +51,7 @@ public class EthAccountApiTest extends MockedResponseTest {
     }
 
     @Test
-    public void getIfContract_returns_false() throws Exception {
+    public void getIfContract_returns_false() {
         // Arrange
         LinkedList<Pair> responses = new LinkedList<>();
         responses.add(Pair.of(200, NO_CONTRACT_RESPONSE));
@@ -66,7 +66,7 @@ public class EthAccountApiTest extends MockedResponseTest {
     }
 
     @Test
-    public void getIfContract_returns_true() throws Exception {
+    public void getIfContract_returns_true() {
         // Arrange
         LinkedList<Pair> responses = new LinkedList<>();
         responses.add(Pair.of(200, CONTRACT_RESPONSE));
@@ -81,7 +81,7 @@ public class EthAccountApiTest extends MockedResponseTest {
     }
 
     @Test
-    public void getLatestBlock() throws Exception {
+    public void getLatestBlock() {
         // Arrange
         LinkedList<Pair> responses = new LinkedList<>();
         responses.add(Pair.of(200, LATEST_BLOCK_RESPONSE));
@@ -96,7 +96,7 @@ public class EthAccountApiTest extends MockedResponseTest {
     }
 
     @Test
-    public void getTransactionFromHash() throws Exception {
+    public void getTransactionFromHash() {
         // Arrange
         LinkedList<Pair> responses = new LinkedList<>();
         responses.add(Pair.of(200, TX_DETAILS_RESPONSE));
@@ -108,6 +108,48 @@ public class EthAccountApiTest extends MockedResponseTest {
         response.assertNoErrors();
         final EthTxDetails txDetails = response.values().get(0);
         assertEquals("0xcc6952c8f5c6e90d1addcaf3717b6df251982637f0cafc32c7f6348018dd2a7b", txDetails.getHash());
+    }
+
+    @Test
+    public void pushTx_returns_200() {
+        // Arrange
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(200, PUSHTX_VALID_RESPONSE));
+        mockInterceptor.setResponseList(responses);
+        // Act
+        final TestObserver<String> testObserver = subject.pushTx("").test();
+        // Assert
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        testObserver.assertValue("0xc88ac065147b34f7a4965f9b0dc539f7863468da61a73b14eb0f8f0fcbb72e5a");
+    }
+
+    @Test
+    public void pushTx_returns_400_error() {
+        // Arrange
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(400, PUSHTX_FAILURE_RESPONSE));
+        mockInterceptor.setResponseList(responses);
+        // Act
+        final TestObserver<String> testObserver = subject.pushTx("").test();
+        // Assert
+        testObserver.assertNotComplete();
+        testObserver.assertNoValues();
+        testObserver.assertError(Throwable.class);
+    }
+
+    @Test
+    public void pushTx_returns_400_with_hash() {
+        // Arrange
+        LinkedList<Pair> responses = new LinkedList<>();
+        responses.add(Pair.of(400, PUSHTX_VALID_RESPONSE));
+        mockInterceptor.setResponseList(responses);
+        // Act
+        final TestObserver<String> testObserver = subject.pushTx("").test();
+        // Assert
+        testObserver.assertNotComplete();
+        testObserver.assertNoValues();
+        testObserver.assertError(Throwable.class);
     }
 
     private static final String ACCOUNT_RESPONSE = "{\n" +
@@ -235,7 +277,7 @@ public class EthAccountApiTest extends MockedResponseTest {
             "  \"transactions\": []\n" +
             "}";
 
-    public static final String TX_DETAILS_RESPONSE = "{\n" +
+    private static final String TX_DETAILS_RESPONSE = "{\n" +
             "\t\"hash\": \"0xcc6952c8f5c6e90d1addcaf3717b6df251982637f0cafc32c7f6348018dd2a7b\",\n" +
             "\t\"nonce\": 0,\n" +
             "\t\"blockHash\": \"0x33a980e70dd3951f85db42cfdddac4d320284d259c6e684ffb179d21586b666f\",\n" +
@@ -259,6 +301,14 @@ public class EthAccountApiTest extends MockedResponseTest {
             "\t\"valueRaw\": \"0x934e17f6dde3200\",\n" +
             "\t\"gasPriceRaw\": \"0x4e3b29200\",\n" +
             "\t\"gasRaw\": \"0x5208\"\n" +
+            "}";
+
+    private static final String PUSHTX_VALID_RESPONSE = "{\n" +
+            "\"txHash\" : \"0xc88ac065147b34f7a4965f9b0dc539f7863468da61a73b14eb0f8f0fcbb72e5a\"\n" +
+            "}";
+
+    private static final String PUSHTX_FAILURE_RESPONSE = "{\n" +
+            "\"error\" : \"Invalid nonce\"\n" +
             "}";
 
 }
