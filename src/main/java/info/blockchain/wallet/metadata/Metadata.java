@@ -167,19 +167,24 @@ public class Metadata {
     }
 
     public String getMetadata() throws MetadataException, IOException, InvalidCipherTextException {
-        return getMetadataEntry(address, isEncrypted);
+        return getMetadataEntry(address, isEncrypted).getValue();
     }
 
     public String getMetadata(String address, boolean isEncrypted) throws MetadataException,
             IOException,
             InvalidCipherTextException {
+        return getMetadataEntry(address, isEncrypted).getValue();
+    }
+
+    // Handling null in RxJava 2.0
+    public Optional<String> getMetadataOptional()  throws MetadataException, IOException, InvalidCipherTextException  {
         return getMetadataEntry(address, isEncrypted);
     }
 
     /**
      * Get metadata entry
      */
-    private String getMetadataEntry(String address, boolean isEncrypted) throws MetadataException,
+    private Optional<String> getMetadataEntry(String address, boolean isEncrypted) throws MetadataException,
             IOException,
             InvalidCipherTextException {
 
@@ -190,14 +195,14 @@ public class Metadata {
         if (exe.isSuccessful()) {
 
             if (isEncrypted) {
-                return AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload());
+                return new Optional(AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload()));
             } else {
-                return new String(Base64.decode(exe.body().getPayload()));
+                return new Optional(new String(Base64.decode(exe.body().getPayload())));
             }
         } else {
 
             if (exe.code() == 404) {
-                return null;
+                return new Optional(null);
             } else {
                 throw new MetadataException(exe.code() + " " + exe.message());
             }
