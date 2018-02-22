@@ -26,13 +26,11 @@ import org.spongycastle.crypto.InvalidCipherTextException;
     isGetterVisibility = Visibility.NONE)
 public class EthereumWallet {
 
-    private static final int METADATA_TYPE_EXTERNAL = 5;
+    public static final int METADATA_TYPE_EXTERNAL = 5;
     private static final int ACCOUNT_INDEX = 0;
 
     @JsonProperty("ethereum")
     private EthereumWalletData walletData;
-
-    private Metadata metadata;
 
     public EthereumWallet() {
         //default constructor for Jackson
@@ -48,8 +46,6 @@ public class EthereumWallet {
     public EthereumWallet(DeterministicKey walletMasterKey, String defaultAccountName)
         throws IOException, MetadataException, NoSuchAlgorithmException {
 
-        DeterministicKey metaDataHDNode = MetadataUtil.deriveMetadataNode(walletMasterKey);
-
         ArrayList<EthereumAccount> accounts = new ArrayList<>();
         accounts.add(EthereumAccount.deriveAccount(walletMasterKey, ACCOUNT_INDEX, defaultAccountName));
 
@@ -58,30 +54,24 @@ public class EthereumWallet {
         this.walletData.setDefaultAccountIdx(0);
         this.walletData.setTxNotes(new HashMap<String, String>());
         this.walletData.setAccounts(accounts);
-
-        this.metadata = getEthereumMetadataNode(metaDataHDNode);
     }
 
     /**
      * Loads existing Ethereum wallet from derived Ethereum metadata node.
      *
-     * @param metaDataHDNode
      * @return Existing Ethereum wallet or Null if no existing Ethereum wallet found.
      * @throws MetadataException
      * @throws IOException
      * @throws InvalidCipherTextException MetadataHdNode encryption/decryption error
      */
-    public static EthereumWallet load(DeterministicKey metaDataHDNode) throws
+    public static EthereumWallet load(String walletJson) throws
             MetadataException,
             IOException,
             InvalidCipherTextException {
 
-        Metadata metadata = getEthereumMetadataNode(metaDataHDNode);
-        String walletJson = metadata.getMetadata();
-
         if (walletJson != null) {
             EthereumWallet ethereumWallet = fromJson(walletJson);
-            ethereumWallet.metadata = metadata;
+
             // Web can store an empty EthereumWalletData object
             if (ethereumWallet.walletData == null || ethereumWallet.walletData.getAccounts().isEmpty()) {
                 return null;
@@ -91,16 +81,6 @@ public class EthereumWallet {
         } else {
             return null;
         }
-    }
-
-    private static Metadata getEthereumMetadataNode(DeterministicKey metaDataHDNode)
-        throws IOException, MetadataException {
-        return new Metadata.Builder(metaDataHDNode, METADATA_TYPE_EXTERNAL).build();
-    }
-
-    public void save()
-        throws IOException, MetadataException, InvalidCipherTextException {
-        metadata.putMetadata(toJson());
     }
 
     public String toJson() throws JsonProcessingException {
