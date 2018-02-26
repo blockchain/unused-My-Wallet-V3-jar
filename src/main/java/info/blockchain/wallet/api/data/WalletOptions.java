@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -38,6 +39,9 @@ public class WalletOptions {
 
     @JsonProperty("bcash")
     private Map<String, Integer> bitcoinCashFees = new HashMap<>();
+
+    @JsonProperty("mobile")
+    private Map<String, String> mobile = new HashMap<>();
 
     public List<String> getBuySellCountries() {
         return buySellCountries;
@@ -73,6 +77,11 @@ public class WalletOptions {
 
     public int getBchFeePerByte() {
         return bitcoinCashFees.get("feePerByte");
+    }
+
+    @Nullable
+    public String getBuyWebviewWalletLink() {
+        return mobile.get("walletRoot");
     }
 
 }

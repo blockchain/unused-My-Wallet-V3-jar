@@ -129,4 +129,26 @@ public class WalletApiTest extends MockedResponseTest {
 
         assertEquals(600, lastTxFuse);
     }
+
+    @Test
+    public void getBuyWebviewWalletLink() throws IOException, URISyntaxException {
+        mockInterceptor.setResponseString("{\n"
+            + "\t\"androidBuyPercent\": 1.00,\n"
+            + "\t\"android\": {\n"
+            + "\t\t\"showUnocoin\": false\n"
+            + "\t},\n"
+            + "\"mobile\": {\n"
+            + "    \"walletRoot\": \"http://bci.com/wallet\"\n"
+            + "  }"
+            + "}");
+        final TestObserver<WalletOptions> testObserver = subject.getWalletOptions().test();
+
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+
+        String walletLink = testObserver.values().get(0)
+            .getBuyWebviewWalletLink();
+
+        assertEquals("http://bci.com/wallet", walletLink);
+    }
 }
