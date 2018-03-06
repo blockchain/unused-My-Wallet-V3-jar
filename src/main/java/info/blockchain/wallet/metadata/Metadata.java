@@ -1,6 +1,7 @@
 package info.blockchain.wallet.metadata;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
@@ -167,19 +168,24 @@ public class Metadata {
     }
 
     public String getMetadata() throws MetadataException, IOException, InvalidCipherTextException {
-        return getMetadataEntry(address, isEncrypted);
+        return getMetadataEntry(address, isEncrypted).orNull();
     }
 
     public String getMetadata(String address, boolean isEncrypted) throws MetadataException,
             IOException,
             InvalidCipherTextException {
+        return getMetadataEntry(address, isEncrypted).orNull();
+    }
+
+    // Handling null in RxJava 2.0
+    public Optional<String> getMetadataOptional()  throws MetadataException, IOException, InvalidCipherTextException  {
         return getMetadataEntry(address, isEncrypted);
     }
 
     /**
      * Get metadata entry
      */
-    private String getMetadataEntry(String address, boolean isEncrypted) throws MetadataException,
+    private Optional<String> getMetadataEntry(String address, boolean isEncrypted) throws MetadataException,
             IOException,
             InvalidCipherTextException {
 
@@ -190,14 +196,14 @@ public class Metadata {
         if (exe.isSuccessful()) {
 
             if (isEncrypted) {
-                return AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload());
+                return Optional.fromNullable(AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload()));
             } else {
-                return new String(Base64.decode(exe.body().getPayload()));
+                return Optional.fromNullable(new String(Base64.decode(exe.body().getPayload())));
             }
         } else {
 
             if (exe.code() == 404) {
-                return null;
+                return Optional.absent();
             } else {
                 throw new MetadataException(exe.code() + " " + exe.message());
             }

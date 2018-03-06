@@ -9,6 +9,7 @@ import info.blockchain.wallet.util.MetadataUtil;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bitcoinj.crypto.DeterministicKey;
 import org.junit.Assert;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.request.RawTransaction;
@@ -121,55 +122,29 @@ public class EthereumWalletTest extends MockedResponseTest {
     public void load() throws Exception {
 
         //Arrange
-        LinkedList<Pair> responseList = new LinkedList<>();
-        responseList.add(Pair.of(200, "{\"payload\":\"AD0iKNNKRpOEm0rq+vQljAI/36cUChu3P4HO3hkqmsv5pdLs/XTvGrU564O4jkRuJ0UiTXYiwB0KymPTY3f7ASIdPK3x5TX9Xvilp+pykwxPWTm33OzfejQ98g70gthaJkIrzmxaTmeM+/iAqpRriOMc8cJD6z9ab193hYb5XRwBjQmMqMBuOPyfFnnvQryC5jAyRfIrfA6DldQim95Hm8+gira7JcX6FqxRLtlXT//KyPxxOeGr5VAejAR1B2rnr07kWGm2BAHqJsZPqzqq8Q==\",\"version\":1,\"type_id\":5,\"signature\":\"ID8UEm8skTqVqJuQqbtKOO+oXuehr5jD368dAa+hmISPFKb1pg0MGr7kCn/zzPb0IcWhMfLsf3x+3/zpmt372tE=\",\"prev_magic_hash\":\"d2e21977d708bf6b619b5a943181077090ffdfe6c8fa747c2b914478af57e756\",\"address\":\"16dT4uai55i1gArFBE2EbyH9qvrRBphBBK\",\"created_at\":1503503369000,\"updated_at\":1503503369000}"));
-        responseList.add(Pair.of(200, "{\"payload\":\"AD0iKNNKRpOEm0rq+vQljAI/36cUChu3P4HO3hkqmsv5pdLs/XTvGrU564O4jkRuJ0UiTXYiwB0KymPTY3f7ASIdPK3x5TX9Xvilp+pykwxPWTm33OzfejQ98g70gthaJkIrzmxaTmeM+/iAqpRriOMc8cJD6z9ab193hYb5XRwBjQmMqMBuOPyfFnnvQryC5jAyRfIrfA6DldQim95Hm8+gira7JcX6FqxRLtlXT//KyPxxOeGr5VAejAR1B2rnr07kWGm2BAHqJsZPqzqq8Q==\",\"version\":1,\"type_id\":5,\"signature\":\"ID8UEm8skTqVqJuQqbtKOO+oXuehr5jD368dAa+hmISPFKb1pg0MGr7kCn/zzPb0IcWhMfLsf3x+3/zpmt372tE=\",\"prev_magic_hash\":\"d2e21977d708bf6b619b5a943181077090ffdfe6c8fa747c2b914478af57e756\",\"address\":\"16dT4uai55i1gArFBE2EbyH9qvrRBphBBK\",\"created_at\":1503503369000,\"updated_at\":1503503369000}"));
-        mockInterceptor.setResponseList(responseList);
+        HDWallet wallet = getWallet3();
+
+        EthereumWallet eth = new EthereumWallet(wallet.getMasterKey(), "label");
+        eth.setHasSeen(true);
 
         //Act
-        subject = EthereumWallet.load(MetadataUtil.deriveMetadataNode(getWallet2().getMasterKey()));
+        subject = EthereumWallet.load(eth.toJson());
 
         //Assert
         Assert.assertTrue(subject.hasSeen());
-        Assert.assertEquals(0, subject.getTxNotes().size());
+        Assert.assertEquals(eth.toJson(), subject.toJson());
     }
 
     @Test
     public void loadEmptyWallet() throws Exception {
 
         //Arrange
-        LinkedList<Pair> responseList = new LinkedList<>();
-        responseList.add(Pair.of(404, "{\"message\":\"Not Found\"}"));
-        responseList.add(Pair.of(404, "{\"message\":\"Not Found\"}"));
-        responseList.add(Pair.of(404, "{\"message\":\"Not Found\"}"));
-        mockInterceptor.setResponseList(responseList);
 
         //Act
-        subject = EthereumWallet.load(MetadataUtil.deriveMetadataNode(getWallet1().getMasterKey()));
+        subject = EthereumWallet.load(null);
 
         //Assert
         Assert.assertNull(subject);
-    }
-
-    @Test
-    public void save() throws Exception {
-
-        HDWallet wallet = getWallet3();
-
-        //Arrange
-        LinkedList<Pair> responseList = new LinkedList<>();
-        responseList.add(Pair.of(200, "{\"payload\":\"Y2/AoEhgHJaT6krQhwVx/Fp2wHHOi+XqKSwZS6I+GAVLe9KNh1yyHQzMFxhY3oGL3c6VZ9iD/wcMvTLFoCcoUyS5L4PsSK/pbjjNz84Y0tYu4nTMpUUL3QrgEoswX4PhmZBt9SalYwsD9XJz1oBZgvkJyKOCVa1vKfI4YnotDSQ49egkzKUtU07qTY5UdZi8Uj+NHr63TrS6r+nZ+yIF2CO7hGcWMAf+2p4MWjxJVNMgrgcIuHie4Lrm9dUVUEI70lvaTP2PtF4px/LoWq1pGQ==\",\"version\":1,\"type_id\":5,\"signature\":\"H/iNIDrfUdj+UxlVj5nn7VBXUEuZanRuqCssVnKrfZI9QruFI5Ysp+hFVrrgDeCPvpAZj4XahTvESFml0Oaucdc=\",\"prev_magic_hash\":\"148c2ed942cd9555dab065234341caf120e596f980426047fa53c011755c49b1\",\"address\":\"13th73nRVMFQrM9HBwSgYfhFNKmMqS2hC6\",\"created_at\":1503504150000,\"updated_at\":1503567702000}"));
-        responseList.add(Pair.of(200, "{\"payload\":\"Y2/AoEhgHJaT6krQhwVx/Fp2wHHOi+XqKSwZS6I+GAVLe9KNh1yyHQzMFxhY3oGL3c6VZ9iD/wcMvTLFoCcoUyS5L4PsSK/pbjjNz84Y0tYu4nTMpUUL3QrgEoswX4PhmZBt9SalYwsD9XJz1oBZgvkJyKOCVa1vKfI4YnotDSQ49egkzKUtU07qTY5UdZi8Uj+NHr63TrS6r+nZ+yIF2CO7hGcWMAf+2p4MWjxJVNMgrgcIuHie4Lrm9dUVUEI70lvaTP2PtF4px/LoWq1pGQ==\",\"version\":1,\"type_id\":5,\"signature\":\"H/iNIDrfUdj+UxlVj5nn7VBXUEuZanRuqCssVnKrfZI9QruFI5Ysp+hFVrrgDeCPvpAZj4XahTvESFml0Oaucdc=\",\"prev_magic_hash\":\"148c2ed942cd9555dab065234341caf120e596f980426047fa53c011755c49b1\",\"address\":\"13th73nRVMFQrM9HBwSgYfhFNKmMqS2hC6\",\"created_at\":1503504150000,\"updated_at\":1503567702000}"));
-        responseList.add(Pair.of(200, "{\"payload\":\"Yqmn5W7/GsNd/EWieVet539s2g2RPrF7GNOAVEfgLSR/pImrWOtKp2Ylh6rWHWieZ+iIfSN+nUbmnVmJ5tHOaXArx2yR1iP03crz4HI1VOcTZyXpULbRQ+sv903/AX+vQnQrElPaotmMraIAU3BIYVFm97eGIaqiZEppNTrfrREZZsZ3VmS1CHd9ILZNHSLrpEy5Kfy1chM0Nfmve1lO63sqVid1EluQnTBTTnTvZWRF4QZ3+RslIIEy2aDHyFUzoB5QATkwPEkO9ywKqi9pMg==\",\"version\":1,\"type_id\":5,\"signature\":\"IDXi2+6NFCg0S1V7C6aYX1Egv2373h09WH0itskUNWycaQwSPg3JSmBLZx/cvIENdbxcy/nFcVobHRRUPgLIy+8=\",\"prev_magic_hash\":\"88df43a57dc7cfb115077a87775845fe8d1f7bf8bbfb88dc4214188778699986\",\"address\":\"13th73nRVMFQrM9HBwSgYfhFNKmMqS2hC6\",\"created_at\":1503504150000,\"updated_at\":1503567732376}"));
-        mockInterceptor.setResponseList(responseList);
-
-        //Act
-        subject = new EthereumWallet(wallet.getMasterKey(),"My Ether Wallet");
-        subject.setHasSeen(true);
-        subject.save();
-
-        //Assert
-        Assert.assertTrue(subject.hasSeen());
     }
 
     @Test

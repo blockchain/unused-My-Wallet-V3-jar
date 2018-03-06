@@ -797,9 +797,13 @@ public class PayloadManager {
      * @throws Exception Can throw a {@link DecryptionException} if the second password is wrong, or
      *                   a generic Exception if saving the nodes fails
      */
-    public void generateNodes(@Nullable String secondPassword) throws Exception{
+    public void generateNodes() throws Exception{
         log.info("Generating metadata nodes");
-        walletBaseBody.getWalletBody().decryptHDWallet(HD_WALLET_INDEX, secondPassword);
+
+        if (walletBaseBody.getWalletBody().isDoubleEncryption()
+            && walletBaseBody.getWalletBody().getHdWallets().get(0).getMasterKey() == null) {
+            throw new HDWalletException("Wallet private key unavailable. First decrypt with second password.");
+        }
 
         boolean success = metadataNodeFactory.saveMetadataHdNodes(
             walletBaseBody.getWalletBody().getHdWallets().get(HD_WALLET_INDEX).getMasterKey());
