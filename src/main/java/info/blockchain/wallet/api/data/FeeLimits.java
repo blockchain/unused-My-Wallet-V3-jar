@@ -12,6 +12,14 @@ public class FeeLimits {
     @JsonProperty("max")
     private long max;
 
+    public FeeLimits(long min, long max) {
+        this.min = min;
+        this.max = max;
+    }
+
+    public FeeLimits() {
+    }
+
     /**
      * Returns a "min" fee limit, which should result in a transaction being included in the 6th block.
      * The fee is in Satoshis per byte.

@@ -13,6 +13,7 @@ import info.blockchain.wallet.payload.data.LegacyAddress
 import io.reactivex.Completable
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.NetworkParameters
+import org.bitcoinj.params.BitcoinCashTestNet3Params
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.util.*
@@ -70,8 +71,13 @@ open class BitcoinCashWallet : DeterministicWallet {
      * addresses
      */
     fun updateAllBalances(legacyAddressList: List<String>, allAccountsAndAddresses: List<String>): Completable =
-            Completable.fromCallable {
-                balanceManager.updateAllBalances(legacyAddressList, allAccountsAndAddresses)
+            if (isTestnet()) {
+                //TODO(bch testnet explorer coming soon)
+                Completable.complete()
+            } else {
+                Completable.fromCallable {
+                    balanceManager.updateAllBalances(legacyAddressList, allAccountsAndAddresses)
+                }
             }
 
     fun getAddressBalance(address: String): BigInteger =
@@ -103,15 +109,22 @@ open class BitcoinCashWallet : DeterministicWallet {
             context: String?,
             limit: Int,
             offset: Int
-    ): MutableList<TransactionSummary> = multiAddressFactory.getAccountTransactions(
-            activeXpubs,
-            watchOnly,
-            legacyAddressList,
-            context,
-            limit,
-            offset,
-            BCH_FORK_HEIGHT
-    )
+    ): MutableList<TransactionSummary> =
+
+            if (isTestnet()) {
+                //TODO(bch testnet explorer coming soon)
+                mutableListOf()
+            } else {
+                multiAddressFactory.getAccountTransactions(
+                        activeXpubs,
+                        watchOnly,
+                        legacyAddressList,
+                        context,
+                        limit,
+                        offset,
+                        BCH_FORK_HEIGHT
+                )
+            }
 
     /**
      * Generates a Base58 Bitcoin Cash receive address for an account at a given position. The
@@ -279,6 +292,8 @@ open class BitcoinCashWallet : DeterministicWallet {
             return keys
         }
     }
+
+    private fun isTestnet() = params.equals(BitcoinCashTestNet3Params.get())
 
     companion object {
 
