@@ -13,5 +13,6 @@ public final class ShapeShiftUrls {
     static final String MARKET_INFO = SHAPESHIFT_URL + "/marketinfo";
     static final String SENDAMOUNT = SHAPESHIFT_URL + "/sendamount";
     static final String TX_STATS = SHAPESHIFT_URL + "/txStat";
+    static final String TIME_REMAINING = SHAPESHIFT_URL + "/timeremaining";
 
 }

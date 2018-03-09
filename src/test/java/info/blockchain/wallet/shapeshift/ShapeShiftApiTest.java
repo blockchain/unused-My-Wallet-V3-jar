@@ -5,6 +5,7 @@ import info.blockchain.wallet.shapeshift.data.MarketInfo;
 import info.blockchain.wallet.shapeshift.data.Quote;
 import info.blockchain.wallet.shapeshift.data.QuoteRequest;
 import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.TimeRemaining;
 import info.blockchain.wallet.shapeshift.data.Trade;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 
@@ -22,7 +23,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
     private ShapeShiftApi subject = new ShapeShiftApi();
 
     @Test
-    public void getMarketInfo() throws Exception {
+    public void getMarketInfo() {
         mockInterceptor
                 .setResponseString("{\"pair\":\"btc_eth\",\"rate\":15.06742777,\"minerFee\":0.001,\"limit\":2.17562517,\"minimum\":0.0001324,\"maxLimit\":1.08781258}");
         final TestObserver<MarketInfo> testObserver = subject.getRate(ShapeShiftPairs.BTC_ETH).test();
@@ -39,7 +40,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
     }
 
     @Test
-    public void getQuote() throws Exception {
+    public void getQuote() {
         mockInterceptor
                 .setResponseString("{\"success\":{\"orderId\":\"2b087b88-4d92-4dce-8167-2a616accfe23\","
                         + "\"pair\":\"eth_btc\","
@@ -67,7 +68,7 @@ public class ShapeShiftApiTest extends MockedResponseTest {
     }
 
     @Test
-    public void getSendAmount() throws Exception {
+    public void getSendAmount() {
         mockInterceptor
                 .setResponseString("{\n"
                         + "\t\"status\": \"complete\",\n"
@@ -96,5 +97,22 @@ public class ShapeShiftApiTest extends MockedResponseTest {
         assertEquals("0xc1361e8ec096dfe48f524bd67fe811e5fd86a41c868ff5843f04619906882123", response.getTransaction());
         assertEquals("BTC_ETH", response.getPair());
         assertNull(response.getError());
+    }
+
+    @Test
+    public void getTimeRemaining() {
+        // Arrange
+        mockInterceptor.setResponseString("{\n" +
+                "\"status\": \"pending\",\n" +
+                "\"seconds_remaining\": \"311\"\n" +
+                "}");
+        // Act
+        final TestObserver<TimeRemaining> testObserver = subject.getTimeRemaining("address").test();
+        // Assert
+        testObserver.assertComplete();
+        testObserver.assertNoErrors();
+        final TimeRemaining result = testObserver.values().get(0);
+        assertEquals(((Integer) 311), result.getSecondsRemaining());
+        assertEquals("pending", result.getStatus());
     }
 }

@@ -4,6 +4,7 @@ import info.blockchain.wallet.shapeshift.data.MarketInfo;
 import info.blockchain.wallet.shapeshift.data.QuoteRequest;
 import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
 import info.blockchain.wallet.shapeshift.data.SendAmountResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.TimeRemaining;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
 import io.reactivex.Observable;
 import retrofit2.http.Body;
@@ -24,4 +25,7 @@ public interface ShapeShiftEndpoints {
 
     @GET(ShapeShiftUrls.TX_STATS + "/{address}")
     Observable<TradeStatusResponse> getTradeStatus(@Path("address") String address);
+
+    @GET(ShapeShiftUrls.TIME_REMAINING + "/{address}")
+    Observable<TimeRemaining> getTimeRemaining(@Path("address") String address);
 }
