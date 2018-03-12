@@ -7,15 +7,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.blockchain.wallet.exceptions.MetadataException;
-import info.blockchain.wallet.metadata.Metadata;
-import info.blockchain.wallet.util.MetadataUtil;
+
+import org.bitcoinj.crypto.DeterministicKey;
+
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.bitcoinj.crypto.DeterministicKey;
-import org.spongycastle.crypto.InvalidCipherTextException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,11 +37,9 @@ public class EthereumWallet {
      * Creates new Ethereum wallet and derives account from provided wallet seed.
      *
      * @param walletMasterKey DeterministicKey of root node
-     * @throws IOException
-     * @throws MetadataException
+     * @param defaultAccountName The desired default account name
      */
-    public EthereumWallet(DeterministicKey walletMasterKey, String defaultAccountName)
-        throws IOException, MetadataException, NoSuchAlgorithmException {
+    public EthereumWallet(DeterministicKey walletMasterKey, String defaultAccountName) {
 
         ArrayList<EthereumAccount> accounts = new ArrayList<>();
         accounts.add(EthereumAccount.deriveAccount(walletMasterKey, ACCOUNT_INDEX, defaultAccountName));
@@ -60,14 +55,9 @@ public class EthereumWallet {
      * Loads existing Ethereum wallet from derived Ethereum metadata node.
      *
      * @return Existing Ethereum wallet or Null if no existing Ethereum wallet found.
-     * @throws MetadataException
      * @throws IOException
-     * @throws InvalidCipherTextException MetadataHdNode encryption/decryption error
      */
-    public static EthereumWallet load(String walletJson) throws
-            MetadataException,
-            IOException,
-            InvalidCipherTextException {
+    public static EthereumWallet load(String walletJson) throws IOException {
 
         if (walletJson != null) {
             EthereumWallet ethereumWallet = fromJson(walletJson);

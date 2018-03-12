@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.blockchain.wallet.exceptions.MetadataException;
+
 import info.blockchain.wallet.shapeshift.data.State;
 import info.blockchain.wallet.shapeshift.data.Trade;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.spongycastle.crypto.InvalidCipherTextException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,16 +33,10 @@ public class ShapeShiftTrades {
      * Loads existing trades from derived trades metadata node.
      *
      * @return Existing shapeshift trades or Null if no existing trades found.
-     * @throws InvalidCipherTextException MetadataHdNode encryption/decryption error
      */
-    public static ShapeShiftTrades load(String json) throws
-            MetadataException,
-            IOException,
-            InvalidCipherTextException {
-
+    public static ShapeShiftTrades load(String json) throws IOException {
         if (json != null) {
-            ShapeShiftTrades tradeData = fromJson(json);
-            return tradeData;
+            return fromJson(json);
         } else {
             return null;
         }
