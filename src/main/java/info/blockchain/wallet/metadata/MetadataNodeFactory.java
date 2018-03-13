@@ -4,10 +4,12 @@ import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
 import info.blockchain.wallet.metadata.data.RemoteMetadataNodes;
 import info.blockchain.wallet.util.MetadataUtil;
-import java.math.BigInteger;
-import java.security.MessageDigest;
+
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.DeterministicKey;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
 
 /**
  * Restores derived metadata nodes from a metadata node derived from user credentials.
@@ -28,7 +30,7 @@ public class MetadataNodeFactory {
         deleteMetadataFromNode(secondPwNodeLegacy);
     }
 
-    public boolean isMetadataUsable() throws Exception {
+    public boolean isMetadataUsable() {
         try {
             String nodesJson = secondPwNode.getMetadata();
             if (nodesJson == null) {
@@ -47,7 +49,7 @@ public class MetadataNodeFactory {
         }
     }
 
-    private boolean loadNodes(RemoteMetadataNodes remoteMetadataNodes) throws Exception {
+    private boolean loadNodes(RemoteMetadataNodes remoteMetadataNodes) {
         //If not all nodes available fail.
         if (!remoteMetadataNodes.isAllNodesAvailable()) {
             return false;
@@ -120,7 +122,7 @@ public class MetadataNodeFactory {
         return metadata;
     }
 
-    public boolean isLegacySecondPwNodeAvailable() throws Exception {
+    public boolean isLegacySecondPwNodeAvailable() {
         try {
             return  secondPwNodeLegacy.getMetadata() != null;
         } catch (Exception e) {
@@ -128,7 +130,7 @@ public class MetadataNodeFactory {
         }
     }
 
-    private void deleteMetadataFromNode(Metadata node) throws Exception {
+    private void deleteMetadataFromNode(Metadata node) {
         try {
             String nodesJson = node.getMetadata();
             if (nodesJson == null) {

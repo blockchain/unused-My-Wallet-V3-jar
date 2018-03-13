@@ -2,6 +2,7 @@ package info.blockchain.wallet.metadata;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+
 import info.blockchain.wallet.BlockchainFramework;
 import info.blockchain.wallet.api.PersistentUrls;
 import info.blockchain.wallet.crypto.AESUtil;
@@ -10,7 +11,7 @@ import info.blockchain.wallet.metadata.data.MetadataRequest;
 import info.blockchain.wallet.metadata.data.MetadataResponse;
 import info.blockchain.wallet.util.FormatsUtil;
 import info.blockchain.wallet.util.MetadataUtil;
-import java.io.IOException;
+
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.crypto.DeterministicKey;
@@ -18,6 +19,9 @@ import org.json.JSONException;
 import org.spongycastle.crypto.InvalidCipherTextException;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
+
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -196,9 +200,9 @@ public class Metadata {
         if (exe.isSuccessful()) {
 
             if (isEncrypted) {
-                return Optional.fromNullable(AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload()));
+                return Optional.of(AESUtil.decryptWithKey(encryptionKey, exe.body().getPayload()));
             } else {
-                return Optional.fromNullable(new String(Base64.decode(exe.body().getPayload())));
+                return Optional.of(new String(Base64.decode(exe.body().getPayload())));
             }
         } else {
 

@@ -5,7 +5,9 @@ import info.blockchain.wallet.shapeshift.data.MarketInfo;
 import info.blockchain.wallet.shapeshift.data.QuoteRequest;
 import info.blockchain.wallet.shapeshift.data.QuoteResponseWrapper;
 import info.blockchain.wallet.shapeshift.data.SendAmountResponseWrapper;
+import info.blockchain.wallet.shapeshift.data.TimeRemaining;
 import info.blockchain.wallet.shapeshift.data.TradeStatusResponse;
+
 import io.reactivex.Observable;
 
 public class ShapeShiftApi {
@@ -34,5 +36,9 @@ public class ShapeShiftApi {
 
     public Observable<TradeStatusResponse> getTradeStatus(String address) {
         return getApiInstance().getTradeStatus(address);
+    }
+
+    public Observable<TimeRemaining> getTimeRemaining(String address) {
+        return getApiInstance().getTimeRemaining(address);
     }
 }
